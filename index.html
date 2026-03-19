@@ -639,7 +639,7 @@ function muscleDiagram(frontHighlight, backHighlight, label){
     <rect x="205" y="56" width="10" height="14" rx="4" fill="${bodyFill}" stroke="${bodyStroke}" stroke-width="1.5"/>
     <text x="210" y="200" text-anchor="middle" fill="#444" font-size="10" font-family="sans-serif">BACK</text>`;
 
-  return `<svg ${dim} xmlns="https://url.us.m.mimecastprotect.com/s/Ee-JClY6WRsP41jKsGfrSzFAV8?domain=w3.org" style="background:transparent">
+  return `<svg ${dim} xmlns="http://www.w3.org/2000/svg" style="background:transparent">
     ${front}${back}
     <text x="140" y="13" text-anchor="middle" fill="#e8ff47" font-size="10" font-family="sans-serif" font-weight="600" letter-spacing="1">${label.toUpperCase()}</text>
   </svg>`;
@@ -872,10 +872,10 @@ let cardioLog = JSON.parse(localStorage.getItem('gainz_cardio') || '[]');
 function saveCardioLog(){ localStorage.setItem('gainz_cardio', JSON.stringify(cardioLog)); }
 
 const CARDIO_SESSIONS = [
-  { id:'run-conv',  type:'run',  style:'conversational', label:'Conversational Run', sub:'Zone 2 · easy pace',    color:'#47b4ff', icon:'?' },
-  { id:'run-hiit',  type:'run',  style:'hiit',            label:'HIIT Run',           sub:'Intervals · high effort', color:'#ff4747', icon:'?' },
-  { id:'bike-conv', type:'bike', style:'conversational', label:'Conversational Bike', sub:'Zone 2 · steady state', color:'#ffb347', icon:'?' },
-  { id:'bike-hiit', type:'bike', style:'hiit',            label:'HIIT Bike',          sub:'Intervals · high effort', color:'#ff4747', icon:'?' },
+  { id:'run-conv',  type:'run',  style:'conversational', label:'Conversational Run', sub:'Zone 2 · easy pace',    color:'#47b4ff', icon:'&#127939;' },
+  { id:'run-hiit',  type:'run',  style:'hiit',            label:'HIIT Run',           sub:'Intervals · high effort', color:'#ff4747', icon:'&#9889;' },
+  { id:'bike-conv', type:'bike', style:'conversational', label:'Conversational Bike', sub:'Zone 2 · steady state', color:'#ffb347', icon:'&#128690;' },
+  { id:'bike-hiit', type:'bike', style:'hiit',            label:'HIIT Bike',          sub:'Intervals · high effort', color:'#ff4747', icon:'&#9889;' },
 ];
 
 // HIIT interval state per card
@@ -1055,9 +1055,9 @@ function renderWk(){
     // Banner: tell user what to aim for
     let banner='';
     if(tgt.hit){
-      banner=`<div class="target-banner up"><span>?</span> Last session hit target · aim for ${tgt.weight}lb today (+5lb)</div>`;
+      banner=`<div class="target-banner up"><span>&#8679;</span> Last session hit target · aim for ${tgt.weight}lb today (+5lb)</div>`;
     } else if(prev.length){
-      banner=`<div class="target-banner same"><span>?</span> Target: ${tgt.weight}lb · ${tgt.reps} reps</div>`;
+      banner=`<div class="target-banner same"><span>&#9654;</span> Target: ${tgt.weight}lb · ${tgt.reps} reps</div>`;
     }
 
     return `<div class="ex-card${isOpen?' active-ex':''} fu" id="exc_${idx}" style="animation-delay:${idx*.04}s">
@@ -1067,8 +1067,8 @@ function renderWk(){
           <div class="ex-info">${ex.sets}–${ex.reps} · ${restSec}s rest · ${ex.muscle||''}</div>
         </div>
         <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-          ${allDone?'<span class="ex-done-badge">? Done</span>':''}
-          <span class="chevron${isOpen?' open':''}">?</span>
+          ${allDone?'<span class="ex-done-badge">&#10003; Done</span>':''}
+          <span class="chevron${isOpen?' open':''}">▾</span>
         </div>
       </div>
       <div class="ex-body${isOpen?' open':''}">
@@ -1110,7 +1110,7 @@ function renderWk(){
         <div class="rest-ctrl">
           <span class="rc-lbl">Rest timer</span>
           <div class="rc-adj">
-            <button class="rc-btn" onclick="adjRest('${n}',-15)">?</button>
+            <button class="rc-btn" onclick="adjRest('${n}',-15)">−</button>
             <div class="rc-val" id="rv_${key}">${restSec}s</div>
             <button class="rc-btn" onclick="adjRest('${n}',15)">+</button>
           </div>
@@ -1179,8 +1179,8 @@ function startRest(sec,name){
     <div class="rest-name">${name}</div>
     <div style="font-size:12px;color:var(--t3)">Next set coming up</div>
     <div class="rest-adj-row">
-      <button class="ra-btn" onclick="adjLiveRest(-30)">?30s</button>
-      <button class="ra-btn" onclick="adjLiveRest(-15)">?15s</button>
+      <button class="ra-btn" onclick="adjLiveRest(-30)">−30s</button>
+      <button class="ra-btn" onclick="adjLiveRest(-15)">−15s</button>
       <button class="ra-btn" onclick="adjLiveRest(30)">+30s</button>
       <button class="ra-btn" onclick="adjLiveRest(60)">+60s</button>
     </div>
@@ -1240,7 +1240,7 @@ function finishWorkout(){
   eid('wk-footer').style.display='none';
   eid('wk-bar').style.width='100%';
   eid('wk-scroll').innerHTML=`<div class="finish-wrap fu">
-    <div style="font-size:56px">?</div>
+    <div style="font-size:56px">&#127942;</div>
     <div class="finish-ttl bc">Session<br><em>Complete</em></div>
     <div class="finish-grid">
       <div class="finish-stat"><div class="fs-val">${mins}</div><div class="fs-lbl">Minutes</div></div>
@@ -1638,7 +1638,7 @@ function showExTrend(name){
           <div class="trend-pr-val">${allPR} lbs</div>
         </div>
         ${volChange!==0?`<div style="font-size:12px;color:${volChange>0?'var(--grn)':'var(--red)'}">
-          ${volChange>0?'?':'?'} ${Math.abs(volChange)}% from first session
+          ${volChange>0?'↑':'↓'} ${Math.abs(volChange)}% from first session
         </div>`:''}
       </div>
       <div class="trend-bars">${bars||'<div class="empty" style="padding:10px">Not enough data</div>'}</div>
@@ -1689,7 +1689,7 @@ function renderEdit(){
         </div>
         <div style="display:flex;align-items:center;gap:8px">
           <button class="mini-btn del" onclick="delDay('${d.id}',event)">Delete day</button>
-          <span class="chevron${editExpandId===d.id?' open':''}">?</span>
+          <span class="chevron${editExpandId===d.id?' open':''}">▾</span>
         </div>
       </div>
       <div class="edit-day-body${editExpandId===d.id?' open':''}" id="edb_${d.id}">
@@ -1710,7 +1710,7 @@ function renderEdit(){
               </div>
               <div class="ex-edit-actions">
                 <button class="mini-btn" onclick="editExSheet('${d.id}','${n}',${i})">Edit</button>
-                <button class="mini-btn del" onclick="removeEx('${d.id}','${n}')">?</button>
+                <button class="mini-btn del" onclick="removeEx('${d.id}','${n}')">✕</button>
               </div>
             </div>`;
           }).join('')}
