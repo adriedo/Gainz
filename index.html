@@ -100,7 +100,7 @@ label{font-size:12px;color:var(--t2);display:block;margin-bottom:5px;}
 /* SVG ILLUSTRATION */
 .ex-illo{width:100%;height:160px;background:var(--s2);border-radius:12px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
 .ex-illo svg{width:100%;height:100%;}
-/* SET ROWS — prev / target / actual */
+/* SET ROWS Â· prev / target / actual */
 .set-head{display:grid;grid-template-columns:22px 1fr 1fr 1fr 36px;gap:4px;margin-bottom:6px;}
 .sh-lbl{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;text-align:center;font-weight:500;}
 .set-row{display:grid;grid-template-columns:22px 1fr 1fr 1fr 36px;gap:4px;align-items:center;margin-bottom:8px;padding:6px 8px;border-radius:10px;background:var(--s2);}
@@ -446,47 +446,47 @@ label{font-size:12px;color:var(--t2);display:block;margin-bottom:5px;}
 // ??? EXERCISE LIBRARY ?????????????????????????????????????????????????????????
 const EXERCISE_LIBRARY = {
   chest:[
-    {name:'Smith Machine Bench Press',      muscle:'Chest',         sets:4,reps:'8–10',  rest:120, search:'smith machine bench press form'},
-    {name:'Smith Machine Incline Press',    muscle:'Upper Chest',   sets:3,reps:'10–12', rest:90,  search:'smith machine incline press form'},
-    {name:'Smith Machine Close-Grip Bench', muscle:'Triceps/Chest', sets:3,reps:'10–12', rest:90,  search:'close grip bench press smith machine'},
-    {name:'Cable Crossover',               muscle:'Chest',         sets:3,reps:'12–15', rest:60,  search:'cable crossover chest form'},
-    {name:'Cable Fly',                     muscle:'Chest',         sets:3,reps:'12–15', rest:60,  search:'cable fly chest form'},
-    {name:'Push-Ups',                      muscle:'Chest',         sets:3,reps:'15–20', rest:60,  search:'push up form tutorial'},
-    {name:'Dips',                          muscle:'Chest/Triceps', sets:3,reps:'10–12', rest:90,  search:'dips exercise form'},
+    {name:'Smith Machine Bench Press',      muscle:'Chest',         sets:4,reps:'8â€“10',  rest:120, search:'smith machine bench press form'},
+    {name:'Smith Machine Incline Press',    muscle:'Upper Chest',   sets:3,reps:'10â€“12', rest:90,  search:'smith machine incline press form'},
+    {name:'Smith Machine Close-Grip Bench', muscle:'Triceps/Chest', sets:3,reps:'10â€“12', rest:90,  search:'close grip bench press smith machine'},
+    {name:'Cable Crossover',               muscle:'Chest',         sets:3,reps:'12â€“15', rest:60,  search:'cable crossover chest form'},
+    {name:'Cable Fly',                     muscle:'Chest',         sets:3,reps:'12â€“15', rest:60,  search:'cable fly chest form'},
+    {name:'Push-Ups',                      muscle:'Chest',         sets:3,reps:'15â€“20', rest:60,  search:'push up form tutorial'},
+    {name:'Dips',                          muscle:'Chest/Triceps', sets:3,reps:'10â€“12', rest:90,  search:'dips exercise form'},
   ],
   shoulders:[
-    {name:'Smith Machine Overhead Press',  muscle:'Shoulders',     sets:3,reps:'10–12', rest:90,  search:'smith machine overhead press form'},
-    {name:'Lateral Raises',               muscle:'Side Delts',    sets:4,reps:'12–15', rest:60,  search:'lateral raise dumbbell form'},
+    {name:'Smith Machine Overhead Press',  muscle:'Shoulders',     sets:3,reps:'10â€“12', rest:90,  search:'smith machine overhead press form'},
+    {name:'Lateral Raises',               muscle:'Side Delts',    sets:4,reps:'12â€“15', rest:60,  search:'lateral raise dumbbell form'},
     {name:'Face Pulls',                   muscle:'Rear Delts',    sets:3,reps:'15',    rest:60,  search:'face pull cable form'},
     {name:'Rear Delt Fly',                muscle:'Rear Delts',    sets:3,reps:'15',    rest:60,  search:'rear delt fly dumbbell form'},
     {name:'Front Raises',                 muscle:'Front Delts',   sets:3,reps:'12',    rest:60,  search:'front raise dumbbell form'},
-    {name:'Arnold Press',                 muscle:'Shoulders',     sets:3,reps:'10–12', rest:75,  search:'arnold press dumbbell form'},
+    {name:'Arnold Press',                 muscle:'Shoulders',     sets:3,reps:'10â€“12', rest:75,  search:'arnold press dumbbell form'},
   ],
   back:[
-    {name:'Cable Lat Pulldown',           muscle:'Lats',          sets:4,reps:'10–12', rest:90,  search:'lat pulldown cable form'},
-    {name:'Smith Machine Bent-Over Row',  muscle:'Mid Back',      sets:4,reps:'10–12', rest:90,  search:'bent over row smith machine form'},
+    {name:'Cable Lat Pulldown',           muscle:'Lats',          sets:4,reps:'10â€“12', rest:90,  search:'lat pulldown cable form'},
+    {name:'Smith Machine Bent-Over Row',  muscle:'Mid Back',      sets:4,reps:'10â€“12', rest:90,  search:'bent over row smith machine form'},
     {name:'Single Arm DB Row',            muscle:'Lats/Mid Back', sets:3,reps:'12',    rest:75,  search:'single arm dumbbell row form'},
-    {name:'Cable Straight-Arm Pulldown',  muscle:'Lats',          sets:3,reps:'12–15', rest:60,  search:'straight arm pulldown cable form'},
-    {name:'Seated Cable Row',             muscle:'Mid Back',      sets:3,reps:'10–12', rest:75,  search:'seated cable row form'},
+    {name:'Cable Straight-Arm Pulldown',  muscle:'Lats',          sets:3,reps:'12â€“15', rest:60,  search:'straight arm pulldown cable form'},
+    {name:'Seated Cable Row',             muscle:'Mid Back',      sets:3,reps:'10â€“12', rest:75,  search:'seated cable row form'},
     {name:'Pull-Ups',                     muscle:'Lats',          sets:4,reps:'Max',   rest:120, search:'pull up form tutorial'},
   ],
   arms:[
     {name:'Dumbbell Curl',               muscle:'Biceps',        sets:3,reps:'12',    rest:60,  search:'dumbbell bicep curl form'},
     {name:'Hammer Curls',                muscle:'Brachialis',    sets:3,reps:'12',    rest:60,  search:'hammer curl form'},
     {name:'Cable Curl 21s',              muscle:'Biceps',        sets:2,reps:'21',    rest:75,  search:'21s bicep curl form'},
-    {name:'Barbell Curl',                muscle:'Biceps',        sets:3,reps:'10–12', rest:60,  search:'barbell curl form'},
-    {name:'Preacher Curl',               muscle:'Biceps',        sets:3,reps:'10–12', rest:60,  search:'preacher curl form'},
-    {name:'Tricep Pushdowns',            muscle:'Triceps',       sets:3,reps:'12–15', rest:60,  search:'tricep pushdown cable form'},
+    {name:'Barbell Curl',                muscle:'Biceps',        sets:3,reps:'10â€“12', rest:60,  search:'barbell curl form'},
+    {name:'Preacher Curl',               muscle:'Biceps',        sets:3,reps:'10â€“12', rest:60,  search:'preacher curl form'},
+    {name:'Tricep Pushdowns',            muscle:'Triceps',       sets:3,reps:'12â€“15', rest:60,  search:'tricep pushdown cable form'},
     {name:'Overhead Tricep Extension',   muscle:'Triceps',       sets:2,reps:'12',    rest:60,  search:'overhead tricep extension dumbbell'},
-    {name:'Skull Crushers',              muscle:'Triceps',       sets:3,reps:'10–12', rest:75,  search:'skull crusher form'},
+    {name:'Skull Crushers',              muscle:'Triceps',       sets:3,reps:'10â€“12', rest:75,  search:'skull crusher form'},
   ],
   legs:[
-    {name:'Smith Machine Squat',         muscle:'Quads/Glutes',  sets:4,reps:'10–12', rest:120, search:'smith machine squat form'},
-    {name:'Smith Machine Romanian Deadlift',muscle:'Hamstrings', sets:4,reps:'10–12', rest:90,  search:'romanian deadlift smith machine form'},
+    {name:'Smith Machine Squat',         muscle:'Quads/Glutes',  sets:4,reps:'10â€“12', rest:120, search:'smith machine squat form'},
+    {name:'Smith Machine Romanian Deadlift',muscle:'Hamstrings', sets:4,reps:'10â€“12', rest:90,  search:'romanian deadlift smith machine form'},
     {name:'Smith Machine Hip Thrust',    muscle:'Glutes',        sets:4,reps:'12',    rest:90,  search:'hip thrust smith machine form'},
     {name:'Smith Machine Reverse Lunge', muscle:'Quads/Glutes',  sets:3,reps:'12 ea', rest:75,  search:'reverse lunge smith machine form'},
-    {name:'Standing Calf Raise (Smith)', muscle:'Calves',        sets:4,reps:'15–20', rest:45,  search:'standing calf raise smith machine'},
-    {name:'Leg Extension (Machine)',     muscle:'Quads',         sets:3,reps:'12–15', rest:60,  search:'leg extension machine form'},
+    {name:'Standing Calf Raise (Smith)', muscle:'Calves',        sets:4,reps:'15â€“20', rest:45,  search:'standing calf raise smith machine'},
+    {name:'Leg Extension (Machine)',     muscle:'Quads',         sets:3,reps:'12â€“15', rest:60,  search:'leg extension machine form'},
     {name:'Bulgarian Split Squat',       muscle:'Quads/Glutes',  sets:3,reps:'10 ea', rest:90,  search:'bulgarian split squat form'},
     {name:'Hip Thrust (Barbell)',        muscle:'Glutes',        sets:4,reps:'12',    rest:90,  search:'barbell hip thrust form'},
     {name:'Leg Curl (Machine)',          muscle:'Hamstrings',    sets:3,reps:'12',    rest:60,  search:'lying leg curl machine form'},
@@ -511,37 +511,37 @@ const EXERCISE_LIBRARY = {
 
 // Form cues per exercise
 const CUES = {
-  'Smith Machine Bench Press':        ['Retract scapula, slight natural arch','Bar touches lower chest','Drive feet into the floor','2–3 sec controlled descent'],
-  'Smith Machine Incline Press':      ['30–45° incline angle','Elbows ~45° from torso, not flared','Full stretch at the bottom','Squeeze chest hard at the top'],
+  'Smith Machine Bench Press':        ['Retract scapula, slight natural arch','Bar touches lower chest','Drive feet into the floor','2â€“3 sec controlled descent'],
+  'Smith Machine Incline Press':      ['30â€“45â€“ incline angle','Elbows ~45â€“ from torso, not flared','Full stretch at the bottom','Squeeze chest hard at the top'],
   'Smith Machine Close-Grip Bench':   ['Hands shoulder-width or slightly inside','Elbows tucked close to body','Full lockout at top','Slow 3 sec descent'],
-  'Cable Crossover':                  ['Slight forward lean','Constant tension through full arc','Squeeze chest at center','Slow return — don\'t let weight jerk back'],
+  'Cable Crossover':                  ['Slight forward lean','Constant tension through full arc','Squeeze chest at center','Slow return Â· don\'t let weight jerk back'],
   'Smith Machine Overhead Press':     ['Brace core before every rep','Press straight up, not forward','Full lockout at top','No lower back arch'],
   'Lateral Raises':                   ['Slight forward lean for better stimulus','Lead with elbows, not wrists','3 sec slow descent','Lighter than you think'],
-  'Face Pulls':                       ['Pull to eye level or slightly above','Externally rotate at end — thumbs back','Light weight, perfect form every rep','Non-negotiable for shoulder health'],
+  'Face Pulls':                       ['Pull to eye level or slightly above','Externally rotate at end Â· thumbs back','Light weight, perfect form every rep','Non-negotiable for shoulder health'],
   'Tricep Pushdowns':                 ['Elbows glued to sides throughout','Full extension at the bottom','Pause and squeeze 1 sec','Absolutely no swinging'],
   'Cable Crunch':                     ['Hinge at hips, not neck','Pull elbows toward knees','Round your spine fully','Slow and controlled back up'],
   'Cable Lat Pulldown':               ['Slight lean back, stay stable','Pull to upper chest','Arms fully extend at top','Think elbows to back pockets'],
-  'Smith Machine Bent-Over Row':      ['Hinge to about 45°','Pull to lower chest / upper abs','Squeeze shoulder blades hard at top','Control the descent slowly'],
+  'Smith Machine Bent-Over Row':      ['Hinge to about 45â€“','Pull to lower chest / upper abs','Squeeze shoulder blades hard at top','Control the descent slowly'],
   'Single Arm DB Row':                ['Flat back, supported on bench','Pull elbow straight back','Squeeze lat at top','Full stretch at the bottom'],
   'Cable Straight-Arm Pulldown':      ['Arms nearly straight throughout','Hinge slightly forward','Pull from overhead to hips','Focus on feeling your lats'],
   'Dumbbell Curl':                    ['No body swinging','Supinate (rotate palm up) at top','Full stretch at the bottom','Squeeze hard at the top'],
   'Hammer Curls':                     ['Neutral grip throughout','Targets brachialis for arm thickness','Elbows pinned to sides','Controlled descent'],
-  'Cable Curl 21s':                   ['7 reps bottom to mid, 7 mid to top, 7 full range','Constant tension from cable','No swinging — strict form','Burns, but worth it'],
-  'Ab Wheel':                         ['Brace core before you roll','Keep lower back flat — don\'t hyperextend','Roll as far as you can control','Slow and deliberate return'],
+  'Cable Curl 21s':                   ['7 reps bottom to mid, 7 mid to top, 7 full range','Constant tension from cable','No swinging Â· strict form','Burns, but worth it'],
+  'Ab Wheel':                         ['Brace core before you roll','Keep lower back flat Â· don\'t hyperextend','Roll as far as you can control','Slow and deliberate return'],
   'Smith Machine Squat':              ['Feet slightly forward of bar on Smith','Knees track over toes','Break parallel','Drive through heels, chest stays up'],
-  'Smith Machine Romanian Deadlift':  ['Push hips back — it\'s a hip hinge','Feel hamstring stretch at bottom','Soft knee bend, not a full bend','Bar stays close to legs'],
-  'Smith Machine Hip Thrust':         ['Upper back on bench, bar across hip crease','Drive through heels','Full hip extension at top — squeeze glutes hard','Chin tucked, core braced'],
+  'Smith Machine Romanian Deadlift':  ['Push hips back Â· it\'s a hip hinge','Feel hamstring stretch at bottom','Soft knee bend, not a full bend','Bar stays close to legs'],
+  'Smith Machine Hip Thrust':         ['Upper back on bench, bar across hip crease','Drive through heels','Full hip extension at top Â· squeeze glutes hard','Chin tucked, core braced'],
   'Smith Machine Reverse Lunge':      ['Step back, not forward','Back knee drops near floor','Front knee stays over toes','Torso stays upright'],
-  'Standing Calf Raise (Smith)':      ['Full range — heel below platform at bottom','Pause and squeeze hard at top','Mix slow and explosive sets','Heavy and controlled beats light and bouncy'],
-  'Leg Extension (Machine)':          ['Pause at full extension 1 sec','Slow controlled descent — 3 sec','Don\'t let weight slam at bottom','Toes slightly out'],
+  'Standing Calf Raise (Smith)':      ['Full range Â· heel below platform at bottom','Pause and squeeze hard at top','Mix slow and explosive sets','Heavy and controlled beats light and bouncy'],
+  'Leg Extension (Machine)':          ['Pause at full extension 1 sec','Slow controlled descent Â· 3 sec','Don\'t let weight slam at bottom','Toes slightly out'],
   'Face Pulls':                       ['Pull to eye level or above','Externally rotate at end','Light weight every time','Key for shoulder longevity'],
-  'Plank':                            ['Neutral spine — no sagging hips','Squeeze glutes and abs','Breathe steadily','Quality tension beats time'],
+  'Plank':                            ['Neutral spine Â· no sagging hips','Squeeze glutes and abs','Breathe steadily','Quality tension beats time'],
   'Hanging Knee Raises':              ['No swinging','Tuck pelvis at top for more activation','Slow controlled descent','Progress to straight legs'],
-  'Dead Bug':                         ['Low back flat to floor the whole time','Opposite arm + leg extend together','Exhale on extension','Go slow — control over speed'],
+  'Dead Bug':                         ['Low back flat to floor the whole time','Opposite arm + leg extend together','Exhale on extension','Go slow Â· control over speed'],
   'Pull-Ups':                         ['Full dead hang at bottom','Chin clears bar at top','3 sec controlled negative','Add weight when 10+ is easy'],
   'Dips':                             ['Slight lean = more chest','Upright = more triceps','Full extension at top','Shoulder below elbow at bottom'],
   'Bulgarian Split Squat':            ['Rear foot elevated on bench','Front knee stays over toes','Torso stays upright','Go lighter than you expect'],
-  'Cable Fly':                        ['Constant slight elbow bend','Big arc motion — hug a barrel','Squeeze chest at center','Slow stretch back out'],
+  'Cable Fly':                        ['Constant slight elbow bend','Big arc motion Â· hug a barrel','Squeeze chest at center','Slow stretch back out'],
   'Rear Delt Fly':                    ['Hinge forward or use incline bench','Lead with elbows wide','Squeeze rear delts at top','Light weight, high reps'],
 };
 
@@ -703,29 +703,29 @@ const DEFAULT_PROGRAM = [
 // ??? EXERCISE TARGET WEIGHTS (based on your logs + 5lb progression) ???????????
 // Format: { sets, reps, targetWeight, targetReps }
 const EX_TARGETS = {
-  'Smith Machine Bench Press':        { sets:4, reps:'8–10',  targetWeight:60,  targetReps:8  },
-  'Smith Machine Incline Press':      { sets:3, reps:'10–12', targetWeight:50,  targetReps:10 },
-  'Cable Crossover':                  { sets:3, reps:'12–15', targetWeight:30,  targetReps:12 },
-  'Smith Machine Overhead Press':     { sets:3, reps:'10–12', targetWeight:25,  targetReps:10 },
-  'Lateral Raises':                   { sets:4, reps:'12–15', targetWeight:25,  targetReps:12 },
+  'Smith Machine Bench Press':        { sets:4, reps:'8â€“10',  targetWeight:60,  targetReps:8  },
+  'Smith Machine Incline Press':      { sets:3, reps:'10â€“12', targetWeight:50,  targetReps:10 },
+  'Cable Crossover':                  { sets:3, reps:'12â€“15', targetWeight:30,  targetReps:12 },
+  'Smith Machine Overhead Press':     { sets:3, reps:'10â€“12', targetWeight:25,  targetReps:10 },
+  'Lateral Raises':                   { sets:4, reps:'12â€“15', targetWeight:25,  targetReps:12 },
   'Face Pulls':                       { sets:3, reps:'15',    targetWeight:20,  targetReps:15 },
-  'Tricep Pushdowns':                 { sets:3, reps:'12–15', targetWeight:45,  targetReps:12 },
+  'Tricep Pushdowns':                 { sets:3, reps:'12â€“15', targetWeight:45,  targetReps:12 },
   'Cable Crunch':                     { sets:3, reps:'20',    targetWeight:55,  targetReps:20 },
-  'Cable Lat Pulldown':               { sets:4, reps:'10–12', targetWeight:85,  targetReps:10 },
-  'Smith Machine Bent-Over Row':      { sets:4, reps:'10–12', targetWeight:60,  targetReps:10 },
+  'Cable Lat Pulldown':               { sets:4, reps:'10â€“12', targetWeight:85,  targetReps:10 },
+  'Smith Machine Bent-Over Row':      { sets:4, reps:'10â€“12', targetWeight:60,  targetReps:10 },
   'Single Arm DB Row':                { sets:3, reps:'12',    targetWeight:25,  targetReps:12 },
-  'Cable Straight-Arm Pulldown':      { sets:3, reps:'12–15', targetWeight:25,  targetReps:12 },
+  'Cable Straight-Arm Pulldown':      { sets:3, reps:'12â€“15', targetWeight:25,  targetReps:12 },
   'Dumbbell Curl':                    { sets:3, reps:'12',    targetWeight:25,  targetReps:12 },
   'Hammer Curls':                     { sets:3, reps:'12',    targetWeight:25,  targetReps:12 },
   'Cable Curl 21s':                   { sets:2, reps:'21',    targetWeight:15,  targetReps:21 },
   'Ab Wheel':                         { sets:3, reps:'12',    targetWeight:0,   targetReps:12 },
-  'Smith Machine Squat':              { sets:4, reps:'10–12', targetWeight:95,  targetReps:10 },
-  'Smith Machine Romanian Deadlift':  { sets:4, reps:'10–12', targetWeight:60,  targetReps:10 },
+  'Smith Machine Squat':              { sets:4, reps:'10â€“12', targetWeight:95,  targetReps:10 },
+  'Smith Machine Romanian Deadlift':  { sets:4, reps:'10â€“12', targetWeight:60,  targetReps:10 },
   'Smith Machine Hip Thrust':         { sets:4, reps:'12',    targetWeight:60,  targetReps:12 },
   'Smith Machine Reverse Lunge':      { sets:3, reps:'12 ea', targetWeight:30,  targetReps:12 },
-  'Standing Calf Raise (Smith)':      { sets:4, reps:'15–20', targetWeight:70,  targetReps:15 },
-  'Leg Extension (Machine)':          { sets:3, reps:'12–15', targetWeight:85,  targetReps:12 },
-  'Smith Machine Close-Grip Bench':   { sets:3, reps:'10–12', targetWeight:50,  targetReps:10 },
+  'Standing Calf Raise (Smith)':      { sets:4, reps:'15â€“20', targetWeight:70,  targetReps:15 },
+  'Leg Extension (Machine)':          { sets:3, reps:'12â€“15', targetWeight:85,  targetReps:12 },
+  'Smith Machine Close-Grip Bench':   { sets:3, reps:'10â€“12', targetWeight:50,  targetReps:10 },
 };
 
 // Find exercise def from library
@@ -734,12 +734,12 @@ function findEx(name) {
     const found = grp.find(e=>e.name===name);
     if(found) return found;
   }
-  return {name,muscle:'Unknown',sets:3,reps:'10–12',rest:90,search:name+' form tutorial'};
+  return {name,muscle:'Unknown',sets:3,reps:'10â€“12',rest:90,search:name+' form tutorial'};
 }
 
 // ??? HISTORICAL DATA (imported from your Strong app logs) ?????????????????????
 const IMPORTED_LOG = [
-  // Feb 23 — Push
+  // Feb 23 Â· Push
   {exercise:'Smith Machine Bench Press',dayName:'Push',dayId:'push',sessionId:1001,date:'2026-02-23T17:56:00',sets:[{weight:45,reps:18,done:true},{weight:45,reps:14,done:true},{weight:55,reps:8,done:true},{weight:55,reps:6,done:true}]},
   {exercise:'Smith Machine Incline Press',dayName:'Push',dayId:'push',sessionId:1001,date:'2026-02-23T17:56:00',sets:[{weight:40,reps:12,done:true},{weight:40,reps:9,done:true},{weight:45,reps:7,done:true},{weight:45,reps:7,done:true}]},
   {exercise:'Cable Crossover',dayName:'Push',dayId:'push',sessionId:1001,date:'2026-02-23T17:56:00',sets:[{weight:25,reps:16,done:true},{weight:25,reps:14,done:true},{weight:30,reps:10,done:true},{weight:30,reps:8,done:true}]},
@@ -748,14 +748,14 @@ const IMPORTED_LOG = [
   {exercise:'Tricep Pushdowns',dayName:'Push',dayId:'push',sessionId:1001,date:'2026-02-23T17:56:00',sets:[{weight:35,reps:18,done:true},{weight:35,reps:16,done:true},{weight:45,reps:8,done:true},{weight:45,reps:8,done:true}]},
   {exercise:'Cable Crunch',dayName:'Push',dayId:'push',sessionId:1001,date:'2026-02-23T17:56:00',sets:[{weight:50,reps:20,done:true},{weight:50,reps:20,done:true},{weight:50,reps:20,done:true}]},
   {exercise:'Ab Wheel',dayName:'Push',dayId:'push',sessionId:1001,date:'2026-02-23T17:56:00',sets:[{weight:0,reps:10,done:true},{weight:0,reps:10,done:true},{weight:0,reps:10,done:true}]},
-  // Feb 11 — Pull
+  // Feb 11 Â· Pull
   {exercise:'Cable Lat Pulldown',dayName:'Pull',dayId:'pull',sessionId:1002,date:'2026-02-11T18:08:00',sets:[{weight:75,reps:18,done:true},{weight:75,reps:12,done:true},{weight:80,reps:8,done:true},{weight:80,reps:8,done:true}]},
   {exercise:'Smith Machine Bent-Over Row',dayName:'Pull',dayId:'pull',sessionId:1002,date:'2026-02-11T18:08:00',sets:[{weight:45,reps:16,done:true},{weight:45,reps:14,done:true},{weight:55,reps:9,done:true},{weight:55,reps:9,done:true}]},
   {exercise:'Dumbbell Curl',dayName:'Pull',dayId:'pull',sessionId:1002,date:'2026-02-11T18:08:00',sets:[{weight:20,reps:12,done:true},{weight:20,reps:12,done:true},{weight:25,reps:8,done:true},{weight:25,reps:8,done:true}]},
   {exercise:'Hammer Curls',dayName:'Pull',dayId:'pull',sessionId:1002,date:'2026-02-11T18:08:00',sets:[{weight:15,reps:12,done:true},{weight:15,reps:12,done:true},{weight:20,reps:8,done:true},{weight:20,reps:8,done:true}]},
   {exercise:'Cable Curl 21s',dayName:'Pull',dayId:'pull',sessionId:1002,date:'2026-02-11T18:08:00',sets:[{weight:10,reps:21,done:true},{weight:10,reps:21,done:true},{weight:15,reps:21,done:true},{weight:15,reps:21,done:true}]},
   {exercise:'Ab Wheel',dayName:'Pull',dayId:'pull',sessionId:1002,date:'2026-02-11T18:08:00',sets:[{weight:0,reps:12,done:true},{weight:0,reps:12,done:true},{weight:0,reps:12,done:true}]},
-  // Feb 15 — Legs
+  // Feb 15 Â· Legs
   {exercise:'Smith Machine Squat',dayName:'Legs',dayId:'legs',sessionId:1003,date:'2026-02-15T10:14:00',sets:[{weight:80,reps:16,done:true},{weight:80,reps:14,done:true},{weight:90,reps:10,done:true},{weight:90,reps:8,done:true}]},
   {exercise:'Smith Machine Romanian Deadlift',dayName:'Legs',dayId:'legs',sessionId:1003,date:'2026-02-15T10:14:00',sets:[{weight:50,reps:14,done:true},{weight:50,reps:12,done:true},{weight:55,reps:8,done:true},{weight:55,reps:8,done:true}]},
   {exercise:'Smith Machine Hip Thrust',dayName:'Legs',dayId:'legs',sessionId:1003,date:'2026-02-15T10:14:00',sets:[{weight:50,reps:12,done:true},{weight:50,reps:12,done:true},{weight:55,reps:8,done:true},{weight:55,reps:8,done:true}]},
@@ -764,7 +764,7 @@ const IMPORTED_LOG = [
   {exercise:'Leg Extension (Machine)',dayName:'Legs',dayId:'legs',sessionId:1003,date:'2026-02-15T10:14:00',sets:[{weight:60,reps:12,done:true},{weight:70,reps:12,done:true},{weight:80,reps:10,done:true},{weight:80,reps:10,done:true}]},
   {exercise:'Cable Crunch',dayName:'Legs',dayId:'legs',sessionId:1003,date:'2026-02-15T10:14:00',sets:[{weight:55,reps:20,done:true},{weight:55,reps:20,done:true},{weight:55,reps:20,done:true}]},
   {exercise:'Ab Wheel',dayName:'Legs',dayId:'legs',sessionId:1003,date:'2026-02-15T10:14:00',sets:[{weight:0,reps:12,done:true},{weight:0,reps:12,done:true},{weight:0,reps:12,done:true}]},
-  // Feb 2 — Chest & Arms
+  // Feb 2 Â· Chest & Arms
   {exercise:'Smith Machine Incline Press',dayName:'Chest & Arms',dayId:'arms',sessionId:1004,date:'2026-02-02T14:02:00',sets:[{weight:40,reps:16,done:true},{weight:40,reps:13,done:true},{weight:45,reps:9,done:true},{weight:45,reps:8,done:true}]},
   {exercise:'Cable Crossover',dayName:'Chest & Arms',dayId:'arms',sessionId:1004,date:'2026-02-02T14:02:00',sets:[{weight:25,reps:14,done:true},{weight:25,reps:14,done:true},{weight:27,reps:10,done:true},{weight:27,reps:8,done:true}]},
   {exercise:'Smith Machine Close-Grip Bench',dayName:'Chest & Arms',dayId:'arms',sessionId:1004,date:'2026-02-02T14:02:00',sets:[{weight:40,reps:10,done:true},{weight:40,reps:10,done:true},{weight:45,reps:6,done:true},{weight:45,reps:6,done:true}]},
@@ -839,7 +839,7 @@ function findEx(name){
   const ovStr=localStorage.getItem('gainz_ex_overrides');
   const ov=ovStr?JSON.parse(ovStr):{};
   if(ov[name]) return {...(findExBase(name)||{name,muscle:'Custom',rest:90,search:name+' form'}),...ov[name]};
-  return findExBase(name)||{name,muscle:'Unknown',sets:3,reps:'10–12',rest:90,search:name+' form tutorial'};
+  return findExBase(name)||{name,muscle:'Unknown',sets:3,reps:'10â€“12',rest:90,search:name+' form tutorial'};
 }
 function findExBase(name){
   for(const grp of Object.values(EXERCISE_LIBRARY)){
@@ -872,10 +872,10 @@ let cardioLog = JSON.parse(localStorage.getItem('gainz_cardio') || '[]');
 function saveCardioLog(){ localStorage.setItem('gainz_cardio', JSON.stringify(cardioLog)); }
 
 const CARDIO_SESSIONS = [
-  { id:'run-conv',  type:'run',  style:'conversational', label:'Conversational Run', sub:'Zone 2 · easy pace',    color:'#47b4ff', icon:'?' },
-  { id:'run-hiit',  type:'run',  style:'hiit',            label:'HIIT Run',           sub:'Intervals · high effort', color:'#ff4747', icon:'?' },
-  { id:'bike-conv', type:'bike', style:'conversational', label:'Conversational Bike', sub:'Zone 2 · steady state', color:'#ffb347', icon:'?' },
-  { id:'bike-hiit', type:'bike', style:'hiit',            label:'HIIT Bike',          sub:'Intervals · high effort', color:'#ff4747', icon:'?' },
+  { id:'run-conv',  type:'run',  style:'conversational', label:'Conversational Run', sub:'Zone 2 Â· easy pace',    color:'#47b4ff', icon:'?' },
+  { id:'run-hiit',  type:'run',  style:'hiit',            label:'HIIT Run',           sub:'Intervals Â· high effort', color:'#ff4747', icon:'?' },
+  { id:'bike-conv', type:'bike', style:'conversational', label:'Conversational Bike', sub:'Zone 2 Â· steady state', color:'#ffb347', icon:'?' },
+  { id:'bike-hiit', type:'bike', style:'hiit',            label:'HIIT Bike',          sub:'Intervals Â· high effort', color:'#ff4747', icon:'?' },
 ];
 
 // HIIT interval state per card
@@ -923,7 +923,7 @@ function buildIntervalUI(id){
   return `<div class="interval-builder">
     <div class="interval-header">
       <span class="interval-title">Intervals</span>
-      <span class="interval-summary">${rounds} round${rounds!==1?'s':''} · ~${Math.ceil(total/60)} min total</span>
+      <span class="interval-summary">${rounds} round${rounds!==1?'s':''} Â· ~${Math.ceil(total/60)} min total</span>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:4px;margin-bottom:6px;">
       <div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;text-align:center;font-weight:500;">Work (sec)</div>
@@ -939,7 +939,7 @@ function buildIntervalUI(id){
         <input class="interval-input" type="number" inputmode="numeric" value="${iv.rest}" min="5" max="300"
           style="border-color:rgba(71,180,255,.3);color:#99ccff;"
           onchange="updateInterval('${id}',${i},'rest',this.value)">
-        <button class="del-interval-btn" onclick="removeInterval('${id}',${i})">×</button>
+        <button class="del-interval-btn" onclick="removeInterval('${id}',${i})">Ã—</button>
       </div>`).join('')}
     </div>
     <button class="add-interval-btn" onclick="addInterval('${id}')">+ Add round</button>
@@ -962,7 +962,7 @@ function renderHome(){
     <div class="day-card dc-${d.type}" onclick="launchWk('${d.id}')">
       <div class="dc-head">
         <div>
-          <div class="dc-title bc">${d.day} — ${d.name}</div>
+          <div class="dc-title bc">${d.day} Â· ${d.name}</div>
           <div class="dc-sub">${d.focus}</div>
         </div>
         <div class="arrow-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
@@ -1055,16 +1055,16 @@ function renderWk(){
     // Banner: tell user what to aim for
     let banner='';
     if(tgt.hit){
-      banner=`<div class="target-banner up"><span>?</span> Last session hit target — aim for ${tgt.weight}lb today (+5lb)</div>`;
+      banner=`<div class="target-banner up"><span>?</span> Last session hit target Â· aim for ${tgt.weight}lb today (+5lb)</div>`;
     } else if(prev.length){
-      banner=`<div class="target-banner same"><span>?</span> Target: ${tgt.weight}lb × ${tgt.reps} reps</div>`;
+      banner=`<div class="target-banner same"><span>?</span> Target: ${tgt.weight}lb Â· ${tgt.reps} reps</div>`;
     }
 
     return `<div class="ex-card${isOpen?' active-ex':''} fu" id="exc_${idx}" style="animation-delay:${idx*.04}s">
       <div class="ex-head" onclick="toggleEx('${n}')">
         <div style="flex:1;min-width:0">
           <div class="ex-name">${n}</div>
-          <div class="ex-info">${ex.sets}×${ex.reps} · ${restSec}s rest · ${ex.muscle||''}</div>
+          <div class="ex-info">${ex.sets}â€“${ex.reps} Â· ${restSec}s rest Â· ${ex.muscle||''}</div>
         </div>
         <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
           ${allDone?'<span class="ex-done-badge">? Done</span>':''}
@@ -1088,13 +1088,13 @@ function renderWk(){
             <div class="set-n">${i+1}</div>
             <div class="set-prev">
               ${hasP
-                ? `<div class="set-prev-w">${p.weight||'—'}<span style="font-size:9px;color:var(--t3)">lb</span></div>
-                   <div class="set-prev-r">${p.reps||'—'} reps</div>`
-                : `<div class="set-prev-r" style="font-size:11px">—</div>`}
+                ? `<div class="set-prev-w">${p.weight||'â€“'}<span style="font-size:9px;color:var(--t3)">lb</span></div>
+                   <div class="set-prev-r">${p.reps||'â€“'} reps</div>`
+                : `<div class="set-prev-r" style="font-size:11px">â€“</div>`}
             </div>
             <div class="set-tgt">
-              <div class="set-tgt-w">${tgt.weight||'—'}<span style="font-size:9px">lb</span></div>
-              <div class="set-tgt-r">${tgt.reps||'—'} reps</div>
+              <div class="set-tgt-w">${tgt.weight||'â€“'}<span style="font-size:9px">lb</span></div>
+              <div class="set-tgt-r">${tgt.reps||'â€“'} reps</div>
             </div>
             <div class="set-actual">
               <input class="si-w" type="number" inputmode="decimal" placeholder="lbs" value="${s.weight}"
@@ -1208,7 +1208,7 @@ function showCues(name){
   bg.innerHTML=`<div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-title">${name}</div>
-    <div class="sheet-sub">${ex.sets} sets · ${ex.reps} reps · ${rest}s rest · ${ex.muscle}</div>
+    <div class="sheet-sub">${ex.sets} sets Â· ${ex.reps} reps Â· ${rest}s rest Â· ${ex.muscle}</div>
     <div class="muscle-diagram" style="margin-bottom:14px">${getIllo(name)}</div>
     ${cues.map(c=>`<div class="cue-row"><div class="cue-dot"></div><div class="cue-txt">${c}</div></div>`).join('')}
     <div class="yt-row" onclick="window.open('https://www.youtube.com/results?search_query=${encodeURIComponent(ex.search)}','_blank')">
@@ -1310,7 +1310,7 @@ function getSessions(){
     s[e.sessionId].entries.push(e);
   });
   const strengthSessions = Object.values(s);
-  // Cardio sessions from cardioLog — each entry is its own session
+  // Cardio sessions from cardioLog Â· each entry is its own session
   const cardioSessions = cardioLog.map(c=>({
     date: c.date,
     dayName: c.label,
@@ -1366,7 +1366,7 @@ function viewSession(sidOrEl){
         ${e.sets.map((st,i)=>`
           <div class="sess-set-row">
             <div class="sess-set-n">${i+1}</div>
-            <div class="sess-set-data">${st.weight?`<b>${st.weight}</b> lb × <b>${st.reps}</b> reps`:`<b>${st.reps}</b> reps`}</div>
+            <div class="sess-set-data">${st.weight?`<b>${st.weight}</b> lb Â· <b>${st.reps}</b> reps`:`<b>${st.reps}</b> reps`}</div>
           </div>`).join('')}
       </div>`).join('')}
     <button class="btn btn-ghost btn-full" style="margin-top:14px" onclick="closeSheets()">Close</button>
@@ -1386,14 +1386,14 @@ function renderHistory(){
     if(s.isCardio){
       const c=s.cardioData;
       const tc='cardio';
-      const details=[c.mins?c.mins+' min':'', c.dist?c.dist+' mi':''].filter(Boolean).join(' · ');
-      const intervals=c.intervals?.length?`${c.intervals.length} rounds · ${c.intervals[0].work}s/${c.intervals[0].rest}s`:'';
+      const details=[c.mins?c.mins+' min':'', c.dist?c.dist+' mi':''].filter(Boolean).join(' Â· ');
+      const intervals=c.intervals?.length?`${c.intervals.length} rounds Â· ${c.intervals[0].work}s/${c.intervals[0].rest}s`:'';
       return `<div class="hist-row" id="hr_${sidStr}">
         <div class="del-reveal"><span>Delete</span></div>
         <div class="hist-card" id="hc_${sidStr}">
           <div style="flex:1">
             <div class="bc" style="font-size:18px;font-weight:700;text-transform:uppercase;color:var(--cardio)">${c.label}</div>
-            <div style="font-size:12px;color:var(--t2);margin-top:3px">${details} · ${ds}</div>
+            <div style="font-size:12px;color:var(--t2);margin-top:3px">${details} Â· ${ds}</div>
             ${intervals?`<div style="font-size:11px;color:var(--t3);margin-top:3px">${intervals}</div>`:''}
           </div>
           <button class="del-ico-btn" onclick="delSession('${sidStr}')">
@@ -1410,7 +1410,7 @@ function renderHistory(){
       <div class="hist-card" id="hc_${sidStr}" onclick="viewSession(${s.sid})">
         <div style="flex:1">
           <div class="bc" style="font-size:18px;font-weight:700;text-transform:uppercase;color:${typeColor(tc)}">${s.dayName}</div>
-          <div style="font-size:12px;color:var(--t2);margin-top:3px">${s.entries.length} exercises · ${tot} sets · ${ds}</div>
+          <div style="font-size:12px;color:var(--t2);margin-top:3px">${s.entries.length} exercises Â· ${tot} sets Â· ${ds}</div>
           <div style="font-size:11px;color:var(--t3);margin-top:3px">${vol.toLocaleString()} lb total volume</div>
         </div>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3);flex-shrink:0;margin-top:2px"><path d="M9 18l6-6-6-6"/></svg>
@@ -1503,9 +1503,9 @@ function renderCalendar(){
   scroll.innerHTML=`
     <div class="card">
       <div class="cal-nav">
-        <button class="cal-nav-btn" onclick="calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderCalendar()">‹</button>
+        <button class="cal-nav-btn" onclick="calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderCalendar()">â€¹</button>
         <div class="cal-month">${monthName}</div>
-        <button class="cal-nav-btn" onclick="calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCalendar()">›</button>
+        <button class="cal-nav-btn" onclick="calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCalendar()">â€º</button>
       </div>
       <div class="cal-grid">
         ${['S','M','T','W','T','F','S'].map(d=>`<div class="cal-dow">${d}</div>`).join('')}
@@ -1576,7 +1576,7 @@ function renderPRs(prs){
     <div class="pr-row" onclick="showExTrend('${name.replace(/'/g,"\\'")}'" style="cursor:pointer;-webkit-tap-highlight-color:transparent;">
       <div>
         <div class="pr-name">${name}</div>
-        <div class="pr-muscle">${findEx(name)?.muscle||''} · tap for trend</div>
+        <div class="pr-muscle">${findEx(name)?.muscle||''} Â· tap for trend</div>
       </div>
       <div style="text-align:right;display:flex;align-items:center;gap:8px">
         <div>
@@ -1630,7 +1630,7 @@ function showExTrend(name){
   bg.innerHTML=`<div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-title">${name}</div>
-    <div class="sheet-sub">${ex?.muscle||''} · ${points.length} sessions logged</div>
+    <div class="sheet-sub">${ex?.muscle||''} Â· ${points.length} sessions logged</div>
     <div class="trend-wrap">
       <div class="trend-meta">
         <div>
@@ -1642,7 +1642,7 @@ function showExTrend(name){
         </div>`:''}
       </div>
       <div class="trend-bars">${bars||'<div class="empty" style="padding:10px">Not enough data</div>'}</div>
-      <div style="font-size:10px;color:var(--t3);margin-top:6px;text-align:center">Max weight per session · last ${recent.length} sessions</div>
+      <div style="font-size:10px;color:var(--t3);margin-top:6px;text-align:center">Max weight per session Â· last ${recent.length} sessions</div>
     </div>
     ${points.length>1?`
     <div style="margin-top:12px">
@@ -1651,7 +1651,7 @@ function showExTrend(name){
         <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--b1)">
           <div style="font-size:13px;color:var(--t2)">${p.date.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div>
           <div style="display:flex;gap:12px;align-items:center">
-            <div style="font-size:13px;font-weight:600">${p.maxW} lbs × ${p.maxR} reps</div>
+            <div style="font-size:13px;font-weight:600">${p.maxW} lbs Â· ${p.maxR} reps</div>
             ${p.maxW===allPR?'<span style="font-size:10px;background:rgba(232,255,71,.15);color:var(--acc);padding:2px 7px;border-radius:20px;font-weight:600">PR</span>':''}
           </div>
         </div>`).join('')}
@@ -1684,7 +1684,7 @@ function renderEdit(){
     <div class="edit-day-card" id="edc_${d.id}">
       <div class="edit-day-head" onclick="toggleEditDay('${d.id}')">
         <div>
-          <div class="edit-day-name bc" style="color:${typeColor(d.type)}">${d.day} — ${d.name}</div>
+          <div class="edit-day-name bc" style="color:${typeColor(d.type)}">${d.day} Â· ${d.name}</div>
           <div style="font-size:12px;color:var(--t2);margin-top:2px">${d.exercises.length} exercises</div>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
@@ -1706,7 +1706,7 @@ function renderEdit(){
               </div>
               <div style="flex:1;min-width:0">
                 <div class="ex-edit-name">${n}</div>
-                <div class="ex-edit-meta">${ex.sets}×${ex.reps} · ${ex.muscle}</div>
+                <div class="ex-edit-meta">${ex.sets}â€“${ex.reps} Â· ${ex.muscle}</div>
               </div>
               <div class="ex-edit-actions">
                 <button class="mini-btn" onclick="editExSheet('${d.id}','${n}',${i})">Edit</button>
@@ -1897,7 +1897,7 @@ function renderExPicks(){
     return `<div class="ex-pick-row">
       <div style="flex:1">
         <div class="ex-pick-name">${ex.name}</div>
-        <div class="ex-pick-muscle">${ex.muscle} · ${ex.sets}×${ex.reps}</div>
+        <div class="ex-pick-muscle">${ex.muscle} Â· ${ex.sets}â€“${ex.reps}</div>
       </div>
       ${already
         ? '<span style="font-size:11px;color:var(--t3)">Added</span>'
@@ -1919,7 +1919,7 @@ function addCustomEx(){
   const name=(eid('custom-ex-name')?.value||'').trim(); if(!name)return;
   const day=program.find(d=>d.id===addExToDay); if(!day)return;
   // Add to library under arms as misc
-  EXERCISE_LIBRARY.arms.push({name,muscle:'Custom',sets:3,reps:'10–12',rest:90,search:name+' form'});
+  EXERCISE_LIBRARY.arms.push({name,muscle:'Custom',sets:3,reps:'10â€“12',rest:90,search:name+' form'});
   if(!day.exercises.includes(name)) day.exercises.push(name);
   saveProg(); closeSheets(); renderEdit(); renderHome();
 }
@@ -1979,7 +1979,7 @@ renderHome();
   </div>
   <div style="flex:1;min-width:0;">
     <div style="font-size:14px;font-weight:500;line-height:1.3;">20 Min Full Body HIIT</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">Sydney Cummings · 20 min</div>
+    <div style="font-size:11px;color:#888;margin-top:3px;">Sydney Cummings Â· 20 min</div>
   </div>
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
 </div>
@@ -1988,8 +1988,8 @@ renderHome();
     <svg width="14" height="14" viewBox="0 0 24 24" fill="#ff4747"><polygon points="5 3 19 12 5 21 5 3"/></svg>
   </div>
   <div style="flex:1;min-width:0;">
-    <div style="font-size:14px;font-weight:500;line-height:1.3;">30 Min HIIT – No Equipment</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">MadFit · 30 min</div>
+    <div style="font-size:14px;font-weight:500;line-height:1.3;">30 Min HIIT Â· No Equipment</div>
+    <div style="font-size:11px;color:#888;margin-top:3px;">MadFit Â· 30 min</div>
   </div>
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
 </div>
@@ -1998,8 +1998,8 @@ renderHome();
     <svg width="14" height="14" viewBox="0 0 24 24" fill="#ff4747"><polygon points="5 3 19 12 5 21 5 3"/></svg>
   </div>
   <div style="flex:1;min-width:0;">
-    <div style="font-size:14px;font-weight:500;line-height:1.3;">20 Min HIIT – Fat Burning</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">Heather Robertson · 20 min</div>
+    <div style="font-size:14px;font-weight:500;line-height:1.3;">20 Min HIIT Â· Fat Burning</div>
+    <div style="font-size:11px;color:#888;margin-top:3px;">Heather Robertson Â· 20 min</div>
   </div>
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
 </div>
@@ -2010,7 +2010,7 @@ renderHome();
   </div>
   <div style="flex:1;min-width:0;">
     <div style="font-size:14px;font-weight:500;line-height:1.3;">45 Min Indoor Cycling</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">GCN Training · 45 min</div>
+    <div style="font-size:11px;color:#888;margin-top:3px;">GCN Training Â· 45 min</div>
   </div>
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
 </div>
@@ -2020,7 +2020,7 @@ renderHome();
   </div>
   <div style="flex:1;min-width:0;">
     <div style="font-size:14px;font-weight:500;line-height:1.3;">30 Min Cycling Intervals</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">GCN Training · 30 min</div>
+    <div style="font-size:11px;color:#888;margin-top:3px;">GCN Training Â· 30 min</div>
   </div>
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
 </div>
@@ -2030,7 +2030,7 @@ renderHome();
   </div>
   <div style="flex:1;min-width:0;">
     <div style="font-size:14px;font-weight:500;line-height:1.3;">30 Min Indoor Cycling HIIT</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">GCN · 30 min</div>
+    <div style="font-size:11px;color:#888;margin-top:3px;">GCN Â· 30 min</div>
   </div>
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
 </div>
@@ -2040,7 +2040,7 @@ renderHome();
   </div>
   <div style="flex:1;min-width:0;">
     <div style="font-size:14px;font-weight:500;line-height:1.3;">60 Min Endurance Ride</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">Cycling Weekly · 60 min</div>
+    <div style="font-size:11px;color:#888;margin-top:3px;">Cycling Weekly Â· 60 min</div>
   </div>
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
 </div>
@@ -2050,8 +2050,8 @@ renderHome();
     <svg width="14" height="14" viewBox="0 0 24 24" fill="#ffb347"><polygon points="5 3 19 12 5 21 5 3"/></svg>
   </div>
   <div style="flex:1;min-width:0;">
-    <div style="font-size:14px;font-weight:500;line-height:1.3;">30 Min Treadmill Run – Guided</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">Sydney Cummings · 30 min</div>
+    <div style="font-size:14px;font-weight:500;line-height:1.3;">30 Min Treadmill Run Â· Guided</div>
+    <div style="font-size:11px;color:#888;margin-top:3px;">Sydney Cummings Â· 30 min</div>
   </div>
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
 </div>
@@ -2060,8 +2060,8 @@ renderHome();
     <svg width="14" height="14" viewBox="0 0 24 24" fill="#ffb347"><polygon points="5 3 19 12 5 21 5 3"/></svg>
   </div>
   <div style="flex:1;min-width:0;">
-    <div style="font-size:14px;font-weight:500;line-height:1.3;">5K Training – Guided Run</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">The Run Experience · 30 min</div>
+    <div style="font-size:14px;font-weight:500;line-height:1.3;">5K Training Â· Guided Run</div>
+    <div style="font-size:11px;color:#888;margin-top:3px;">The Run Experience Â· 30 min</div>
   </div>
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
 </div>
@@ -2071,8 +2071,8 @@ renderHome();
     <svg width="14" height="14" viewBox="0 0 24 24" fill="#b47fff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
   </div>
   <div style="flex:1;min-width:0;">
-    <div style="font-size:14px;font-weight:500;line-height:1.3;">Yoga for Beginners – 20 Min</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">Yoga with Adriene · 20 min</div>
+    <div style="font-size:14px;font-weight:500;line-height:1.3;">Yoga for Beginners Â· 20 Min</div>
+    <div style="font-size:11px;color:#888;margin-top:3px;">Yoga with Adriene Â· 20 min</div>
   </div>
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
 </div>
@@ -2082,7 +2082,7 @@ renderHome();
   </div>
   <div style="flex:1;min-width:0;">
     <div style="font-size:14px;font-weight:500;line-height:1.3;">30 Min Full Body Yoga Flow</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">Yoga with Adriene · 30 min</div>
+    <div style="font-size:11px;color:#888;margin-top:3px;">Yoga with Adriene Â· 30 min</div>
   </div>
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
 </div>
@@ -2091,8 +2091,8 @@ renderHome();
     <svg width="14" height="14" viewBox="0 0 24 24" fill="#b47fff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
   </div>
   <div style="flex:1;min-width:0;">
-    <div style="font-size:14px;font-weight:500;line-height:1.3;">Yoga for Athletes – Recovery</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">Yoga with Adriene · 30 min</div>
+    <div style="font-size:14px;font-weight:500;line-height:1.3;">Yoga for Athletes Â· Recovery</div>
+    <div style="font-size:11px;color:#888;margin-top:3px;">Yoga with Adriene Â· 30 min</div>
   </div>
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
 </div>
@@ -2102,8 +2102,8 @@ renderHome();
     <svg width="14" height="14" viewBox="0 0 24 24" fill="#47ff8a"><polygon points="5 3 19 12 5 21 5 3"/></svg>
   </div>
   <div style="flex:1;min-width:0;">
-    <div style="font-size:14px;font-weight:500;line-height:1.3;">6 Pack Abs – 10 Min</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">Athlean-X · 10 min</div>
+    <div style="font-size:14px;font-weight:500;line-height:1.3;">6 Pack Abs Â· 10 Min</div>
+    <div style="font-size:11px;color:#888;margin-top:3px;">Athlean-X Â· 10 min</div>
   </div>
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
 </div>
@@ -2112,8 +2112,8 @@ renderHome();
     <svg width="14" height="14" viewBox="0 0 24 24" fill="#47ff8a"><polygon points="5 3 19 12 5 21 5 3"/></svg>
   </div>
   <div style="flex:1;min-width:0;">
-    <div style="font-size:14px;font-weight:500;line-height:1.3;">10 Min Abs – No Equipment</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">MadFit · 10 min</div>
+    <div style="font-size:14px;font-weight:500;line-height:1.3;">10 Min Abs Â· No Equipment</div>
+    <div style="font-size:11px;color:#888;margin-top:3px;">MadFit Â· 10 min</div>
   </div>
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
 </div>
@@ -2123,8 +2123,8 @@ renderHome();
     <svg width="14" height="14" viewBox="0 0 24 24" fill="#e8ff47"><polygon points="5 3 19 12 5 21 5 3"/></svg>
   </div>
   <div style="flex:1;min-width:0;">
-    <div style="font-size:14px;font-weight:500;line-height:1.3;">30 Min Full Body – No Equipment</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">Heather Robertson · 30 min</div>
+    <div style="font-size:14px;font-weight:500;line-height:1.3;">30 Min Full Body Â· No Equipment</div>
+    <div style="font-size:11px;color:#888;margin-top:3px;">Heather Robertson Â· 30 min</div>
   </div>
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
 </div>
@@ -2134,12 +2134,12 @@ renderHome();
   </div>
   <div style="flex:1;min-width:0;">
     <div style="font-size:14px;font-weight:500;line-height:1.3;">20 Min Full Body Workout</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">MadFit · 20 min</div>
+    <div style="font-size:11px;color:#888;margin-top:3px;">MadFit Â· 20 min</div>
   </div>
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
 </div>
   </div>
-  <div style="display:flex;background:#141414;border-top:1px solid rgba(255,255,255,0.07);padding:6px 0;flex-shrink:0;"><button class="nb" onclick="nav('home',this)" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;background:none;border:none;cursor:pointer;color:#4a4a4a;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span style="font-size:9px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;">Home</span></button><button class="nb" onclick="nav('history',this)" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;background:none;border:none;cursor:pointer;color:#4a4a4a;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span style="font-size:9px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;">History</span></button><button class="nb" onclick="nav('calendar',this)" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;background:none;border:none;cursor:pointer;color:#4a4a4a;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span style="font-size:9px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;">Calendar</span></button><button class="nb" onclick="nav('progress',this)" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;background:none;border:none;cursor:pointer;color:#4a4a4a;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span style="font-size:9px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;">Progress</span></button><button class="nb on" onclick="nav('videos',this)" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;background:none;border:none;cursor:pointer;color:#e8ff47;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px"><polygon points="5 3 19 12 5 21 5 3"/></svg><span style="font-size:9px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;">Play</span></button></div>
+  <div style="display:flex;background:#141414;border-top:1px solid rgba(255,255,255,0.07);padding:6px 0;flex-shrink:0;"><button class="nb" onclick="nav('home',this)" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;background:none;border:none;cursor:pointer;color:#4a4a4a;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span style="font-size:9px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;">Home</span></button><button class="nb" onclick="nav('history',this)" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;background:none;border:none;cursor:pointer;color:#4a4a4a;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span style="font-size:9px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;">History</span></button><button class="nb" onclick="nav('calendar',this)" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;background:none;border:none;cursor:pointer;color:#4a4a4a;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span style="font-size:9px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;">Calendar</span></button><button class="nb" onclick="nav('progress',this)" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;background:none;border:none;cursor:pointer;color:#4a4a4a;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span style="font-size:9px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;">Progress</span></button><button class="nb" onclick="nav('edit',this)" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;background:none;border:none;cursor:pointer;color:#4a4a4a;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span style="font-size:9px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;">Edit</span></button><button class="nb on" onclick="nav('videos',this)" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;background:none;border:none;cursor:pointer;color:#e8ff47;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px"><polygon points="5 3 19 12 5 21 5 3"/></svg><span style="font-size:9px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;">Play</span></button></div>
 </div>
 
 </body>
