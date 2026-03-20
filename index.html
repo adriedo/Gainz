@@ -6,9 +6,35 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0a0a0a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Gainz">
+<meta name="application-name" content="Gainz">
+<!-- PWA Manifest (inline data URI so single-file works) -->
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Gainz%22%2C%22short_name%22%3A%22Gainz%22%2C%22description%22%3A%22Your%20personal%20workout%20tracker%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230a0a0a%22%2C%22theme_color%22%3A%22%230a0a0a%22%2C%22orientation%22%3A%22portrait%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%2520viewBox%3D'0%25200%2520512%2520512'%253E%253Crect%2520width%3D'512'%2520height%3D'512'%2520rx%3D'112'%2520fill%3D'%25230a0a0a'%2F%253E%253Ctext%2520x%3D'256'%2520y%3D'340'%2520text-anchor%3D'middle'%2520font-size%3D'280'%2520fill%3D'%2523e8ff47'%253E%25F0%259F%2592%25AA%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
+<!-- Apple Touch Icon -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20512%20512'%3E%3Crect%20width%3D'512'%20height%3D'512'%20rx%3D'112'%20fill%3D'%230a0a0a'%2F%3E%3Ctext%20x%3D'256'%20y%3D'360'%20text-anchor%3D'middle'%20font-size%3D'300'%20fill%3D'%23e8ff47'%3E%F0%9F%92%AA%3C%2Ftext%3E%3C%2Fsvg%3E">
 <title>Gainz</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
+/* ─── PWA INSTALL BANNER ─────────────────────────────────────────────────── */
+#pwa-banner{
+  position:fixed;bottom:88px;left:50%;transform:translateX(-50%);
+  background:#1a1a1a;border:1px solid rgba(232,255,71,.35);
+  border-radius:16px;padding:13px 14px;
+  display:none;align-items:center;gap:11px;
+  z-index:9999;box-shadow:0 8px 40px rgba(0,0,0,.7);
+  max-width:370px;width:calc(100% - 28px);
+  animation:pwaSlideUp .3s ease;
+}
+@keyframes pwaSlideUp{from{opacity:0;transform:translateX(-50%) translateY(18px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+#pwa-banner .pi{font-size:26px;flex-shrink:0;line-height:1;}
+#pwa-banner .pt{flex:1;min-width:0;}
+#pwa-banner .pt-h{font-size:13px;font-weight:600;color:#f0f0f0;white-space:nowrap;}
+#pwa-banner .pt-s{font-size:11px;color:#888;margin-top:2px;line-height:1.4;}
+#pwa-banner .pb{padding:8px 13px;background:#e8ff47;color:#000;border:none;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;flex-shrink:0;}
+#pwa-banner .px{width:26px;height:26px;background:none;border:none;color:#555;cursor:pointer;font-size:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;}
+#pwa-banner .px:hover{color:#888;}
+
 :root{
   --bg:#0a0a0a;--s1:#141414;--s2:#1e1e1e;--s3:#282828;
   --b1:rgba(255,255,255,0.07);--b2:rgba(255,255,255,0.13);--b3:rgba(255,255,255,0.22);
@@ -100,28 +126,24 @@ label{font-size:12px;color:var(--t2);display:block;margin-bottom:5px;}
 /* SVG ILLUSTRATION */
 .ex-illo{width:100%;height:160px;background:var(--s2);border-radius:12px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
 .ex-illo svg{width:100%;height:100%;}
-/* SET ROWS · prev / target / actual */
+/* SET ROWS */
 .set-head{display:grid;grid-template-columns:22px 1fr 1fr 1fr 36px;gap:4px;margin-bottom:6px;}
 .sh-lbl{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;text-align:center;font-weight:500;}
 .set-row{display:grid;grid-template-columns:22px 1fr 1fr 1fr 36px;gap:4px;align-items:center;margin-bottom:8px;padding:6px 8px;border-radius:10px;background:var(--s2);}
 .set-row.set-done{background:rgba(71,255,138,0.06);border:1px solid rgba(71,255,138,0.15);}
 .set-n{font-size:12px;color:var(--t2);font-weight:600;text-align:center;}
-/* prev cell */
 .set-prev{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;}
 .set-prev-w{font-size:13px;font-weight:600;color:var(--t2);}
 .set-prev-r{font-size:10px;color:var(--t3);}
-/* target cell */
 .set-tgt{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;}
 .set-tgt-w{font-size:13px;font-weight:600;color:var(--acc);opacity:.7;}
 .set-tgt-r{font-size:10px;color:var(--t3);}
-/* actual inputs */
 .set-actual{display:flex;flex-direction:column;gap:3px;}
 .si-w{width:100%;padding:5px 4px;background:var(--s3);border:1px solid var(--b2);border-radius:7px;color:var(--t1);font-size:14px;font-weight:600;text-align:center;-webkit-appearance:none;font-family:'DM Sans',sans-serif;}
 .si-r{width:100%;padding:5px 4px;background:var(--s3);border:1px solid var(--b2);border-radius:7px;color:var(--t1);font-size:14px;font-weight:600;text-align:center;-webkit-appearance:none;font-family:'DM Sans',sans-serif;}
 .si-w:focus,.si-r:focus{outline:none;border-color:var(--acc);}
 .chk{width:36px;height:36px;border-radius:50%;border:2px solid var(--b2);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--t3);flex-shrink:0;}
 .chk.done{background:var(--grn);border-color:var(--grn);color:#000;}
-/* target hit banner */
 .target-banner{display:flex;align-items:center;gap:6px;padding:8px 10px;border-radius:8px;margin-bottom:10px;font-size:12px;font-weight:500;}
 .target-banner.up{background:rgba(71,255,138,0.1);color:var(--grn);}
 .target-banner.same{background:rgba(232,255,71,0.08);color:var(--acc);}
@@ -179,7 +201,6 @@ label{font-size:12px;color:var(--t2);display:block;margin-bottom:5px;}
 .edit-day-name{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;text-transform:uppercase;}
 .edit-day-body{display:none;padding:0 16px 14px;}
 .edit-day-body.open{display:block;}
-/* ex-edit-row defined in DRAG REORDER section */
 .ex-edit-name{font-size:14px;font-weight:500;}
 .ex-edit-meta{font-size:12px;color:var(--t2);margin-top:2px;}
 .ex-edit-actions{display:flex;gap:6px;}
@@ -265,7 +286,7 @@ label{font-size:12px;color:var(--t2);display:block;margin-bottom:5px;}
 .sess-set-n{font-size:11px;color:var(--t3);width:18px;}
 .sess-set-data{font-size:13px;color:var(--t2);}
 .sess-set-data b{color:var(--t1);}
-/* PROGRESS REDESIGN */
+/* PROGRESS */
 .prog-tab-row{display:flex;gap:6px;margin-bottom:16px;}
 .prog-tab{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--b2);background:none;color:var(--t2);font-family:'DM Sans',sans-serif;}
 .prog-tab.on{background:var(--acc);color:#000;border-color:var(--acc);}
@@ -287,28 +308,7 @@ label{font-size:12px;color:var(--t2);display:block;margin-bottom:5px;}
 .discard-btn{padding:10px 16px;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;border:1px solid rgba(255,71,71,.3);background:none;color:var(--red);margin-top:8px;width:100%;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .fu{animation:fadeUp .22s ease;}
-
-/* 6-TAB NAV - smaller text */
 .nb span{font-size:9px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;}
-/* VIDEO CARDS */
-.vid-section-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin:18px 0 10px;}
-.vid-section-lbl:first-child{margin-top:0;}
-.vid-card{background:var(--s1);border:1px solid var(--b1);border-radius:14px;overflow:hidden;margin-bottom:10px;cursor:pointer;transition:transform .12s;}
-.vid-card:active{transform:scale(.97);}
-.vid-thumb{width:100%;height:160px;object-fit:cover;background:var(--s2);display:block;}
-.vid-thumb-placeholder{width:100%;height:160px;background:var(--s2);display:flex;align-items:center;justify-content:center;position:relative;}
-.vid-play-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
-.vid-play-btn{width:52px;height:52px;border-radius:50%;background:rgba(232,255,71,.9);display:flex;align-items:center;justify-content:center;}
-.vid-info{padding:12px 14px;}
-.vid-title{font-size:14px;font-weight:600;line-height:1.4;margin-bottom:4px;}
-.vid-meta{font-size:11px;color:var(--t2);display:flex;align-items:center;gap:8px;}
-.vid-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;}
-.vb-hiit{background:rgba(255,71,71,.15);color:#ff4747;}
-.vb-bike{background:rgba(71,180,255,.15);color:#47b4ff;}
-.vb-yoga{background:rgba(180,127,255,.15);color:#b47fff;}
-.vb-core{background:rgba(71,255,138,.15);color:#47ff8a;}
-.vb-run{background:rgba(255,179,71,.15);color:#ffb347;}
-.vb-full{background:rgba(232,255,71,.15);color:#e8ff47;}
 /* INTERVAL BUILDER */
 .interval-builder{background:var(--s2);border-radius:12px;padding:12px;margin-top:10px;}
 .interval-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
@@ -319,8 +319,7 @@ label{font-size:12px;color:var(--t2);display:block;margin-bottom:5px;}
 .del-interval-btn{width:28px;height:28px;border-radius:50%;background:rgba(255,71,71,.15);border:none;color:var(--red);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
 .add-interval-btn{width:100%;padding:9px;border-radius:9px;background:none;border:1px solid var(--b2);color:var(--t2);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;margin-bottom:10px;}
 .interval-summary{font-size:12px;color:var(--t3);margin-bottom:8px;}
-
-/* VIDEO LINK ROWS */
+/* VIDEO LINKS */
 .vid-link{display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:13px 14px;margin-bottom:8px;text-decoration:none;color:var(--t1);transition:transform .12s;cursor:pointer;}
 .vid-link:active{transform:scale(.97);}
 .vid-link-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
@@ -330,6 +329,18 @@ label{font-size:12px;color:var(--t2);display:block;margin-bottom:5px;}
 </style>
 </head>
 <body>
+
+<!-- PWA Install Banner -->
+<div id="pwa-banner">
+  <div class="pi">💪</div>
+  <div class="pt">
+    <div class="pt-h">Add Gainz to Home Screen</div>
+    <div class="pt-s" id="pwa-sub">Install for offline access &amp; full-screen</div>
+  </div>
+  <button class="pb" id="pwa-install-btn">Install</button>
+  <button class="px" id="pwa-close-btn">×</button>
+</div>
+
 <div id="app">
 
 <!-- HOME -->
@@ -349,7 +360,7 @@ label{font-size:12px;color:var(--t2);display:block;margin-bottom:5px;}
     <button class="nb" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Calendar</span></button>
     <button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button>
     <button class="nb" onclick="nav('edit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span>Edit</span></button>
-  <button class="nb" onclick="nav('videos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Play</span></button>
+    <button class="nb" onclick="nav('videos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Play</span></button>
   </div>
 </div>
 
@@ -383,7 +394,7 @@ label{font-size:12px;color:var(--t2);display:block;margin-bottom:5px;}
     <button class="nb" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Calendar</span></button>
     <button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button>
     <button class="nb" onclick="nav('edit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span>Edit</span></button>
-  <button class="nb" onclick="nav('videos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Play</span></button>
+    <button class="nb" onclick="nav('videos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Play</span></button>
   </div>
 </div>
 
@@ -400,7 +411,7 @@ label{font-size:12px;color:var(--t2);display:block;margin-bottom:5px;}
     <button class="nb on" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Calendar</span></button>
     <button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button>
     <button class="nb" onclick="nav('edit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span>Edit</span></button>
-  <button class="nb" onclick="nav('videos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Play</span></button>
+    <button class="nb" onclick="nav('videos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Play</span></button>
   </div>
 </div>
 
@@ -417,7 +428,7 @@ label{font-size:12px;color:var(--t2);display:block;margin-bottom:5px;}
     <button class="nb" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Calendar</span></button>
     <button class="nb on" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button>
     <button class="nb" onclick="nav('edit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span>Edit</span></button>
-  <button class="nb" onclick="nav('videos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Play</span></button>
+    <button class="nb" onclick="nav('videos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Play</span></button>
   </div>
 </div>
 
@@ -437,13 +448,103 @@ label{font-size:12px;color:var(--t2);display:block;margin-bottom:5px;}
     <button class="nb" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Calendar</span></button>
     <button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button>
     <button class="nb on" onclick="nav('edit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span>Edit</span></button>
-  <button class="nb" onclick="nav('videos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Play</span></button>
+    <button class="nb" onclick="nav('videos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Play</span></button>
+  </div>
+</div>
+
+<!-- VIDEOS SCREEN -->
+<div id="s-videos" class="scr" style="background:#0a0a0a;">
+  <div style="padding:20px 16px 8px;flex-shrink:0;">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:800;text-transform:uppercase;color:#f0f0f0;">Play</div>
+    <div style="font-size:13px;color:#888;margin-top:2px;">Follow-along workouts</div>
+  </div>
+  <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 16px 32px;">
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:#4a4a4a;margin:18px 0 10px;">HIIT</div>
+    <div onclick="window.open('https://www.youtube.com/watch?v=Jpxc0TUr9BI&t=1800s')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#ff4747"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">20 Min Full Body HIIT</div><div style="font-size:11px;color:#888;margin-top:3px;">Sydney Cummings · 20 min</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    <div onclick="window.open('https://www.youtube.com/watch?v=4nPKyvKmFi0')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#ff4747"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">30 Min HIIT – No Equipment</div><div style="font-size:11px;color:#888;margin-top:3px;">MadFit · 30 min</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    <div onclick="window.open('https://www.youtube.com/watch?v=ml6cT4AZdqI')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#ff4747"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">20 Min HIIT – Fat Burning</div><div style="font-size:11px;color:#888;margin-top:3px;">Heather Robertson · 20 min</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:#4a4a4a;margin:18px 0 10px;">Bike</div>
+    <div onclick="window.open('https://www.youtube.com/watch?v=ZMO_XC9w7Lw&t=1277s')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#47b4ff"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">45 Min Indoor Cycling</div><div style="font-size:11px;color:#888;margin-top:3px;">GCN Training · 45 min</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    <div onclick="window.open('https://www.youtube.com/watch?v=kPl66RocFDo')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#47b4ff"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">30 Min Cycling Intervals</div><div style="font-size:11px;color:#888;margin-top:3px;">GCN Training · 30 min</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    <div onclick="window.open('https://www.youtube.com/watch?v=ZiGE3-L4vyg')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#47b4ff"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">30 Min Indoor Cycling HIIT</div><div style="font-size:11px;color:#888;margin-top:3px;">GCN · 30 min</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    <div onclick="window.open('https://www.youtube.com/watch?v=wBurKQX7h4Q')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#47b4ff"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">60 Min Endurance Ride</div><div style="font-size:11px;color:#888;margin-top:3px;">Cycling Weekly · 60 min</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:#4a4a4a;margin:18px 0 10px;">Run</div>
+    <div onclick="window.open('https://www.youtube.com/watch?v=vDKnTjpccf4')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#ffb347"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">30 Min Treadmill Run – Guided</div><div style="font-size:11px;color:#888;margin-top:3px;">Sydney Cummings · 30 min</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    <div onclick="window.open('https://www.youtube.com/watch?v=0_qUOTkGSRA')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#ffb347"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">5K Training – Guided Run</div><div style="font-size:11px;color:#888;margin-top:3px;">The Run Experience · 30 min</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:#4a4a4a;margin:18px 0 10px;">Yoga</div>
+    <div onclick="window.open('https://www.youtube.com/watch?v=v7AYKMP6rOE')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#b47fff"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">Yoga for Beginners – 20 Min</div><div style="font-size:11px;color:#888;margin-top:3px;">Yoga with Adriene · 20 min</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    <div onclick="window.open('https://www.youtube.com/watch?v=oBu-pQG6sTY')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#b47fff"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">30 Min Full Body Yoga Flow</div><div style="font-size:11px;color:#888;margin-top:3px;">Yoga with Adriene · 30 min</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    <div onclick="window.open('https://www.youtube.com/watch?v=VpW33Celubg')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#b47fff"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">Yoga for Athletes – Recovery</div><div style="font-size:11px;color:#888;margin-top:3px;">Yoga with Adriene · 30 min</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:#4a4a4a;margin:18px 0 10px;">Core &amp; Abs</div>
+    <div onclick="window.open('https://www.youtube.com/watch?v=jDwoBqPH0jk')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#47ff8a"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">6 Pack Abs – 10 Min</div><div style="font-size:11px;color:#888;margin-top:3px;">Athlean-X · 10 min</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    <div onclick="window.open('https://www.youtube.com/watch?v=1f8yoFFdkcY')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#47ff8a"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">10 Min Abs – No Equipment</div><div style="font-size:11px;color:#888;margin-top:3px;">MadFit · 10 min</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:#4a4a4a;margin:18px 0 10px;">Full Body</div>
+    <div onclick="window.open('https://www.youtube.com/watch?v=UBMk30rjy0o')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#e8ff47"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">30 Min Full Body – No Equipment</div><div style="font-size:11px;color:#888;margin-top:3px;">Heather Robertson · 30 min</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    <div onclick="window.open('https://www.youtube.com/watch?v=9UO-OOAiSWk')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#e8ff47"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">20 Min Full Body Workout</div><div style="font-size:11px;color:#888;margin-top:3px;">MadFit · 20 min</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+  </div>
+  <div class="nav">
+    <button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button>
+    <button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span>History</span></button>
+    <button class="nb" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Calendar</span></button>
+    <button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button>
+    <button class="nb" onclick="nav('edit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span>Edit</span></button>
+    <button class="nb on" onclick="nav('videos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Play</span></button>
   </div>
 </div>
 
 </div><!-- #app -->
+
 <script>
-// ??? EXERCISE LIBRARY ?????????????????????????????????????????????????????????
+// Service worker omitted — blob/data URI registration is blocked by browsers
+// (SecurityError). The PWA install banner works without a SW. All data lives
+// in localStorage so the app works fully offline once loaded.
+
+// ─── PWA: Install prompt logic ────────────────────────────────────────────────
+(function(){
+  const banner  = document.getElementById('pwa-banner');
+  const btn     = document.getElementById('pwa-install-btn');
+  const closeX  = document.getElementById('pwa-close-btn');
+  const sub     = document.getElementById('pwa-sub');
+  const DISMISS = 'gainz_pwa_dismissed';
+
+  function hideBanner(){ if(banner) banner.style.display='none'; }
+  function showBanner(){ if(banner && !localStorage.getItem(DISMISS)) banner.style.display='flex'; }
+
+  // Already installed → never show
+  if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone){ return; }
+
+  closeX?.addEventListener('click', () => { hideBanner(); localStorage.setItem(DISMISS,'1'); });
+
+  // Android / Chrome — beforeinstallprompt
+  let deferred = null;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferred = e;
+    showBanner();
+  });
+  btn?.addEventListener('click', async () => {
+    if(deferred){
+      deferred.prompt();
+      const {outcome} = await deferred.userChoice;
+      deferred = null;
+      hideBanner();
+      if(outcome === 'accepted') localStorage.setItem(DISMISS,'1');
+    }
+  });
+
+  // iOS Safari — manual instructions
+  const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isSafari = /safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent);
+  if(isIos && isSafari){
+    if(sub)  sub.innerHTML = 'Tap <strong style="color:#e8ff47">Share ↑</strong> then <strong style="color:#e8ff47">"Add to Home Screen"</strong>';
+    if(btn){ btn.textContent = 'Got it'; btn.onclick = () => { hideBanner(); localStorage.setItem(DISMISS,'1'); }; }
+    showBanner();
+  }
+})();
+</script>
+
+<script>
+// ─── EXERCISE LIBRARY ─────────────────────────────────────────────────────────
 const EXERCISE_LIBRARY = {
   chest:[
     {name:'Smith Machine Bench Press',      muscle:'Chest',         sets:4,reps:'8–10',  rest:120, search:'smith machine bench press form'},
@@ -509,199 +610,123 @@ const EXERCISE_LIBRARY = {
   ],
 };
 
-// Form cues per exercise
 const CUES = {
   'Smith Machine Bench Press':        ['Retract scapula, slight natural arch','Bar touches lower chest','Drive feet into the floor','2–3 sec controlled descent'],
-  'Smith Machine Incline Press':      ['30–45– incline angle','Elbows ~45– from torso, not flared','Full stretch at the bottom','Squeeze chest hard at the top'],
+  'Smith Machine Incline Press':      ['30–45° incline angle','Elbows ~45° from torso, not flared','Full stretch at the bottom','Squeeze chest hard at the top'],
   'Smith Machine Close-Grip Bench':   ['Hands shoulder-width or slightly inside','Elbows tucked close to body','Full lockout at top','Slow 3 sec descent'],
-  'Cable Crossover':                  ['Slight forward lean','Constant tension through full arc','Squeeze chest at center','Slow return · don\'t let weight jerk back'],
+  'Cable Crossover':                  ['Slight forward lean','Constant tension through full arc','Squeeze chest at center','Slow return — don\'t let weight jerk back'],
   'Smith Machine Overhead Press':     ['Brace core before every rep','Press straight up, not forward','Full lockout at top','No lower back arch'],
   'Lateral Raises':                   ['Slight forward lean for better stimulus','Lead with elbows, not wrists','3 sec slow descent','Lighter than you think'],
-  'Face Pulls':                       ['Pull to eye level or slightly above','Externally rotate at end · thumbs back','Light weight, perfect form every rep','Non-negotiable for shoulder health'],
+  'Face Pulls':                       ['Pull to eye level or slightly above','Externally rotate at end — thumbs back','Light weight, perfect form every rep','Non-negotiable for shoulder health'],
   'Tricep Pushdowns':                 ['Elbows glued to sides throughout','Full extension at the bottom','Pause and squeeze 1 sec','Absolutely no swinging'],
   'Cable Crunch':                     ['Hinge at hips, not neck','Pull elbows toward knees','Round your spine fully','Slow and controlled back up'],
   'Cable Lat Pulldown':               ['Slight lean back, stay stable','Pull to upper chest','Arms fully extend at top','Think elbows to back pockets'],
-  'Smith Machine Bent-Over Row':      ['Hinge to about 45–','Pull to lower chest / upper abs','Squeeze shoulder blades hard at top','Control the descent slowly'],
+  'Smith Machine Bent-Over Row':      ['Hinge to about 45°','Pull to lower chest / upper abs','Squeeze shoulder blades hard at top','Control the descent slowly'],
   'Single Arm DB Row':                ['Flat back, supported on bench','Pull elbow straight back','Squeeze lat at top','Full stretch at the bottom'],
   'Cable Straight-Arm Pulldown':      ['Arms nearly straight throughout','Hinge slightly forward','Pull from overhead to hips','Focus on feeling your lats'],
   'Dumbbell Curl':                    ['No body swinging','Supinate (rotate palm up) at top','Full stretch at the bottom','Squeeze hard at the top'],
   'Hammer Curls':                     ['Neutral grip throughout','Targets brachialis for arm thickness','Elbows pinned to sides','Controlled descent'],
-  'Cable Curl 21s':                   ['7 reps bottom to mid, 7 mid to top, 7 full range','Constant tension from cable','No swinging · strict form','Burns, but worth it'],
-  'Ab Wheel':                         ['Brace core before you roll','Keep lower back flat · don\'t hyperextend','Roll as far as you can control','Slow and deliberate return'],
+  'Cable Curl 21s':                   ['7 reps bottom to mid, 7 mid to top, 7 full range','Constant tension from cable','No swinging — strict form','Burns, but worth it'],
+  'Ab Wheel':                         ['Brace core before you roll','Keep lower back flat — don\'t hyperextend','Roll as far as you can control','Slow and deliberate return'],
   'Smith Machine Squat':              ['Feet slightly forward of bar on Smith','Knees track over toes','Break parallel','Drive through heels, chest stays up'],
-  'Smith Machine Romanian Deadlift':  ['Push hips back · it\'s a hip hinge','Feel hamstring stretch at bottom','Soft knee bend, not a full bend','Bar stays close to legs'],
-  'Smith Machine Hip Thrust':         ['Upper back on bench, bar across hip crease','Drive through heels','Full hip extension at top · squeeze glutes hard','Chin tucked, core braced'],
+  'Smith Machine Romanian Deadlift':  ['Push hips back — it\'s a hip hinge','Feel hamstring stretch at bottom','Soft knee bend, not a full bend','Bar stays close to legs'],
+  'Smith Machine Hip Thrust':         ['Upper back on bench, bar across hip crease','Drive through heels','Full hip extension at top — squeeze glutes hard','Chin tucked, core braced'],
   'Smith Machine Reverse Lunge':      ['Step back, not forward','Back knee drops near floor','Front knee stays over toes','Torso stays upright'],
-  'Standing Calf Raise (Smith)':      ['Full range · heel below platform at bottom','Pause and squeeze hard at top','Mix slow and explosive sets','Heavy and controlled beats light and bouncy'],
-  'Leg Extension (Machine)':          ['Pause at full extension 1 sec','Slow controlled descent · 3 sec','Don\'t let weight slam at bottom','Toes slightly out'],
-  'Face Pulls':                       ['Pull to eye level or above','Externally rotate at end','Light weight every time','Key for shoulder longevity'],
-  'Plank':                            ['Neutral spine · no sagging hips','Squeeze glutes and abs','Breathe steadily','Quality tension beats time'],
+  'Standing Calf Raise (Smith)':      ['Full range — heel below platform at bottom','Pause and squeeze hard at top','Mix slow and explosive sets','Heavy and controlled beats light and bouncy'],
+  'Leg Extension (Machine)':          ['Pause at full extension 1 sec','Slow controlled descent — 3 sec','Don\'t let weight slam at bottom','Toes slightly out'],
+  'Plank':                            ['Neutral spine — no sagging hips','Squeeze glutes and abs','Breathe steadily','Quality tension beats time'],
   'Hanging Knee Raises':              ['No swinging','Tuck pelvis at top for more activation','Slow controlled descent','Progress to straight legs'],
-  'Dead Bug':                         ['Low back flat to floor the whole time','Opposite arm + leg extend together','Exhale on extension','Go slow · control over speed'],
+  'Dead Bug':                         ['Low back flat to floor the whole time','Opposite arm + leg extend together','Exhale on extension','Go slow — control over speed'],
   'Pull-Ups':                         ['Full dead hang at bottom','Chin clears bar at top','3 sec controlled negative','Add weight when 10+ is easy'],
   'Dips':                             ['Slight lean = more chest','Upright = more triceps','Full extension at top','Shoulder below elbow at bottom'],
   'Bulgarian Split Squat':            ['Rear foot elevated on bench','Front knee stays over toes','Torso stays upright','Go lighter than you expect'],
-  'Cable Fly':                        ['Constant slight elbow bend','Big arc motion · hug a barrel','Squeeze chest at center','Slow stretch back out'],
+  'Cable Fly':                        ['Constant slight elbow bend','Big arc motion — hug a barrel','Squeeze chest at center','Slow stretch back out'],
   'Rear Delt Fly':                    ['Hinge forward or use incline bench','Lead with elbows wide','Squeeze rear delts at top','Light weight, high reps'],
 };
 
-
-// ??? MUSCLE ANATOMY DIAGRAMS ??????????????????????????????????????????????????
-// Front and back body outline with highlighted muscle groups
 function muscleDiagram(frontHighlight, backHighlight, label){
-  // Body outline paths (simplified anatomical front/back silhouettes)
-  // Each muscle group is a path that can be highlighted
   const dim='viewBox="0 0 280 200"';
   const bodyFill='#1e1e1e'; const bodyStroke='#3a3a3a';
-  const hi='#e8ff47'; const hiSec='rgba(232,255,71,0.4)';
-  const dim2='#2a2a2a';
-
-  // Front body SVG
+  const hi='#e8ff47'; const dim2='#2a2a2a';
   const front=`
-    <!-- torso -->
     <ellipse cx="70" cy="85" rx="22" ry="30" fill="${bodyFill}" stroke="${bodyStroke}" stroke-width="1.5"/>
-    <!-- chest -->
     <path d="M52 72 Q62 65 70 68 Q78 65 88 72 Q85 82 70 84 Q55 82 52 72Z" fill="${frontHighlight.includes('chest')?hi:dim2}" opacity="${frontHighlight.includes('chest')?'1':'.6'}"/>
-    <!-- left shoulder -->
     <ellipse cx="51" cy="74" rx="9" ry="9" fill="${frontHighlight.includes('shoulder')?hi:dim2}" opacity="${frontHighlight.includes('shoulder')?'1':'.5'}"/>
-    <!-- right shoulder -->
     <ellipse cx="89" cy="74" rx="9" ry="9" fill="${frontHighlight.includes('shoulder')?hi:dim2}" opacity="${frontHighlight.includes('shoulder')?'1':'.5'}"/>
-    <!-- left bicep -->
     <rect x="40" y="84" width="10" height="22" rx="5" fill="${frontHighlight.includes('bicep')||frontHighlight.includes('arm')?hi:dim2}" opacity="${frontHighlight.includes('bicep')||frontHighlight.includes('arm')?'1':'.5'}"/>
-    <!-- right bicep -->
     <rect x="90" y="84" width="10" height="22" rx="5" fill="${frontHighlight.includes('bicep')||frontHighlight.includes('arm')?hi:dim2}" opacity="${frontHighlight.includes('bicep')||frontHighlight.includes('arm')?'1':'.5'}"/>
-    <!-- left forearm -->
     <rect x="38" y="107" width="9" height="20" rx="4" fill="${frontHighlight.includes('forearm')||frontHighlight.includes('arm')?hi:dim2}" opacity=".4"/>
-    <!-- right forearm -->
     <rect x="93" y="107" width="9" height="20" rx="4" fill="${frontHighlight.includes('forearm')||frontHighlight.includes('arm')?hi:dim2}" opacity=".4"/>
-    <!-- abs -->
     <rect x="60" y="86" width="8" height="8" rx="2" fill="${frontHighlight.includes('abs')||frontHighlight.includes('core')?hi:dim2}" opacity="${frontHighlight.includes('abs')||frontHighlight.includes('core')?'.9':'.4'}"/>
     <rect x="72" y="86" width="8" height="8" rx="2" fill="${frontHighlight.includes('abs')||frontHighlight.includes('core')?hi:dim2}" opacity="${frontHighlight.includes('abs')||frontHighlight.includes('core')?'.9':'.4'}"/>
     <rect x="60" y="96" width="8" height="8" rx="2" fill="${frontHighlight.includes('abs')||frontHighlight.includes('core')?hi:dim2}" opacity="${frontHighlight.includes('abs')||frontHighlight.includes('core')?'.9':'.4'}"/>
     <rect x="72" y="96" width="8" height="8" rx="2" fill="${frontHighlight.includes('abs')||frontHighlight.includes('core')?hi:dim2}" opacity="${frontHighlight.includes('abs')||frontHighlight.includes('core')?'.9':'.4'}"/>
     <rect x="60" y="106" width="8" height="8" rx="2" fill="${frontHighlight.includes('abs')||frontHighlight.includes('core')?hi:dim2}" opacity="${frontHighlight.includes('abs')||frontHighlight.includes('core')?'.9':'.4'}"/>
     <rect x="72" y="106" width="8" height="8" rx="2" fill="${frontHighlight.includes('abs')||frontHighlight.includes('core')?hi:dim2}" opacity="${frontHighlight.includes('abs')||frontHighlight.includes('core')?'.9':'.4'}"/>
-    <!-- left quad -->
     <ellipse cx="62" cy="150" rx="10" ry="22" fill="${frontHighlight.includes('quad')||frontHighlight.includes('leg')?hi:dim2}" opacity="${frontHighlight.includes('quad')||frontHighlight.includes('leg')?'1':'.5'}"/>
-    <!-- right quad -->
     <ellipse cx="78" cy="150" rx="10" ry="22" fill="${frontHighlight.includes('quad')||frontHighlight.includes('leg')?hi:dim2}" opacity="${frontHighlight.includes('quad')||frontHighlight.includes('leg')?'1':'.5'}"/>
-    <!-- left calf -->
     <ellipse cx="62" cy="182" rx="7" ry="12" fill="${frontHighlight.includes('calf')||frontHighlight.includes('leg')?hi:dim2}" opacity="${frontHighlight.includes('calf')||frontHighlight.includes('leg')?'1':'.4'}"/>
-    <!-- right calf -->
     <ellipse cx="78" cy="182" rx="7" ry="12" fill="${frontHighlight.includes('calf')||frontHighlight.includes('leg')?hi:dim2}" opacity="${frontHighlight.includes('calf')||frontHighlight.includes('leg')?'1':'.4'}"/>
-    <!-- head -->
     <circle cx="70" cy="42" r="16" fill="${bodyFill}" stroke="${bodyStroke}" stroke-width="1.5"/>
-    <!-- neck -->
     <rect x="65" y="56" width="10" height="14" rx="4" fill="${bodyFill}" stroke="${bodyStroke}" stroke-width="1.5"/>
-    <!-- tricep front (small) -->
     <rect x="88" y="84" width="12" height="18" rx="5" fill="${frontHighlight.includes('tricep')?hi:dim2}" opacity="${frontHighlight.includes('tricep')?'.8':'.3'}"/>
     <rect x="40" y="84" width="12" height="18" rx="5" fill="${frontHighlight.includes('tricep')?hi:dim2}" opacity="${frontHighlight.includes('tricep')?'.6':'.2'}"/>
-    <!-- side delt indicator -->
     <text x="70" y="200" text-anchor="middle" fill="#444" font-size="10" font-family="sans-serif">FRONT</text>`;
-
-  // Back body SVG
   const back=`
-    <!-- torso back -->
     <ellipse cx="210" cy="85" rx="22" ry="30" fill="${bodyFill}" stroke="${bodyStroke}" stroke-width="1.5"/>
-    <!-- traps -->
     <path d="M192 70 Q202 60 210 64 Q218 60 228 70 Q222 76 210 78 Q198 76 192 70Z" fill="${backHighlight.includes('trap')||backHighlight.includes('back')?hi:dim2}" opacity="${backHighlight.includes('trap')||backHighlight.includes('back')?'1':'.5'}"/>
-    <!-- lats left -->
     <path d="M190 78 Q188 95 194 108 Q200 105 204 90 Z" fill="${backHighlight.includes('lat')||backHighlight.includes('back')?hi:dim2}" opacity="${backHighlight.includes('lat')||backHighlight.includes('back')?'1':'.5'}"/>
-    <!-- lats right -->
     <path d="M230 78 Q232 95 226 108 Q220 105 216 90 Z" fill="${backHighlight.includes('lat')||backHighlight.includes('back')?hi:dim2}" opacity="${backHighlight.includes('lat')||backHighlight.includes('back')?'1':'.5'}"/>
-    <!-- mid back / rhomboids -->
     <ellipse cx="210" cy="92" rx="12" ry="10" fill="${backHighlight.includes('back')||backHighlight.includes('mid')||backHighlight.includes('rhom')?hi:dim2}" opacity="${backHighlight.includes('back')||backHighlight.includes('mid')?'.8':'.3'}"/>
-    <!-- left shoulder back -->
     <ellipse cx="191" cy="75" rx="9" ry="9" fill="${backHighlight.includes('shoulder')||backHighlight.includes('delt')?hi:dim2}" opacity="${backHighlight.includes('shoulder')||backHighlight.includes('delt')?'1':'.5'}"/>
-    <!-- right shoulder back -->
     <ellipse cx="229" cy="75" rx="9" ry="9" fill="${backHighlight.includes('shoulder')||backHighlight.includes('delt')?hi:dim2}" opacity="${backHighlight.includes('shoulder')||backHighlight.includes('delt')?'1':'.5'}"/>
-    <!-- left tricep -->
     <rect x="178" y="84" width="11" height="22" rx="5" fill="${backHighlight.includes('tricep')||backHighlight.includes('arm')?hi:dim2}" opacity="${backHighlight.includes('tricep')||backHighlight.includes('arm')?'1':'.5'}"/>
-    <!-- right tricep -->
     <rect x="231" y="84" width="11" height="22" rx="5" fill="${backHighlight.includes('tricep')||backHighlight.includes('arm')?hi:dim2}" opacity="${backHighlight.includes('tricep')||backHighlight.includes('arm')?'1':'.5'}"/>
-    <!-- left forearm back -->
     <rect x="176" y="107" width="10" height="20" rx="4" fill="${backHighlight.includes('forearm')||backHighlight.includes('arm')?hi:dim2}" opacity=".4"/>
-    <!-- right forearm back -->
     <rect x="234" y="107" width="10" height="20" rx="4" fill="${backHighlight.includes('forearm')||backHighlight.includes('arm')?hi:dim2}" opacity=".4"/>
-    <!-- glutes -->
     <ellipse cx="204" cy="122" rx="11" ry="12" fill="${backHighlight.includes('glute')||backHighlight.includes('butt')?hi:dim2}" opacity="${backHighlight.includes('glute')||backHighlight.includes('butt')?'1':'.5'}"/>
     <ellipse cx="216" cy="122" rx="11" ry="12" fill="${backHighlight.includes('glute')||backHighlight.includes('butt')?hi:dim2}" opacity="${backHighlight.includes('glute')||backHighlight.includes('butt')?'1':'.5'}"/>
-    <!-- left hamstring -->
     <ellipse cx="203" cy="152" rx="10" ry="22" fill="${backHighlight.includes('ham')||backHighlight.includes('leg')?hi:dim2}" opacity="${backHighlight.includes('ham')||backHighlight.includes('leg')?'1':'.5'}"/>
-    <!-- right hamstring -->
     <ellipse cx="217" cy="152" rx="10" ry="22" fill="${backHighlight.includes('ham')||backHighlight.includes('leg')?hi:dim2}" opacity="${backHighlight.includes('ham')||backHighlight.includes('leg')?'1':'.5'}"/>
-    <!-- left calf back -->
     <ellipse cx="203" cy="182" rx="7" ry="12" fill="${backHighlight.includes('calf')||backHighlight.includes('leg')?hi:dim2}" opacity="${backHighlight.includes('calf')||backHighlight.includes('leg')?'1':'.4'}"/>
-    <!-- right calf back -->
     <ellipse cx="217" cy="182" rx="7" ry="12" fill="${backHighlight.includes('calf')||backHighlight.includes('leg')?hi:dim2}" opacity="${backHighlight.includes('calf')||backHighlight.includes('leg')?'1':'.4'}"/>
-    <!-- head -->
     <circle cx="210" cy="42" r="16" fill="${bodyFill}" stroke="${bodyStroke}" stroke-width="1.5"/>
     <rect x="205" y="56" width="10" height="14" rx="4" fill="${bodyFill}" stroke="${bodyStroke}" stroke-width="1.5"/>
     <text x="210" y="200" text-anchor="middle" fill="#444" font-size="10" font-family="sans-serif">BACK</text>`;
-
-  return `<svg ${dim} xmlns="http://www.w3.org/2000/svg" style="background:transparent">
-    ${front}${back}
-    <text x="140" y="13" text-anchor="middle" fill="#e8ff47" font-size="10" font-family="sans-serif" font-weight="600" letter-spacing="1">${label.toUpperCase()}</text>
-  </svg>`;
+  return `<svg ${dim} xmlns="http://www.w3.org/2000/svg" style="background:transparent">${front}${back}<text x="140" y="13" text-anchor="middle" fill="#e8ff47" font-size="10" font-family="sans-serif" font-weight="600" letter-spacing="1">${label.toUpperCase()}</text></svg>`;
 }
 
 function getIllo(exName){
   const n=exName.toLowerCase();
-  if(n.includes('bench press')||n.includes('cable crossover')||n.includes('cable fly')||n.includes('push-up'))
-    return muscleDiagram(['chest','shoulder','tricep'],['back'],'Chest / Triceps');
-  if(n.includes('incline press'))
-    return muscleDiagram(['chest','shoulder'],[],'Upper Chest / Shoulders');
-  if(n.includes('close-grip')||n.includes('close grip')||n.includes('skull'))
-    return muscleDiagram(['tricep','chest'],['tricep'],'Triceps / Chest');
-  if(n.includes('overhead press')||n.includes('arnold'))
-    return muscleDiagram(['shoulder'],['shoulder','trap'],'Shoulders');
-  if(n.includes('lateral raise'))
-    return muscleDiagram(['shoulder'],[  ],'Side Deltoids');
-  if(n.includes('face pull')||n.includes('rear delt'))
-    return muscleDiagram(['shoulder'],['shoulder','delt','trap'],'Rear Delts / Traps');
-  if(n.includes('tricep pushdown')||n.includes('overhead tricep')||n.includes('dip'))
-    return muscleDiagram(['tricep'],['tricep'],'Triceps');
-  if(n.includes('cable crunch')||n.includes('ab wheel')||n.includes('plank')||n.includes('dead bug')||n.includes('russian'))
-    return muscleDiagram(['abs','core'],['back'],'Core / Abs');
-  if(n.includes('lat pulldown')||n.includes('pull-up')||n.includes('straight-arm'))
-    return muscleDiagram(['bicep'],['lat','back'],'Lats / Biceps');
-  if(n.includes('bent-over row')||n.includes('single arm')||n.includes('seated cable row'))
-    return muscleDiagram(['bicep'],['lat','mid back','trap'],'Back / Biceps');
-  if(n.includes('curl'))
-    return muscleDiagram(['bicep','arm'],[],'Biceps');
-  if(n.includes('squat'))
-    return muscleDiagram(['quad','leg'],['glute','ham'],'Quads / Glutes');
-  if(n.includes('romanian')||n.includes('rdl'))
-    return muscleDiagram(['leg'],['ham','glute'],'Hamstrings / Glutes');
-  if(n.includes('hip thrust'))
-    return muscleDiagram([],['glute','ham'],'Glutes / Hamstrings');
-  if(n.includes('lunge')||n.includes('split squat'))
-    return muscleDiagram(['quad','leg'],['glute','ham'],'Quads / Glutes');
-  if(n.includes('leg extension'))
-    return muscleDiagram(['quad','leg'],[],'Quadriceps');
-  if(n.includes('leg curl'))
-    return muscleDiagram([],['ham','leg'],'Hamstrings');
-  if(n.includes('calf'))
-    return muscleDiagram(['calf','leg'],['calf','leg'],'Calves');
-  if(n.includes('hanging')||n.includes('knee raise'))
-    return muscleDiagram(['abs','core'],['back'],'Abs / Core');
+  if(n.includes('bench press')||n.includes('cable crossover')||n.includes('cable fly')||n.includes('push-up')) return muscleDiagram(['chest','shoulder','tricep'],['back'],'Chest / Triceps');
+  if(n.includes('incline press')) return muscleDiagram(['chest','shoulder'],[],'Upper Chest / Shoulders');
+  if(n.includes('close-grip')||n.includes('close grip')||n.includes('skull')) return muscleDiagram(['tricep','chest'],['tricep'],'Triceps / Chest');
+  if(n.includes('overhead press')||n.includes('arnold')) return muscleDiagram(['shoulder'],['shoulder','trap'],'Shoulders');
+  if(n.includes('lateral raise')) return muscleDiagram(['shoulder'],[],'Side Deltoids');
+  if(n.includes('face pull')||n.includes('rear delt')) return muscleDiagram(['shoulder'],['shoulder','delt','trap'],'Rear Delts / Traps');
+  if(n.includes('tricep pushdown')||n.includes('overhead tricep')||n.includes('dip')) return muscleDiagram(['tricep'],['tricep'],'Triceps');
+  if(n.includes('cable crunch')||n.includes('ab wheel')||n.includes('plank')||n.includes('dead bug')||n.includes('russian')) return muscleDiagram(['abs','core'],['back'],'Core / Abs');
+  if(n.includes('lat pulldown')||n.includes('pull-up')||n.includes('straight-arm')) return muscleDiagram(['bicep'],['lat','back'],'Lats / Biceps');
+  if(n.includes('bent-over row')||n.includes('single arm')||n.includes('seated cable row')) return muscleDiagram(['bicep'],['lat','mid back','trap'],'Back / Biceps');
+  if(n.includes('curl')) return muscleDiagram(['bicep','arm'],[],'Biceps');
+  if(n.includes('squat')) return muscleDiagram(['quad','leg'],['glute','ham'],'Quads / Glutes');
+  if(n.includes('romanian')||n.includes('rdl')) return muscleDiagram(['leg'],['ham','glute'],'Hamstrings / Glutes');
+  if(n.includes('hip thrust')) return muscleDiagram([],['glute','ham'],'Glutes / Hamstrings');
+  if(n.includes('lunge')||n.includes('split squat')) return muscleDiagram(['quad','leg'],['glute','ham'],'Quads / Glutes');
+  if(n.includes('leg extension')) return muscleDiagram(['quad','leg'],[],'Quadriceps');
+  if(n.includes('leg curl')) return muscleDiagram([],['ham','leg'],'Hamstrings');
+  if(n.includes('calf')) return muscleDiagram(['calf','leg'],['calf','leg'],'Calves');
+  if(n.includes('hanging')||n.includes('knee raise')) return muscleDiagram(['abs','core'],['back'],'Abs / Core');
   return muscleDiagram(['chest','shoulder'],['back'],'Full Body');
 }
 
-// ??? PROGRAM DATA ?????????????????????????????????????????????????????????????
 const DEFAULT_PROGRAM = [
-  { id:'push', day:'Day 1', name:'Push', type:'push', focus:'Chest / Shoulders / Triceps',
-    exercises:['Smith Machine Bench Press','Smith Machine Incline Press','Cable Crossover','Smith Machine Overhead Press','Lateral Raises','Face Pulls','Tricep Pushdowns','Cable Crunch'] },
-  { id:'pull', day:'Day 2', name:'Pull', type:'pull', focus:'Back / Biceps',
-    exercises:['Cable Lat Pulldown','Smith Machine Bent-Over Row','Single Arm DB Row','Cable Straight-Arm Pulldown','Dumbbell Curl','Hammer Curls','Cable Curl 21s','Ab Wheel'] },
-  { id:'legs', day:'Day 3', name:'Legs', type:'legs', focus:'Quads / Glutes / Hamstrings / Calves',
-    exercises:['Smith Machine Squat','Smith Machine Romanian Deadlift','Smith Machine Hip Thrust','Smith Machine Reverse Lunge','Standing Calf Raise (Smith)','Leg Extension (Machine)','Cable Crunch','Ab Wheel'] },
-  { id:'arms', day:'Day 4', name:'Chest & Arms', type:'full', focus:'Chest / Biceps / Triceps',
-    exercises:['Smith Machine Close-Grip Bench','Smith Machine Incline Press','Cable Crossover','Dumbbell Curl','Hammer Curls','Tricep Pushdowns','Lateral Raises','Cable Crunch'] },
+  { id:'push', day:'Day 1', name:'Push', type:'push', focus:'Chest / Shoulders / Triceps', exercises:['Smith Machine Bench Press','Smith Machine Incline Press','Cable Crossover','Smith Machine Overhead Press','Lateral Raises','Face Pulls','Tricep Pushdowns','Cable Crunch'] },
+  { id:'pull', day:'Day 2', name:'Pull', type:'pull', focus:'Back / Biceps', exercises:['Cable Lat Pulldown','Smith Machine Bent-Over Row','Single Arm DB Row','Cable Straight-Arm Pulldown','Dumbbell Curl','Hammer Curls','Cable Curl 21s','Ab Wheel'] },
+  { id:'legs', day:'Day 3', name:'Legs', type:'legs', focus:'Quads / Glutes / Hamstrings / Calves', exercises:['Smith Machine Squat','Smith Machine Romanian Deadlift','Smith Machine Hip Thrust','Smith Machine Reverse Lunge','Standing Calf Raise (Smith)','Leg Extension (Machine)','Cable Crunch','Ab Wheel'] },
+  { id:'arms', day:'Day 4', name:'Chest & Arms', type:'full', focus:'Chest / Biceps / Triceps', exercises:['Smith Machine Close-Grip Bench','Smith Machine Incline Press','Cable Crossover','Dumbbell Curl','Hammer Curls','Tricep Pushdowns','Lateral Raises','Cable Crunch'] },
 ];
 
-// ??? EXERCISE TARGET WEIGHTS (based on your logs + 5lb progression) ???????????
-// Format: { sets, reps, targetWeight, targetReps }
 const EX_TARGETS = {
   'Smith Machine Bench Press':        { sets:4, reps:'8–10',  targetWeight:60,  targetReps:8  },
   'Smith Machine Incline Press':      { sets:3, reps:'10–12', targetWeight:50,  targetReps:10 },
@@ -728,18 +753,7 @@ const EX_TARGETS = {
   'Smith Machine Close-Grip Bench':   { sets:3, reps:'10–12', targetWeight:50,  targetReps:10 },
 };
 
-// Find exercise def from library
-function findEx(name) {
-  for(const grp of Object.values(EXERCISE_LIBRARY)){
-    const found = grp.find(e=>e.name===name);
-    if(found) return found;
-  }
-  return {name,muscle:'Unknown',sets:3,reps:'10–12',rest:90,search:name+' form tutorial'};
-}
-
-// ??? HISTORICAL DATA (imported from your Strong app logs) ?????????????????????
 const IMPORTED_LOG = [
-  // Feb 23 · Push
   {exercise:'Smith Machine Bench Press',dayName:'Push',dayId:'push',sessionId:1001,date:'2026-02-23T17:56:00',sets:[{weight:45,reps:18,done:true},{weight:45,reps:14,done:true},{weight:55,reps:8,done:true},{weight:55,reps:6,done:true}]},
   {exercise:'Smith Machine Incline Press',dayName:'Push',dayId:'push',sessionId:1001,date:'2026-02-23T17:56:00',sets:[{weight:40,reps:12,done:true},{weight:40,reps:9,done:true},{weight:45,reps:7,done:true},{weight:45,reps:7,done:true}]},
   {exercise:'Cable Crossover',dayName:'Push',dayId:'push',sessionId:1001,date:'2026-02-23T17:56:00',sets:[{weight:25,reps:16,done:true},{weight:25,reps:14,done:true},{weight:30,reps:10,done:true},{weight:30,reps:8,done:true}]},
@@ -748,14 +762,12 @@ const IMPORTED_LOG = [
   {exercise:'Tricep Pushdowns',dayName:'Push',dayId:'push',sessionId:1001,date:'2026-02-23T17:56:00',sets:[{weight:35,reps:18,done:true},{weight:35,reps:16,done:true},{weight:45,reps:8,done:true},{weight:45,reps:8,done:true}]},
   {exercise:'Cable Crunch',dayName:'Push',dayId:'push',sessionId:1001,date:'2026-02-23T17:56:00',sets:[{weight:50,reps:20,done:true},{weight:50,reps:20,done:true},{weight:50,reps:20,done:true}]},
   {exercise:'Ab Wheel',dayName:'Push',dayId:'push',sessionId:1001,date:'2026-02-23T17:56:00',sets:[{weight:0,reps:10,done:true},{weight:0,reps:10,done:true},{weight:0,reps:10,done:true}]},
-  // Feb 11 · Pull
   {exercise:'Cable Lat Pulldown',dayName:'Pull',dayId:'pull',sessionId:1002,date:'2026-02-11T18:08:00',sets:[{weight:75,reps:18,done:true},{weight:75,reps:12,done:true},{weight:80,reps:8,done:true},{weight:80,reps:8,done:true}]},
   {exercise:'Smith Machine Bent-Over Row',dayName:'Pull',dayId:'pull',sessionId:1002,date:'2026-02-11T18:08:00',sets:[{weight:45,reps:16,done:true},{weight:45,reps:14,done:true},{weight:55,reps:9,done:true},{weight:55,reps:9,done:true}]},
   {exercise:'Dumbbell Curl',dayName:'Pull',dayId:'pull',sessionId:1002,date:'2026-02-11T18:08:00',sets:[{weight:20,reps:12,done:true},{weight:20,reps:12,done:true},{weight:25,reps:8,done:true},{weight:25,reps:8,done:true}]},
   {exercise:'Hammer Curls',dayName:'Pull',dayId:'pull',sessionId:1002,date:'2026-02-11T18:08:00',sets:[{weight:15,reps:12,done:true},{weight:15,reps:12,done:true},{weight:20,reps:8,done:true},{weight:20,reps:8,done:true}]},
   {exercise:'Cable Curl 21s',dayName:'Pull',dayId:'pull',sessionId:1002,date:'2026-02-11T18:08:00',sets:[{weight:10,reps:21,done:true},{weight:10,reps:21,done:true},{weight:15,reps:21,done:true},{weight:15,reps:21,done:true}]},
   {exercise:'Ab Wheel',dayName:'Pull',dayId:'pull',sessionId:1002,date:'2026-02-11T18:08:00',sets:[{weight:0,reps:12,done:true},{weight:0,reps:12,done:true},{weight:0,reps:12,done:true}]},
-  // Feb 15 · Legs
   {exercise:'Smith Machine Squat',dayName:'Legs',dayId:'legs',sessionId:1003,date:'2026-02-15T10:14:00',sets:[{weight:80,reps:16,done:true},{weight:80,reps:14,done:true},{weight:90,reps:10,done:true},{weight:90,reps:8,done:true}]},
   {exercise:'Smith Machine Romanian Deadlift',dayName:'Legs',dayId:'legs',sessionId:1003,date:'2026-02-15T10:14:00',sets:[{weight:50,reps:14,done:true},{weight:50,reps:12,done:true},{weight:55,reps:8,done:true},{weight:55,reps:8,done:true}]},
   {exercise:'Smith Machine Hip Thrust',dayName:'Legs',dayId:'legs',sessionId:1003,date:'2026-02-15T10:14:00',sets:[{weight:50,reps:12,done:true},{weight:50,reps:12,done:true},{weight:55,reps:8,done:true},{weight:55,reps:8,done:true}]},
@@ -764,7 +776,6 @@ const IMPORTED_LOG = [
   {exercise:'Leg Extension (Machine)',dayName:'Legs',dayId:'legs',sessionId:1003,date:'2026-02-15T10:14:00',sets:[{weight:60,reps:12,done:true},{weight:70,reps:12,done:true},{weight:80,reps:10,done:true},{weight:80,reps:10,done:true}]},
   {exercise:'Cable Crunch',dayName:'Legs',dayId:'legs',sessionId:1003,date:'2026-02-15T10:14:00',sets:[{weight:55,reps:20,done:true},{weight:55,reps:20,done:true},{weight:55,reps:20,done:true}]},
   {exercise:'Ab Wheel',dayName:'Legs',dayId:'legs',sessionId:1003,date:'2026-02-15T10:14:00',sets:[{weight:0,reps:12,done:true},{weight:0,reps:12,done:true},{weight:0,reps:12,done:true}]},
-  // Feb 2 · Chest & Arms
   {exercise:'Smith Machine Incline Press',dayName:'Chest & Arms',dayId:'arms',sessionId:1004,date:'2026-02-02T14:02:00',sets:[{weight:40,reps:16,done:true},{weight:40,reps:13,done:true},{weight:45,reps:9,done:true},{weight:45,reps:8,done:true}]},
   {exercise:'Cable Crossover',dayName:'Chest & Arms',dayId:'arms',sessionId:1004,date:'2026-02-02T14:02:00',sets:[{weight:25,reps:14,done:true},{weight:25,reps:14,done:true},{weight:27,reps:10,done:true},{weight:27,reps:8,done:true}]},
   {exercise:'Smith Machine Close-Grip Bench',dayName:'Chest & Arms',dayId:'arms',sessionId:1004,date:'2026-02-02T14:02:00',sets:[{weight:40,reps:10,done:true},{weight:40,reps:10,done:true},{weight:45,reps:6,done:true},{weight:45,reps:6,done:true}]},
@@ -775,15 +786,12 @@ const IMPORTED_LOG = [
   {exercise:'Ab Wheel',dayName:'Chest & Arms',dayId:'arms',sessionId:1004,date:'2026-02-02T14:02:00',sets:[{weight:0,reps:12,done:true},{weight:0,reps:12,done:true},{weight:0,reps:12,done:true}]},
 ];
 
-// ??? STATE ????????????????????????????????????????????????????????????????????
 let program = JSON.parse(localStorage.getItem('gainz_prog') || 'null') || JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
 let wkLog   = (()=>{
   const stored = JSON.parse(localStorage.getItem('gainz_log') || '[]');
-  // Merge imported history if not already present
   const hasImported = stored.some(e=>e.sessionId===1001);
   return hasImported ? stored : [...stored, ...IMPORTED_LOG];
 })();
-// Save merged log
 localStorage.setItem('gainz_log', JSON.stringify(wkLog));
 
 let custRest= JSON.parse(localStorage.getItem('gainz_rest') || '{}');
@@ -806,7 +814,6 @@ function beep(){try{const c=new(window.AudioContext||window.webkitAudioContext)(
 function getRest(name,def){ return custRest[name]!==undefined?custRest[name]:def; }
 function setRest(name,v){ custRest[name]=Math.max(10,Math.min(600,v)); saveRest(); }
 
-// Get last session's sets for an exercise
 function getLastSets(name){
   const entries=wkLog.filter(e=>e.exercise===name);
   if(!entries.length)return [];
@@ -814,21 +821,15 @@ function getLastSets(name){
   return entries[0].sets;
 }
 
-// Compute target for this session: last weight + progression if at top of rep range
 function getTarget(name){
   const t=EX_TARGETS[name];
   const prev=getLastSets(name);
   if(!t) return {weight:'', reps:''};
   if(!prev.length) return {weight:t.targetWeight||'', reps:t.targetReps||''};
-  // If last session hit target reps on all sets, suggest +5lb
   const lastMaxReps=Math.max(...prev.map(s=>parseInt(s.reps)||0));
   const lastMaxWeight=Math.max(...prev.map(s=>parseFloat(s.weight)||0));
   const targetHit = lastMaxReps >= (t.targetReps||10);
-  return {
-    weight: targetHit ? lastMaxWeight+5 : lastMaxWeight,
-    reps: t.targetReps||10,
-    hit: targetHit
-  };
+  return { weight: targetHit ? lastMaxWeight+5 : lastMaxWeight, reps: t.targetReps||10, hit: targetHit };
 }
 
 function computePRs(){ const b={}; wkLog.forEach(e=>{ const m=Math.max(...e.sets.map(s=>parseFloat(s.weight)||0)); if(m>0&&(!b[e.exercise]||m>b[e.exercise]))b[e.exercise]=m; }); return b; }
@@ -849,7 +850,6 @@ function findExBase(name){
   return null;
 }
 
-// ??? NAV ??????????????????????????????????????????????????????????????????????
 function nav(screen, btn){
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
@@ -860,43 +860,26 @@ function nav(screen, btn){
   if(screen==='calendar') renderCalendar();
   if(screen==='progress') renderProgress();
   if(screen==='edit') renderEdit();
-  // videos screen is static HTML - no render needed
 }
 
-
-
-
-// ??? HOME ?????????????????????????????????????????????????????????????????????
-// ??? CARDIO LOG ???????????????????????????????????????????????????????????????
 let cardioLog = JSON.parse(localStorage.getItem('gainz_cardio') || '[]');
 function saveCardioLog(){ localStorage.setItem('gainz_cardio', JSON.stringify(cardioLog)); }
 
 const CARDIO_SESSIONS = [
-  { id:'run-conv',  type:'run',  style:'conversational', label:'Conversational Run', sub:'Zone 2 · easy pace',    color:'#47b4ff', icon:'&#127939;' },
-  { id:'run-hiit',  type:'run',  style:'hiit',            label:'HIIT Run',           sub:'Intervals · high effort', color:'#ff4747', icon:'&#9889;' },
-  { id:'bike-conv', type:'bike', style:'conversational', label:'Conversational Bike', sub:'Zone 2 · steady state', color:'#ffb347', icon:'&#128690;' },
-  { id:'bike-hiit', type:'bike', style:'hiit',            label:'HIIT Bike',          sub:'Intervals · high effort', color:'#ff4747', icon:'&#9889;' },
+  { id:'run-conv',  type:'run',  style:'conversational', label:'Conversational Run', sub:'Zone 2 · easy pace',    color:'#47b4ff', icon:'🏃' },
+  { id:'run-hiit',  type:'run',  style:'hiit',            label:'HIIT Run',           sub:'Intervals · high effort', color:'#ff4747', icon:'⚡' },
+  { id:'bike-conv', type:'bike', style:'conversational', label:'Conversational Bike', sub:'Zone 2 · steady state', color:'#ffb347', icon:'🚴' },
+  { id:'bike-hiit', type:'bike', style:'hiit',            label:'HIIT Bike',          sub:'Intervals · high effort', color:'#ff4747', icon:'⚡' },
 ];
 
-// HIIT interval state per card
 const hiitIntervals = {
   'run-hiit':  [{work:40,rest:20},{work:40,rest:20},{work:40,rest:20}],
   'bike-hiit': [{work:40,rest:20},{work:40,rest:20},{work:40,rest:20}],
 };
 
-function addInterval(id){
-  hiitIntervals[id].push({work:40,rest:20});
-  renderHome();
-  setTimeout(()=>eid('int-list-'+id)?.lastElementChild?.scrollIntoView({behavior:'smooth',block:'nearest'}),60);
-}
-function removeInterval(id,idx){
-  if(hiitIntervals[id].length<=1)return;
-  hiitIntervals[id].splice(idx,1);
-  renderHome();
-}
-function updateInterval(id,idx,field,val){
-  hiitIntervals[id][idx][field]=Math.max(5,parseInt(val)||30);
-}
+function addInterval(id){ hiitIntervals[id].push({work:40,rest:20}); renderHome(); setTimeout(()=>eid('int-list-'+id)?.lastElementChild?.scrollIntoView({behavior:'smooth',block:'nearest'}),60); }
+function removeInterval(id,idx){ if(hiitIntervals[id].length<=1)return; hiitIntervals[id].splice(idx,1); renderHome(); }
+function updateInterval(id,idx,field,val){ hiitIntervals[id][idx][field]=Math.max(5,parseInt(val)||30); }
 
 function logCardio(id){
   const c = CARDIO_SESSIONS.find(s=>s.id===id);
@@ -912,9 +895,7 @@ function logCardio(id){
   renderHome();
 }
 
-function getLastCardio(id){
-  return cardioLog.find(l=>l.id===id);
-}
+function getLastCardio(id){ return cardioLog.find(l=>l.id===id); }
 
 function buildIntervalUI(id){
   const intervals = hiitIntervals[id]||[];
@@ -933,12 +914,8 @@ function buildIntervalUI(id){
     <div id="int-list-${id}">
     ${intervals.map((iv,i)=>`
       <div class="interval-row">
-        <input class="interval-input" type="number" inputmode="numeric" value="${iv.work}" min="5" max="300"
-          style="border-color:rgba(255,71,71,.3);color:#ff9999;"
-          onchange="updateInterval('${id}',${i},'work',this.value)">
-        <input class="interval-input" type="number" inputmode="numeric" value="${iv.rest}" min="5" max="300"
-          style="border-color:rgba(71,180,255,.3);color:#99ccff;"
-          onchange="updateInterval('${id}',${i},'rest',this.value)">
+        <input class="interval-input" type="number" inputmode="numeric" value="${iv.work}" min="5" max="300" style="border-color:rgba(255,71,71,.3);color:#ff9999;" onchange="updateInterval('${id}',${i},'work',this.value)">
+        <input class="interval-input" type="number" inputmode="numeric" value="${iv.rest}" min="5" max="300" style="border-color:rgba(71,180,255,.3);color:#99ccff;" onchange="updateInterval('${id}',${i},'rest',this.value)">
         <button class="del-interval-btn" onclick="removeInterval('${id}',${i})">×</button>
       </div>`).join('')}
     </div>
@@ -946,7 +923,6 @@ function buildIntervalUI(id){
   </div>`;
 }
 
-// ??? HOME ?????????????????????????????????????????????????????????????????????
 function renderHome(){
   eid('dateline').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
   const sessions = new Set(wkLog.map(l=>l.sessionId)).size;
@@ -956,15 +932,10 @@ function renderHome(){
     <div class="stat-box"><div class="stat-n a">${sessions}</div><div class="stat-lbl">Sessions</div></div>
     <div class="stat-box"><div class="stat-n">${totalSets}</div><div class="stat-lbl">Sets</div></div>
     <div class="stat-box"><div class="stat-n a">${Object.keys(prs).length}</div><div class="stat-lbl">PRs</div></div>`;
-
-  // Strength cards
   eid('day-grid').innerHTML = program.map(d=>`
     <div class="day-card dc-${d.type}" onclick="launchWk('${d.id}')">
       <div class="dc-head">
-        <div>
-          <div class="dc-title bc">${d.day} · ${d.name}</div>
-          <div class="dc-sub">${d.focus}</div>
-        </div>
+        <div><div class="dc-title bc">${d.day} — ${d.name}</div><div class="dc-sub">${d.focus}</div></div>
         <div class="arrow-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
       </div>
       <div class="dc-meta">
@@ -972,31 +943,17 @@ function renderHome(){
         <span class="tag tag-${d.type}">${d.exercises.reduce((a,n)=>{const e=findEx(n);return a+e.sets;},0)} sets</span>
       </div>
     </div>`).join('');
-
-  // Cardio cards
   eid('cardio-grid').innerHTML = CARDIO_SESSIONS.map(c=>{
     const last = getLastCardio(c.id);
     const lastStr = last ? `Last: ${last.mins?last.mins+'min':''} ${last.dist?last.dist+'mi':''}`.trim() : 'No sessions yet';
     const isHiit = c.style==='hiit';
     const cardClass = c.type==='run'?'cc-run':'cc-bike';
     return `<div class="cardio-card ${cardClass}">
-      <div class="cc-head">
-        <div>
-          <div class="cc-title">${c.icon} ${c.label}</div>
-          <div class="cc-sub">${c.sub}</div>
-        </div>
-        <span class="cc-badge${isHiit?' hiit-badge':''}">${isHiit?'HIIT':'Zone 2'}</span>
-      </div>
+      <div class="cc-head"><div><div class="cc-title">${c.icon} ${c.label}</div><div class="cc-sub">${c.sub}</div></div><span class="cc-badge${isHiit?' hiit-badge':''}">${isHiit?'HIIT':'Zone 2'}</span></div>
       ${isHiit ? buildIntervalUI(c.id) : ''}
       <div class="cc-inputs" style="margin-top:${isHiit?'10px':'0'}">
-        <div>
-          <label class="cc-lbl">Time (min)</label>
-          <input class="cc-input" type="number" inputmode="decimal" placeholder="0" id="cc-mins-${c.id}" min="0" step="1">
-        </div>
-        <div>
-          <label class="cc-lbl">Distance (mi)</label>
-          <input class="cc-input" type="number" inputmode="decimal" placeholder="0.0" id="cc-dist-${c.id}" min="0" step="0.1">
-        </div>
+        <div><label class="cc-lbl">Time (min)</label><input class="cc-input" type="number" inputmode="decimal" placeholder="0" id="cc-mins-${c.id}" min="0" step="1"></div>
+        <div><label class="cc-lbl">Distance (mi)</label><input class="cc-input" type="number" inputmode="decimal" placeholder="0.0" id="cc-dist-${c.id}" min="0" step="0.1"></div>
       </div>
       <button class="cc-log-btn" onclick="logCardio('${c.id}')">Log session</button>
       <div class="cc-last">${lastStr}</div>
@@ -1004,7 +961,6 @@ function renderHome(){
   }).join('');
 }
 
-// ??? LAUNCH WORKOUT ???????????????????????????????????????????????????????????
 function launchWk(dayId){
   const day = program.find(d=>d.id===dayId);
   wkDone=false;
@@ -1012,12 +968,7 @@ function launchWk(dayId){
   day.exercises.forEach(n=>{
     const ex=findEx(n);
     const tgt=getTarget(n);
-    // Each set starts with target values pre-filled; user can override
-    activeWk.sets[n]=Array.from({length:ex.sets},()=>({
-      weight: tgt.weight!==undefined ? String(tgt.weight) : '',
-      reps:   tgt.reps!==undefined   ? String(tgt.reps)   : '',
-      done:false
-    }));
+    activeWk.sets[n]=Array.from({length:ex.sets},()=>({ weight: tgt.weight!==undefined ? String(tgt.weight) : '', reps: tgt.reps!==undefined ? String(tgt.reps) : '', done:false }));
   });
   wkSecs=0; clearInterval(wkTimer);
   wkTimer=setInterval(()=>{ wkSecs++; const el=eid('wk-elapsed'); if(el)el.textContent=fmt(wkSecs); updateProg(); },1000);
@@ -1051,74 +1002,34 @@ function renderWk(){
     const tgt=getTarget(n);
     const restSec=getRest(n,ex.rest);
     const key=n.replace(/[^a-z0-9]/gi,'_');
-
-    // Banner: tell user what to aim for
     let banner='';
-    if(tgt.hit){
-      banner=`<div class="target-banner up"><span>&#8679;</span> Last session hit target · aim for ${tgt.weight}lb today (+5lb)</div>`;
-    } else if(prev.length){
-      banner=`<div class="target-banner same"><span>&#9654;</span> Target: ${tgt.weight}lb · ${tgt.reps} reps</div>`;
-    }
-
+    if(tgt.hit){ banner=`<div class="target-banner up"><span>⬆</span> Last session hit target — aim for ${tgt.weight}lb today (+5lb)</div>`; }
+    else if(prev.length){ banner=`<div class="target-banner same"><span>🎯</span> Target: ${tgt.weight}lb × ${tgt.reps} reps</div>`; }
     return `<div class="ex-card${isOpen?' active-ex':''} fu" id="exc_${idx}" style="animation-delay:${idx*.04}s">
       <div class="ex-head" onclick="toggleEx('${n}')">
-        <div style="flex:1;min-width:0">
-          <div class="ex-name">${n}</div>
-          <div class="ex-info">${ex.sets}–${ex.reps} · ${restSec}s rest · ${ex.muscle||''}</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-          ${allDone?'<span class="ex-done-badge">&#10003; Done</span>':''}
-          <span class="chevron${isOpen?' open':''}">▾</span>
-        </div>
+        <div style="flex:1;min-width:0"><div class="ex-name">${n}</div><div class="ex-info">${ex.sets}×${ex.reps} · ${restSec}s rest · ${ex.muscle||''}</div></div>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">${allDone?'<span class="ex-done-badge">✓ Done</span>':''}<span class="chevron${isOpen?' open':''}">▼</span></div>
       </div>
       <div class="ex-body${isOpen?' open':''}">
         <div class="muscle-diagram">${getIllo(n)}</div>
         ${banner}
-        <div class="set-head">
-          <div></div>
-          <div class="sh-lbl">Previous</div>
-          <div class="sh-lbl">Target</div>
-          <div class="sh-lbl">Actual</div>
-          <div></div>
-        </div>
+        <div class="set-head"><div></div><div class="sh-lbl">Previous</div><div class="sh-lbl">Target</div><div class="sh-lbl">Actual</div><div></div></div>
         ${sets.map((s,i)=>{
           const p=prev[i]||{};
           const hasP=p.weight||p.reps;
           return `<div class="set-row${s.done?' set-done':''}">
             <div class="set-n">${i+1}</div>
-            <div class="set-prev">
-              ${hasP
-                ? `<div class="set-prev-w">${p.weight||'–'}<span style="font-size:9px;color:var(--t3)">lb</span></div>
-                   <div class="set-prev-r">${p.reps||'–'} reps</div>`
-                : `<div class="set-prev-r" style="font-size:11px">–</div>`}
-            </div>
-            <div class="set-tgt">
-              <div class="set-tgt-w">${tgt.weight||'–'}<span style="font-size:9px">lb</span></div>
-              <div class="set-tgt-r">${tgt.reps||'–'} reps</div>
-            </div>
+            <div class="set-prev">${hasP?`<div class="set-prev-w">${p.weight||'—'}<span style="font-size:9px;color:var(--t3)">lb</span></div><div class="set-prev-r">${p.reps||'—'} reps</div>`:`<div class="set-prev-r" style="font-size:11px">—</div>`}</div>
+            <div class="set-tgt"><div class="set-tgt-w">${tgt.weight||'—'}<span style="font-size:9px">lb</span></div><div class="set-tgt-r">${tgt.reps||'—'} reps</div></div>
             <div class="set-actual">
-              <input class="si-w" type="number" inputmode="decimal" placeholder="lbs" value="${s.weight}"
-                id="w_${key}_${i}" onchange="updSet('${n}',${i},'weight',this.value)">
-              <input class="si-r" type="number" inputmode="numeric" placeholder="reps" value="${s.reps}"
-                id="r_${key}_${i}" onchange="updSet('${n}',${i},'reps',this.value)">
+              <input class="si-w" type="number" inputmode="decimal" placeholder="lbs" value="${s.weight}" id="w_${key}_${i}" onchange="updSet('${n}',${i},'weight',this.value)">
+              <input class="si-r" type="number" inputmode="numeric" placeholder="reps" value="${s.reps}" id="r_${key}_${i}" onchange="updSet('${n}',${i},'reps',this.value)">
             </div>
-            <button class="chk${s.done?' done':''}" onclick="doneSet('${n}',${i})">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-            </button>
+            <button class="chk${s.done?' done':''}" onclick="doneSet('${n}',${i})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></button>
           </div>`;
         }).join('')}
-        <div class="rest-ctrl">
-          <span class="rc-lbl">Rest timer</span>
-          <div class="rc-adj">
-            <button class="rc-btn" onclick="adjRest('${n}',-15)">−</button>
-            <div class="rc-val" id="rv_${key}">${restSec}s</div>
-            <button class="rc-btn" onclick="adjRest('${n}',15)">+</button>
-          </div>
-        </div>
-        <button class="form-tips-btn" onclick="showCues('${n}')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-          Form tips & cues
-        </button>
+        <div class="rest-ctrl"><span class="rc-lbl">Rest timer</span><div class="rc-adj"><button class="rc-btn" onclick="adjRest('${n}',-15)">−</button><div class="rc-val" id="rv_${key}">${restSec}s</div><button class="rc-btn" onclick="adjRest('${n}',15)">+</button></div></div>
+        <button class="form-tips-btn" onclick="showCues('${n}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>Form tips &amp; cues</button>
       </div></div>`;
   }).join('');
   updateProg();
@@ -1128,10 +1039,7 @@ function toggleEx(n){
   if(!activeWk)return;
   activeWk.expandedEx=activeWk.expandedEx===n?null:n;
   renderWk();
-  setTimeout(()=>{
-    const idx=activeWk.day.exercises.indexOf(n);
-    eid('exc_'+idx)?.scrollIntoView({behavior:'smooth',block:'nearest'});
-  },60);
+  setTimeout(()=>{ const idx=activeWk.day.exercises.indexOf(n); eid('exc_'+idx)?.scrollIntoView({behavior:'smooth',block:'nearest'}); },60);
 }
 
 function updSet(n,i,f,v){ if(activeWk)activeWk.sets[n][i][f]=v; }
@@ -1151,15 +1059,9 @@ function doneSet(n,i){
 function adjRest(n,d){
   const ex=findEx(n);
   setRest(n,getRest(n,ex.rest)+d);
-  const key=n.replace(/[^a-z0-9]/gi,'_');
-  const el=eid('rv_'+key); if(el)el.textContent=getRest(n,ex.rest)+'s';
-  // update info line
-  const cards=document.querySelectorAll('.ex-info');
-  // just re-render to be safe
   renderWk();
 }
 
-// ??? REST TIMER ???????????????????????????????????????????????????????????????
 function startRest(sec,name){
   clearInterval(restInterval);
   eid('rest-ov-el')?.remove();
@@ -1198,7 +1100,6 @@ function startRest(sec,name){
 function adjLiveRest(d){restRem=Math.max(1,restRem+d);restMax=Math.max(restMax,restRem);const e=eid('rs');if(e)e.textContent=restRem;}
 function skipRest(){clearInterval(restInterval);eid('rest-ov-el')?.remove();}
 
-// ??? FORM CUES SHEET ??????????????????????????????????????????????????????????
 function showCues(name){
   const ex=findEx(name);
   const cues=CUES[name]||['Focus on controlled movement','Full range of motion','Breathe steadily'];
@@ -1222,7 +1123,6 @@ function showCues(name){
   document.body.appendChild(bg);
 }
 
-// ??? FINISH WORKOUT ???????????????????????????????????????????????????????????
 function finishWorkout(){
   if(wkDone)return; wkDone=true;
   clearInterval(wkTimer); clearInterval(restInterval);
@@ -1240,7 +1140,7 @@ function finishWorkout(){
   eid('wk-footer').style.display='none';
   eid('wk-bar').style.width='100%';
   eid('wk-scroll').innerHTML=`<div class="finish-wrap fu">
-    <div style="font-size:56px">&#127942;</div>
+    <div style="font-size:56px">🔥</div>
     <div class="finish-ttl bc">Session<br><em>Complete</em></div>
     <div class="finish-grid">
       <div class="finish-stat"><div class="fs-val">${mins}</div><div class="fs-lbl">Minutes</div></div>
@@ -1265,22 +1165,15 @@ function goHome(){
 }
 
 function confirmEnd(){
-  // Show options: finish, discard, or cancel
   const bg=document.createElement('div');
   bg.className='sheet-bg';
   bg.innerHTML=`<div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-title">End Workout?</div>
     <div class="sheet-sub">Choose how you want to end this session</div>
-    <button class="btn btn-acc btn-full" style="margin-bottom:8px" onclick="closeSheets();finishWorkout()">
-      Save & finish
-    </button>
-    <button class="btn btn-ghost btn-full" style="margin-bottom:8px" onclick="closeSheets()">
-      Keep going
-    </button>
-    <button class="discard-btn" onclick="discardWorkout()">
-      Discard workout (don't save)
-    </button>
+    <button class="btn btn-acc btn-full" style="margin-bottom:8px" onclick="closeSheets();finishWorkout()">Save &amp; finish</button>
+    <button class="btn btn-ghost btn-full" style="margin-bottom:8px" onclick="closeSheets()">Keep going</button>
+    <button class="discard-btn" onclick="discardWorkout()">Discard workout (don't save)</button>
   </div>`;
   bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
   document.body.appendChild(bg);
@@ -1301,43 +1194,25 @@ function discardWorkout(){
   document.querySelector('#s-home .nb')?.classList.add('on');
 }
 
-// ??? HISTORY ?????????????????????????????????????????????????????????????????
 function getSessions(){
-  // Strength sessions from wkLog
   const s={};
   wkLog.forEach(e=>{
     if(!s[e.sessionId]) s[e.sessionId]={date:e.date,dayName:e.dayName,dayId:e.dayId,sid:e.sessionId,entries:[],isCardio:false};
     s[e.sessionId].entries.push(e);
   });
   const strengthSessions = Object.values(s);
-  // Cardio sessions from cardioLog · each entry is its own session
-  const cardioSessions = cardioLog.map(c=>({
-    date: c.date,
-    dayName: c.label,
-    dayId: 'cardio',
-    sid: c.date, // use date string as unique id
-    entries: [{exercise:c.label, sets:[{weight:0,reps:0}], dayName:c.label}],
-    isCardio: true,
-    cardioData: c,
-  }));
-  return [...strengthSessions, ...cardioSessions].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const cardioSessions = cardioLog.map(c=>({ date:c.date, dayName:c.label, dayId:'cardio', sid:c.date, entries:[{exercise:c.label,sets:[{weight:0,reps:0}],dayName:c.label}], isCardio:true, cardioData:c }));
+  return [...strengthSessions,...cardioSessions].sort((a,b)=>new Date(b.date)-new Date(a.date));
 }
 function delSession(sid){
-  // Could be a strength session (numeric id) or cardio (date string)
   const isCardio = typeof sid === 'string' && sid.includes('T');
-  if(isCardio){
-    cardioLog = cardioLog.filter(c=>c.date!==sid);
-    saveCardioLog();
-  } else {
-    wkLog = wkLog.filter(e=>e.sessionId!==sid);
-    saveLog();
-  }
+  if(isCardio){ cardioLog = cardioLog.filter(c=>c.date!==sid); saveCardioLog(); }
+  else { wkLog = wkLog.filter(e=>e.sessionId!==sid); saveLog(); }
   renderHistory(); renderHome();
 }
 function clearHistory(){ if(confirm('Delete ALL history? Cannot be undone.')){ wkLog=[]; saveLog(); renderHistory(); renderHome(); } }
 
 function viewSession(sidOrEl){
-  // Accept either a raw sid value or a DOM element (called from data-sid onclick)
   const sid = (sidOrEl && sidOrEl.dataset) ? sidOrEl.dataset.sid : sidOrEl;
   const sessions=getSessions();
   const s=sessions.find(x=>String(x.sid)===String(sid)); if(!s) return;
@@ -1360,15 +1235,7 @@ function viewSession(sidOrEl){
       <div class="metric-box"><div class="metric-val a" style="font-size:20px">${Math.round(totalVol).toLocaleString()}</div><div class="metric-lbl">Vol (lb)</div></div>
     </div>
     <div style="font-size:11px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Exercises</div>
-    ${s.entries.map(e=>`
-      <div class="sess-ex-block">
-        <div class="sess-ex-name">${e.exercise}</div>
-        ${e.sets.map((st,i)=>`
-          <div class="sess-set-row">
-            <div class="sess-set-n">${i+1}</div>
-            <div class="sess-set-data">${st.weight?`<b>${st.weight}</b> lb · <b>${st.reps}</b> reps`:`<b>${st.reps}</b> reps`}</div>
-          </div>`).join('')}
-      </div>`).join('')}
+    ${s.entries.map(e=>`<div class="sess-ex-block"><div class="sess-ex-name">${e.exercise}</div>${e.sets.map((st,i)=>`<div class="sess-set-row"><div class="sess-set-n">${i+1}</div><div class="sess-set-data">${st.weight?`<b>${st.weight}</b> lb × <b>${st.reps}</b> reps`:`<b>${st.reps}</b> reps`}</div></div>`).join('')}</div>`).join('')}
     <button class="btn btn-ghost btn-full" style="margin-top:14px" onclick="closeSheets()">Close</button>
   </div>`;
   bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
@@ -1385,39 +1252,23 @@ function renderHistory(){
     const sidStr=String(s.sid);
     if(s.isCardio){
       const c=s.cardioData;
-      const tc='cardio';
-      const details=[c.mins?c.mins+' min':'', c.dist?c.dist+' mi':''].filter(Boolean).join(' · ');
+      const details=[c.mins?c.mins+' min':'',c.dist?c.dist+' mi':''].filter(Boolean).join(' · ');
       const intervals=c.intervals?.length?`${c.intervals.length} rounds · ${c.intervals[0].work}s/${c.intervals[0].rest}s`:'';
-      return `<div class="hist-row" id="hr_${sidStr}">
-        <div class="del-reveal"><span>Delete</span></div>
+      return `<div class="hist-row" id="hr_${sidStr}"><div class="del-reveal"><span>Delete</span></div>
         <div class="hist-card" id="hc_${sidStr}">
-          <div style="flex:1">
-            <div class="bc" style="font-size:18px;font-weight:700;text-transform:uppercase;color:var(--cardio)">${c.label}</div>
-            <div style="font-size:12px;color:var(--t2);margin-top:3px">${details} · ${ds}</div>
-            ${intervals?`<div style="font-size:11px;color:var(--t3);margin-top:3px">${intervals}</div>`:''}
-          </div>
-          <button class="del-ico-btn" onclick="delSession('${sidStr}')">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-          </button>
-        </div>
-      </div>`;
+          <div style="flex:1"><div class="bc" style="font-size:18px;font-weight:700;text-transform:uppercase;color:var(--cardio)">${c.label}</div><div style="font-size:12px;color:var(--t2);margin-top:3px">${details} · ${ds}</div>${intervals?`<div style="font-size:11px;color:var(--t3);margin-top:3px">${intervals}</div>`:''}</div>
+          <button class="del-ico-btn" onclick="delSession('${sidStr}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
+        </div></div>`;
     }
     const tot=s.entries.reduce((a,e)=>a+e.sets.length,0);
     const vol=Math.round(s.entries.reduce((a,e)=>a+e.sets.reduce((b,x)=>(b+(parseFloat(x.weight)||0)*(parseInt(x.reps)||0)),0),0));
     const tc=program.find(p=>p.id===s.dayId)?.type||'full';
-    return `<div class="hist-row" id="hr_${sidStr}">
-      <div class="del-reveal"><span>Delete</span></div>
+    return `<div class="hist-row" id="hr_${sidStr}"><div class="del-reveal"><span>Delete</span></div>
       <div class="hist-card" id="hc_${sidStr}" onclick="viewSession(${s.sid})">
-        <div style="flex:1">
-          <div class="bc" style="font-size:18px;font-weight:700;text-transform:uppercase;color:${typeColor(tc)}">${s.dayName}</div>
-          <div style="font-size:12px;color:var(--t2);margin-top:3px">${s.entries.length} exercises · ${tot} sets · ${ds}</div>
-          <div style="font-size:11px;color:var(--t3);margin-top:3px">${vol.toLocaleString()} lb total volume</div>
-        </div>
+        <div style="flex:1"><div class="bc" style="font-size:18px;font-weight:700;text-transform:uppercase;color:${typeColor(tc)}">${s.dayName}</div><div style="font-size:12px;color:var(--t2);margin-top:3px">${s.entries.length} exercises · ${tot} sets · ${ds}</div><div style="font-size:11px;color:var(--t3);margin-top:3px">${vol.toLocaleString()} lb total volume</div></div>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3);flex-shrink:0;margin-top:2px"><path d="M9 18l6-6-6-6"/></svg>
-      </div>
-    </div>`;
+      </div></div>`;
   }).join('')+`<button class="btn btn-danger btn-full" style="margin-top:6px" onclick="clearHistory()">Clear all history</button>`;
-
   sessions.forEach(s=>{
     const sidStr=String(s.sid);
     const card=eid('hc_'+sidStr); if(!card)return;
@@ -1428,54 +1279,29 @@ function renderHistory(){
   });
 }
 
-// ??? CALENDAR ?????????????????????????????????????????????????????????????????
 let calYear=new Date().getFullYear(), calMonth=new Date().getMonth();
 const TYPE_COLORS={'push':'#ff6b6b','pull':'#47ff8a','legs':'#b47fff','cardio':'#47b4ff','full':'#ffb347'};
 
 function renderCalendar(){
   const scroll=eid('cal-scroll'); if(!scroll)return;
   const sessions=getSessions();
-  // Build date->session map
   const dateMap={};
-  // Merge strength + cardio into calendar
-  const allCalSessions = [...sessions];
-  allCalSessions.forEach(s=>{
-    const dk=new Date(s.date).toDateString();
-    if(!dateMap[dk])dateMap[dk]=[];
-    dateMap[dk].push(s);
-  });
-
+  sessions.forEach(s=>{ const dk=new Date(s.date).toDateString(); if(!dateMap[dk])dateMap[dk]=[]; dateMap[dk].push(s); });
   const today=new Date();
   const firstDay=new Date(calYear,calMonth,1).getDay();
   const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
   const monthName=new Date(calYear,calMonth).toLocaleDateString('en-US',{month:'long',year:'numeric'});
-
-  // Streak calc
-  let streak=0,check=new Date(today);
-  check.setHours(0,0,0,0);
-  while(true){
-    const dk=check.toDateString();
-    if(dateMap[dk]){streak++;check.setDate(check.getDate()-1);}
-    else if(check.toDateString()===today.toDateString()){check.setDate(check.getDate()-1);}
-    else break;
-  }
-
-  // Weekly volume for last 8 weeks
+  let streak=0,check=new Date(today); check.setHours(0,0,0,0);
+  while(true){ const dk=check.toDateString(); if(dateMap[dk]){streak++;check.setDate(check.getDate()-1);}else if(check.toDateString()===today.toDateString()){check.setDate(check.getDate()-1);}else break; }
   const weeklyVol=[];
   for(let w=7;w>=0;w--){
     const wStart=new Date(today); wStart.setDate(today.getDate()-w*7-6); wStart.setHours(0,0,0,0);
     const wEnd=new Date(today); wEnd.setDate(today.getDate()-w*7); wEnd.setHours(23,59,59,999);
     let vol=0;
-    sessions.forEach(s=>{
-      const sd=new Date(s.date);
-      if(sd>=wStart&&sd<=wEnd) vol+=s.entries.reduce((a,e)=>a+e.sets.reduce((b,x)=>(b+(parseFloat(x.weight)||0)*(parseInt(x.reps)||0)),0),0);
-    });
-    const wLabel=new Date(wEnd).toLocaleDateString('en-US',{month:'short',day:'numeric'});
-    weeklyVol.push({label:wLabel,vol:Math.round(vol)});
+    sessions.forEach(s=>{ const sd=new Date(s.date); if(sd>=wStart&&sd<=wEnd) vol+=s.entries.reduce((a,e)=>a+e.sets.reduce((b,x)=>(b+(parseFloat(x.weight)||0)*(parseInt(x.reps)||0)),0),0); });
+    weeklyVol.push({label:new Date(wEnd).toLocaleDateString('en-US',{month:'short',day:'numeric'}),vol:Math.round(vol)});
   }
   const maxVol=Math.max(...weeklyVol.map(w=>w.vol),1);
-
-  // Calendar days
   let daysCells='';
   for(let i=0;i<firstDay;i++) daysCells+=`<div class="cal-day empty-day"></div>`;
   for(let d=1;d<=daysInMonth;d++){
@@ -1488,18 +1314,12 @@ function renderCalendar(){
     const dotColor=tc?TYPE_COLORS[tc]||'#e8ff47':'#e8ff47';
     const sidEncoded = hasSess ? String(sess.sid).replace(/'/g,"\\'") : '';
     const clickAttr = hasSess ? 'onclick="viewSession(this.dataset.sid)" data-sid="'+sidEncoded+'"' : '';
-    daysCells += '<div class="cal-day'+(hasSess?' worked':'')+(isToday?' today':'')+'" '+clickAttr+'>';
-    daysCells += '<span>'+d+'</span>';
+    daysCells += '<div class="cal-day'+(hasSess?' worked':'')+(isToday?' today':'')+'" '+clickAttr+'><span>'+d+'</span>';
     if(hasSess) daysCells += '<span class="cal-dot" style="background:'+dotColor+'"></span>';
     daysCells += '</div>';
   }
-
-  // Workout type legend
   const typesSeen=[...new Set(sessions.map(s=>s.isCardio?'cardio':program.find(p=>p.id===s.dayId)?.type||'full'))];
-  const legend=typesSeen.filter(t=>TYPE_COLORS[t]).map(t=>{
-    return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--t2)"><span style="width:8px;height:8px;border-radius:50%;background:'+TYPE_COLORS[t]+';display:inline-block"></span>'+t+'</span>';
-  }).join('');
-
+  const legend=typesSeen.filter(t=>TYPE_COLORS[t]).map(t=>`<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--t2)"><span style="width:8px;height:8px;border-radius:50%;background:${TYPE_COLORS[t]};display:inline-block"></span>${t}</span>`).join('');
   scroll.innerHTML=`
     <div class="card">
       <div class="cal-nav">
@@ -1507,35 +1327,13 @@ function renderCalendar(){
         <div class="cal-month">${monthName}</div>
         <button class="cal-nav-btn" onclick="calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCalendar()">›</button>
       </div>
-      <div class="cal-grid">
-        ${['S','M','T','W','T','F','S'].map(d=>`<div class="cal-dow">${d}</div>`).join('')}
-        ${daysCells}
-      </div>
+      <div class="cal-grid">${['S','M','T','W','T','F','S'].map(d=>`<div class="cal-dow">${d}</div>`).join('')}${daysCells}</div>
       ${legend?`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid var(--b1)">${legend}</div>`:''}
     </div>
-    <div class="card">
-      <div style="display:flex;align-items:center;gap:14px">
-        <div>
-          <div class="streak-n">${streak}?</div>
-        </div>
-        <div>
-          <div style="font-weight:500;font-size:15px">Day streak</div>
-          <div style="font-size:12px;color:var(--t2);margin-top:2px">${sessions.length} total sessions logged</div>
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div style="font-size:11px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">Weekly volume (lbs)</div>
-      ${weeklyVol.map(w=>`
-        <div class="vol-bar-wrap">
-          <div class="vol-day-lbl">${w.label}</div>
-          <div class="vol-bar-bg"><div class="vol-bar" style="width:${w.vol?Math.round(w.vol/maxVol*100):0}%"></div></div>
-          <div class="vol-n">${w.vol?w.vol.toLocaleString():''}</div>
-        </div>`).join('')}
-    </div>`;
+    <div class="card"><div style="display:flex;align-items:center;gap:14px"><div><div class="streak-n">${streak}🔥</div></div><div><div style="font-weight:500;font-size:15px">Day streak</div><div style="font-size:12px;color:var(--t2);margin-top:2px">${sessions.length} total sessions logged</div></div></div></div>
+    <div class="card"><div style="font-size:11px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">Weekly volume (lbs)</div>${weeklyVol.map(w=>`<div class="vol-bar-wrap"><div class="vol-day-lbl">${w.label}</div><div class="vol-bar-bg"><div class="vol-bar" style="width:${w.vol?Math.round(w.vol/maxVol*100):0}%"></div></div><div class="vol-n">${w.vol?w.vol.toLocaleString():''}</div></div>`).join('')}</div>`;
 }
 
-// ??? PROGRESS ?????????????????????????????????????????????????????????????????
 let progTab='prs';
 function renderProgress(){
   const list=eid('prog-list');
@@ -1544,18 +1342,10 @@ function renderProgress(){
   const totalSets=wkLog.reduce((a,l)=>a+(l.sets?.length||0),0);
   const totalVol=Math.round(wkLog.reduce((a,e)=>a+e.sets.reduce((b,s)=>(b+(parseFloat(s.weight)||0)*(parseInt(s.reps)||0)),0),0));
   const totalSessions=sessions.length;
-
-  // Volume by muscle group
   const muscleVol={};
-  wkLog.forEach(e=>{
-    const ex=findEx(e.exercise);
-    const muscle=ex?.muscle||'Other';
-    const vol=e.sets.reduce((b,s)=>(b+(parseFloat(s.weight)||0)*(parseInt(s.reps)||0)),0);
-    muscleVol[muscle]=(muscleVol[muscle]||0)+vol;
-  });
+  wkLog.forEach(e=>{ const ex=findEx(e.exercise); const muscle=ex?.muscle||'Other'; const vol=e.sets.reduce((b,s)=>(b+(parseFloat(s.weight)||0)*(parseInt(s.reps)||0)),0); muscleVol[muscle]=(muscleVol[muscle]||0)+vol; });
   const topMuscles=Object.entries(muscleVol).sort((a,b)=>b[1]-a[1]).slice(0,6);
   const maxMVol=Math.max(...topMuscles.map(m=>m[1]),1);
-
   list.innerHTML=`
     <div class="metric-row">
       <div class="metric-box"><div class="metric-val a">${totalSessions}</div><div class="metric-lbl">Sessions</div></div>
@@ -1573,89 +1363,37 @@ function renderProgress(){
 function renderPRs(prs){
   if(!Object.keys(prs).length) return '<div class="empty">No PRs yet.<br>Log some weighted sets to track.</div>';
   return `<div class="card">${Object.entries(prs).sort((a,b)=>b[1]-a[1]).map(([name,w])=>`
-    <div class="pr-row" onclick="showExTrend('${name.replace(/'/g,"\\'")}'" style="cursor:pointer;-webkit-tap-highlight-color:transparent;">
-      <div>
-        <div class="pr-name">${name}</div>
-        <div class="pr-muscle">${findEx(name)?.muscle||''} · tap for trend</div>
-      </div>
+    <div class="pr-row" onclick="showExTrend('${name.replace(/'/g,"\\'")}'" style="cursor:pointer;">
+      <div><div class="pr-name">${name}</div><div class="pr-muscle">${findEx(name)?.muscle||''} · tap for trend</div></div>
       <div style="text-align:right;display:flex;align-items:center;gap:8px">
-        <div>
-          <div class="pr-val">${w}</div>
-          <div class="pr-unit">lbs PR</div>
-        </div>
+        <div><div class="pr-val">${w}</div><div class="pr-unit">lbs PR</div></div>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3)"><path d="M9 18l6-6-6-6"/></svg>
       </div>
     </div>`).join('')}</div>`;
 }
 
 function showExTrend(name){
-  // Gather all logged sets for this exercise sorted by date ascending
-  const entries = wkLog
-    .filter(e=>e.exercise===name)
-    .sort((a,b)=>new Date(a.date)-new Date(b.date));
-
-  if(!entries.length){ return; }
-
-  // Per-session: best weight
-  const points = entries.map(e=>({
-    date: new Date(e.date),
-    maxW: Math.max(...e.sets.map(s=>parseFloat(s.weight)||0)),
-    maxR: Math.max(...e.sets.map(s=>parseInt(s.reps)||0)),
-    totalVol: e.sets.reduce((a,s)=>(a+(parseFloat(s.weight)||0)*(parseInt(s.reps)||0)),0),
-  })).filter(p=>p.maxW>0);
-
-  const allPR = Math.max(...points.map(p=>p.maxW));
-  const maxVol = Math.max(...points.map(p=>p.totalVol),1);
-  const recent = points.slice(-8); // last 8 sessions
-  const ex = findEx(name);
-
-  // Build bar chart (max weight per session)
-  const chartMax = Math.max(...recent.map(p=>p.maxW),1);
-  const bars = recent.map((p,i)=>{
-    const isPR = p.maxW===allPR;
-    const pct = Math.round(p.maxW/chartMax*100);
-    const d = p.date.toLocaleDateString('en-US',{month:'numeric',day:'numeric'});
-    return `<div class="trend-col">
-      <div class="trend-val-lbl">${p.maxW}</div>
-      <div class="trend-bar-outer"><div class="trend-bar${isPR?' is-pr':i===recent.length-1?' recent':''}" style="height:${pct}%"></div></div>
-      <div class="trend-date">${d}</div>
-    </div>`;
-  }).join('');
-
-  // Volume trend summary
-  const first = points[0], last2 = points[points.length-1];
-  const volChange = points.length>1 ? Math.round(((last2.maxW-first.maxW)/first.maxW)*100) : 0;
-
+  const entries=wkLog.filter(e=>e.exercise===name).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  if(!entries.length)return;
+  const points=entries.map(e=>({ date:new Date(e.date), maxW:Math.max(...e.sets.map(s=>parseFloat(s.weight)||0)), maxR:Math.max(...e.sets.map(s=>parseInt(s.reps)||0)), totalVol:e.sets.reduce((a,s)=>(a+(parseFloat(s.weight)||0)*(parseInt(s.reps)||0)),0) })).filter(p=>p.maxW>0);
+  const allPR=Math.max(...points.map(p=>p.maxW));
+  const recent=points.slice(-8);
+  const ex=findEx(name);
+  const chartMax=Math.max(...recent.map(p=>p.maxW),1);
+  const bars=recent.map((p,i)=>{ const isPR=p.maxW===allPR; const pct=Math.round(p.maxW/chartMax*100); const d=p.date.toLocaleDateString('en-US',{month:'numeric',day:'numeric'}); return `<div class="trend-col"><div class="trend-val-lbl">${p.maxW}</div><div class="trend-bar-outer"><div class="trend-bar${isPR?' is-pr':i===recent.length-1?' recent':''}" style="height:${pct}%"></div></div><div class="trend-date">${d}</div></div>`; }).join('');
+  const first=points[0], last2=points[points.length-1];
+  const volChange=points.length>1?Math.round(((last2.maxW-first.maxW)/first.maxW)*100):0;
   const bg=document.createElement('div'); bg.className='sheet-bg';
   bg.innerHTML=`<div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-title">${name}</div>
     <div class="sheet-sub">${ex?.muscle||''} · ${points.length} sessions logged</div>
     <div class="trend-wrap">
-      <div class="trend-meta">
-        <div>
-          <div class="trend-pr-lbl">All-time PR</div>
-          <div class="trend-pr-val">${allPR} lbs</div>
-        </div>
-        ${volChange!==0?`<div style="font-size:12px;color:${volChange>0?'var(--grn)':'var(--red)'}">
-          ${volChange>0?'↑':'↓'} ${Math.abs(volChange)}% from first session
-        </div>`:''}
-      </div>
+      <div class="trend-meta"><div><div class="trend-pr-lbl">All-time PR</div><div class="trend-pr-val">${allPR} lbs</div></div>${volChange!==0?`<div style="font-size:12px;color:${volChange>0?'var(--grn)':'var(--red)'}">${volChange>0?'↑':'↓'} ${Math.abs(volChange)}% from first session</div>`:''}</div>
       <div class="trend-bars">${bars||'<div class="empty" style="padding:10px">Not enough data</div>'}</div>
       <div style="font-size:10px;color:var(--t3);margin-top:6px;text-align:center">Max weight per session · last ${recent.length} sessions</div>
     </div>
-    ${points.length>1?`
-    <div style="margin-top:12px">
-      <div style="font-size:11px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Session history</div>
-      ${points.slice().reverse().slice(0,10).map(p=>`
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--b1)">
-          <div style="font-size:13px;color:var(--t2)">${p.date.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div>
-          <div style="display:flex;gap:12px;align-items:center">
-            <div style="font-size:13px;font-weight:600">${p.maxW} lbs · ${p.maxR} reps</div>
-            ${p.maxW===allPR?'<span style="font-size:10px;background:rgba(232,255,71,.15);color:var(--acc);padding:2px 7px;border-radius:20px;font-weight:600">PR</span>':''}
-          </div>
-        </div>`).join('')}
-    </div>`:''}
+    ${points.length>1?`<div style="margin-top:12px"><div style="font-size:11px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Session history</div>${points.slice().reverse().slice(0,10).map(p=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--b1)"><div style="font-size:13px;color:var(--t2)">${p.date.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div><div style="display:flex;gap:12px;align-items:center"><div style="font-size:13px;font-weight:600">${p.maxW} lbs × ${p.maxR} reps</div>${p.maxW===allPR?'<span style="font-size:10px;background:rgba(232,255,71,.15);color:var(--acc);padding:2px 7px;border-radius:20px;font-weight:600">PR</span>':''}</div></div>`).join('')}</div>`:''}
     <button class="btn btn-ghost btn-full" style="margin-top:14px" onclick="closeSheets()">Close</button>
   </div>`;
   bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
@@ -1664,18 +1402,9 @@ function showExTrend(name){
 
 function renderMuscleVol(topMuscles,maxMVol){
   if(!topMuscles.length) return '<div class="empty">No volume data yet.</div>';
-  return `<div class="card">
-    <div style="font-size:11px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">Total volume by muscle</div>
-    ${topMuscles.map(([m,v])=>`
-      <div class="vol-bar-wrap" style="margin-bottom:10px">
-        <div style="width:90px;font-size:12px;color:var(--t2);flex-shrink:0">${m}</div>
-        <div class="vol-bar-bg"><div class="vol-bar" style="width:${Math.round(v/maxMVol*100)}%;background:var(--acc)"></div></div>
-        <div class="vol-n" style="width:50px">${Math.round(v/1000).toFixed(1)}k</div>
-      </div>`).join('')}
-  </div>`;
+  return `<div class="card"><div style="font-size:11px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">Total volume by muscle</div>${topMuscles.map(([m,v])=>`<div class="vol-bar-wrap" style="margin-bottom:10px"><div style="width:90px;font-size:12px;color:var(--t2);flex-shrink:0">${m}</div><div class="vol-bar-bg"><div class="vol-bar" style="width:${Math.round(v/maxMVol*100)}%;background:var(--acc)"></div></div><div class="vol-n" style="width:50px">${Math.round(v/1000).toFixed(1)}k</div></div>`).join('')}</div>`;
 }
 
-// ??? EDIT SCREEN ??????????????????????????????????????????????????????????????
 let dragSrcDay=null, dragSrcIdx=null;
 
 function renderEdit(){
@@ -1683,152 +1412,51 @@ function renderEdit(){
   list.innerHTML=program.map(d=>`
     <div class="edit-day-card" id="edc_${d.id}">
       <div class="edit-day-head" onclick="toggleEditDay('${d.id}')">
-        <div>
-          <div class="edit-day-name bc" style="color:${typeColor(d.type)}">${d.day} · ${d.name}</div>
-          <div style="font-size:12px;color:var(--t2);margin-top:2px">${d.exercises.length} exercises</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <button class="mini-btn del" onclick="delDay('${d.id}',event)">Delete day</button>
-          <span class="chevron${editExpandId===d.id?' open':''}">▾</span>
-        </div>
+        <div><div class="edit-day-name bc" style="color:${typeColor(d.type)}">${d.day} — ${d.name}</div><div style="font-size:12px;color:var(--t2);margin-top:2px">${d.exercises.length} exercises</div></div>
+        <div style="display:flex;align-items:center;gap:8px"><button class="mini-btn del" onclick="delDay('${d.id}',event)">Delete day</button><span class="chevron${editExpandId===d.id?' open':''}">▼</span></div>
       </div>
       <div class="edit-day-body${editExpandId===d.id?' open':''}" id="edb_${d.id}">
         <div id="drag-list-${d.id}">
           ${d.exercises.map((n,i)=>{
             const ex=findEx(n);
             return `<div class="ex-edit-row" id="exrow_${d.id}_${i}" draggable="true"
-              ondragstart="onDragStart(event,'${d.id}',${i})"
-              ondragover="onDragOver(event,'${d.id}',${i})"
-              ondrop="onDrop(event,'${d.id}',${i})"
-              ondragend="onDragEnd(event)">
-              <div class="drag-handle" title="Drag to reorder">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="9" y1="6" x2="15" y2="6"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="18" x2="15" y2="18"/></svg>
-              </div>
-              <div style="flex:1;min-width:0">
-                <div class="ex-edit-name">${n}</div>
-                <div class="ex-edit-meta">${ex.sets}–${ex.reps} · ${ex.muscle}</div>
-              </div>
-              <div class="ex-edit-actions">
-                <button class="mini-btn" onclick="editExSheet('${d.id}','${n}',${i})">Edit</button>
-                <button class="mini-btn del" onclick="removeEx('${d.id}','${n}')">✕</button>
-              </div>
+              ondragstart="onDragStart(event,'${d.id}',${i})" ondragover="onDragOver(event,'${d.id}',${i})"
+              ondrop="onDrop(event,'${d.id}',${i})" ondragend="onDragEnd(event)">
+              <div class="drag-handle" title="Drag to reorder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="9" y1="6" x2="15" y2="6"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="18" x2="15" y2="18"/></svg></div>
+              <div style="flex:1;min-width:0"><div class="ex-edit-name">${n}</div><div class="ex-edit-meta">${ex.sets}×${ex.reps} · ${ex.muscle}</div></div>
+              <div class="ex-edit-actions"><button class="mini-btn" onclick="editExSheet('${d.id}','${n}',${i})">Edit</button><button class="mini-btn del" onclick="removeEx('${d.id}','${n}')">✕</button></div>
             </div>`;
           }).join('')}
         </div>
         <button class="btn btn-ghost btn-full btn-sm" style="margin-top:10px" onclick="showAddExSheet('${d.id}')">+ Add exercise</button>
       </div>
     </div>`).join('');
-
-  // Touch-based drag for mobile
   setupTouchDrag();
 }
 
-function onDragStart(e, dayId, idx){
-  dragSrcDay=dayId; dragSrcIdx=idx;
-  e.dataTransfer.effectAllowed='move';
-  setTimeout(()=>e.target.classList.add('dragging'),0);
-}
-function onDragOver(e, dayId, idx){
-  e.preventDefault(); e.dataTransfer.dropEffect='move';
-  document.querySelectorAll('.ex-edit-row').forEach(r=>r.classList.remove('drag-over'));
-  if(!(dragSrcDay===dayId && dragSrcIdx===idx))
-    eid(`exrow_${dayId}_${idx}`)?.classList.add('drag-over');
-}
-function onDrop(e, dayId, idx){
-  e.preventDefault();
-  if(dragSrcDay!==dayId||dragSrcIdx===idx)return;
-  const d=program.find(p=>p.id===dayId); if(!d)return;
-  const arr=[...d.exercises];
-  const [moved]=arr.splice(dragSrcIdx,1);
-  arr.splice(idx,0,moved);
-  d.exercises=arr;
-  saveProg(); renderEdit(); renderHome();
-}
-function onDragEnd(e){
-  e.target.classList.remove('dragging');
-  document.querySelectorAll('.ex-edit-row').forEach(r=>r.classList.remove('drag-over'));
-}
+function onDragStart(e,dayId,idx){ dragSrcDay=dayId; dragSrcIdx=idx; e.dataTransfer.effectAllowed='move'; setTimeout(()=>e.target.classList.add('dragging'),0); }
+function onDragOver(e,dayId,idx){ e.preventDefault(); e.dataTransfer.dropEffect='move'; document.querySelectorAll('.ex-edit-row').forEach(r=>r.classList.remove('drag-over')); if(!(dragSrcDay===dayId&&dragSrcIdx===idx)) eid(`exrow_${dayId}_${idx}`)?.classList.add('drag-over'); }
+function onDrop(e,dayId,idx){ e.preventDefault(); if(dragSrcDay!==dayId||dragSrcIdx===idx)return; const d=program.find(p=>p.id===dayId); if(!d)return; const arr=[...d.exercises]; const [moved]=arr.splice(dragSrcIdx,1); arr.splice(idx,0,moved); d.exercises=arr; saveProg(); renderEdit(); renderHome(); }
+function onDragEnd(e){ e.target.classList.remove('dragging'); document.querySelectorAll('.ex-edit-row').forEach(r=>r.classList.remove('drag-over')); }
 
-// Touch drag for mobile (long press + drag)
 function setupTouchDrag(){
-  let touchDayId=null, touchIdx=null, touchClone=null, touchOffY=0;
+  let touchDayId=null,touchIdx=null,touchClone=null,touchOffY=0;
   document.querySelectorAll('.drag-handle').forEach(handle=>{
-    handle.addEventListener('touchstart', e=>{
-      e.stopPropagation();
-      const row=handle.closest('.ex-edit-row');
-      const m=row.id.match(/exrow_(.+)_(\d+)/);
-      if(!m)return;
-      touchDayId=m[1]; touchIdx=parseInt(m[2]);
-      const rect=row.getBoundingClientRect();
-      touchOffY=e.touches[0].clientY-rect.top;
-      // Create floating clone
-      touchClone=row.cloneNode(true);
-      touchClone.style.cssText=`position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;opacity:.85;z-index:999;pointer-events:none;background:var(--s2);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.5);`;
-      document.body.appendChild(touchClone);
-      row.style.opacity='.3';
-    },{passive:true});
-
-    handle.addEventListener('touchmove', e=>{
-      e.preventDefault();
-      if(!touchClone)return;
-      const y=e.touches[0].clientY-touchOffY;
-      touchClone.style.top=y+'px';
-      // Find target row
-      const elements=document.elementsFromPoint(e.touches[0].clientX, e.touches[0].clientY);
-      const targetRow=elements.find(el=>el.classList?.contains('ex-edit-row')&&el.id!==`exrow_${touchDayId}_${touchIdx}`);
-      document.querySelectorAll('.ex-edit-row').forEach(r=>r.classList.remove('drag-over'));
-      if(targetRow)targetRow.classList.add('drag-over');
-    },{passive:false});
-
-    handle.addEventListener('touchend', e=>{
-      if(!touchClone){return;}
-      const over=document.querySelector('.ex-edit-row.drag-over');
-      if(over){
-        const m=over.id.match(/exrow_(.+)_(\d+)/);
-        if(m&&m[1]===touchDayId){
-          const toIdx=parseInt(m[2]);
-          const d=program.find(p=>p.id===touchDayId);
-          if(d){
-            const arr=[...d.exercises];
-            const [moved]=arr.splice(touchIdx,1);
-            arr.splice(toIdx,0,moved);
-            d.exercises=arr;
-            saveProg();
-          }
-        }
-      }
-      touchClone.remove(); touchClone=null;
-      document.querySelectorAll('.ex-edit-row').forEach(r=>{r.classList.remove('drag-over');r.style.opacity='';});
-      renderEdit(); renderHome();
-    },{passive:true});
+    handle.addEventListener('touchstart',e=>{ e.stopPropagation(); const row=handle.closest('.ex-edit-row'); const m=row.id.match(/exrow_(.+)_(\d+)/); if(!m)return; touchDayId=m[1]; touchIdx=parseInt(m[2]); const rect=row.getBoundingClientRect(); touchOffY=e.touches[0].clientY-rect.top; touchClone=row.cloneNode(true); touchClone.style.cssText=`position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;opacity:.85;z-index:999;pointer-events:none;background:var(--s2);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.5);`; document.body.appendChild(touchClone); row.style.opacity='.3'; },{passive:true});
+    handle.addEventListener('touchmove',e=>{ e.preventDefault(); if(!touchClone)return; touchClone.style.top=(e.touches[0].clientY-touchOffY)+'px'; const els=document.elementsFromPoint(e.touches[0].clientX,e.touches[0].clientY); const tr=els.find(el=>el.classList?.contains('ex-edit-row')&&el.id!==`exrow_${touchDayId}_${touchIdx}`); document.querySelectorAll('.ex-edit-row').forEach(r=>r.classList.remove('drag-over')); if(tr)tr.classList.add('drag-over'); },{passive:false});
+    handle.addEventListener('touchend',e=>{ if(!touchClone)return; const over=document.querySelector('.ex-edit-row.drag-over'); if(over){ const m=over.id.match(/exrow_(.+)_(\d+)/); if(m&&m[1]===touchDayId){ const toIdx=parseInt(m[2]); const d=program.find(p=>p.id===touchDayId); if(d){ const arr=[...d.exercises]; const [moved]=arr.splice(touchIdx,1); arr.splice(toIdx,0,moved); d.exercises=arr; saveProg(); } } } touchClone.remove(); touchClone=null; document.querySelectorAll('.ex-edit-row').forEach(r=>{r.classList.remove('drag-over');r.style.opacity='';}); renderEdit(); renderHome(); },{passive:true});
   });
 }
 
-function toggleEditDay(id){
-  editExpandId=editExpandId===id?null:id;
-  renderEdit();
-}
-
-function delDay(id,e){
-  e.stopPropagation();
-  if(confirm('Delete this workout day?')){ program=program.filter(d=>d.id!==id); saveProg(); renderEdit(); renderHome(); }
-}
-
-function removeEx(dayId,name){
-  const d=program.find(p=>p.id===dayId); if(!d)return;
-  d.exercises=d.exercises.filter(n=>n!==name);
-  saveProg(); renderEdit(); renderHome();
-}
+function toggleEditDay(id){ editExpandId=editExpandId===id?null:id; renderEdit(); }
+function delDay(id,e){ e.stopPropagation(); if(confirm('Delete this workout day?')){ program=program.filter(d=>d.id!==id); saveProg(); renderEdit(); renderHome(); } }
+function removeEx(dayId,name){ const d=program.find(p=>p.id===dayId); if(!d)return; d.exercises=d.exercises.filter(n=>n!==name); saveProg(); renderEdit(); renderHome(); }
 
 function editExSheet(dayId,name,idx){
   const ex=findEx(name);
-  const d=program.find(p=>p.id===dayId);
   const rest=getRest(name,ex.rest);
   const bg=document.createElement('div'); bg.className='sheet-bg';
-  bg.innerHTML=`<div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">Edit: ${name}</div>
-    <div class="sheet-sub">${ex.muscle}</div>
+  bg.innerHTML=`<div class="sheet"><div class="sheet-handle"></div><div class="sheet-title">Edit: ${name}</div><div class="sheet-sub">${ex.muscle}</div>
     <div class="field"><label>Sets</label><input type="number" id="ee-sets" value="${ex.sets}" min="1" max="10"></div>
     <div class="field"><label>Reps / Target</label><input type="text" id="ee-reps" value="${ex.reps}"></div>
     <div class="field"><label>Rest (seconds)</label><input type="number" id="ee-rest" value="${rest}" min="10" max="600" step="5"></div>
@@ -1843,38 +1471,21 @@ function saveExEdit(name){
   const sets=parseInt(eid('ee-sets')?.value)||3;
   const reps=eid('ee-reps')?.value||'10';
   const rest=parseInt(eid('ee-rest')?.value)||90;
-  // Store custom overrides
   custRest[name]=rest;
-  // Update library entry if custom (we store overrides in a separate map)
   if(!localStorage.getItem('gainz_ex_overrides')) localStorage.setItem('gainz_ex_overrides','{}');
   const ov=JSON.parse(localStorage.getItem('gainz_ex_overrides'));
   ov[name]={sets,reps,rest};
   localStorage.setItem('gainz_ex_overrides',JSON.stringify(ov));
-  saveRest();
-  closeSheets();
-  renderEdit();
+  saveRest(); closeSheets(); renderEdit();
 }
 
-// ??? ADD EXERCISE SHEET ???????????????????????????????????????????????????????
 function showAddExSheet(dayId){
-  addExToDay=dayId;
-  activeMg='chest';
+  addExToDay=dayId; activeMg='chest';
   const bg=document.createElement('div'); bg.className='sheet-bg'; bg.id='add-ex-sheet';
-  bg.innerHTML=`<div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">Add Exercise</div>
-    <div class="sheet-sub">Pick a muscle group then select exercise</div>
-    <div class="mg-tabs" id="mg-tabs">
-      ${['chest','shoulders','back','arms','legs','core','cardio'].map(g=>`
-        <button class="mg-tab${g===activeMg?' on':''}" onclick="setMg('${g}')">${g.charAt(0).toUpperCase()+g.slice(1)}</button>
-      `).join('')}
-    </div>
+  bg.innerHTML=`<div class="sheet"><div class="sheet-handle"></div><div class="sheet-title">Add Exercise</div><div class="sheet-sub">Pick a muscle group then select exercise</div>
+    <div class="mg-tabs" id="mg-tabs">${['chest','shoulders','back','arms','legs','core','cardio'].map(g=>`<button class="mg-tab${g===activeMg?' on':''}" onclick="setMg('${g}')">${g.charAt(0).toUpperCase()+g.slice(1)}</button>`).join('')}</div>
     <div id="ex-pick-list"></div>
-    <div style="margin-top:8px">
-      <div class="sheet-sub" style="margin-bottom:6px">Or add custom exercise:</div>
-      <input type="text" id="custom-ex-name" placeholder="Exercise name..." style="margin-bottom:8px">
-      <button class="btn btn-ghost btn-full btn-sm" onclick="addCustomEx()">Add custom</button>
-    </div>
+    <div style="margin-top:8px"><div class="sheet-sub" style="margin-bottom:6px">Or add custom exercise:</div><input type="text" id="custom-ex-name" placeholder="Exercise name..." style="margin-bottom:8px"><button class="btn btn-ghost btn-full btn-sm" onclick="addCustomEx()">Add custom</button></div>
     <button class="btn btn-ghost btn-full" style="margin-top:10px" onclick="closeSheets()">Close</button>
   </div>`;
   bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
@@ -1882,66 +1493,24 @@ function showAddExSheet(dayId){
   renderExPicks();
 }
 
-function setMg(mg){
-  activeMg=mg;
-  document.querySelectorAll('.mg-tab').forEach(t=>{t.classList.toggle('on',t.textContent.toLowerCase()===mg);});
-  renderExPicks();
-}
+function setMg(mg){ activeMg=mg; document.querySelectorAll('.mg-tab').forEach(t=>{t.classList.toggle('on',t.textContent.toLowerCase()===mg);}); renderExPicks(); }
 
 function renderExPicks(){
   const list=eid('ex-pick-list'); if(!list)return;
   const group=EXERCISE_LIBRARY[activeMg]||[];
   const day=program.find(d=>d.id===addExToDay);
-  list.innerHTML=group.map(ex=>{
-    const already=day?.exercises.includes(ex.name);
-    return `<div class="ex-pick-row">
-      <div style="flex:1">
-        <div class="ex-pick-name">${ex.name}</div>
-        <div class="ex-pick-muscle">${ex.muscle} · ${ex.sets}–${ex.reps}</div>
-      </div>
-      ${already
-        ? '<span style="font-size:11px;color:var(--t3)">Added</span>'
-        : `<button class="add-ex-btn" onclick="addExToProgram('${ex.name}')">+ Add</button>`}
-    </div>`;
-  }).join('')||'<div style="font-size:13px;color:var(--t3);padding:12px 0">No exercises in this group.</div>';
+  list.innerHTML=group.map(ex=>{ const already=day?.exercises.includes(ex.name); return `<div class="ex-pick-row"><div style="flex:1"><div class="ex-pick-name">${ex.name}</div><div class="ex-pick-muscle">${ex.muscle} · ${ex.sets}×${ex.reps}</div></div>${already?'<span style="font-size:11px;color:var(--t3)">Added</span>':`<button class="add-ex-btn" onclick="addExToProgram('${ex.name}')">+ Add</button>`}</div>`; }).join('')||'<div style="font-size:13px;color:var(--t3);padding:12px 0">No exercises in this group.</div>';
 }
 
-function addExToProgram(name){
-  const day=program.find(d=>d.id===addExToDay); if(!day)return;
-  if(!day.exercises.includes(name)) day.exercises.push(name);
-  saveProg();
-  renderExPicks(); // refresh to show "Added"
-  renderEdit();
-  renderHome();
-}
+function addExToProgram(name){ const day=program.find(d=>d.id===addExToDay); if(!day)return; if(!day.exercises.includes(name)) day.exercises.push(name); saveProg(); renderExPicks(); renderEdit(); renderHome(); }
+function addCustomEx(){ const name=(eid('custom-ex-name')?.value||'').trim(); if(!name)return; const day=program.find(d=>d.id===addExToDay); if(!day)return; EXERCISE_LIBRARY.arms.push({name,muscle:'Custom',sets:3,reps:'10–12',rest:90,search:name+' form'}); if(!day.exercises.includes(name)) day.exercises.push(name); saveProg(); closeSheets(); renderEdit(); renderHome(); }
 
-function addCustomEx(){
-  const name=(eid('custom-ex-name')?.value||'').trim(); if(!name)return;
-  const day=program.find(d=>d.id===addExToDay); if(!day)return;
-  // Add to library under arms as misc
-  EXERCISE_LIBRARY.arms.push({name,muscle:'Custom',sets:3,reps:'10–12',rest:90,search:name+' form'});
-  if(!day.exercises.includes(name)) day.exercises.push(name);
-  saveProg(); closeSheets(); renderEdit(); renderHome();
-}
-
-// ??? NEW DAY SHEET ????????????????????????????????????????????????????????????
 function showNewDaySheet(){
   const bg=document.createElement('div'); bg.className='sheet-bg';
-  bg.innerHTML=`<div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">New Workout Day</div>
-    <div class="sheet-sub">Create a custom training day</div>
+  bg.innerHTML=`<div class="sheet"><div class="sheet-handle"></div><div class="sheet-title">New Workout Day</div><div class="sheet-sub">Create a custom training day</div>
     <div class="field"><label>Day name (e.g. "Upper Body A")</label><input type="text" id="nd-name" placeholder="Day name..."></div>
     <div class="field"><label>Focus / subtitle</label><input type="text" id="nd-focus" placeholder="e.g. Chest / Shoulders / Triceps"></div>
-    <div class="field"><label>Type (sets color)</label>
-      <select id="nd-type">
-        <option value="push">Push (red)</option>
-        <option value="pull">Pull (green)</option>
-        <option value="legs">Legs (purple)</option>
-        <option value="cardio">Cardio (blue)</option>
-        <option value="full">Full/Other (orange)</option>
-      </select>
-    </div>
+    <div class="field"><label>Type (sets color)</label><select id="nd-type"><option value="push">Push (red)</option><option value="pull">Pull (green)</option><option value="legs">Legs (purple)</option><option value="cardio">Cardio (blue)</option><option value="full">Full/Other (orange)</option></select></div>
     <button class="btn btn-acc btn-full" onclick="createDay()">Create day</button>
     <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="closeSheets()">Cancel</button>
   </div>`;
@@ -1961,186 +1530,7 @@ function createDay(){
   editExpandId=id; renderEdit();
 }
 
-// ??? INIT ?????????????????????????????????????????????????????????????????????
 renderHome();
 </script>
-
-<!-- VIDEOS SCREEN -->
-<div id="s-videos" class="scr" style="background:#0a0a0a;">
-  <div style="padding:20px 16px 8px;flex-shrink:0;">
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:800;text-transform:uppercase;color:#f0f0f0;">Play</div>
-    <div style="font-size:13px;color:#888;margin-top:2px;">Follow-along workouts</div>
-  </div>
-  <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 16px 32px;">
-<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:#4a4a4a;margin:18px 0 10px;">HIIT</div>
-<div onclick="window.open('https://www.youtube.com/watch?v=Jpxc0TUr9BI&t=1800s')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;">
-  <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="#ff4747"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-  </div>
-  <div style="flex:1;min-width:0;">
-    <div style="font-size:14px;font-weight:500;line-height:1.3;">20 Min Full Body HIIT</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">Sydney Cummings · 20 min</div>
-  </div>
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-</div>
-<div onclick="window.open('https://www.youtube.com/watch?v=4nPKyvKmFi0')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;">
-  <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="#ff4747"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-  </div>
-  <div style="flex:1;min-width:0;">
-    <div style="font-size:14px;font-weight:500;line-height:1.3;">30 Min HIIT · No Equipment</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">MadFit · 30 min</div>
-  </div>
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-</div>
-<div onclick="window.open('https://www.youtube.com/watch?v=ml6cT4AZdqI')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;">
-  <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="#ff4747"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-  </div>
-  <div style="flex:1;min-width:0;">
-    <div style="font-size:14px;font-weight:500;line-height:1.3;">20 Min HIIT · Fat Burning</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">Heather Robertson · 20 min</div>
-  </div>
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-</div>
-<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:#4a4a4a;margin:18px 0 10px;">Bike</div>
-<div onclick="window.open('https://www.youtube.com/watch?v=ZMO_XC9w7Lw&t=1277s')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;">
-  <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="#47b4ff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-  </div>
-  <div style="flex:1;min-width:0;">
-    <div style="font-size:14px;font-weight:500;line-height:1.3;">45 Min Indoor Cycling</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">GCN Training · 45 min</div>
-  </div>
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-</div>
-<div onclick="window.open('https://www.youtube.com/watch?v=kPl66RocFDo')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;">
-  <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="#47b4ff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-  </div>
-  <div style="flex:1;min-width:0;">
-    <div style="font-size:14px;font-weight:500;line-height:1.3;">30 Min Cycling Intervals</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">GCN Training · 30 min</div>
-  </div>
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-</div>
-<div onclick="window.open('https://www.youtube.com/watch?v=ZiGE3-L4vyg')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;">
-  <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="#47b4ff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-  </div>
-  <div style="flex:1;min-width:0;">
-    <div style="font-size:14px;font-weight:500;line-height:1.3;">30 Min Indoor Cycling HIIT</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">GCN · 30 min</div>
-  </div>
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-</div>
-<div onclick="window.open('https://www.youtube.com/watch?v=wBurKQX7h4Q')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;">
-  <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="#47b4ff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-  </div>
-  <div style="flex:1;min-width:0;">
-    <div style="font-size:14px;font-weight:500;line-height:1.3;">60 Min Endurance Ride</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">Cycling Weekly · 60 min</div>
-  </div>
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-</div>
-<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:#4a4a4a;margin:18px 0 10px;">Run</div>
-<div onclick="window.open('https://www.youtube.com/watch?v=vDKnTjpccf4')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;">
-  <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="#ffb347"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-  </div>
-  <div style="flex:1;min-width:0;">
-    <div style="font-size:14px;font-weight:500;line-height:1.3;">30 Min Treadmill Run · Guided</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">Sydney Cummings · 30 min</div>
-  </div>
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-</div>
-<div onclick="window.open('https://www.youtube.com/watch?v=0_qUOTkGSRA')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;">
-  <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="#ffb347"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-  </div>
-  <div style="flex:1;min-width:0;">
-    <div style="font-size:14px;font-weight:500;line-height:1.3;">5K Training · Guided Run</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">The Run Experience · 30 min</div>
-  </div>
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-</div>
-<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:#4a4a4a;margin:18px 0 10px;">Yoga</div>
-<div onclick="window.open('https://www.youtube.com/watch?v=v7AYKMP6rOE')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;">
-  <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="#b47fff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-  </div>
-  <div style="flex:1;min-width:0;">
-    <div style="font-size:14px;font-weight:500;line-height:1.3;">Yoga for Beginners · 20 Min</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">Yoga with Adriene · 20 min</div>
-  </div>
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-</div>
-<div onclick="window.open('https://www.youtube.com/watch?v=oBu-pQG6sTY')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;">
-  <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="#b47fff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-  </div>
-  <div style="flex:1;min-width:0;">
-    <div style="font-size:14px;font-weight:500;line-height:1.3;">30 Min Full Body Yoga Flow</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">Yoga with Adriene · 30 min</div>
-  </div>
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-</div>
-<div onclick="window.open('https://www.youtube.com/watch?v=VpW33Celubg')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;">
-  <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="#b47fff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-  </div>
-  <div style="flex:1;min-width:0;">
-    <div style="font-size:14px;font-weight:500;line-height:1.3;">Yoga for Athletes · Recovery</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">Yoga with Adriene · 30 min</div>
-  </div>
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-</div>
-<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:#4a4a4a;margin:18px 0 10px;">Core & Abs</div>
-<div onclick="window.open('https://www.youtube.com/watch?v=jDwoBqPH0jk')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;">
-  <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="#47ff8a"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-  </div>
-  <div style="flex:1;min-width:0;">
-    <div style="font-size:14px;font-weight:500;line-height:1.3;">6 Pack Abs · 10 Min</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">Athlean-X · 10 min</div>
-  </div>
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-</div>
-<div onclick="window.open('https://www.youtube.com/watch?v=1f8yoFFdkcY')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;">
-  <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="#47ff8a"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-  </div>
-  <div style="flex:1;min-width:0;">
-    <div style="font-size:14px;font-weight:500;line-height:1.3;">10 Min Abs · No Equipment</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">MadFit · 10 min</div>
-  </div>
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-</div>
-<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:#4a4a4a;margin:18px 0 10px;">Full Body</div>
-<div onclick="window.open('https://www.youtube.com/watch?v=UBMk30rjy0o')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;">
-  <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="#e8ff47"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-  </div>
-  <div style="flex:1;min-width:0;">
-    <div style="font-size:14px;font-weight:500;line-height:1.3;">30 Min Full Body · No Equipment</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">Heather Robertson · 30 min</div>
-  </div>
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-</div>
-<div onclick="window.open('https://www.youtube.com/watch?v=9UO-OOAiSWk')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;">
-  <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="#e8ff47"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-  </div>
-  <div style="flex:1;min-width:0;">
-    <div style="font-size:14px;font-weight:500;line-height:1.3;">20 Min Full Body Workout</div>
-    <div style="font-size:11px;color:#888;margin-top:3px;">MadFit · 20 min</div>
-  </div>
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-</div>
-  </div>
-  <div style="display:flex;background:#141414;border-top:1px solid rgba(255,255,255,0.07);padding:6px 0;flex-shrink:0;"><button class="nb" onclick="nav('home',this)" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;background:none;border:none;cursor:pointer;color:#4a4a4a;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span style="font-size:9px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;">Home</span></button><button class="nb" onclick="nav('history',this)" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;background:none;border:none;cursor:pointer;color:#4a4a4a;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span style="font-size:9px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;">History</span></button><button class="nb" onclick="nav('calendar',this)" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;background:none;border:none;cursor:pointer;color:#4a4a4a;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span style="font-size:9px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;">Calendar</span></button><button class="nb" onclick="nav('progress',this)" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;background:none;border:none;cursor:pointer;color:#4a4a4a;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span style="font-size:9px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;">Progress</span></button><button class="nb" onclick="nav('edit',this)" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;background:none;border:none;cursor:pointer;color:#4a4a4a;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span style="font-size:9px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;">Edit</span></button><button class="nb on" onclick="nav('videos',this)" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;background:none;border:none;cursor:pointer;color:#e8ff47;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px"><polygon points="5 3 19 12 5 21 5 3"/></svg><span style="font-size:9px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;">Play</span></button></div>
-</div>
-
 </body>
 </html>
