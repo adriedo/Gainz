@@ -369,7 +369,13 @@ input[type="date"]{color-scheme:dark;}
     <div class="stat-grid" id="home-stats"></div>
     <div class="slbl">Strength Work</div>
     <div id="day-grid"></div>
-    <div class="slbl">Cardio</div>
+    <div class="slbl" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>Cardio</span>
+      <div style="display:flex;gap:5px;" id="log-unit-toggle">
+        <button onclick="setLogUnit('mi')" id="lu-mi" style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;cursor:pointer;font-family:'DM Sans',sans-serif;">mi</button>
+        <button onclick="setLogUnit('km')" id="lu-km" style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;cursor:pointer;font-family:'DM Sans',sans-serif;">km</button>
+      </div>
+    </div>
     <div id="cardio-grid"></div>
   </div>
   <div class="nav">
@@ -812,6 +818,48 @@ function beep(){try{const c=new(window.AudioContext||window.webkitAudioContext)(
 
 // ─── VOICE ────────────────────────────────────────────────────────────────
 let voiceEnabled=JSON.parse(localStorage.getItem('gainz_voice')||'true');
+// logUnit: what unit the user currently logs IN (stored with each entry)
+// viewUnit: what unit to display in progress view (can convert)
+let logUnit=localStorage.getItem('gainz_log_unit')||'mi';   // 'mi' or 'km' — per entry input
+let viewUnit=localStorage.getItem('gainz_view_unit')||'mi'; // 'mi' or 'km' — progress display
+
+const KM_PER_MI=1.60934;
+
+function setLogUnit(u){logUnit=u;localStorage.setItem('gainz_log_unit',u);renderHome();}
+function setViewUnit(u){viewUnit=u;localStorage.setItem('gainz_view_unit',u);renderProgress();}
+
+// Convert a stored distance (tagged with its unit) to viewUnit for display
+function toViewDist(val,storedUnit){
+  if(!val||val<=0)return 0;
+  const v=parseFloat(val)||0;
+  if(storedUnit===viewUnit)return v;
+  if(storedUnit==='mi'&&viewUnit==='km')return v*KM_PER_MI;
+  if(storedUnit==='km'&&viewUnit==='mi')return v/KM_PER_MI;
+  return v;
+}
+
+// Format a stored distance for display in viewUnit
+function fmtDist(val,storedUnit){
+  const u=storedUnit||'mi';
+  const converted=toViewDist(val,u);
+  if(!converted||converted<=0)return'';
+  return (Math.round(converted*100)/100)+' '+viewUnit;
+}
+
+// Format a stored distance for LOGGING display (uses logUnit label)
+function fmtDistLog(val){
+  if(!val||val<=0)return'';
+  return (Math.round(parseFloat(val)*100)/100)+' '+logUnit;
+}
+
+// Pace in min/viewUnit
+function fmtPaceStr(mins,dist,storedUnit){
+  if(!dist||!mins||dist<=0||mins<=0)return'';
+  const converted=toViewDist(dist,storedUnit||'mi');
+  if(!converted||converted<=0)return'';
+  const pace=mins/converted;
+  return Math.floor(pace)+':'+(String(Math.round((pace%1)*60)).padStart(2,'0'))+'/'+viewUnit;
+}
 function toggleVoice(){
   voiceEnabled=!voiceEnabled;
   localStorage.setItem('gainz_voice',JSON.stringify(voiceEnabled));
@@ -822,18 +870,55 @@ function toggleVoice(){
   });
 }
 
+// Cache preferred voice - iOS loads voices async
+let _cachedVoice=null;
+function getPreferredVoice(){
+  if(_cachedVoice)return _cachedVoice;
+  const voices=window.speechSynthesis.getVoices();
+  _cachedVoice=voices.find(v=>/samantha|karen|daniel|alex|google us|google uk/i.test(v.name))||
+               voices.find(v=>v.lang==='en-US'&&v.localService)||
+               voices.find(v=>v.lang.startsWith('en'))||null;
+  return _cachedVoice;
+}
+// Prime voice on voices loaded event (iOS fires this async)
+if(window.speechSynthesis){
+  window.speechSynthesis.onvoiceschanged=()=>{ _cachedVoice=null; getPreferredVoice(); };
+}
+
+// iOS requires speech to be triggered within a user gesture at least once.
+// We unlock it on the very first tap anywhere in the app.
+let _speechUnlocked=false;
+function unlockSpeech(){
+  if(_speechUnlocked||!window.speechSynthesis)return;
+  _speechUnlocked=true;
+  const u=new SpeechSynthesisUtterance('');
+  u.volume=0;u.rate=1;
+  window.speechSynthesis.speak(u);
+}
+document.addEventListener('touchstart',unlockSpeech,{once:true,passive:true});
+document.addEventListener('click',unlockSpeech,{once:true,passive:true});
+
 function speak(text,onDone){
   if(!voiceEnabled){onDone&&onDone();return;}
   if(!window.speechSynthesis){onDone&&onDone();return;}
-  window.speechSynthesis.cancel();
+  // On iOS, cancel() can break the queue — only cancel if something is speaking
+  if(window.speechSynthesis.speaking) window.speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(text);
   u.rate=1.05;u.pitch=1.0;u.volume=1.0;
-  // Prefer a natural-sounding voice if available
-  const voices=window.speechSynthesis.getVoices();
-  const preferred=voices.find(v=>/samantha|karen|daniel|alex|google us|google uk/i.test(v.name));
-  if(preferred)u.voice=preferred;
+  const pv=getPreferredVoice();
+  if(pv)u.voice=pv;
   if(onDone)u.onend=onDone;
+  // iOS bug: long pause can cause synthesis to stop mid-sentence
+  // Workaround: resume if paused
+  if(window.speechSynthesis.paused) window.speechSynthesis.resume();
   window.speechSynthesis.speak(u);
+  // iOS watchdog: if synthesis stalls, resume it
+  const watchdog=setInterval(()=>{
+    if(!window.speechSynthesis.speaking){clearInterval(watchdog);return;}
+    if(window.speechSynthesis.paused){window.speechSynthesis.resume();}
+  },1000);
+  u.onend=()=>{ clearInterval(watchdog); onDone&&onDone(); };
+  u.onerror=()=>{ clearInterval(watchdog); onDone&&onDone(); };
 }
 
 // Build the "rest over" announcement based on what's coming next
@@ -980,7 +1065,7 @@ function logCardio(id){
   const isHiit=c.style==='hiit';
   const intervals=isHiit?[...(hiitIntervals[id]||[])]:null;
   if(!mins&&!dist){alert('Enter time or distance first.');return;}
-  cardioLog.unshift({id,type:c.type,style:c.style,label:c.label,mins,dist,intervals,date:new Date().toISOString()});
+  cardioLog.unshift({id,type:c.type,style:c.style,label:c.label,mins,dist,distUnit:logUnit,intervals,date:new Date().toISOString()});
   saveCardioLog();
   const mi=eid('cc-mins-'+id),di=eid('cc-dist-'+id);
   if(mi)mi.value='';if(di)di.value='';
@@ -1005,6 +1090,15 @@ function buildIntervalUI(id){
 
 function renderHome(){
   eid('dateline').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  // Style active log unit button
+  ['mi','km'].forEach(u=>{
+    const b=eid('lu-'+u);
+    if(!b)return;
+    const active=u===logUnit;
+    b.style.background=active?'var(--acc)':'var(--s2)';
+    b.style.color=active?'#000':'var(--t2)';
+    b.style.border=active?'1px solid var(--acc)':'1px solid var(--b2)';
+  });
   const sessions=new Set(wkLog.map(l=>l.sessionId)).size;
   const totalSets=wkLog.reduce((a,l)=>a+(l.sets?.length||0),0);
   const prs=computePRs();
@@ -1022,7 +1116,7 @@ function renderHome(){
     </div>`).join('');
   eid('cardio-grid').innerHTML=CARDIO_SESSIONS.map(c=>{
     const last=getLastCardio(c.id);
-    const lastStr=last?`Last: ${last.mins?last.mins+'min':''} ${last.dist?last.dist+'mi':''}`.trim():'No sessions yet';
+    const lastStr=last?`Last: ${last.mins?last.mins+' min':''} ${last.dist?(Math.round(parseFloat(last.dist)*100)/100)+' '+(last.distUnit||'mi'):''}`.trim():'No sessions yet';
     const isHiit=c.style==='hiit';
     const cardClass=c.type==='run'?'cc-run':'cc-bike';
     return`<div class="cardio-card ${cardClass}">
@@ -1030,7 +1124,7 @@ function renderHome(){
       ${isHiit?buildIntervalUI(c.id):''}
       <div class="cc-inputs" style="margin-top:${isHiit?'10px':'0'}">
         <div><label class="cc-lbl">Time (min)</label><input class="cc-input" type="number" inputmode="decimal" placeholder="0" id="cc-mins-${c.id}" min="0" step="1"></div>
-        <div><label class="cc-lbl">Distance (mi)</label><input class="cc-input" type="number" inputmode="decimal" placeholder="0.0" id="cc-dist-${c.id}" min="0" step="0.1"></div>
+        <div><label class="cc-lbl">Distance (${logUnit})</label><input class="cc-input" type="number" inputmode="decimal" placeholder="0.0" id="cc-dist-${c.id}" min="0" step="0.1"></div>
       </div>
       <button class="cc-log-btn" onclick="logCardio('${c.id}')">Log session</button>
       <div class="cc-last">${lastStr}</div>
@@ -1055,10 +1149,8 @@ function launchWk(dayId){
   // Init voice button state
   const vb=eid('wk-voice-btn');
   if(vb){vb.classList.toggle('on',voiceEnabled);vb.textContent=voiceEnabled?'🔊':'🔇';}
-  // Prime voices on first interaction (browser requirement)
-  if(window.speechSynthesis&&window.speechSynthesis.getVoices().length===0){
-    window.speechSynthesis.getVoices();
-  }
+  // Trigger voice unlock on workout start (user interaction)
+  unlockSpeech();
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
   eid('s-workout').classList.add('on');
 }
@@ -1188,17 +1280,8 @@ function startRest(sec,name,setIdx){
       if(voiceEnabled){
         // Say "Go!" then chain directly into the full next-set announcement
         const nextMsg=buildNextSetAnnouncement(_announceName,_announceSetIdx);
-        const u1=new SpeechSynthesisUtterance('Go!');
-        u1.rate=1.05;u1.pitch=1.1;u1.volume=1.0;
-        const voices=window.speechSynthesis.getVoices();
-        const preferred=voices.find(v=>/samantha|karen|daniel|alex|google us|google uk/i.test(v.name));
-        if(preferred)u1.voice=preferred;
-        u1.onend=()=>{
-          // Small pause then speak the full announcement
-          setTimeout(()=>speak(nextMsg),250);
-        };
-        window.speechSynthesis.cancel();
-        window.speechSynthesis.speak(u1);
+        // Use speak() for iOS compatibility - chain Go! then announcement
+        speak('Go!',()=>setTimeout(()=>speak(nextMsg),200));
       }
     }
   },1000);
@@ -1368,7 +1451,7 @@ function renderHistory(){
     const sidStr=String(s.sid).replace(/'/g,"\\'");
     if(s.isCardio){
       const c=s.cardioData;
-      const details=[c.mins?c.mins+' min':'',c.dist?c.dist+' mi':''].filter(Boolean).join(' · ');
+      const details=[c.mins?c.mins+' min':'',c.dist?(Math.round(parseFloat(c.dist)*100)/100)+' '+(c.distUnit||'mi'):''].filter(Boolean).join(' · ');
       const intervals=c.intervals?.length?`${c.intervals.length} rounds · ${c.intervals[0].work}s/${c.intervals[0].rest}s`:'';
       return`<div class="hist-row" id="hr_${s.sid.replace(/[:.]/g,'_')}"><div class="del-reveal"><span>Delete</span></div>
         <div class="hist-card" id="hc_${s.sid.replace(/[:.]/g,'_')}">
@@ -1553,14 +1636,39 @@ function showLogPastSheet(prefillDate){
   renderPastDetailArea();
 }
 
+let _pastUnit=logUnit; // inherits current log unit, can be changed per-form
+function setPastUnit(u){
+  _pastUnit=u;
+  ['mi','km'].forEach(unit=>{
+    const b=eid('past-unit-'+unit);
+    if(!b)return;
+    const active=unit===u;
+    b.style.background=active?'var(--acc)':'var(--s2)';
+    b.style.color=active?'#000':'var(--t2)';
+    b.style.borderColor=active?'var(--acc)':'var(--b2)';
+  });
+}
+
 function renderPastDetailArea(){
   const type=eid('past-type')?.value||'';
   const area=eid('past-detail-area');if(!area)return;
   if(type.startsWith('cardio')){
     area.innerHTML=`
       <div class="field"><label>Duration (minutes)</label><input type="number" id="past-mins" inputmode="decimal" placeholder="e.g. 30" min="0"></div>
-      <div class="field"><label>Distance (miles, optional)</label><input type="number" id="past-dist" inputmode="decimal" placeholder="e.g. 3.1" min="0" step="0.1"></div>
+      <div class="field">
+        <label>Distance (optional)</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="number" id="past-dist" inputmode="decimal" placeholder="e.g. 3.1" min="0" step="0.1" style="flex:1;">
+          <div style="display:flex;gap:4px;flex-shrink:0;">
+            <button id="past-unit-mi" onclick="setPastUnit('mi')" style="padding:8px 12px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;border:1px solid var(--b2);background:var(--s2);color:var(--t2);">mi</button>
+            <button id="past-unit-km" onclick="setPastUnit('km')" style="padding:8px 12px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;border:1px solid var(--b2);background:var(--s2);color:var(--t2);">km</button>
+          </div>
+        </div>
+      </div>
       <div class="field"><label>Notes (optional)</label><input type="text" id="past-notes" placeholder="e.g. Felt great, 5 mile run"></div>`;
+    // Init unit buttons to current logUnit default
+    _pastUnit=logUnit;
+    setPastUnit(_pastUnit);
   } else if(type.startsWith('strength-')){
     const dayId=type.replace('strength-','');
     const day=program.find(d=>d.id===dayId);
@@ -1599,7 +1707,7 @@ function savePastSession(){
     cardioLog.push({
       id:idMap[subtype]||'run-conv',type:subtype==='bike'?'bike':'run',
       style:subtype==='hiit'?'hiit':'conversational',
-      label:labelMap[subtype]||'Run',mins,dist,notes,
+      label:labelMap[subtype]||'Run',mins,dist,distUnit:_pastUnit||logUnit,notes,
       date:sessionDate.toISOString(),isPast:true
     });
     saveCardioLog();
@@ -1695,6 +1803,14 @@ function showExTrend(name){
 
 function renderCardioProgress(){
   if(!cardioLog.length) return '<div class="empty">No cardio sessions yet.<br>Log a run or bike session to track progress.</div>';
+  // View unit toggle header
+  const viewToggle=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+    <div style="font-size:12px;color:var(--t2);">Showing distances in:</div>
+    <div style="display:flex;gap:6px;">
+      <button onclick="setViewUnit('mi');renderProgress()" style="font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px;cursor:pointer;font-family:'DM Sans',sans-serif;background:${viewUnit==='mi'?'var(--acc)':'var(--s2)'};color:${viewUnit==='mi'?'#000':'var(--t2)'};border:1px solid ${viewUnit==='mi'?'var(--acc)':'var(--b2)'};">mi</button>
+      <button onclick="setViewUnit('km');renderProgress()" style="font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px;cursor:pointer;font-family:'DM Sans',sans-serif;background:${viewUnit==='km'?'var(--acc)':'var(--s2)'};color:${viewUnit==='km'?'#000':'var(--t2)'};border:1px solid ${viewUnit==='km'?'var(--acc)':'var(--b2)'};">km</button>
+    </div>
+  </div>`;
 
   // Separate by type
   const byType={run:[],bike:[],hiit:[]};
@@ -1706,21 +1822,24 @@ function renderCardioProgress(){
   function buildTypeSection(label,color,icon,entries){
     if(!entries.length)return'';
     const sorted=[...entries].sort((a,b)=>new Date(a.date)-new Date(b.date));
-    // PRs
-    const prDist=Math.max(...entries.map(e=>parseFloat(e.dist)||0));
+    // PRs — convert each entry to viewUnit before comparing
+    const prDist=Math.max(...entries.map(e=>toViewDist(parseFloat(e.dist)||0,e.distUnit||'mi')));
     const prTime=Math.max(...entries.map(e=>parseFloat(e.mins)||0));
-    // Avg pace (min/mile) from entries that have both dist and time
+    // Avg pace in viewUnit
     const withBoth=entries.filter(e=>e.dist>0&&e.mins>0);
-    const avgPace=withBoth.length?withBoth.reduce((a,e)=>a+e.mins/e.dist,0)/withBoth.length:0;
-    const totalDist=entries.reduce((a,e)=>a+(parseFloat(e.dist)||0),0);
+    const avgPace=withBoth.length
+      ?withBoth.reduce((a,e)=>a+(e.mins/toViewDist(e.dist,e.distUnit||'mi')),0)/withBoth.length
+      :0;
+    const totalDist=entries.reduce((a,e)=>a+toViewDist(parseFloat(e.dist)||0,e.distUnit||'mi'),0);
     const totalMins=entries.reduce((a,e)=>a+(parseFloat(e.mins)||0),0);
     const recentSessions=sorted.slice(-8);
 
-    // Build distance trend bars
-    const maxDist=Math.max(...recentSessions.map(s=>parseFloat(s.dist)||0),0.1);
+    // Build distance trend bars — convert each to viewUnit
+    const recentDists=recentSessions.map(s=>toViewDist(parseFloat(s.dist)||0,s.distUnit||'mi'));
+    const maxDist=Math.max(...recentDists,0.1);
     const distBars=recentSessions.map((s,i)=>{
-      const d=parseFloat(s.dist)||0;
-      const isPR=d>0&&d===prDist;
+      const d=recentDists[i];
+      const isPR=d>0&&Math.abs(d-prDist)<0.001;
       const pct=Math.round(d/maxDist*100);
       const dateStr=new Date(s.date).toLocaleDateString('en-US',{month:'numeric',day:'numeric'});
       return`<div class="trend-col">
@@ -1731,9 +1850,13 @@ function renderCardioProgress(){
     }).join('');
 
     // Pace trend
-    const maxPaceInverse=Math.max(...recentSessions.map(s=>(s.dist>0&&s.mins>0)?1/(s.mins/s.dist):0),0.01);
-    const paceBars=recentSessions.filter(s=>s.dist>0&&s.mins>0).map((s,i)=>{
-      const pace=s.mins/s.dist;
+    const recentPaces=recentSessions.map(s=>{
+      const d=toViewDist(parseFloat(s.dist)||0,s.distUnit||'mi');
+      return(d>0&&s.mins>0)?s.mins/d:0;
+    });
+    const maxPaceInverse=Math.max(...recentPaces.map(p=>p>0?1/p:0),0.01);
+    const paceBars=recentSessions.filter((s,i)=>recentPaces[i]>0).map((s,i)=>{
+      const pace=recentPaces[i]||s.mins/toViewDist(s.dist,s.distUnit||'mi');
       const paceStr=Math.floor(pace)+':'+(String(Math.round((pace%1)*60)).padStart(2,'0'));
       const pct=Math.round((1/pace)/maxPaceInverse*100);
       const dateStr=new Date(s.date).toLocaleDateString('en-US',{month:'numeric',day:'numeric'});
@@ -1744,7 +1867,7 @@ function renderCardioProgress(){
       </div>`;
     }).join('');
 
-    const fmtPace=avgPace>0?Math.floor(avgPace)+':'+(String(Math.round((avgPace%1)*60)).padStart(2,'0'))+'':'-';
+    const fmtPace=avgPace>0?Math.floor(avgPace)+':'+(String(Math.round((avgPace%1)*60)).padStart(2,'0')):'—';
     const fmtHours=totalMins>=60?(Math.floor(totalMins/60)+'h '+(totalMins%60)+'m'):(Math.round(totalMins)+'m');
 
     return`<div class="card" style="border-left:4px solid ${color};padding-left:14px;">
@@ -1755,36 +1878,36 @@ function renderCardioProgress(){
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;">
         <div class="metric-box" style="padding:10px;">
-          <div class="metric-val a" style="font-size:22px;">${prDist>0?prDist:'—'}</div>
-          <div class="metric-lbl">PR dist (mi)</div>
+          <div class="metric-val a" style="font-size:22px;">${prDist>0?(Math.round(prDist*100)/100)+' '+viewUnit:'—'}</div>
+          <div class="metric-lbl">Best distance</div>
         </div>
         <div class="metric-box" style="padding:10px;">
-          <div class="metric-val" style="font-size:22px;">${fmtPace}</div>
-          <div class="metric-lbl">Avg pace /mi</div>
+          <div class="metric-val" style="font-size:20px;">${fmtPace}</div>
+          <div class="metric-lbl">Avg pace /'+viewUnit+'</div>
         </div>
         <div class="metric-box" style="padding:10px;">
-          <div class="metric-val a" style="font-size:22px;">${totalDist>0?Math.round(totalDist*10)/10:'—'}</div>
-          <div class="metric-lbl">Total miles</div>
+          <div class="metric-val a" style="font-size:22px;">${totalDist>0?(Math.round(totalDist*10)/10)+' '+viewUnit:'—'}</div>
+          <div class="metric-lbl">Total dist</div>
         </div>
         <div class="metric-box" style="padding:10px;">
           <div class="metric-val" style="font-size:22px;">${fmtHours}</div>
           <div class="metric-lbl">Total time</div>
         </div>
       </div>
-      ${distBars?`<div style="font-size:10px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">Distance (mi) — last ${recentSessions.length} sessions</div>
+      ${distBars?`<div style="font-size:10px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">Distance (${viewUnit}) — last ${recentSessions.length} sessions</div>
       <div class="trend-bars" style="height:70px;">${distBars}</div>`:''}
-      ${paceBars?`<div style="font-size:10px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.07em;margin-top:14px;margin-bottom:6px;">Pace (min/mi) — faster = taller bar</div>
+      ${paceBars?`<div style="font-size:10px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.07em;margin-top:14px;margin-bottom:6px;">Pace (min/${viewUnit}) — faster = taller bar</div>
       <div class="trend-bars" style="height:70px;">${paceBars}</div>`:''}
       <div style="margin-top:12px;">
         <div style="font-size:10px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;">Recent sessions</div>
         ${sorted.slice().reverse().slice(0,5).map(s=>{
-          const pace=s.dist>0&&s.mins>0?s.mins/s.dist:0;
-          const paceStr=pace>0?Math.floor(pace)+':'+(String(Math.round((pace%1)*60)).padStart(2,'0'))+'/mi':'';
+          const paceStr=s.dist>0&&s.mins>0?fmtPaceStr(s.mins,s.dist,s.distUnit||'mi'):'';
+          const dispDist=s.dist>0?toViewDist(parseFloat(s.dist)||0,s.distUnit||'mi'):0;
           const dateStr=new Date(s.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
           return`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--b1);">
             <div style="font-size:12px;color:var(--t2);">${dateStr}</div>
             <div style="display:flex;gap:12px;font-size:12px;font-weight:600;">
-              ${s.dist>0?`<span style="color:${color};">${s.dist} mi</span>`:''}
+              ${dispDist>0?`<span style="color:${color};">${Math.round(dispDist*100)/100} ${viewUnit}</span>`:''}
               ${s.mins>0?`<span style="color:var(--t2);">${s.mins} min</span>`:''}
               ${paceStr?`<span style="color:var(--t3);">${paceStr}</span>`:''}
             </div>
@@ -1794,11 +1917,11 @@ function renderCardioProgress(){
     </div>`;
   }
 
-  return[
+  return viewToggle+[
     buildTypeSection('Running','#47b4ff','🏃',byType.run),
     buildTypeSection('Cycling','#ffb347','🚴',byType.bike),
     buildTypeSection('HIIT','#ff4747','⚡',byType.hiit),
-  ].filter(Boolean).join('') || '<div class="empty">No cardio data yet.</div>';
+  ].filter(Boolean).join('') || viewToggle+'<div class="empty">No cardio data yet.</div>';
 }
 
 function renderMuscleVol(topMuscles,maxMVol){
