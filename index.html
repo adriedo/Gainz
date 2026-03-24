@@ -2385,21 +2385,6 @@ function createDay(){
 }
 
 renderHome();
-</script>
-// ─── GAINZ iOS VOICE FIX ─────────────────────────────────────────────────────
-// HOW TO USE: Open your Gainz HTML file in a text editor.
-// Find the very last line: </body>
-// Paste this entire block JUST BEFORE that line:
-//   <script>
-//   [this file’s contents]
-//   </script>
-// Save and re-open on your phone. Voice will now work on iOS Safari.
-//
-// What this fixes:
-//  - iOS Safari drops speech utterances if they aren’t from a direct gesture
-//  - onend callback sometimes never fires on iOS, breaking chained announcements
-//  - AudioContext suspends after ~30s on iOS, breaking the beep sound
-// ─────────────────────────────────────────────────────────────────────────────
 
 (function() {
 ‘use strict’;
@@ -2455,7 +2440,6 @@ if (_busy || _queue.length === 0) return;
 const { text, onDone } = _queue.shift();
 _busy = true;
 
-```
 if (!window.voiceEnabled || !window.speechSynthesis) {
   _busy = false;
   onDone && onDone();
@@ -2516,7 +2500,6 @@ setTimeout(finish, timeoutMs);
 
 if (window.speechSynthesis.paused) window.speechSynthesis.resume();
 window.speechSynthesis.speak(u);
-```
 
 }
 
@@ -2550,6 +2533,7 @@ o.stop(ctx.currentTime + 0.5);
 
 console.log(’[Gainz] iOS voice fix active ✓’);
 })();  
+  
 </script>  
 </body>
 </html>
