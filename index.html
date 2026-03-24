@@ -2386,5 +2386,170 @@ function createDay(){
 
 renderHome();
 </script>
+// ─── GAINZ iOS VOICE FIX ─────────────────────────────────────────────────────
+// HOW TO USE: Open your Gainz HTML file in a text editor.
+// Find the very last line: </body>
+// Paste this entire block JUST BEFORE that line:
+//   <script>
+//   [this file’s contents]
+//   </script>
+// Save and re-open on your phone. Voice will now work on iOS Safari.
+//
+// What this fixes:
+//  - iOS Safari drops speech utterances if they aren’t from a direct gesture
+//  - onend callback sometimes never fires on iOS, breaking chained announcements
+//  - AudioContext suspends after ~30s on iOS, breaking the beep sound
+// ─────────────────────────────────────────────────────────────────────────────
+
+(function() {
+‘use strict’;
+
+// ── AudioContext singleton ──────────────────────────────────────────────────
+let _audioCtx = null;
+function _getAudioCtx() {
+if (!_audioCtx) {
+_audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+return _audioCtx;
+}
+
+// ── Unlock on first gesture ─────────────────────────────────────────────────
+// Overrides the original unlockSpeech to also warm up AudioContext properly
+window.unlockSpeech = function() {
+// Warm AudioContext — iOS requires a gesture-triggered buffer play
+try {
+const ctx = _getAudioCtx();
+if (ctx.state === ‘suspended’) ctx.resume();
+const buf = ctx.createBuffer(1, 1, 22050);
+const src = ctx.createBufferSource();
+src.buffer = buf;
+src.connect(ctx.destination);
+src.start(0);
+} catch(e) {}
+
+```
+// Warm speechSynthesis with a zero-volume utterance
+if (window.speechSynthesis) {
+  const warm = new SpeechSynthesisUtterance('');
+  warm.volume = 0;
+  warm.rate = 1;
+  window.speechSynthesis.speak(warm);
+}
+```
+
+};
+
+// Re-register gesture listeners pointing to the new unlockSpeech
+document.addEventListener(‘touchstart’, window.unlockSpeech, { once: true, passive: true });
+document.addEventListener(‘click’,      window.unlockSpeech, { once: true, passive: true });
+
+// ── Serial speak queue ──────────────────────────────────────────────────────
+// iOS drops or silently fails utterances when you fire them simultaneously
+// or chain them via onend (which sometimes never fires). We serialize instead:
+// only one utterance active at a time, with a hard-timeout fallback.
+let _queue = [];
+let _busy  = false;
+
+function _drain() {
+if (_busy || _queue.length === 0) return;
+const { text, onDone } = _queue.shift();
+_busy = true;
+
+```
+if (!window.voiceEnabled || !window.speechSynthesis) {
+  _busy = false;
+  onDone && onDone();
+  _drain();
+  return;
+}
+
+// Only cancel if something is actively playing — cancel on idle breaks iOS
+if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+
+// Re-warm AudioContext before each utterance (iOS suspends it after ~30s)
+try {
+  const ctx = _getAudioCtx();
+  if (ctx.state === 'suspended') ctx.resume();
+} catch(e) {}
+
+const u = new SpeechSynthesisUtterance(text);
+u.rate   = 1.05;
+u.pitch  = 1.0;
+u.volume = 1.0;
+
+// Reuse the app's existing voice picker
+const pv = (typeof window.getPreferredVoice === 'function') ? window.getPreferredVoice() : null;
+if (pv) u.voice = pv;
+
+// Hard-timeout: ~2.5 chars/sec speech rate + 800ms buffer
+// This fires if onend never arrives (common iOS Safari bug)
+const timeoutMs = Math.max(1200, (text.length / 2.5) * 1000 + 800);
+let settled = false;
+
+function finish() {
+  if (settled) return;
+  settled = true;
+  clearInterval(watchdog);
+  _busy = false;
+  onDone && onDone();
+  // Small inter-utterance gap helps iOS reliably start the next one
+  setTimeout(_drain, 80);
+}
+
+u.onend   = finish;
+u.onerror = finish;
+
+// Watchdog: poll every 400ms.
+// If iOS paused synthesis mid-utterance, resume it.
+// If synthesis stopped without firing onend, call finish().
+const watchdog = setInterval(function() {
+  if (settled) { clearInterval(watchdog); return; }
+  if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+  if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) {
+    clearInterval(watchdog);
+    finish();
+  }
+}, 400);
+
+// Hard timeout fallback
+setTimeout(finish, timeoutMs);
+
+if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+window.speechSynthesis.speak(u);
+```
+
+}
+
+// ── Override global speak() ─────────────────────────────────────────────────
+window.speak = function(text, onDone) {
+if (!window.voiceEnabled || !window.speechSynthesis) {
+onDone && onDone();
+return;
+}
+_queue.push({ text, onDone });
+_drain();
+};
+
+// ── Override global beep() ──────────────────────────────────────────────────
+// Uses AudioContext directly — no speechSynthesis dependency
+window.beep = function() {
+try {
+const ctx = _getAudioCtx();
+if (ctx.state === ‘suspended’) ctx.resume();
+const o = ctx.createOscillator();
+const g = ctx.createGain();
+o.connect(g);
+g.connect(ctx.destination);
+o.frequency.value = 880;
+g.gain.setValueAtTime(0.3, ctx.currentTime);
+g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+o.start();
+o.stop(ctx.currentTime + 0.5);
+} catch(e) {}
+};
+
+console.log(’[Gainz] iOS voice fix active ✓’);
+})();  
+</script>  
 </body>
 </html>
