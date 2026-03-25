@@ -10,6 +10,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Gainz">
 <meta name="application-name" content="Gainz">
+<meta name="color-scheme" content="dark">
 <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Gainz%22%2C%22short_name%22%3A%22Gainz%22%2C%22description%22%3A%22Your%20personal%20workout%20tracker%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230a0a0a%22%2C%22theme_color%22%3A%22%230a0a0a%22%2C%22orientation%22%3A%22portrait%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%2520viewBox%3D'0%25200%2520512%2520512'%253E%253Crect%2520width%3D'512'%2520height%3D'512'%2520rx%3D'112'%2520fill%3D'%25230a0a0a'%2F%253E%253Ctext%2520x%3D'256'%2520y%3D'340'%2520text-anchor%3D'middle'%2520font-size%3D'280'%2520fill%3D'%2523e8ff47'%253E%25F0%259F%2592%25AA%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20512%20512'%3E%3Crect%20width%3D'512'%20height%3D'512'%20rx%3D'112'%20fill%3D'%230a0a0a'%2F%3E%3Ctext%20x%3D'256'%20y%3D'360'%20text-anchor%3D'middle'%20font-size%3D'300'%20fill%3D'%23e8ff47'%3E%F0%9F%92%AA%3C%2Ftext%3E%3C%2Fsvg%3E">
 <title>Gainz</title>
@@ -42,8 +43,9 @@
 –push:#ff6b6b;–pull:#47ff8a;–legs:#b47fff;–cardio:#47b4ff;–full:#ffb347;
 –sb:env(safe-area-inset-bottom,0px);
 –st:env(safe-area-inset-top,0px);
+color-scheme:dark;
 }
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;color-scheme:dark;}
 html{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(–bg);}body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(–bg);font-family:DM Sans,sans-serif;color:var(–t1);overscroll-behavior:none;-webkit-text-size-adjust:100%;}
 .bc{font-family:Barlow Condensed,sans-serif;}
 #app{display:flex;flex-direction:column;height:100vh;height:100dvh;max-width:430px;margin:0 auto;padding-top:var(–st);}
@@ -3632,247 +3634,88 @@ function getRecentFoods() {
 }
 
 // ─── FOOD DATABASES ───────────────────────────────────────────────────────────
-// ─── LOCAL FOOD DATABASE (works fully offline) ────────────────────────────────
-// ~200 common foods with accurate macros per 100g, plus common serving sizes
-const LOCAL_FOODS = [
-  // PROTEINS
-  {name:'Chicken Breast (cooked)',     brand:'',    serving:100, servingUnit:'100g',  cal:165, g:31,  carbs:0,   fat:3.6},
-  {name:'Chicken Thigh (cooked)',      brand:'',    serving:100, servingUnit:'100g',  cal:209, g:26,  carbs:0,   fat:11},
-  {name:'Ground Beef 80/20 (cooked)', brand:'',    serving:100, servingUnit:'100g',  cal:254, g:26,  carbs:0,   fat:17},
-  {name:'Ground Beef 93% lean',        brand:'',    serving:100, servingUnit:'100g',  cal:175, g:26,  carbs:0,   fat:8},
-  {name:'Salmon (cooked)',             brand:'',    serving:100, servingUnit:'100g',  cal:208, g:20,  carbs:0,   fat:13},
-  {name:'Tuna (canned in water)',      brand:'',    serving:100, servingUnit:'100g',  cal:116, g:26,  carbs:0,   fat:1},
-  {name:'Tilapia (cooked)',            brand:'',    serving:100, servingUnit:'100g',  cal:128, g:26,  carbs:0,   fat:3},
-  {name:'Shrimp (cooked)',             brand:'',    serving:100, servingUnit:'100g',  cal:99,  g:24,  carbs:0.2, fat:0.3},
-  {name:'Turkey Breast (cooked)',      brand:'',    serving:100, servingUnit:'100g',  cal:135, g:30,  carbs:0,   fat:1},
-  {name:'Steak (sirloin, cooked)',     brand:'',    serving:100, servingUnit:'100g',  cal:207, g:26,  carbs:0,   fat:11},
-  {name:'Pork Tenderloin (cooked)',    brand:'',    serving:100, servingUnit:'100g',  cal:143, g:26,  carbs:0,   fat:4},
-  {name:'Bacon (cooked)',              brand:'',    serving:15,  servingUnit:'2 strips', cal:87, g:6, carbs:0.1, fat:7},
-  {name:'Eggs (whole)',                brand:'',    serving:50,  servingUnit:'1 large', cal:72, g:6,  carbs:0.4, fat:5},
-  {name:'Egg Whites',                  brand:'',    serving:100, servingUnit:'100g',  cal:52,  g:11,  carbs:0.7, fat:0.2},
-  {name:'Greek Yogurt (plain, 0%)',    brand:'',    serving:170, servingUnit:'1 cup',  cal:92,  g:17,  carbs:6,   fat:0.5},
-  {name:'Greek Yogurt (plain, 2%)',    brand:'',    serving:170, servingUnit:'1 cup',  cal:130, g:17,  carbs:8,   fat:3},
-  {name:'Cottage Cheese (2%)',         brand:'',    serving:113, servingUnit:'1/2 cup', cal:90, g:12, carbs:5,   fat:2.5},
-  {name:'Cottage Cheese (1%)',         brand:'',    serving:113, servingUnit:'1/2 cup', cal:81, g:14, carbs:3,   fat:1},
-  // DAIRY
-  {name:'Milk (whole)',                brand:'',    serving:240, servingUnit:'1 cup',  cal:149, g:8,   carbs:12,  fat:8},
-  {name:'Milk (2%)',                   brand:'',    serving:240, servingUnit:'1 cup',  cal:122, g:8,   carbs:12,  fat:5},
-  {name:'Milk (skim)',                 brand:'',    serving:240, servingUnit:'1 cup',  cal:83,  g:8,   carbs:12,  fat:0.2},
-  {name:'Cheddar Cheese',             brand:'',    serving:28,  servingUnit:'1 oz',   cal:113, g:7,   carbs:0.4, fat:9},
-  {name:'Mozzarella',                  brand:'',    serving:28,  servingUnit:'1 oz',   cal:85,  g:6,   carbs:1,   fat:6},
-  {name:'String Cheese',              brand:'',    serving:28,  servingUnit:'1 stick', cal:80,  g:7,   carbs:1,   fat:5},
-  // PROTEIN SUPPLEMENTS
-  {name:'Whey Protein Powder',         brand:'',    serving:30,  servingUnit:'1 scoop', cal:120, g:25, carbs:3,   fat:2},
-  {name:'Casein Protein Powder',       brand:'',    serving:30,  servingUnit:'1 scoop', cal:110, g:24, carbs:3,   fat:1},
-  {name:'Plant Protein Powder',        brand:'',    serving:30,  servingUnit:'1 scoop', cal:120, g:20, carbs:8,   fat:2},
-  {name:'Premier Protein Shake',       brand:'Premier Protein', serving:325, servingUnit:'1 bottle', cal:160, g:30, carbs:5, fat:3},
-  {name:'RXBAR',                       brand:'RXBAR',  serving:52,  servingUnit:'1 bar', cal:210, g:12, carbs:23, fat:9},
-  {name:'Quest Bar',                   brand:'Quest',  serving:60,  servingUnit:'1 bar', cal:200, g:21, carbs:22, fat:8},
-  {name:'Kind Protein Bar',            brand:'Kind',   serving:50,  servingUnit:'1 bar', cal:250, g:12, carbs:17, fat:17},
-  // GRAINS & CARBS
-  {name:'White Rice (cooked)',         brand:'',    serving:186, servingUnit:'1 cup',  cal:242, g:4,   carbs:53,  fat:0.4},
-  {name:'Brown Rice (cooked)',         brand:'',    serving:195, servingUnit:'1 cup',  cal:216, g:5,   carbs:45,  fat:1.8},
-  {name:'Oatmeal (cooked)',            brand:'',    serving:234, servingUnit:'1 cup',  cal:158, g:6,   carbs:27,  fat:3},
-  {name:'Oats (dry)',                  brand:'',    serving:40,  servingUnit:'1/2 cup dry', cal:150, g:5, carbs:27, fat:3},
-  {name:'Quinoa (cooked)',             brand:'',    serving:185, servingUnit:'1 cup',  cal:222, g:8,   carbs:39,  fat:3.5},
-  {name:'Pasta (cooked)',              brand:'',    serving:140, servingUnit:'1 cup',  cal:220, g:8,   carbs:43,  fat:1.3},
-  {name:'Whole Wheat Bread',          brand:'',    serving:30,  servingUnit:'1 slice', cal:80,  g:4,   carbs:15,  fat:1},
-  {name:'White Bread',                brand:'',    serving:30,  servingUnit:'1 slice', cal:79,  g:3,   carbs:15,  fat:1},
-  {name:'Bagel (plain)',               brand:'',    serving:98,  servingUnit:'1 medium', cal:270, g:10, carbs:53, fat:2},
-  {name:'English Muffin',             brand:'',    serving:57,  servingUnit:'1 muffin', cal:132, g:5,  carbs:26,  fat:1},
-  {name:'Tortilla (flour, 10")',       brand:'',    serving:72,  servingUnit:'1 tortilla', cal:218, g:6, carbs:36, fat:6},
-  {name:'Corn Tortilla',              brand:'',    serving:26,  servingUnit:'1 tortilla', cal:52,  g:1,  carbs:11,  fat:0.7},
-  {name:'Sweet Potato (baked)',        brand:'',    serving:150, servingUnit:'1 medium', cal:130, g:3,  carbs:30,  fat:0.1},
-  {name:'White Potato (baked)',        brand:'',    serving:173, servingUnit:'1 medium', cal:161, g:4,  carbs:37,  fat:0.2},
-  // VEGETABLES
-  {name:'Broccoli (steamed)',          brand:'',    serving:156, servingUnit:'1 cup',  cal:55,  g:4,   carbs:11,  fat:0.6},
-  {name:'Spinach (raw)',               brand:'',    serving:30,  servingUnit:'1 cup',  cal:7,   g:0.9, carbs:1.1, fat:0.1},
-  {name:'Romaine Lettuce',             brand:'',    serving:47,  servingUnit:'1 cup',  cal:8,   g:0.6, carbs:1.5, fat:0.1},
-  {name:'Kale (raw)',                  brand:'',    serving:67,  servingUnit:'1 cup',  cal:34,  g:2.9, carbs:6.7, fat:0.5},
-  {name:'Bell Pepper',                 brand:'',    serving:119, servingUnit:'1 medium', cal:37, g:1.2, carbs:7,  fat:0.4},
-  {name:'Cucumber',                    brand:'',    serving:119, servingUnit:'1 cup sliced', cal:16, g:0.7, carbs:3.8, fat:0.1},
-  {name:'Tomato',                      brand:'',    serving:123, servingUnit:'1 medium', cal:22, g:1.1, carbs:4.8, fat:0.2},
-  {name:'Carrots (raw)',               brand:'',    serving:61,  servingUnit:'1 medium', cal:25, g:0.6, carbs:6,  fat:0.1},
-  {name:'Celery',                      brand:'',    serving:101, servingUnit:'1 cup',  cal:16,  g:0.7, carbs:3,   fat:0.2},
-  {name:'Asparagus',                   brand:'',    serving:134, servingUnit:'1 cup',  cal:27,  g:3,   carbs:5,   fat:0.3},
-  {name:'Zucchini',                    brand:'',    serving:124, servingUnit:'1 cup',  cal:21,  g:1.5, carbs:3.9, fat:0.4},
-  {name:'Edamame (shelled)',           brand:'',    serving:155, servingUnit:'1 cup',  cal:189, g:17,  carbs:14,  fat:8},
-  {name:'Black Beans (cooked)',        brand:'',    serving:172, servingUnit:'1 cup',  cal:227, g:15,  carbs:41,  fat:0.9},
-  {name:'Chickpeas (cooked)',          brand:'',    serving:164, servingUnit:'1 cup',  cal:269, g:15,  carbs:45,  fat:4},
-  {name:'Lentils (cooked)',            brand:'',    serving:198, servingUnit:'1 cup',  cal:230, g:18,  carbs:40,  fat:0.8},
-  // FRUITS
-  {name:'Banana',                      brand:'',    serving:118, servingUnit:'1 medium', cal:105, g:1.3, carbs:27, fat:0.4},
-  {name:'Apple',                       brand:'',    serving:182, servingUnit:'1 medium', cal:95,  g:0.5, carbs:25, fat:0.3},
-  {name:'Blueberries',                 brand:'',    serving:148, servingUnit:'1 cup',  cal:84,  g:1.1, carbs:21,  fat:0.5},
-  {name:'Strawberries',                brand:'',    serving:152, servingUnit:'1 cup',  cal:49,  g:1,   carbs:12,  fat:0.5},
-  {name:'Orange',                      brand:'',    serving:131, servingUnit:'1 medium', cal:62, g:1.2, carbs:15,  fat:0.2},
-  {name:'Avocado',                     brand:'',    serving:201, servingUnit:'1 whole', cal:322, g:4,  carbs:17,  fat:29},
-  {name:'Mango',                       brand:'',    serving:165, servingUnit:'1 cup',  cal:99,  g:1.4, carbs:25,  fat:0.6},
-  {name:'Grapes',                      brand:'',    serving:92,  servingUnit:'1 cup',  cal:62,  g:0.6, carbs:16,  fat:0.3},
-  // NUTS & FATS
-  {name:'Almonds',                     brand:'',    serving:28,  servingUnit:'1 oz (~23)',  cal:164, g:6, carbs:6,  fat:14},
-  {name:'Peanuts',                     brand:'',    serving:28,  servingUnit:'1 oz',   cal:161, g:7,   carbs:5,   fat:14},
-  {name:'Walnuts',                     brand:'',    serving:28,  servingUnit:'1 oz',   cal:185, g:4.3, carbs:3.9, fat:18},
-  {name:'Cashews',                     brand:'',    serving:28,  servingUnit:'1 oz',   cal:157, g:5.2, carbs:9,   fat:12},
-  {name:'Peanut Butter',              brand:'',    serving:32,  servingUnit:'2 tbsp', cal:191, g:7,   carbs:7,   fat:16},
-  {name:'Almond Butter',              brand:'',    serving:32,  servingUnit:'2 tbsp', cal:196, g:7,   carbs:6,   fat:18},
-  {name:'Olive Oil',                   brand:'',    serving:14,  servingUnit:'1 tbsp', cal:119, g:0,   carbs:0,   fat:14},
-  // FAST FOOD & RESTAURANT
-  {name:'McDonald\'s Big Mac',         brand:'McDonald\'s', serving:213, servingUnit:'1 burger', cal:550, g:25, carbs:44, fat:30},
-  {name:'McDonald\'s McDouble',        brand:'McDonald\'s', serving:176, servingUnit:'1 burger', cal:400, g:22, carbs:34, fat:19},
-  {name:'McDonald\'s Chicken McNuggets (10pc)', brand:'McDonald\'s', serving:162, servingUnit:'10 pieces', cal:440, g:26, carbs:26, fat:27},
-  {name:'McDonald\'s Fries (medium)', brand:'McDonald\'s', serving:117, servingUnit:'medium', cal:320, g:4, carbs:44, fat:15},
-  {name:'Chick-fil-A Grilled Chicken Sandwich', brand:'Chick-fil-A', serving:222, servingUnit:'1 sandwich', cal:380, g:37, carbs:40, fat:7},
-  {name:'Chick-fil-A Waffle Fries (medium)', brand:'Chick-fil-A', serving:127, servingUnit:'medium', cal:420, g:5, carbs:50, fat:22},
-  {name:'Chipotle Chicken Bowl (rice+beans+chicken+salsa)', brand:'Chipotle', serving:450, servingUnit:'1 bowl', cal:655, g:51, carbs:72, fat:17},
-  {name:'Chipotle Chicken Burrito', brand:'Chipotle', serving:550, servingUnit:'1 burrito', cal:855, g:53, carbs:96, fat:24},
-  {name:'Subway Turkey (6")',          brand:'Subway', serving:220, servingUnit:'6" sub', cal:280, g:18, carbs:45, fat:4},
-  {name:'Subway Tuna (6")',            brand:'Subway', serving:240, servingUnit:'6" sub', cal:480, g:22, carbs:44, fat:24},
-  {name:'Panera Bread You Pick 2 Turkey Sandwich', brand:'Panera', serving:206, servingUnit:'half sandwich', cal:430, g:25, carbs:52, fat:13},
-  {name:'Starbucks Egg Bites (Bacon)',brand:'Starbucks', serving:170, servingUnit:'2 bites', cal:310, g:19, carbs:13, fat:20},
-  {name:'Starbucks Oatmeal',          brand:'Starbucks', serving:236, servingUnit:'1 serving', cal:160, g:5, carbs:28, fat:2.5},
-  // BREAKFAST FOODS
-  {name:'Cheerios',                    brand:'General Mills', serving:28, servingUnit:'1 cup', cal:100, g:3, carbs:20, fat:2},
-  {name:'Oatmeal (Quaker Instant, plain)', brand:'Quaker', serving:28, servingUnit:'1 packet', cal:100, g:4, carbs:19, fat:2},
-  {name:'Pancakes (homemade)',         brand:'',    serving:77,  servingUnit:'3 small', cal:175, g:5, carbs:28, fat:6},
-  {name:'Waffles (frozen, Eggo)',      brand:'Eggo', serving:70, servingUnit:'2 waffles', cal:180, g:4, carbs:28, fat:6},
-  // SNACKS
-  {name:'Rice Cakes (plain)',          brand:'',    serving:9,   servingUnit:'1 cake', cal:35,  g:0.7, carbs:7.3, fat:0.3},
-  {name:'Popcorn (air popped)',        brand:'',    serving:28,  servingUnit:'3 cups', cal:108, g:3.6, carbs:22,  fat:1.2},
-  {name:'Pretzels',                    brand:'',    serving:28,  servingUnit:'1 oz',   cal:108, g:2.6, carbs:23,  fat:0.8},
-  {name:'Lay\'s Potato Chips',         brand:'Lay\'s', serving:28, servingUnit:'1 oz (~15)', cal:160, g:2, carbs:15, fat:10},
-  {name:'Tortilla Chips',              brand:'',    serving:28,  servingUnit:'1 oz',   cal:140, g:2,   carbs:19,  fat:7},
-  {name:'Protein Bar (generic 20g)',   brand:'',    serving:60,  servingUnit:'1 bar',  cal:220, g:20,  carbs:22,  fat:8},
-  {name:'Granola Bar (Quaker)',        brand:'Quaker', serving:21, servingUnit:'1 bar', cal:90, g:1, carbs:18, fat:2},
-  // CONDIMENTS & SAUCES
-  {name:'Ketchup',                     brand:'',    serving:17,  servingUnit:'1 tbsp', cal:19,  g:0.3, carbs:4.7, fat:0},
-  {name:'Mustard',                     brand:'',    serving:5,   servingUnit:'1 tsp',  cal:3,   g:0.2, carbs:0.3, fat:0.1},
-  {name:'Mayonnaise',                  brand:'',    serving:13,  servingUnit:'1 tbsp', cal:94,  g:0.1, carbs:0.1, fat:10},
-  {name:'Ranch Dressing',              brand:'',    serving:30,  servingUnit:'2 tbsp', cal:130, g:0.5, carbs:2,   fat:13},
-  {name:'Hot Sauce (Tabasco)',         brand:'',    serving:5,   servingUnit:'1 tsp',  cal:0,   g:0,   carbs:0,   fat:0},
-  {name:'Soy Sauce',                   brand:'',    serving:15,  servingUnit:'1 tbsp', cal:8,   g:1.3, carbs:0.8, fat:0.1},
-  {name:'Hummus',                      brand:'',    serving:30,  servingUnit:'2 tbsp', cal:70,  g:2,   carbs:6,   fat:4},
-  {name:'Salsa',                       brand:'',    serving:30,  servingUnit:'2 tbsp', cal:10,  g:0.5, carbs:2,   fat:0},
-  // BEVERAGES
-  {name:'Whole Milk (1 cup)',          brand:'',    serving:240, servingUnit:'1 cup',  cal:149, g:8,   carbs:12,  fat:8},
-  {name:'Orange Juice',               brand:'',    serving:240, servingUnit:'1 cup',  cal:112, g:1.7, carbs:26,  fat:0.5},
-  {name:'Coca-Cola (12oz)',           brand:'Coca-Cola', serving:355, servingUnit:'12 fl oz', cal:140, g:0, carbs:39, fat:0},
-  {name:'Gatorade (20oz)',            brand:'Gatorade', serving:591, servingUnit:'20 fl oz', cal:130, g:0, carbs:34, fat:0},
-  {name:'Coffee (black)',              brand:'',    serving:240, servingUnit:'8 fl oz', cal:2,   g:0.3, carbs:0,   fat:0},
-  {name:'Latte (whole milk, 12oz)',   brand:'',    serving:354, servingUnit:'12 fl oz', cal:200, g:10, carbs:20, fat:8},
-  {name:'Protein Shake (w/ whole milk)', brand:'', serving:400, servingUnit:'1 shake', cal:400, g:35, carbs:30, fat:10},
-  // PREPARED / FROZEN
-  {name:'Amy\'s Burrito (Bean & Cheese)', brand:'Amy\'s', serving:170, servingUnit:'1 burrito', cal:310, g:11, carbs:46, fat:9},
-  {name:'Lean Cuisine Chicken & Vegetables', brand:'Lean Cuisine', serving:255, servingUnit:'1 meal', cal:180, g:18, carbs:20, fat:3},
-  {name:'Instant Ramen (Maruchan)',   brand:'Maruchan', serving:85, servingUnit:'1 pack (dry)', cal:380, g:8, carbs:52, fat:14},
-];
 
-// Add per100 to all local foods for serving size calculation
-LOCAL_FOODS.forEach(f => {
-  const factor = 100 / (f.serving||100);
-  f.per100 = {
-    cal:     (f.cal||0) * factor,
-    protein: (f.g||0) * factor,
-    carbs:   (f.carbs||0) * factor,
-    fat:     (f.fat||0) * factor,
-  };
-  f.source = 'local';
-});
-
-function searchLocalFoods(query) {
-  if(!query || query.length < 2) return [];
-  const q = query.toLowerCase().trim();
-  const terms = q.split(/\s+/);
-
-  return LOCAL_FOODS
-    .map(f => {
-      const text = (f.name + ' ' + f.brand).toLowerCase();
-      // Score: exact match > starts with > all terms match > partial match
-      let score = 0;
-      if(text === q) score = 100;
-      else if(text.startsWith(q)) score = 80;
-      else if(terms.every(t => text.includes(t))) score = 60;
-      else if(terms.some(t => text.includes(t))) score = 30 * terms.filter(t => text.includes(t)).length / terms.length;
-      return {food: f, score};
-    })
-    .filter(r => r.score > 0)
-    .sort((a,b) => b.score - a.score)
-    .slice(0, 8)
-    .map(r => ({...r.food}));
+// ── Claude AI backbone — works everywhere, knows everything ──────────────────
+// Fetch with timeout helper
+// Safari-safe timeout: use Promise.race instead of AbortController
+// AbortController signals can't be structured-cloned in some Safari contexts
+function fetchWithTimeout(url, options, ms) {
+  const fetchPromise = fetch(url, options);
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error('Request timed out after ' + ms + 'ms')), ms)
+  );
+  return Promise.race([fetchPromise, timeoutPromise]);
 }
 
-
-// ─── FOOD DATABASES ───────────────────────────────────────────────────────────
-
-// Call Claude API — works in Claude artifacts (no key needed, proxied)
 async function callClaude(systemPrompt, userMessage, maxTokens) {
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetchWithTimeout('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: {'Content-Type': 'application/json'},
+    headers: {
+      'Content-Type': 'application/json',
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: maxTokens || 600,
+      model: 'claude-sonnet-4-5',
+      max_tokens: maxTokens || 800,
       system: systemPrompt,
       messages: [{role: 'user', content: userMessage}]
     })
-  });
-  if(!res.ok) throw new Error('API error: ' + res.status);
+  }, 15000); // 15 second timeout
+  if(!res.ok) {
+    const errText = await res.text().catch(() => '');
+    throw new Error('HTTP ' + res.status + ': ' + errText.slice(0, 100));
+  }
   const data = await res.json();
+  if(data.error) throw new Error(data.error.message || 'API error');
   return data.content?.[0]?.text || '';
 }
 
-// Search using Claude AI — primary search engine (works offline-of-fetch, always available)
 async function searchWithAI(query) {
   try {
     const text = await callClaude(
-      'You are a nutrition database. Return ONLY a JSON array of 6 foods matching the query. Each item: {"name":"Food Name","brand":"Brand or empty","serving":100,"servingUnit":"1 cup or 100g etc","cal":200,"protein":20,"carbs":10,"fat":8}. Use accurate USDA/nutrition label values. No markdown, no explanation, just the JSON array.',
+      'You are a comprehensive nutrition database covering ALL foods: grocery store products, restaurant items, fast food, whole foods, supplements, international foods, and anything in between. Given a food query, return ONLY a valid JSON array of up to 8 matching foods. Each item must have these exact fields: {"name":"Exact Product Name","brand":"Brand Name or empty string","serving":100,"servingUnit":"1 cup / 1 bar / 100g etc","cal":200,"protein":20,"carbs":10,"fat":8}. Use accurate real-world nutrition label values. Return ONLY the JSON array, no markdown, no explanation.',
       query,
-      800
+      900
     );
     const clean = text.replace(/```json?|```/g,'').trim();
     const items = JSON.parse(clean);
-    return items.map(f => ({
-      name: String(f.name||query),
-      brand: String(f.brand||''),
-      serving: parseFloat(f.serving)||100,
-      servingUnit: String(f.servingUnit||'100g'),
-      cal:   parseInt(f.cal)||0,
-      g:     parseFloat(f.protein)||0,
-      carbs: parseFloat(f.carbs)||0,
-      fat:   parseFloat(f.fat)||0,
-      per100: makePer100(f, parseFloat(f.serving)||100),
-      source: 'ai',
-    }));
-  } catch(e) { return []; }
+    if(!Array.isArray(items)) return [];
+    return items.map(f => normalizeFood(f, 'ai')).filter(f => f.name && (f.cal > 0 || f.g > 0));
+  } catch(e) { console.warn('AI search failed:', e.message); return []; }
 }
 
-// Open Food Facts — for real branded products (requires internet)
+// ── Open Food Facts — largest free food DB, 3M+ products globally ────────────
 async function searchOpenFoodFacts(query) {
   try {
     const url = 'https://world.openfoodfacts.org/cgi/search.pl'
       + '?search_terms=' + encodeURIComponent(query)
-      + '&search_simple=1&action=process&json=1&page_size=10'
-      + '&fields=product_name,brands,nutriments,serving_quantity,serving_size';
-    const res = await fetch(url, {headers: {'User-Agent': 'Gainz-App/1.0'}});
+      + '&search_simple=1&action=process&json=1&page_size=20'
+      + '&fields=product_name,brands,nutriments,serving_quantity,serving_size,categories';
+    const res = await fetchWithTimeout(url, {headers: {'Accept': 'application/json'}}, 8000);
     if(!res.ok) return [];
     const data = await res.json();
-    return (data.products||[])
+    return (data.products || [])
       .filter(p => p.product_name && p.nutriments)
       .map(p => parseOFFProduct(p))
-      .filter(p => p.cal > 0 || p.g > 0)
-      .slice(0, 6);
-  } catch(e) { return []; }
+      .filter(p => p.name && p.cal > 0)
+      .slice(0, 10);
+  } catch(e) { console.warn('OFF search failed:', e.message); return []; }
 }
 
 async function lookupOFFBarcode(barcode) {
   try {
-    const res = await fetch('https://world.openfoodfacts.org/api/v0/product/' + barcode + '.json',
-      {headers: {'User-Agent': 'Gainz-App/1.0'}});
+    const res = await fetchWithTimeout(
+      'https://world.openfoodfacts.org/api/v0/product/' + barcode + '.json',
+      {headers: {'Accept': 'application/json'}},
+      8000
+    );
+    if(!res.ok) return null;
     const data = await res.json();
     if(data.status !== 1 || !data.product) return null;
     const result = parseOFFProduct(data.product);
-    return result.name !== 'Unknown' ? result : null;
-  } catch(e) { return null; }
+    return (result.name && result.name !== 'Unknown') ? result : null;
+  } catch(e) { console.warn('OFF barcode failed:', e); return null; }
 }
 
 function parseOFFProduct(p) {
@@ -3880,93 +3723,211 @@ function parseOFFProduct(p) {
   const servingG = parseFloat(p.serving_quantity) || 100;
   const factor = servingG / 100;
   const per100 = {
-    cal:     parseFloat(n['energy-kcal_100g']||n['energy-kcal']||0),
-    protein: parseFloat(n['proteins_100g']||n['proteins']||0),
-    carbs:   parseFloat(n['carbohydrates_100g']||n['carbohydrates']||0),
-    fat:     parseFloat(n['fat_100g']||n['fat']||0),
+    cal:     parseFloat(n['energy-kcal_100g'] || n['energy-kcal'] || n['energy_100g'] || 0) || 0,
+    protein: parseFloat(n['proteins_100g'] || n['proteins'] || 0) || 0,
+    carbs:   parseFloat(n['carbohydrates_100g'] || n['carbohydrates'] || 0) || 0,
+    fat:     parseFloat(n['fat_100g'] || n['fat'] || 0) || 0,
   };
+  // Normalize energy: sometimes stored in kJ, convert
+  if(per100.cal > 900) per100.cal = Math.round(per100.cal / 4.184);
   return {
-    name:        (p.product_name||'Unknown').trim(),
-    brand:       (p.brands||'').split(',')[0].trim(),
+    name:        (p.product_name || p.product_name_en || '').trim() || 'Unknown',
+    brand:       ((p.brands || '').split(',')[0] || '').trim(),
     serving:     servingG,
-    servingUnit: p.serving_size || (servingG + 'g'),
+    servingUnit: (p.serving_size || servingG + 'g').trim(),
     cal:         Math.round(per100.cal * factor),
-    g:           Math.round(per100.protein * factor * 10)/10,
-    carbs:       Math.round(per100.carbs * factor * 10)/10,
-    fat:         Math.round(per100.fat * factor * 10)/10,
+    g:           Math.round(per100.protein * factor * 10) / 10,
+    carbs:       Math.round(per100.carbs * factor * 10) / 10,
+    fat:         Math.round(per100.fat * factor * 10) / 10,
     per100,
     source: 'off',
   };
 }
 
-function makePer100(f, servingG) {
-  const factor = 100 / (servingG||100);
+// ── USDA FoodData Central — authoritative US nutritional data ─────────────────
+async function searchUSDA(query) {
+  try {
+    const url = 'https://api.nal.usda.gov/fdc/v1/foods/search'
+      + '?query=' + encodeURIComponent(query)
+      + '&pageSize=8&dataType=Branded,SR%20Legacy,Survey%20(FNDDS)'
+      + '&api_key=DEMO_KEY';
+    const res = await fetchWithTimeout(url, {}, 8000);
+    if(!res.ok) return [];
+    const data = await res.json();
+    return (data.foods || []).map(f => {
+      const n = {};
+      (f.foodNutrients || []).forEach(nutrient => {
+        const name = nutrient.nutrientName || '';
+        if(/energy/i.test(name) && nutrient.unitName === 'KCAL') n.cal = nutrient.value;
+        if(/protein/i.test(name) && nutrient.unitName === 'G') n.protein = nutrient.value;
+        if(/carbohydrate/i.test(name) && nutrient.unitName === 'G') n.carbs = nutrient.value;
+        if(/total lipid|^fat$/i.test(name) && nutrient.unitName === 'G') n.fat = nutrient.value;
+      });
+      const servingG = parseFloat(f.servingSize) || 100;
+      const factor = servingG / 100;
+      return {
+        name:        (f.description || '').trim(),
+        brand:       (f.brandName || f.brandOwner || '').trim(),
+        serving:     servingG,
+        servingUnit: f.servingSizeUnit ? servingG + f.servingSizeUnit : servingG + 'g',
+        cal:         Math.round((n.cal || 0) * factor),
+        g:           Math.round((n.protein || 0) * factor * 10) / 10,
+        carbs:       Math.round((n.carbs || 0) * factor * 10) / 10,
+        fat:         Math.round((n.fat || 0) * factor * 10) / 10,
+        per100: {cal: n.cal||0, protein: n.protein||0, carbs: n.carbs||0, fat: n.fat||0},
+        source: 'usda',
+      };
+    }).filter(f => f.cal > 0).slice(0, 6);
+  } catch(e) { console.warn('USDA search failed:', e.message); return []; }
+}
+
+// ── Open Food Facts by brand — search brand-specific products ─────────────────
+async function searchOFFByBrand(brand, productQuery) {
+  try {
+    // Search by brand tag for more accurate brand lookups
+    const brandSlug = brand.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    const url = 'https://world.openfoodfacts.org/brand/' + encodeURIComponent(brandSlug) + '.json'
+      + '?page_size=20&fields=product_name,brands,nutriments,serving_quantity,serving_size';
+    const res = await fetchWithTimeout(url, {headers: {'Accept': 'application/json'}}, 8000);
+    if(!res.ok) return [];
+    const data = await res.json();
+    const products = (data.products || [])
+      .filter(p => p.product_name && p.nutriments)
+      .map(p => parseOFFProduct(p))
+      .filter(p => p.cal > 0);
+
+    // Filter by product query if provided
+    if(productQuery) {
+      const q = productQuery.toLowerCase();
+      return products
+        .filter(p => p.name.toLowerCase().includes(q))
+        .slice(0, 8);
+    }
+    return products.slice(0, 10);
+  } catch(e) { return []; }
+}
+
+// Helper to normalize any food object
+function normalizeFood(f, source) {
+  const servingG = parseFloat(f.serving) || 100;
+  const factor = 100 / servingG;
   return {
-    cal:     (parseInt(f.cal)||0) * factor,
-    protein: (parseFloat(f.protein)||0) * factor,
-    carbs:   (parseFloat(f.carbs)||0) * factor,
-    fat:     (parseFloat(f.fat)||0) * factor,
+    name:        String(f.name || f.product_name || '').trim(),
+    brand:       String(f.brand || '').trim(),
+    serving:     servingG,
+    servingUnit: String(f.servingUnit || f.serving_size || servingG + 'g'),
+    cal:         parseInt(f.cal) || 0,
+    g:           parseFloat(f.protein) || parseFloat(f.g) || 0,
+    carbs:       parseFloat(f.carbs) || 0,
+    fat:         parseFloat(f.fat) || 0,
+    per100: {
+      cal:     (parseInt(f.cal) || 0) * factor,
+      protein: (parseFloat(f.protein) || parseFloat(f.g) || 0) * factor,
+      carbs:   (parseFloat(f.carbs) || 0) * factor,
+      fat:     (parseFloat(f.fat) || 0) * factor,
+    },
+    source,
   };
 }
 
-// Combined search — local DB instant, then AI + OFF in parallel
+function makePer100(f, servingG) {
+  const factor = 100 / (servingG || 100);
+  return {
+    cal:     (parseInt(f.cal) || 0) * factor,
+    protein: (parseFloat(f.protein) || parseFloat(f.g) || 0) * factor,
+    carbs:   (parseFloat(f.carbs) || 0) * factor,
+    fat:     (parseFloat(f.fat) || 0) * factor,
+  };
+}
+
+// Detect if query looks like a brand search (e.g. "Rana pasta", "Chobani yogurt")
+function detectBrandQuery(query) {
+  const q = query.trim();
+  // Common brand indicators: first word is capitalized, known brands
+  const knownBrands = ['rana','chobani','fage','siggi','rxbar','quest','kind','clif','larabar',
+    'oikos','dannon','yoplait','noosa','stonyfield','kite hill','kashi','nature valley',
+    'luna','perfect bar','built','pure protein','musclepharm','optimum nutrition','dymatize',
+    'garden of life','vega','bob\'s red mill','kodiak','eggo','pepperidge','dave\'s',
+    'ezekiel','udi\'s','canyon bakehouse','schar','siete','banza','barilla','prego',
+    'ragu','classico','newman\'s','amy\'s','annie\'s','earth balance','follow your heart',
+    'beyond meat','impossible','morningstar','lightlife','field roast','tofurky',
+    'chipotle','panera','subway','starbucks','dunkin','mcdonald','chick-fil-a',
+    'shake shack','five guys','in-n-out','panda express','olive garden','cheesecake'];
+  const firstWord = q.split(' ')[0].toLowerCase().replace(/[^a-z]/g,'');
+  const isBrand = knownBrands.includes(firstWord) || (q.split(' ').length >= 2 && /^[A-Z]/.test(q.split(' ')[0]));
+  return isBrand ? {brand: q.split(' ')[0], product: q.split(' ').slice(1).join(' ')} : null;
+}
+
+// ── Master search — parallel across all sources ───────────────────────────────
 async function searchFood(query) {
   if(!query || query.length < 2) return [];
 
-  // 1. Local DB — instant results
+  // Step 1: instant local results
   const local = searchLocalFoods(query);
 
-  // 2. AI + OFF in parallel
-  const [aiRes, offRes] = await Promise.allSettled([
+  // Step 2: detect brand search
+  const brandInfo = detectBrandQuery(query);
+
+  // Step 3: run all sources in parallel
+  const sources = [
     searchWithAI(query),
     searchOpenFoodFacts(query),
-  ]);
-  const aiResults  = aiRes.status  === 'fulfilled' ? aiRes.value  : [];
-  const offResults = offRes.status === 'fulfilled' ? offRes.value : [];
+    searchUSDA(query),
+  ];
+  if(brandInfo && brandInfo.brand) {
+    sources.push(searchOFFByBrand(brandInfo.brand, brandInfo.product));
+  }
 
-  // Merge: real products (OFF) first, then local, then AI estimates
-  const merged = [...offResults, ...local, ...aiResults];
+  // Master 12s timeout — if all sources are slow, at least return local results
+  const timeoutResult = new Promise(resolve => setTimeout(() => resolve('timeout'), 12000));
+  const raceResult = await Promise.race([Promise.allSettled(sources), timeoutResult]);
+  
+  if(raceResult === 'timeout') {
+    console.warn('Search timed out, returning local results only');
+    return local;
+  }
+  
+  const results = raceResult;
+  const aiResults   = results[0].status === 'fulfilled' ? results[0].value : [];
+  const offResults  = results[1].status === 'fulfilled' ? results[1].value : [];
+  const usdaResults = results[2].status === 'fulfilled' ? results[2].value : [];
+  const brandResults= results[3]?.status === 'fulfilled' ? results[3].value : [];
+
+  // Rank: brand-specific > OFF (real products) > local > USDA > AI
+  const merged = [...brandResults, ...offResults, ...local, ...usdaResults, ...aiResults];
+
+  // Deduplicate by normalized name
   const seen = new Set();
   return merged.filter(f => {
-    const key = (f.name||'').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,18);
+    if(!f.name) return false;
+    const key = f.name.toLowerCase().replace(/[^a-z0-9]/g,'').slice(0, 20);
     if(!key || seen.has(key)) return false;
     seen.add(key); return true;
-  }).slice(0, 12);
+  }).slice(0, 15);
 }
 
-// Barcode lookup — OFF first, then Claude
+// ── Barcode lookup — OFF + Claude fallback ────────────────────────────────────
 async function lookupBarcode(barcode) {
-  // Try Open Food Facts first (most accurate for real products)
+  // Try Open Food Facts (most accurate for real barcodes)
   const offResult = await lookupOFFBarcode(barcode);
   if(offResult) return offResult;
 
-  // Claude fallback — knows many major US products by barcode
+  // Claude knows many major products by barcode
   try {
     const text = await callClaude(
-      'You are a nutrition database. Given a product barcode UPC/EAN, return ONLY a JSON object with the product details, or null if unknown. Format: {"name":"Product Name","brand":"Brand","serving":30,"servingUnit":"30g","cal":120,"protein":5,"carbs":20,"fat":3}. No markdown.',
+      'You are a nutrition database. Given a UPC/EAN barcode number, identify the product and return ONLY a JSON object: {"name":"Product Name","brand":"Brand","serving":30,"servingUnit":"30g","cal":120,"protein":5,"carbs":20,"fat":3}. If you do not know the product, return null.',
       'Barcode: ' + barcode,
       300
     );
     const clean = text.replace(/```json?|```/g,'').trim();
-    if(clean === 'null' || !clean) return null;
+    if(clean === 'null' || !clean || clean[0] !== '{') return null;
     const product = JSON.parse(clean);
-    if(!product || !product.name) return null;
-    const servingG = parseFloat(product.serving)||100;
-    return {
-      name:    String(product.name),
-      brand:   String(product.brand||''),
-      serving: servingG,
-      servingUnit: String(product.servingUnit||servingG+'g'),
-      cal:   parseInt(product.cal)||0,
-      g:     parseFloat(product.protein)||0,
-      carbs: parseFloat(product.carbs)||0,
-      fat:   parseFloat(product.fat)||0,
-      per100: makePer100(product, servingG),
-      barcode,
-      source: 'ai',
-    };
+    if(!product?.name) return null;
+    const servingG = parseFloat(product.serving) || 100;
+    return normalizeFood({...product, g: product.protein}, 'ai');
   } catch(e) { return null; }
 }
+
 
 // ─── BARCODE SCANNING ─────────────────────────────────────────────────────────
 // Uses iOS camera capture → image → Claude Vision to read barcode + identify product
@@ -3976,21 +3937,27 @@ function openScanner() {
   input.type = 'file';
   input.accept = 'image/*';
   input.setAttribute('capture', 'environment');
-  input.style.cssText = 'position:fixed;top:-9999px;opacity:0;';
+  input.style.cssText = 'position:fixed;top:-9999px;opacity:0;width:1px;height:1px;';
   document.body.appendChild(input);
 
+  // Handle case where user cancels camera
+  let handled = false;
+  const cleanup = () => { if(document.body.contains(input)) document.body.removeChild(input); };
+
   input.onchange = async (e) => {
+    handled = true;
     const file = e.target.files?.[0];
-    if(document.body.contains(input)) document.body.removeChild(input);
+    cleanup();
     if(!file) return;
-    showFoodLoadingSheet('Identifying product…');
+    showFoodLoadingSheet('Reading product… this may take a few seconds');
     await scanImageForFood(file);
   };
 
-  input.onerror = () => {
-    if(document.body.contains(input)) document.body.removeChild(input);
-    showManualBarcodeEntry();
-  };
+  // iOS sometimes fires focus instead of cancel — use a blur fallback
+  window.addEventListener('focus', function onFocus() {
+    window.removeEventListener('focus', onFocus);
+    setTimeout(() => { if(!handled) cleanup(); }, 500);
+  }, {once: true});
 
   input.click();
 }
@@ -4003,11 +3970,15 @@ async function scanImageForFood(file) {
       const mimeType = file.type || 'image/jpeg';
       try {
         // Send image to Claude Vision — ask it to identify barcode AND product
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
+        const res = await fetchWithTimeout('https://api.anthropic.com/v1/messages', {
           method: 'POST',
-          headers: {'Content-Type': 'application/json'},
+          headers: {
+            'Content-Type': 'application/json',
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true',
+          },
           body: JSON.stringify({
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-5',
             max_tokens: 500,
             messages: [{
               role: 'user',
@@ -4018,9 +3989,15 @@ async function scanImageForFood(file) {
             }]
           })
         });
-        if(!res.ok) throw new Error('API ' + res.status);
+        if(!res.ok) {
+          const errBody = await res.text().catch(() => '');
+          throw new Error('API ' + res.status + ': ' + errBody.slice(0,80));
+        }
         const data = await res.json();
-        const text = (data.content?.[0]?.text||'').replace(/```json?|```/g,'').trim();
+        if(data.error) throw new Error(data.error.message || 'Claude API error');
+        const rawText = data.content?.[0]?.text || '';
+        const text = rawText.replace(/```json?|```/g,'').trim();
+        if(!text) throw new Error('Empty response from Claude');
         const product = JSON.parse(text);
 
         closeSheets();
@@ -4054,8 +4031,9 @@ async function scanImageForFood(file) {
         resolve();
       } catch(err) {
         closeSheets();
-        // API failed — show manual entry with helpful message
-        showNotFoundSheet('photo scan');
+        console.error('Scan error:', err);
+        // Show error detail for debugging
+        showNotFoundSheet('scan (error: ' + (err.message||'unknown') + ')');
         resolve();
       }
     };
@@ -4166,11 +4144,12 @@ function showAddFoodConfirmSheet(food) {
   bg.addEventListener('click', e => { if(e.target===bg) bg.remove(); });
   document.body.appendChild(bg);
 
-  // Auto-detect meal from time
+  // Use the meal we're adding to, or auto-detect from time
   const hr = new Date().getHours();
   const mealEl = document.getElementById('fc-meal');
   if(mealEl) {
-    if(hr < 10) mealEl.value = 'Breakfast';
+    if(_addingForMeal) { mealEl.value = _addingForMeal; }
+    else if(hr < 10) mealEl.value = 'Breakfast';
     else if(hr < 13) mealEl.value = 'Lunch';
     else if(hr < 17) mealEl.value = 'Snack';
     else mealEl.value = 'Dinner';
@@ -4262,19 +4241,19 @@ function submitManualFood() {
 }
 
 // ─── FOOD SEARCH SHEET ────────────────────────────────────────────────────────
-function showFoodSearchSheet() {
+function showFoodSearchSheet(prefillQuery) {
   const bg = document.createElement('div'); bg.className='sheet-bg';
-  bg.innerHTML = '<div class="sheet" style="max-height:92dvh;">'
+  bg.innerHTML = '<div class="sheet" style="max-height:94dvh;">'
     + '<div class="sheet-handle"></div>'
     + '<div class="sheet-title">Search Food</div>'
     + '<div style="display:flex;gap:8px;margin-bottom:6px;">'
-    +   '<input type="text" id="food-search-input" placeholder="Greek yogurt, chicken breast…" style="flex:1;" autocomplete="off" autocorrect="off" spellcheck="false">'
-    +   '<button class="btn btn-acc btn-sm" style="flex-shrink:0;" onclick="runFoodSearch()">Search</button>'
+    +   '<input type="text" id="food-search-input" placeholder="Chicken breast, Rana pasta, Quest bar…" style="flex:1;" autocomplete="off" autocorrect="off" spellcheck="false">'
+    +   '<button class="btn btn-acc btn-sm" style="flex-shrink:0;min-width:60px;" onclick="runFoodSearch()">Search</button>'
     + '</div>'
-    + '<div style="font-size:11px;color:var(--t3);margin-bottom:12px;">Searches Open Food Facts, USDA + AI</div>'
-    + '<div id="food-search-results"></div>'
-    + '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--b1);">'
-    +   '<button class="btn btn-ghost btn-full btn-sm" onclick="closeSheets();showManualFoodSheet()">+ Log manually</button>'
+    + '<div style="font-size:11px;color:var(--t3);margin-bottom:8px;">Open Food Facts · USDA · AI — 3M+ products</div>'
+    + '<div id="food-search-results"><div style="padding:20px;text-align:center;color:var(--t3);">Type a food, brand, or product name</div></div>'
+    + '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--b1);">'
+    +   '<button class="btn btn-ghost btn-full btn-sm" onclick="closeSheets();showManualFoodSheet()">+ Log manually instead</button>'
     + '</div>'
     + '</div>';
   bg.addEventListener('click', e => { if(e.target===bg) bg.remove(); });
@@ -4282,52 +4261,116 @@ function showFoodSearchSheet() {
 
   const inp = document.getElementById('food-search-input');
   if(inp) {
-    setTimeout(() => inp.focus(), 150);
+    if(prefillQuery) { inp.value = prefillQuery; setTimeout(() => runFoodSearch(), 100); }
+    else setTimeout(() => inp.focus(), 150);
     inp.addEventListener('keydown', e => { if(e.key==='Enter') runFoodSearch(); });
   }
 }
 
 async function runFoodSearch() {
-  const q = document.getElementById('food-search-input')?.value?.trim();
+  const q = (document.getElementById('food-search-input')?.value || '').trim();
   if(!q) return;
-  const results = document.getElementById('food-search-results');
-  if(results) results.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t2);">Searching across databases…</div>';
+  const resultsEl = document.getElementById('food-search-results');
+
+  // Show local results immediately while APIs load
+  const localResults = searchLocalFoods(q);
+  if(resultsEl) {
+    if(localResults.length) {
+      renderSearchResults(localResults, q, resultsEl, true);
+    } else {
+      resultsEl.innerHTML = '<div style="text-align:center;padding:24px;color:var(--t2);">'
+        + '<div style="font-size:24px;margin-bottom:8px;">🔍</div>'
+        + 'Searching ' + (detectBrandQuery(q) ? '"' + q.split(' ')[0] + '" brand + ' : '') + 'all databases…'
+        + '</div>';
+    }
+  }
 
   const foods = await searchFood(q);
 
-  if(!results) return;
+  if(!resultsEl) return;
   if(!foods.length) {
-    results.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t3);">No results found for "' + q + '"</div>';
+    resultsEl.innerHTML = '<div style="text-align:center;padding:24px;color:var(--t3);">'
+      + '<div style="font-size:24px;margin-bottom:8px;">🤷</div>'
+      + 'Nothing found for "<strong style="color:var(--t1);">' + q + '</strong>".<br>'
+      + '<span style="font-size:12px;">Try a different spelling or log it manually.</span>'
+      + '</div>';
     return;
   }
 
-  const sourceLabel = {off:'', usda:'<span style="font-size:9px;color:#47b4ff;margin-left:4px;">USDA</span>', ai:'<span style="font-size:9px;color:var(--acc);margin-left:4px;">AI</span>'};
+  const sourceBadge = {
+    off:   '<span style="font-size:9px;background:rgba(71,255,138,.15);color:var(--grn);padding:1px 5px;border-radius:3px;margin-left:4px;">OFF</span>',
+    usda:  '<span style="font-size:9px;background:rgba(71,180,255,.15);color:#47b4ff;padding:1px 5px;border-radius:3px;margin-left:4px;">USDA</span>',
+    ai:    '<span style="font-size:9px;background:rgba(232,255,71,.15);color:var(--acc);padding:1px 5px;border-radius:3px;margin-left:4px;">AI</span>',
+    local: '',
+  };
 
-  results.innerHTML = '<div style="font-size:11px;color:var(--t3);margin-bottom:8px;">' + foods.length + ' results</div>'
-    + foods.map((f,i) => (
+  resultsEl.innerHTML = '<div style="font-size:11px;color:var(--t3);margin-bottom:8px;">' + foods.length + ' results for "' + q + '"</div>'
+    + foods.map((f, i) => (
       '<div class="food-search-result" data-fi="' + i + '">'
-      + '<div style="flex:1;min-width:0;">'
-      + '<div class="food-log-name">' + f.name + (sourceLabel[f.source]||'') + '</div>'
-      + (f.brand ? '<div class="food-log-meta">' + f.brand + ' · ' + (f.servingUnit||'') + '</div>' : '<div class="food-log-meta">' + (f.servingUnit||'') + '</div>')
+      + '<div style="flex:1;min-width:0;padding-right:8px;">'
+      +   '<div style="font-size:14px;font-weight:500;line-height:1.3;">' + f.name + (sourceBadge[f.source]||'') + '</div>'
+      +   '<div style="font-size:11px;color:var(--t2);margin-top:2px;">'
+      +     (f.brand ? '<strong>' + f.brand + '</strong> · ' : '')
+      +     (f.servingUnit || '')
+      +   '</div>'
       + '</div>'
-      + '<div style="text-align:right;flex-shrink:0;margin-left:12px;">'
-      + '<div style="font-family:Barlow Condensed,sans-serif;font-size:20px;font-weight:700;color:var(--acc);">' + (f.cal||'—') + '</div>'
-      + '<div style="font-size:10px;color:var(--t3);">kcal</div>'
-      + '<div style="font-size:10px;color:#47b4ff;">' + f.g + 'g P</div>'
+      + '<div style="text-align:right;flex-shrink:0;">'
+      +   '<div style="font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:700;color:var(--acc);">' + (f.cal||'—') + '</div>'
+      +   '<div style="font-size:9px;color:var(--t3);">kcal</div>'
+      +   '<div style="font-size:10px;color:#47b4ff;margin-top:1px;">' + (f.g||0) + 'g P</div>'
+      + '</div>'
+      + '</div>'
+    )).join('');
+
+  renderSearchResults(foods, q, resultsEl, false);
+}
+
+function renderSearchResults(foods, q, resultsEl, isPartial) {
+  if(!resultsEl) return;
+  if(!foods.length) {
+    resultsEl.innerHTML = '<div style="text-align:center;padding:24px;color:var(--t3);">'
+      + '<div style="font-size:24px;margin-bottom:8px;">🤷</div>'
+      + 'Nothing found for "<strong style="color:var(--t1);">' + q + '</strong>".<br>'
+      + '<span style="font-size:12px;">Try a different spelling or log it manually.</span>'
+      + '</div>';
+    return;
+  }
+
+  const sourceBadge = {
+    off:   '<span style="font-size:9px;background:rgba(71,255,138,.15);color:var(--grn);padding:1px 5px;border-radius:3px;margin-left:4px;">OFF</span>',
+    usda:  '<span style="font-size:9px;background:rgba(71,180,255,.15);color:#47b4ff;padding:1px 5px;border-radius:3px;margin-left:4px;">USDA</span>',
+    ai:    '<span style="font-size:9px;background:rgba(232,255,71,.15);color:var(--acc);padding:1px 5px;border-radius:3px;margin-left:4px;">AI</span>',
+    local: '',
+  };
+
+  resultsEl.innerHTML = '<div style="font-size:11px;color:var(--t3);margin-bottom:8px;">'
+    + foods.length + ' results' + (isPartial ? ' — loading more…' : '') + '</div>'
+    + foods.map((f, i) => (
+      '<div class="food-search-result" data-fi="' + i + '">'
+      + '<div style="flex:1;min-width:0;padding-right:8px;">'
+      +   '<div style="font-size:14px;font-weight:500;line-height:1.3;">' + f.name + (sourceBadge[f.source]||'') + '</div>'
+      +   '<div style="font-size:11px;color:var(--t2);margin-top:2px;">'
+      +     (f.brand ? '<strong>' + f.brand + '</strong> · ' : '')
+      +     (f.servingUnit || '')
+      +   '</div>'
+      + '</div>'
+      + '<div style="text-align:right;flex-shrink:0;">'
+      +   '<div style="font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:700;color:var(--acc);">' + (f.cal||'—') + '</div>'
+      +   '<div style="font-size:9px;color:var(--t3);">kcal</div>'
+      +   '<div style="font-size:10px;color:#47b4ff;margin-top:1px;">' + (f.g||0) + 'g P</div>'
       + '</div>'
       + '</div>'
     )).join('');
 
   window._searchFoods = foods;
-  results.querySelectorAll('.food-search-result').forEach(el => {
+  resultsEl.querySelectorAll('.food-search-result').forEach(el => {
     el.addEventListener('click', () => {
-      closeSheets();
-      showAddFoodConfirmSheet(window._searchFoods[parseInt(el.dataset.fi)]);
+      const f = window._searchFoods[parseInt(el.dataset.fi)];
+      if(f) { closeSheets(); showAddFoodConfirmSheet(f); }
     });
   });
 }
 
-// ─── GOALS SHEET ─────────────────────────────────────────────────────────────
 function showFoodGoalsSheet() {
   const bg = document.createElement('div'); bg.className='sheet-bg';
   bg.innerHTML = '<div class="sheet">'
@@ -4370,134 +4413,196 @@ function renderFood() {
   if(dl) dl.textContent = displayDate;
 
   const items = getTodayFoodItems(foodViewDate);
-  const totals = getDayTotals(foodViewDate);
+  const t = getDayTotals(foodViewDate);
+  const g = foodGoals;
 
-  // Macro ring
-  function ring(val, goal, color, label, unit) {
-    const pct = Math.min(val / Math.max(goal,1), 1);
-    const circ = 2*Math.PI*28;
-    const dash = pct * circ;
-    return '<div class="macro-ring-item">'
-      + '<div class="macro-ring"><svg width="72" height="72" viewBox="0 0 72 72">'
-      + '<circle class="mr-track" cx="36" cy="36" r="28"/>'
-      + '<circle class="mr-prog" cx="36" cy="36" r="28" stroke="' + color + '" stroke-dasharray="' + dash.toFixed(1) + ' ' + circ.toFixed(1) + '" stroke-dashoffset="0"/>'
-      + '</svg>'
-      + '<div class="macro-ring-inner"><div class="macro-ring-val" style="color:' + color + ';">' + Math.round(val) + '</div><div class="macro-ring-lbl">' + unit + '</div></div>'
+  // Calorie progress bar
+  const calPct = Math.min(t.calories / Math.max(g.calories, 1), 1);
+  const calLeft = Math.max(g.calories - t.calories, 0);
+  const calOver = t.calories > g.calories;
+
+  // Macro bar helper
+  function macroBar(label, val, goal, color) {
+    const pct = Math.min(val / Math.max(goal, 1), 1) * 100;
+    return '<div style="margin-bottom:10px;">'
+      + '<div style="display:flex;justify-content:space-between;margin-bottom:4px;">'
+      + '<span style="font-size:12px;font-weight:500;">' + label + '</span>'
+      + '<span style="font-size:12px;color:var(--t2);">' + Math.round(val) + ' / ' + goal + 'g</span>'
       + '</div>'
-      + '<div style="font-size:11px;color:var(--t2);text-align:center;">' + label + '<br><span style="color:var(--t3);font-size:10px;">/ ' + goal + unit + '</span></div>'
+      + '<div style="height:6px;background:var(--s3);border-radius:3px;overflow:hidden;">'
+      + '<div style="height:100%;width:' + pct.toFixed(1) + '%;background:' + color + ';border-radius:3px;transition:width .4s;"></div>'
+      + '</div>'
       + '</div>';
   }
 
+  // Summary card — MFP style: calories remaining prominently, then macros below
+  const summaryCard = '<div class="card" style="padding:16px 16px 12px;">'
+    // Date nav
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">'
+    + '<button onclick="shiftFoodDate(-1)" style="width:32px;height:32px;border-radius:50%;background:var(--s2);border:none;color:var(--t1);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;touch-action:manipulation;">‹</button>'
+    + '<div style="font-size:13px;font-weight:600;color:var(--t2);">' + displayDate + '</div>'
+    + '<button onclick="shiftFoodDate(1)" style="width:32px;height:32px;border-radius:50%;background:var(--s2);border:none;color:var(--t1);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;touch-action:manipulation;' + (isToday ? 'opacity:.25;' : '') + '" ' + (isToday ? 'disabled' : '') + '>›</button>'
+    + '</div>'
+    // Big calorie number — MFP style
+    + '<div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:0;margin-bottom:14px;">'
+    + '<div style="text-align:center;">'
+    +   '<div style="font-size:11px;color:var(--t2);margin-bottom:2px;">Goal</div>'
+    +   '<div style="font-family:Barlow Condensed,sans-serif;font-size:26px;font-weight:800;">' + g.calories + '</div>'
+    + '</div>'
+    + '<div style="text-align:center;padding:0 8px;">'
+    +   '<div style="font-size:11px;color:var(--t2);margin-bottom:2px;">Food</div>'
+    +   '<div style="font-family:Barlow Condensed,sans-serif;font-size:26px;font-weight:800;color:var(--t2);">− ' + t.calories + '</div>'
+    + '</div>'
+    + '<div style="text-align:center;">'
+    +   '<div style="font-size:11px;color:var(--t2);margin-bottom:2px;">' + (calOver ? 'Over' : 'Remaining') + '</div>'
+    +   '<div style="font-family:Barlow Condensed,sans-serif;font-size:26px;font-weight:800;color:' + (calOver ? 'var(--red)' : 'var(--acc)') + ';">' + (calOver ? t.calories - g.calories : calLeft) + '</div>'
+    + '</div>'
+    + '</div>'
+    // Calorie progress bar
+    + '<div style="height:8px;background:var(--s3);border-radius:4px;overflow:hidden;margin-bottom:14px;">'
+    + '<div style="height:100%;width:' + (calPct * 100).toFixed(1) + '%;background:' + (calOver ? 'var(--red)' : 'var(--acc)') + ';border-radius:4px;transition:width .4s;"></div>'
+    + '</div>'
+    // Macro bars
+    + macroBar('Protein', t.protein, g.protein, '#47b4ff')
+    + macroBar('Carbs', t.carbs, g.carbs, '#ffb347')
+    + macroBar('Fat', t.fat, g.fat, '#ff9147')
+    + '</div>';
+
+  // Action row
+  const actions = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;">'
+    + '<button onclick="openScanner()" style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 8px;background:var(--s1);border:1px solid var(--b2);border-radius:14px;cursor:pointer;touch-action:manipulation;">'
+    +   '<span style="font-size:22px;">📷</span>'
+    +   '<span style="font-size:11px;font-weight:600;color:var(--t2);">Scan</span>'
+    + '</button>'
+    + '<button onclick="showFoodSearchSheet()" style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 8px;background:var(--s1);border:1px solid var(--b2);border-radius:14px;cursor:pointer;touch-action:manipulation;">'
+    +   '<span style="font-size:22px;">🔍</span>'
+    +   '<span style="font-size:11px;font-weight:600;color:var(--t2);">Search</span>'
+    + '</button>'
+    + '<button onclick="showManualFoodSheet()" style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 8px;background:var(--s1);border:1px solid var(--b2);border-radius:14px;cursor:pointer;touch-action:manipulation;">'
+    +   '<span style="font-size:22px;">✏️</span>'
+    +   '<span style="font-size:11px;font-weight:600;color:var(--t2);">Manual</span>'
+    + '</button>'
+    + '</div>';
+
   // Group by meal
-  const mealOrder = ['Breakfast','Lunch','Dinner','Snack','Pre-workout','Post-workout','Other'];
+  const mealOrder = ['Breakfast','Lunch','Dinner','Snack','Pre-workout','Post-workout'];
   const byMeal = {};
   items.forEach((item, idx) => {
-    const meal = item.meal || 'Other';
+    const meal = item.meal || 'Dinner';
     if(!byMeal[meal]) byMeal[meal] = [];
     byMeal[meal].push({item, idx});
   });
 
-  const mealSections = mealOrder.filter(m => byMeal[m]).map(meal => {
-    const mealCal = byMeal[meal].reduce((a,{item}) => a+(parseInt(item.cal)||0), 0);
-    return '<div style="margin-bottom:14px;">'
-      + '<div style="display:flex;justify-content:space-between;margin-bottom:6px;">'
-      + '<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);">' + meal + '</div>'
-      + '<div style="font-size:11px;color:var(--t3);">' + mealCal + ' kcal</div>'
-      + '</div>'
-      + byMeal[meal].map(({item, idx}) => (
-        '<div class="food-log-item">'
-        + '<div style="flex:1;min-width:0;">'
-        + '<div class="food-log-name">' + item.name + '</div>'
-        + (item.brand ? '<div class="food-log-meta">' + item.brand + '</div>' : '')
-        + '<div style="font-size:11px;color:var(--t3);margin-top:2px;">'
-        + (item.g ? 'P ' + item.g + 'g ' : '')
-        + (item.carbs ? 'C ' + item.carbs + 'g ' : '')
-        + (item.fat ? 'F ' + item.fat + 'g' : '')
-        + '</div>'
-        + '</div>'
-        + '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:10px;">'
-        + '<div class="food-log-cal">' + (item.cal||'—') + '<span style="font-size:10px;font-weight:400;"> kcal</span></div>'
-        + '<button data-didx="' + idx + '" class="food-del-btn" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:20px;padding:2px 6px;line-height:1;touch-action:manipulation;">×</button>'
-        + '</div>'
-        + '</div>'
-      )).join('')
-      + '</div>';
-  }).join('');
+  // Meal section — MFP style with add button per meal
+  function mealSection(meal) {
+    const entries = byMeal[meal] || [];
+    const mealCal = entries.reduce((a,{item}) => a + (parseInt(item.cal)||0), 0);
+    const mealP   = entries.reduce((a,{item}) => a + (parseFloat(item.g)||0), 0);
+    const mealC   = entries.reduce((a,{item}) => a + (parseFloat(item.carbs)||0), 0);
+    const mealF   = entries.reduce((a,{item}) => a + (parseFloat(item.fat)||0), 0);
 
-  // Recent foods
-  const recent = getRecentFoods();
-  const recentHTML = recent.length
-    ? '<div class="card">'
-      + '<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:10px;">Recent Foods</div>'
+    return '<div class="card" style="padding:0;overflow:hidden;margin-bottom:10px;">'
+      // Meal header
+      + '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--s2);border-bottom:1px solid var(--b1);">'
+      + '<div>'
+      +   '<div style="font-size:13px;font-weight:700;">' + meal + '</div>'
+      +   '<div style="font-size:11px;color:var(--t2);margin-top:1px;">' + mealCal + ' kcal</div>'
+      + '</div>'
+      + '<button data-meal="' + meal + '" class="add-to-meal-btn" style="width:28px;height:28px;border-radius:50%;background:var(--acc);color:#000;border:none;cursor:pointer;font-size:18px;line-height:1;touch-action:manipulation;">+</button>'
+      + '</div>'
+      // Items
+      + (entries.length
+        ? entries.map(({item, idx}) => (
+          '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--b1);">'
+          + '<div style="flex:1;min-width:0;margin-right:10px;">'
+          +   '<div style="font-size:14px;font-weight:500;line-height:1.3;">' + item.name + '</div>'
+          +   '<div style="font-size:11px;color:var(--t2);margin-top:2px;">'
+          +     (item.brand ? item.brand + ' · ' : '')
+          +     (item.servings && item.servings !== 1 ? item.servings + ' serving' + (item.servings > 1 ? 's' : '') + ' · ' : '')
+          +     (item.g ? item.g + 'g P ' : '')
+          +     (item.carbs ? item.carbs + 'g C ' : '')
+          +     (item.fat ? item.fat + 'g F' : '')
+          +   '</div>'
+          + '</div>'
+          + '<div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">'
+          +   '<div style="text-align:right;">'
+          +     '<div style="font-family:Barlow Condensed,sans-serif;font-size:20px;font-weight:700;">' + (item.cal||0) + '</div>'
+          +     '<div style="font-size:9px;color:var(--t3);">kcal</div>'
+          +   '</div>'
+          +   '<button data-didx="' + idx + '" class="food-del-btn" style="background:none;border:none;color:var(--t3);cursor:pointer;font-size:18px;padding:4px;touch-action:manipulation;">×</button>'
+          + '</div>'
+          + '</div>'
+        )).join('')
+        : '<div style="padding:12px 14px;font-size:13px;color:var(--t3);">Tap + to add food</div>')
+      // Meal footer totals (only if has items)
+      + (entries.length
+        ? '<div style="padding:8px 14px;background:var(--s2);border-top:1px solid var(--b1);display:flex;gap:14px;">'
+          + '<span style="font-size:11px;color:#47b4ff;">P ' + Math.round(mealP) + 'g</span>'
+          + '<span style="font-size:11px;color:#ffb347;">C ' + Math.round(mealC) + 'g</span>'
+          + '<span style="font-size:11px;color:#ff9147;">F ' + Math.round(mealF) + 'g</span>'
+          + '</div>'
+        : '')
+      + '</div>';
+  }
+
+  // Recent foods quick-add
+  const recent = getRecentFoods().slice(0, 5);
+  const recentSection = recent.length
+    ? '<div class="card" style="padding:0;overflow:hidden;">'
+      + '<div style="padding:12px 14px;background:var(--s2);border-bottom:1px solid var(--b1);">'
+      +   '<div style="font-size:13px;font-weight:700;">Recent</div>'
+      + '</div>'
       + recent.map((f,i) => (
-        '<div class="food-search-result recent-food-row" data-ri="' + i + '" style="padding:10px 0;">'
-        + '<div style="flex:1;min-width:0;"><div class="food-log-name">' + f.name + '</div>'
-        + '<div class="food-log-meta">' + (f.brand||'') + (f.servingUnit ? ' · ' + f.servingUnit : '') + '</div></div>'
-        + '<div style="text-align:right;flex-shrink:0;margin-left:10px;">'
-        + '<div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;color:var(--acc);">' + (f.cal||'—') + '</div>'
-        + '<div style="font-size:10px;color:var(--t3);">kcal · ' + (f.g||0) + 'g P</div>'
-        + '</div></div>'
+        '<div class="recent-food-row" data-ri="' + i + '" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--b1);cursor:pointer;">'
+        + '<div style="flex:1;min-width:0;margin-right:10px;">'
+        +   '<div style="font-size:14px;font-weight:500;">' + f.name + '</div>'
+        +   '<div style="font-size:11px;color:var(--t2);margin-top:2px;">' + (f.brand || '') + (f.servingUnit ? ' · ' + f.servingUnit : '') + '</div>'
+        + '</div>'
+        + '<div style="text-align:right;flex-shrink:0;">'
+        +   '<div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;">' + (f.cal||'—') + '</div>'
+        +   '<div style="font-size:9px;color:var(--t3);">kcal</div>'
+        + '</div>'
+        + '</div>'
       )).join('')
       + '</div>'
     : '';
 
-  const calLeft = Math.max(foodGoals.calories - totals.calories, 0);
-  const calOver = totals.calories > foodGoals.calories;
-
-  scroll.innerHTML =
-    // Date nav
-    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">'
-    + '<button onclick="shiftFoodDate(-1)" style="width:34px;height:34px;border-radius:50%;background:var(--s2);border:none;color:var(--t1);cursor:pointer;font-size:20px;touch-action:manipulation;">‹</button>'
-    + '<div style="font-size:13px;font-weight:500;color:var(--t2);">' + displayDate + '</div>'
-    + '<button onclick="shiftFoodDate(1)" style="width:34px;height:34px;border-radius:50%;background:var(--s2);border:none;color:var(--t1);cursor:pointer;font-size:20px;touch-action:manipulation;' + (isToday?'opacity:.3;':'' ) + '" ' + (isToday?'disabled':'') + '>›</button>'
-    + '</div>'
-    // Macro summary card
-    + '<div class="card" style="padding:16px;">'
-    + '<div style="text-align:center;margin-bottom:12px;">'
-    + '<div style="font-family:Barlow Condensed,sans-serif;font-size:48px;font-weight:800;color:' + (calOver?'var(--red)':'var(--acc)') + ';line-height:1;">' + totals.calories + '</div>'
-    + '<div style="font-size:12px;color:var(--t2);">' + (calOver ? '⚠️ ' + (totals.calories - foodGoals.calories) + ' over goal' : calLeft + ' kcal remaining') + ' · goal: ' + foodGoals.calories + '</div>'
-    + '</div>'
-    + '<div class="macro-ring-row">'
-    + ring(totals.protein, foodGoals.protein, '#47b4ff', 'Protein', 'g')
-    + ring(totals.carbs,   foodGoals.carbs,   '#ffb347', 'Carbs',   'g')
-    + ring(totals.fat,     foodGoals.fat,     '#ff9147', 'Fat',     'g')
-    + '</div>'
-    + '</div>'
-    // Actions
-    + '<button class="scan-btn" onclick="openScanner()" style="touch-action:manipulation;">📷 Scan Barcode</button>'
-    + '<div style="display:flex;gap:8px;margin-bottom:14px;">'
-    + '<button class="btn btn-ghost" style="flex:1;touch-action:manipulation;" onclick="showFoodSearchSheet()">🔍 Search</button>'
-    + '<button class="btn btn-ghost" style="flex:1;touch-action:manipulation;" onclick="showManualFoodSheet()">✏️ Manual</button>'
-    + '</div>'
-    // Food log
-    + '<div class="card">'
-    + (items.length
-      ? mealSections
-        + '<div style="border-top:1px solid var(--b1);padding-top:10px;display:flex;justify-content:space-between;font-size:12px;">'
-        + '<span style="font-weight:600;color:var(--t2);">Daily total</span>'
-        + '<span style="font-weight:600;">' + Math.round(totals.protein) + 'g P · ' + Math.round(totals.carbs) + 'g C · ' + Math.round(totals.fat) + 'g F</span>'
-        + '</div>'
-      : '<div style="text-align:center;padding:28px 0;color:var(--t3);line-height:1.8;">Nothing logged yet.<br>Scan a barcode or search to add food.</div>')
-    + '</div>'
-    + recentHTML;
+  scroll.innerHTML = summaryCard + actions
+    + mealOrder.map(m => mealSection(m)).join('')
+    + recentSection;
 
   // Wire delete buttons
   scroll.querySelectorAll('.food-del-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', e => {
       e.stopPropagation();
       deleteFoodItem(parseInt(btn.dataset.didx), foodViewDate);
     });
   });
 
-  // Wire recent food clicks
+  // Wire add-to-meal buttons — open search pre-tagged with meal
+  scroll.querySelectorAll('.add-to-meal-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      _addingForMeal = btn.dataset.meal;
+      showFoodSearchSheet();
+    });
+  });
+
+  // Wire recent foods
   window._recentFoods = recent;
   scroll.querySelectorAll('.recent-food-row').forEach(el => {
     el.addEventListener('click', () => {
       const f = window._recentFoods[parseInt(el.dataset.ri)];
-      if(f) { f.per100 = f.per100 || {cal:f.cal,protein:f.g,carbs:f.carbs,fat:f.fat}; showAddFoodConfirmSheet(f); }
+      if(f) {
+        f.per100 = f.per100 || {cal:f.cal, protein:f.g, carbs:f.carbs, fat:f.fat};
+        showAddFoodConfirmSheet(f);
+      }
     });
   });
 }
+
+// Track which meal we're adding to
+let _addingForMeal = 'Dinner';
+
 
 function shiftFoodDate(dir) {
   const d = new Date(foodViewDate + 'T12:00:00');
