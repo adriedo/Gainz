@@ -925,6 +925,7 @@ function beep(){try{const c=new(window.AudioContext||window.webkitAudioContext)(
 
 // ─── VOICE ────────────────────────────────────────────────────────────────
 let voiceEnabled=JSON.parse(localStorage.getItem('gainz_voice')||'true');
+let vibrationEnabled=JSON.parse(localStorage.getItem('gainz_vibration')||'true');
 // logUnit: what unit the user currently logs IN (stored with each entry)
 // viewUnit: what unit to display in progress view (can convert)
 let logUnit=localStorage.getItem('gainz_log_unit')||'mi';   // 'mi' or 'km' — per entry input
@@ -977,6 +978,15 @@ function toggleVoice(){
   });
   // iOS Safari: unlock speech synthesis inside this tap handler (direct user gesture)
   if(voiceEnabled) unlockSpeech();
+}
+function toggleVibration(){
+  vibrationEnabled=!vibrationEnabled;
+  localStorage.setItem('gainz_vibration',JSON.stringify(vibrationEnabled));
+  document.querySelectorAll('.vibration-toggle-btn').forEach(b=>{
+    b.classList.toggle('on',vibrationEnabled);
+    b.textContent=vibrationEnabled?'📳 Vibrate on':'📴 Vibrate off';
+  });
+  if(vibrationEnabled&&navigator.vibrate){navigator.vibrate(100);}
 }
 
 // Cache preferred voice - iOS loads voices async
@@ -1611,11 +1621,14 @@ function startRest(sec,name,setIdx){
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;">
       <button class="skip-btn" onclick="skipRest()">Skip rest</button>
       <button class="voice-toggle-btn voice-btn" onclick="toggleVoice()" style="padding:10px 14px;"></button>
+      <button class="vibration-toggle-btn voice-btn" onclick="toggleVibration()" style="padding:10px 14px;"></button>
     </div>`;
   // Set initial voice button state after DOM insert
   document.body.appendChild(ov);
   const vb=ov.querySelector('.voice-toggle-btn');
   if(vb){vb.classList.toggle('on',voiceEnabled);vb.textContent=voiceEnabled?'🔊 Voice on':'🔇 Voice off';}
+  const vibb=ov.querySelector('.vibration-toggle-btn');
+  if(vibb){vibb.classList.toggle('on',vibrationEnabled);vibb.textContent=vibrationEnabled?'📳 Vibrate on':'📴 Vibrate off';}
   restInterval=setInterval(()=>{
     restRem--;
     const se=eid('rs'),rpe=eid('rp');
@@ -1629,6 +1642,7 @@ function startRest(sec,name,setIdx){
       clearInterval(restInterval);
       eid('rest-ov-el')?.remove();
       beep();
+      if(vibrationEnabled&&navigator.vibrate){navigator.vibrate([200,100,200]);}
       if(voiceEnabled){
         // Say "Go!" then chain directly into the full next-set announcement
         const nextMsg=buildNextSetAnnouncement(_announceName,_announceSetIdx);
