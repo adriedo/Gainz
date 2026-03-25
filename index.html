@@ -1,8 +1,9 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0a0a0a">
@@ -16,7 +17,7 @@
 <style>
 /* ─── PWA INSTALL BANNER ─────────────────────────────────────────────────── */
 #pwa-banner{
-  position:fixed;bottom:88px;left:50%;transform:translateX(-50%);
+  position:fixed;bottom:calc(88px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);
   background:#1a1a1a;border:1px solid rgba(232,255,71,.35);
   border-radius:16px;padding:13px 14px;
   display:none;align-items:center;gap:11px;
@@ -34,417 +35,418 @@
 #pwa-banner .px:hover{color:#888;}
 
 :root{
-  --bg:#0a0a0a;--s1:#141414;--s2:#1e1e1e;--s3:#282828;
-  --b1:rgba(255,255,255,0.07);--b2:rgba(255,255,255,0.13);--b3:rgba(255,255,255,0.22);
-  --t1:#f0f0f0;--t2:#888;--t3:#4a4a4a;
-  --acc:#e8ff47;--red:#ff4747;--grn:#47ff8a;--blu:#47b4ff;--org:#ff9147;
-  --push:#ff6b6b;--pull:#47ff8a;--legs:#b47fff;--cardio:#47b4ff;--full:#ffb347;
-  --sb:env(safe-area-inset-bottom,0px);
+–bg:#0a0a0a;–s1:#141414;–s2:#1e1e1e;–s3:#282828;
+–b1:rgba(255,255,255,0.07);–b2:rgba(255,255,255,0.13);–b3:rgba(255,255,255,0.22);
+–t1:#f0f0f0;–t2:#888;–t3:#4a4a4a;
+–acc:#e8ff47;–red:#ff4747;–grn:#47ff8a;–blu:#47b4ff;–org:#ff9147;
+–push:#ff6b6b;–pull:#47ff8a;–legs:#b47fff;–cardio:#47b4ff;–full:#ffb347;
+–sb:env(safe-area-inset-bottom,0px);
+–st:env(safe-area-inset-top,0px);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;}
-html,body{height:100%;overflow:hidden;background:var(--bg);}
-body{font-family:DM Sans,sans-serif;color:var(--t1);overscroll-behavior:none;}
+html{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(–bg);}body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(–bg);font-family:DM Sans,sans-serif;color:var(–t1);overscroll-behavior:none;-webkit-text-size-adjust:100%;}
 .bc{font-family:Barlow Condensed,sans-serif;}
-#app{display:flex;flex-direction:column;height:100dvh;max-width:430px;margin:0 auto;}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh;max-width:430px;margin:0 auto;padding-top:var(–st);}
 .scr{display:none;flex-direction:column;flex:1;overflow:hidden;}
 .scr.on{display:flex;}
 .scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 32px;}
 .scroll::-webkit-scrollbar{display:none;}
 /* NAV */
-.nav{display:flex;background:var(--s1);border-top:1px solid var(--b1);padding:6px 0 calc(6px + var(--sb));flex-shrink:0;}
-.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;background:none;border:none;cursor:pointer;color:var(--t3);font-family:DM Sans,sans-serif;}
-.nb.on{color:var(--acc);}
+.nav{display:flex;background:var(–s1);border-top:1px solid var(–b1);padding:6px 0 calc(6px + var(–sb));flex-shrink:0;}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;background:none;border:none;cursor:pointer;color:var(–t3);font-family:DM Sans,sans-serif;}
+.nb.on{color:var(–acc);}
 .nb svg{width:22px;height:22px;}
 .nb span{font-size:9px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;}
 /* CARDS */
-.card{background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:16px;margin-bottom:10px;}
-.card-sm{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:12px 14px;margin-bottom:8px;}
+.card{background:var(–s1);border:1px solid var(–b1);border-radius:16px;padding:16px;margin-bottom:10px;}
+.card-sm{background:var(–s1);border:1px solid var(–b1);border-radius:12px;padding:12px 14px;margin-bottom:8px;}
 /* BTNS */
-.btn{padding:12px 20px;border-radius:12px;font-size:15px;font-weight:500;cursor:pointer;font-family:DM Sans,sans-serif;border:none;display:flex;align-items:center;justify-content:center;gap:8px;}
-.btn-acc{background:var(--acc);color:#000;}
-.btn-ghost{background:none;border:1px solid var(--b2);color:var(--t1);}
-.btn-danger{background:rgba(255,71,71,.1);border:1px solid rgba(255,71,71,.25);color:var(--red);}
+.btn{padding:12px 20px;border-radius:12px;font-size:15px;font-weight:500;cursor:pointer;font-family:DM Sans,sans-serif;border:none;display:flex;align-items:center;justify-content:center;gap:8px;touch-action:manipulation;-webkit-user-select:none;user-select:none;}
+.btn-acc{background:var(–acc);color:#000;}
+.btn-ghost{background:none;border:1px solid var(–b2);color:var(–t1);}
+.btn-danger{background:rgba(255,71,71,.1);border:1px solid rgba(255,71,71,.25);color:var(–red);}
 .btn-full{width:100%;}
 .btn-sm{padding:8px 14px;font-size:13px;border-radius:10px;}
 .btn:active{opacity:.75;}
 /* INPUTS */
-input,select,textarea{font-family:DM Sans,sans-serif;color:var(--t1);background:var(--s2);border:1px solid var(--b2);border-radius:10px;padding:10px 12px;font-size:15px;width:100%;-webkit-appearance:none;}
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(--acc);}
-select option{background:#222;color:var(--t1);}
-label{font-size:12px;color:var(--t2);display:block;margin-bottom:5px;}
+input,select,textarea{font-family:DM Sans,sans-serif;color:var(–t1);background:var(–s2);border:1px solid var(–b2);border-radius:10px;padding:10px 12px;font-size:16px;width:100%;-webkit-appearance:none;}input[type=“number”]{-moz-appearance:textfield;}input[type=“number”]::-webkit-outer-spin-button,input[type=“number”]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(–acc);}
+select option{background:#222;color:var(–t1);}
+label{font-size:12px;color:var(–t2);display:block;margin-bottom:5px;}
 .field{margin-bottom:14px;}
 /* TAGS */
 .tag{display:inline-block;font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;}
-.tag-push{background:rgba(255,107,107,.15);color:var(--push);}
-.tag-pull{background:rgba(71,255,138,.15);color:var(--pull);}
-.tag-legs{background:rgba(180,127,255,.15);color:var(--legs);}
-.tag-cardio{background:rgba(71,180,255,.15);color:var(--cardio);}
-.tag-full{background:rgba(255,179,71,.15);color:var(--full);}
+.tag-push{background:rgba(255,107,107,.15);color:var(–push);}
+.tag-pull{background:rgba(71,255,138,.15);color:var(–pull);}
+.tag-legs{background:rgba(180,127,255,.15);color:var(–legs);}
+.tag-cardio{background:rgba(71,180,255,.15);color:var(–cardio);}
+.tag-full{background:rgba(255,179,71,.15);color:var(–full);}
 /* SECTION LABEL */
-.slbl{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin:20px 0 10px;}
+.slbl{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(–t3);margin:20px 0 10px;}
 /* HOME */
 .greet{font-family:Barlow Condensed,sans-serif;font-size:46px;font-weight:800;text-transform:uppercase;letter-spacing:-1px;line-height:1.05;margin-bottom:6px;}
-.greet em{color:var(--acc);font-style:normal;}
+.greet em{color:var(–acc);font-style:normal;}
 .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px;}
-.stat-box{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:14px 10px;}
+.stat-box{background:var(–s1);border:1px solid var(–b1);border-radius:12px;padding:14px 10px;}
 .stat-n{font-family:Barlow Condensed,sans-serif;font-size:30px;font-weight:700;line-height:1;}
-.stat-n.a{color:var(--acc);}
-.stat-lbl{font-size:11px;color:var(--t2);margin-top:3px;}
+.stat-n.a{color:var(–acc);}
+.stat-lbl{font-size:11px;color:var(–t2);margin-top:3px;}
 /* DAY CARD */
-.day-card{background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:16px;margin-bottom:10px;cursor:pointer;position:relative;overflow:hidden;transition:transform .12s;}
+.day-card{background:var(–s1);border:1px solid var(–b1);border-radius:16px;padding:16px;margin-bottom:10px;cursor:pointer;position:relative;overflow:hidden;transition:transform .12s;}
 .day-card:active{transform:scale(.975);}
-.day-card::before{content:'';position:absolute;left:0;top:0;width:4px;height:100%;}
-.dc-push::before{background:var(--push);}.dc-pull::before{background:var(--pull);}
-.dc-legs::before{background:var(--legs);}.dc-cardio::before{background:var(--cardio);}
-.dc-full::before{background:var(--full);}
+.day-card::before{content:’’;position:absolute;left:0;top:0;width:4px;height:100%;}
+.dc-push::before{background:var(–push);}.dc-pull::before{background:var(–pull);}
+.dc-legs::before{background:var(–legs);}.dc-cardio::before{background:var(–cardio);}
+.dc-full::before{background:var(–full);}
 .dc-head{display:flex;align-items:center;justify-content:space-between;}
 .dc-title{font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:700;text-transform:uppercase;}
-.dc-sub{font-size:12px;color:var(--t2);margin-top:2px;}
+.dc-sub{font-size:12px;color:var(–t2);margin-top:2px;}
 .dc-meta{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
-.arrow-circle{width:34px;height:34px;background:var(--acc);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.arrow-circle{width:34px;height:34px;background:var(–acc);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 /* WORKOUT SCREEN */
-.wk-hdr{background:var(--s1);border-bottom:1px solid var(--b1);padding:12px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.wk-hdr{background:var(–s1);border-bottom:1px solid var(–b1);padding:12px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
 .wk-ttl{font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:700;text-transform:uppercase;}
-.wk-elapsed{font-size:13px;color:var(--t2);}
-.prog-bar-wrap{height:3px;background:var(--s2);flex-shrink:0;}
-.prog-bar{height:100%;background:var(--acc);transition:width .3s;}
-.wk-footer{padding:12px 16px calc(12px + var(--sb));background:var(--s1);border-top:1px solid var(--b1);flex-shrink:0;}
-.icon-btn{width:36px;height:36px;border-radius:50%;background:var(--s2);border:none;color:var(--t1);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.wk-elapsed{font-size:13px;color:var(–t2);}
+.prog-bar-wrap{height:3px;background:var(–s2);flex-shrink:0;}
+.prog-bar{height:100%;background:var(–acc);transition:width .3s;}
+.wk-footer{padding:12px 16px calc(12px + var(–sb));background:var(–s1);border-top:1px solid var(–b1);flex-shrink:0;}
+.icon-btn{width:36px;height:36px;border-radius:50%;background:var(–s2);border:none;color:var(–t1);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
 /* EX CARD IN WORKOUT */
-.ex-card{background:var(--s1);border:1px solid var(--b1);border-radius:16px;margin-bottom:10px;overflow:hidden;}
-.ex-card.active-ex{border-color:var(--acc);}
+.ex-card{background:var(–s1);border:1px solid var(–b1);border-radius:16px;margin-bottom:10px;overflow:hidden;}
+.ex-card.active-ex{border-color:var(–acc);}
 .ex-head{padding:13px 15px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;gap:10px;}
 .ex-name{font-family:Barlow Condensed,sans-serif;font-size:19px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;}
-.ex-info{font-size:12px;color:var(--t2);margin-top:2px;}
-.ex-done-badge{font-size:11px;padding:2px 8px;border-radius:20px;background:rgba(71,255,138,.15);color:var(--grn);}
-.chevron{font-size:11px;color:var(--t3);transition:transform .2s;}
+.ex-info{font-size:12px;color:var(–t2);margin-top:2px;}
+.ex-done-badge{font-size:11px;padding:2px 8px;border-radius:20px;background:rgba(71,255,138,.15);color:var(–grn);}
+.chevron{font-size:11px;color:var(–t3);transition:transform .2s;}
 .chevron.open{transform:rotate(180deg);}
 .ex-body{display:none;padding:0 15px 14px;}
 .ex-body.open{display:block;}
 /* SVG ILLUSTRATION */
-.ex-illo{width:100%;height:160px;background:var(--s2);border-radius:12px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.ex-illo{width:100%;height:160px;background:var(–s2);border-radius:12px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
 .ex-illo svg{width:100%;height:100%;}
 /* SET ROWS */
 .set-head{display:grid;grid-template-columns:22px 1fr 1fr 1fr 36px;gap:4px;margin-bottom:6px;}
-.sh-lbl{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;text-align:center;font-weight:500;}
-.set-row{display:grid;grid-template-columns:22px 1fr 1fr 1fr 36px;gap:4px;align-items:center;margin-bottom:8px;padding:6px 8px;border-radius:10px;background:var(--s2);}
+.sh-lbl{font-size:9px;color:var(–t3);text-transform:uppercase;letter-spacing:.05em;text-align:center;font-weight:500;}
+.set-row{display:grid;grid-template-columns:22px 1fr 1fr 1fr 36px;gap:4px;align-items:center;margin-bottom:8px;padding:6px 8px;border-radius:10px;background:var(–s2);}
 .set-row.set-done{background:rgba(71,255,138,0.06);border:1px solid rgba(71,255,138,0.15);}
-.set-n{font-size:12px;color:var(--t2);font-weight:600;text-align:center;}
+.set-n{font-size:12px;color:var(–t2);font-weight:600;text-align:center;}
 .set-prev{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;}
-.set-prev-w{font-size:13px;font-weight:600;color:var(--t2);}
-.set-prev-r{font-size:10px;color:var(--t3);}
+.set-prev-w{font-size:13px;font-weight:600;color:var(–t2);}
+.set-prev-r{font-size:10px;color:var(–t3);}
 .set-tgt{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;}
-.set-tgt-w{font-size:13px;font-weight:600;color:var(--acc);opacity:.7;}
-.set-tgt-r{font-size:10px;color:var(--t3);}
+.set-tgt-w{font-size:13px;font-weight:600;color:var(–acc);opacity:.7;}
+.set-tgt-r{font-size:10px;color:var(–t3);}
 .set-actual{display:flex;flex-direction:column;gap:3px;}
-.si-w{width:100%;padding:5px 4px;background:var(--s3);border:1px solid var(--b2);border-radius:7px;color:var(--t1);font-size:14px;font-weight:600;text-align:center;-webkit-appearance:none;font-family:DM Sans,sans-serif;}
-.si-r{width:100%;padding:5px 4px;background:var(--s3);border:1px solid var(--b2);border-radius:7px;color:var(--t1);font-size:14px;font-weight:600;text-align:center;-webkit-appearance:none;font-family:DM Sans,sans-serif;}
-.si-w:focus,.si-r:focus{outline:none;border-color:var(--acc);}
-.chk{width:36px;height:36px;border-radius:50%;border:2px solid var(--b2);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--t3);flex-shrink:0;}
-.chk.done{background:var(--grn);border-color:var(--grn);color:#000;}
+.si-w{width:100%;padding:5px 4px;background:var(–s3);border:1px solid var(–b2);border-radius:7px;color:var(–t1);font-size:16px;font-weight:600;text-align:center;-webkit-appearance:none;font-family:DM Sans,sans-serif;}
+.si-r{width:100%;padding:5px 4px;background:var(–s3);border:1px solid var(–b2);border-radius:7px;color:var(–t1);font-size:16px;font-weight:600;text-align:center;-webkit-appearance:none;font-family:DM Sans,sans-serif;}
+.si-w:focus,.si-r:focus{outline:none;border-color:var(–acc);}
+.chk{width:36px;height:36px;border-radius:50%;border:2px solid var(–b2);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(–t3);flex-shrink:0;}
+.chk.done{background:var(–grn);border-color:var(–grn);color:#000;}
 .target-banner{display:flex;align-items:center;gap:6px;padding:8px 10px;border-radius:8px;margin-bottom:10px;font-size:12px;font-weight:500;}
-.target-banner.up{background:rgba(71,255,138,0.1);color:var(--grn);}
-.target-banner.same{background:rgba(232,255,71,0.08);color:var(--acc);}
+.target-banner.up{background:rgba(71,255,138,0.1);color:var(–grn);}
+.target-banner.same{background:rgba(232,255,71,0.08);color:var(–acc);}
 /* REST CONTROL */
-.rest-ctrl{display:flex;align-items:center;justify-content:space-between;background:var(--s2);border-radius:10px;padding:8px 12px;margin-top:8px;}
-.rc-lbl{font-size:12px;color:var(--t2);}
+.rest-ctrl{display:flex;align-items:center;justify-content:space-between;background:var(–s2);border-radius:10px;padding:8px 12px;margin-top:8px;}
+.rc-lbl{font-size:12px;color:var(–t2);}
 .rc-adj{display:flex;align-items:center;gap:8px;}
-.rc-btn{width:28px;height:28px;border-radius:50%;border:1px solid var(--b2);background:none;color:var(--t1);cursor:pointer;font-size:16px;line-height:1;font-family:DM Sans,sans-serif;}
-.rc-val{font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;color:var(--acc);min-width:42px;text-align:center;}
-.form-tips-btn{width:100%;padding:9px;background:none;border:1px solid var(--b1);border-radius:10px;color:var(--t2);font-size:13px;font-family:DM Sans,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;}
-.form-tips-btn:active{background:var(--s2);}
+.rc-btn{width:28px;height:28px;border-radius:50%;border:1px solid var(–b2);background:none;color:var(–t1);cursor:pointer;font-size:16px;line-height:1;font-family:DM Sans,sans-serif;}
+.rc-val{font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;color:var(–acc);min-width:42px;text-align:center;}
+.form-tips-btn{width:100%;padding:9px;background:none;border:1px solid var(–b1);border-radius:10px;color:var(–t2);font-size:13px;font-family:DM Sans,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;}
+.form-tips-btn:active{background:var(–s2);}
 /* REST OVERLAY */
-.rest-ov{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;}
+.rest-ov{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:calc(24px + env(safe-area-inset-top,0px)) 24px calc(24px + env(safe-area-inset-bottom,0px));}
 .rest-ring{position:relative;width:180px;height:180px;}
 .rest-ring svg{transform:rotate(-90deg);}
 .r-track{fill:none;stroke:#222;stroke-width:8;}
-.r-prog{fill:none;stroke:var(--acc);stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .95s linear;}
+.r-prog{fill:none;stroke:var(–acc);stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .95s linear;}
 .rest-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-.rest-secs{font-family:Barlow Condensed,sans-serif;font-size:66px;font-weight:800;line-height:1;color:var(--acc);}
-.rest-name{font-family:Barlow Condensed,sans-serif;font-size:19px;font-weight:700;text-transform:uppercase;color:var(--t1);text-align:center;}
+.rest-secs{font-family:Barlow Condensed,sans-serif;font-size:66px;font-weight:800;line-height:1;color:var(–acc);}
+.rest-name{font-family:Barlow Condensed,sans-serif;font-size:19px;font-weight:700;text-transform:uppercase;color:var(–t1);text-align:center;}
 .rest-adj-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
-.ra-btn{padding:9px 16px;border-radius:30px;font-size:13px;font-weight:500;cursor:pointer;font-family:DM Sans,sans-serif;border:1px solid var(--b2);background:var(--s2);color:var(--t1);}
-.skip-btn{padding:12px 30px;border-radius:30px;font-size:14px;font-weight:500;cursor:pointer;font-family:DM Sans,sans-serif;border:none;background:var(--s2);color:var(--t1);}
-.voice-btn{padding:8px 14px;border-radius:30px;font-size:12px;font-weight:500;cursor:pointer;font-family:DM Sans,sans-serif;border:1px solid var(--b2);background:none;color:var(--t2);display:flex;align-items:center;gap:5px;}
-.voice-btn.on{border-color:var(--acc);color:var(--acc);}
+.ra-btn{padding:9px 16px;border-radius:30px;font-size:13px;font-weight:500;cursor:pointer;font-family:DM Sans,sans-serif;border:1px solid var(–b2);background:var(–s2);color:var(–t1);}
+.skip-btn{padding:12px 30px;border-radius:30px;font-size:14px;font-weight:500;cursor:pointer;font-family:DM Sans,sans-serif;border:none;background:var(–s2);color:var(–t1);}
+.voice-btn{padding:8px 14px;border-radius:30px;font-size:12px;font-weight:500;cursor:pointer;font-family:DM Sans,sans-serif;border:1px solid var(–b2);background:none;color:var(–t2);display:flex;align-items:center;gap:5px;}
+.voice-btn.on{border-color:var(–acc);color:var(–acc);}
 /* FINISH */
 .finish-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center;gap:14px;}
 .finish-ttl{font-family:Barlow Condensed,sans-serif;font-size:46px;font-weight:800;text-transform:uppercase;line-height:1.1;}
-.finish-ttl em{color:var(--acc);font-style:normal;}
+.finish-ttl em{color:var(–acc);font-style:normal;}
 .finish-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;}
-.finish-stat{background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:16px;}
-.fs-val{font-family:Barlow Condensed,sans-serif;font-size:34px;font-weight:800;color:var(--acc);}
-.fs-lbl{font-size:12px;color:var(--t2);margin-top:2px;}
+.finish-stat{background:var(–s1);border:1px solid var(–b1);border-radius:14px;padding:16px;}
+.fs-val{font-family:Barlow Condensed,sans-serif;font-size:34px;font-weight:800;color:var(–acc);}
+.fs-lbl{font-size:12px;color:var(–t2);margin-top:2px;}
 /* SHEET */
-.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:flex-end;}
-.sheet{background:var(--s1);border-radius:22px 22px 0 0;padding:20px 20px calc(28px + var(--sb));width:100%;max-height:88vh;overflow-y:auto;}
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:flex-end;-webkit-overflow-scrolling:touch;}
+.sheet{background:var(–s1);border-radius:22px 22px 0 0;padding:20px 20px calc(28px + var(–sb));width:100%;max-height:88vh;max-height:88dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .sheet::-webkit-scrollbar{display:none;}
-.sheet-handle{width:38px;height:4px;background:var(--b2);border-radius:2px;margin:0 auto 16px;}
+.sheet-handle{width:38px;height:4px;background:var(–b2);border-radius:2px;margin:0 auto 16px;}
 .sheet-title{font-family:Barlow Condensed,sans-serif;font-size:24px;font-weight:800;text-transform:uppercase;margin-bottom:4px;}
-.sheet-sub{font-size:13px;color:var(--t2);margin-bottom:14px;}
-.cue-row{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--b1);}
+.sheet-sub{font-size:13px;color:var(–t2);margin-bottom:14px;}
+.cue-row{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(–b1);}
 .cue-row:last-of-type{border-bottom:none;}
-.cue-dot{width:6px;height:6px;border-radius:50%;background:var(--acc);margin-top:7px;flex-shrink:0;}
+.cue-dot{width:6px;height:6px;border-radius:50%;background:var(–acc);margin-top:7px;flex-shrink:0;}
 .cue-txt{font-size:14px;line-height:1.6;}
-.yt-row{margin-top:12px;display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--s2);border-radius:12px;cursor:pointer;border:1px solid var(--b1);}
-.yt-ico{width:30px;height:30px;background:var(--red);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.yt-row{margin-top:12px;display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(–s2);border-radius:12px;cursor:pointer;border:1px solid var(–b1);}
+.yt-ico{width:30px;height:30px;background:var(–red);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 /* HISTORY */
 .hist-row{position:relative;margin-bottom:8px;border-radius:14px;overflow:hidden;}
-.del-reveal{position:absolute;inset:0;background:var(--red);display:flex;align-items:center;justify-content:flex-end;padding-right:20px;border-radius:14px;}
+.del-reveal{position:absolute;inset:0;background:var(–red);display:flex;align-items:center;justify-content:flex-end;padding-right:20px;border-radius:14px;}
 .del-reveal span{font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.07em;}
-.hist-card{background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:14px 15px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;transition:transform .18s ease;will-change:transform;touch-action:pan-y;}
+.hist-card{background:var(–s1);border:1px solid var(–b1);border-radius:14px;padding:14px 15px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;transition:transform .18s ease;will-change:transform;touch-action:pan-y;}
 .hist-card.nt{transition:none;}
-.del-ico-btn{width:30px;height:30px;border-radius:50%;background:rgba(255,71,71,.15);border:none;color:var(--red);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.del-ico-btn{width:30px;height:30px;border-radius:50%;background:rgba(255,71,71,.15);border:none;color:var(–red);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 /* EDIT SCREEN */
-.edit-day-card{background:var(--s1);border:1px solid var(--b1);border-radius:14px;margin-bottom:10px;overflow:hidden;}
+.edit-day-card{background:var(–s1);border:1px solid var(–b1);border-radius:14px;margin-bottom:10px;overflow:hidden;}
 .edit-day-head{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
 .edit-day-name{font-family:Barlow Condensed,sans-serif;font-size:20px;font-weight:700;text-transform:uppercase;}
 .edit-day-body{display:none;padding:0 16px 14px;}
 .edit-day-body.open{display:block;}
 .ex-edit-name{font-size:14px;font-weight:500;}
-.ex-edit-meta{font-size:12px;color:var(--t2);margin-top:2px;}
+.ex-edit-meta{font-size:12px;color:var(–t2);margin-top:2px;}
 .ex-edit-actions{display:flex;gap:6px;}
-.mini-btn{padding:5px 10px;border-radius:8px;font-size:12px;cursor:pointer;font-family:DM Sans,sans-serif;border:1px solid var(--b2);background:none;color:var(--t2);}
-.mini-btn.del{border-color:rgba(255,71,71,.3);color:var(--red);}
-.mini-btn:active{background:var(--s2);}
+.mini-btn{padding:5px 10px;border-radius:8px;font-size:12px;cursor:pointer;font-family:DM Sans,sans-serif;border:1px solid var(–b2);background:none;color:var(–t2);}
+.mini-btn.del{border-color:rgba(255,71,71,.3);color:var(–red);}
+.mini-btn:active{background:var(–s2);}
 /* MUSCLE GROUP TABS */
 .mg-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px;}
 .mg-tabs::-webkit-scrollbar{display:none;}
-.mg-tab{padding:7px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;border:1px solid var(--b2);background:none;color:var(--t2);font-family:DM Sans,sans-serif;}
-.mg-tab.on{background:var(--acc);color:#000;border-color:var(--acc);}
-.ex-pick-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--b1);}
+.mg-tab{padding:7px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;border:1px solid var(–b2);background:none;color:var(–t2);font-family:DM Sans,sans-serif;}
+.mg-tab.on{background:var(–acc);color:#000;border-color:var(–acc);}
+.ex-pick-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(–b1);}
 .ex-pick-row:last-of-type{border-bottom:none;}
 .ex-pick-name{font-size:14px;font-weight:500;}
-.ex-pick-muscle{font-size:11px;color:var(--t2);margin-top:2px;}
-.add-ex-btn{padding:5px 12px;border-radius:8px;font-size:12px;background:var(--acc);color:#000;border:none;cursor:pointer;font-family:DM Sans,sans-serif;font-weight:500;}
+.ex-pick-muscle{font-size:11px;color:var(–t2);margin-top:2px;}
+.add-ex-btn{padding:5px 12px;border-radius:8px;font-size:12px;background:var(–acc);color:#000;border:none;cursor:pointer;font-family:DM Sans,sans-serif;font-weight:500;}
 /* EMPTY */
-.empty{text-align:center;padding:40px 20px;color:var(--t3);font-size:14px;line-height:1.8;}
+.empty{text-align:center;padding:40px 20px;color:var(–t3);font-size:14px;line-height:1.8;}
 /* DRAG REORDER */
-.ex-edit-row{display:flex;align-items:center;padding:9px 0;border-bottom:1px solid var(--b1);gap:6px;}
+.ex-edit-row{display:flex;align-items:center;padding:9px 0;border-bottom:1px solid var(–b1);gap:6px;}
 .ex-edit-row:last-of-type{border-bottom:none;}
 .ex-edit-row.dragging{opacity:.35;}
-.ex-edit-row.drag-over{border-top:2px solid var(--acc);}
-.drag-handle{width:26px;height:36px;display:flex;align-items:center;justify-content:center;cursor:grab;color:var(--t3);flex-shrink:0;touch-action:none;user-select:none;}
-.drag-handle:active{cursor:grabbing;color:var(--t1);}
+.ex-edit-row.drag-over{border-top:2px solid var(–acc);}
+.drag-handle{width:26px;height:36px;display:flex;align-items:center;justify-content:center;cursor:grab;color:var(–t3);flex-shrink:0;touch-action:none;user-select:none;}
+.drag-handle:active{cursor:grabbing;color:var(–t1);}
 /* CARDIO CARDS */
-.cardio-card{background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:16px;margin-bottom:10px;position:relative;overflow:hidden;}
-.cardio-card::before{content:'';position:absolute;left:0;top:0;width:4px;height:100%;}
+.cardio-card{background:var(–s1);border:1px solid var(–b1);border-radius:16px;padding:16px;margin-bottom:10px;position:relative;overflow:hidden;}
+.cardio-card::before{content:’’;position:absolute;left:0;top:0;width:4px;height:100%;}
 .cc-run::before{background:#47b4ff;}.cc-bike::before{background:#ffb347;}
 .cc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
 .cc-title{font-family:Barlow Condensed,sans-serif;font-size:20px;font-weight:700;text-transform:uppercase;}
-.cc-sub{font-size:11px;color:var(--t2);margin-top:1px;}
+.cc-sub{font-size:11px;color:var(–t2);margin-top:1px;}
 .cc-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
-.cc-lbl{font-size:10px;color:var(--t2);font-weight:500;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;}
-.cc-input{padding:9px 8px;background:var(--s2);border:1px solid var(--b1);border-radius:9px;color:var(--t1);font-size:16px;font-weight:600;text-align:center;-webkit-appearance:none;font-family:DM Sans,sans-serif;width:100%;}
-.cc-input:focus{outline:none;border-color:var(--acc);}
-.cc-log-btn{width:100%;padding:11px;border-radius:10px;background:var(--acc);color:#000;border:none;cursor:pointer;font-size:14px;font-weight:600;font-family:DM Sans,sans-serif;}
+.cc-lbl{font-size:10px;color:var(–t2);font-weight:500;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;}
+.cc-input{padding:9px 8px;background:var(–s2);border:1px solid var(–b1);border-radius:9px;color:var(–t1);font-size:16px;font-weight:600;text-align:center;-webkit-appearance:none;font-family:DM Sans,sans-serif;width:100%;}
+.cc-input:focus{outline:none;border-color:var(–acc);}
+.cc-log-btn{width:100%;padding:11px;border-radius:10px;background:var(–acc);color:#000;border:none;cursor:pointer;font-size:14px;font-weight:600;font-family:DM Sans,sans-serif;}
 .cc-log-btn:active{opacity:.8;}
 .cc-badge{font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.04em;}
 .cc-run .cc-badge{background:rgba(71,180,255,.15);color:#47b4ff;}
 .cc-bike .cc-badge{background:rgba(255,179,71,.15);color:#ffb347;}
 .hiit-badge{background:rgba(255,71,71,.15)!important;color:#ff4747!important;}
-.cc-last{font-size:11px;color:var(--t3);margin-top:7px;text-align:center;}
+.cc-last{font-size:11px;color:var(–t3);margin-top:7px;text-align:center;}
 /* TREND CHART */
-.trend-wrap{background:var(--s2);border-radius:12px;padding:14px;margin-top:10px;}
+.trend-wrap{background:var(–s2);border-radius:12px;padding:14px;margin-top:10px;}
 .trend-meta{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;}
-.trend-pr-lbl{font-size:11px;color:var(--t2);}
-.trend-pr-val{font-family:Barlow Condensed,sans-serif;font-size:24px;font-weight:700;color:var(--acc);}
+.trend-pr-lbl{font-size:11px;color:var(–t2);}
+.trend-pr-val{font-family:Barlow Condensed,sans-serif;font-size:24px;font-weight:700;color:var(–acc);}
 .trend-bars{display:flex;align-items:flex-end;gap:4px;height:70px;}
 .trend-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;height:100%;}
 .trend-bar-outer{flex:1;width:100%;display:flex;align-items:flex-end;}
-.trend-bar{width:100%;border-radius:3px 3px 0 0;background:var(--s3);min-height:2px;}
-.trend-bar.is-pr{background:var(--acc);}
+.trend-bar{width:100%;border-radius:3px 3px 0 0;background:var(–s3);min-height:2px;}
+.trend-bar.is-pr{background:var(–acc);}
 .trend-bar.recent{background:#555;}
-.trend-date{font-size:9px;color:var(--t3);text-align:center;white-space:nowrap;overflow:hidden;width:100%;}
-.trend-val-lbl{font-size:9px;color:var(--t2);text-align:center;}
+.trend-date{font-size:9px;color:var(–t3);text-align:center;white-space:nowrap;overflow:hidden;width:100%;}
+.trend-val-lbl{font-size:9px;color:var(–t2);text-align:center;}
 /* CALENDAR */
 .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
-.cal-nav-btn{width:34px;height:34px;border-radius:50%;background:var(--s2);border:none;color:var(--t1);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;}
+.cal-nav-btn{width:34px;height:34px;border-radius:50%;background:var(–s2);border:none;color:var(–t1);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;}
 .cal-month{font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:700;text-transform:uppercase;}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
-.cal-dow{font-size:10px;color:var(--t3);text-align:center;padding:4px 0;font-weight:500;text-transform:uppercase;letter-spacing:.04em;}
-.cal-day{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;font-size:13px;font-weight:500;color:var(--t2);}
-.cal-day.today{color:var(--t1);font-weight:700;}
-.cal-day.today::after{content:'';width:4px;height:4px;border-radius:50%;background:var(--acc);position:absolute;bottom:3px;}
-.cal-day.worked{background:var(--s2);color:var(--t1);}
+.cal-dow{font-size:10px;color:var(–t3);text-align:center;padding:4px 0;font-weight:500;text-transform:uppercase;letter-spacing:.04em;}
+.cal-day{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;font-size:13px;font-weight:500;color:var(–t2);}
+.cal-day.today{color:var(–t1);font-weight:700;}
+.cal-day.today::after{content:’’;width:4px;height:4px;border-radius:50%;background:var(–acc);position:absolute;bottom:3px;}
+.cal-day.worked{background:var(–s2);color:var(–t1);}
 .cal-day.worked .cal-dot{display:block;}
 .cal-dot{display:none;width:6px;height:6px;border-radius:50%;position:absolute;bottom:3px;}
 .cal-day.empty-day{pointer-events:none;}
-.cal-day:not(.empty-day):hover{background:var(--s2);color:var(--t1);}
-.cal-streak{display:flex;align-items:center;gap:10px;background:var(--s2);border-radius:12px;padding:14px;margin-top:14px;}
-.streak-n{font-family:Barlow Condensed,sans-serif;font-size:42px;font-weight:800;color:var(--acc);line-height:1;}
+.cal-day:not(.empty-day):hover{background:var(–s2);color:var(–t1);}
+.cal-streak{display:flex;align-items:center;gap:10px;background:var(–s2);border-radius:12px;padding:14px;margin-top:14px;}
+.streak-n{font-family:Barlow Condensed,sans-serif;font-size:42px;font-weight:800;color:var(–acc);line-height:1;}
 .cal-week-vol{margin-top:14px;}
 .vol-bar-wrap{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
-.vol-day-lbl{font-size:11px;color:var(--t2);width:28px;flex-shrink:0;}
-.vol-bar-bg{flex:1;height:8px;background:var(--s2);border-radius:4px;overflow:hidden;}
-.vol-bar{height:100%;border-radius:4px;background:var(--acc);transition:width .4s;}
-.vol-n{font-size:11px;color:var(--t3);width:32px;text-align:right;flex-shrink:0;}
+.vol-day-lbl{font-size:11px;color:var(–t2);width:28px;flex-shrink:0;}
+.vol-bar-bg{flex:1;height:8px;background:var(–s2);border-radius:4px;overflow:hidden;}
+.vol-bar{height:100%;border-radius:4px;background:var(–acc);transition:width .4s;}
+.vol-n{font-size:11px;color:var(–t3);width:32px;text-align:right;flex-shrink:0;}
 /* SESSION DETAIL SHEET */
-.sess-ex-block{padding:10px 0;border-bottom:1px solid var(--b1);}
+.sess-ex-block{padding:10px 0;border-bottom:1px solid var(–b1);}
 .sess-ex-block:last-of-type{border-bottom:none;}
 .sess-ex-name{font-size:14px;font-weight:600;margin-bottom:6px;}
 .sess-set-row{display:flex;gap:8px;margin-bottom:4px;align-items:center;}
-.sess-set-n{font-size:11px;color:var(--t3);width:18px;}
-.sess-set-data{font-size:13px;color:var(--t2);}
-.sess-set-data b{color:var(--t1);}
+.sess-set-n{font-size:11px;color:var(–t3);width:18px;}
+.sess-set-data{font-size:13px;color:var(–t2);}
+.sess-set-data b{color:var(–t1);}
 /* PROGRESS */
 .prog-tab-row{display:flex;gap:6px;margin-bottom:16px;}
-.prog-tab{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--b2);background:none;color:var(--t2);font-family:DM Sans,sans-serif;}
-.prog-tab.on{background:var(--acc);color:#000;border-color:var(--acc);}
+.prog-tab{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(–b2);background:none;color:var(–t2);font-family:DM Sans,sans-serif;}
+.prog-tab.on{background:var(–acc);color:#000;border-color:var(–acc);}
 .metric-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
-.metric-box{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:14px;}
+.metric-box{background:var(–s1);border:1px solid var(–b1);border-radius:12px;padding:14px;}
 .metric-val{font-family:Barlow Condensed,sans-serif;font-size:32px;font-weight:700;line-height:1;}
-.metric-val.a{color:var(--acc);}
-.metric-lbl{font-size:11px;color:var(--t2);margin-top:3px;}
-.pr-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--b1);}
+.metric-val.a{color:var(–acc);}
+.metric-lbl{font-size:11px;color:var(–t2);margin-top:3px;}
+.pr-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(–b1);}
 .pr-row:last-of-type{border-bottom:none;}
 .pr-name{font-size:14px;font-weight:500;}
-.pr-muscle{font-size:11px;color:var(--t2);margin-top:2px;}
-.pr-val{font-family:Barlow Condensed,sans-serif;font-size:26px;font-weight:700;color:var(--acc);}
-.pr-unit{font-size:11px;color:var(--t3);}
+.pr-muscle{font-size:11px;color:var(–t2);margin-top:2px;}
+.pr-val{font-family:Barlow Condensed,sans-serif;font-size:26px;font-weight:700;color:var(–acc);}
+.pr-unit{font-size:11px;color:var(–t3);}
 /* MUSCLE DIAGRAM */
-.muscle-diagram{width:100%;height:200px;background:var(--s2);border-radius:12px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.muscle-diagram{width:100%;height:200px;background:var(–s2);border-radius:12px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
 .muscle-diagram svg{width:100%;height:100%;}
 /* DISCARD BTN */
-.discard-btn{padding:10px 16px;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;font-family:DM Sans,sans-serif;border:1px solid rgba(255,71,71,.3);background:none;color:var(--red);margin-top:8px;width:100%;}
+.discard-btn{padding:10px 16px;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;font-family:DM Sans,sans-serif;border:1px solid rgba(255,71,71,.3);background:none;color:var(–red);margin-top:8px;width:100%;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .fu{animation:fadeUp .22s ease;}
 /* ONBOARDING */
-.onboard-screen{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;flex-direction:column;overflow:hidden;}
-.onboard-progress{height:3px;background:var(--s2);flex-shrink:0;}
-.onboard-progress-bar{height:100%;background:var(--acc);transition:width .4s ease;}
+.onboard-screen{position:fixed;inset:0;background:var(–bg);z-index:500;display:flex;flex-direction:column;overflow:hidden;}
+.onboard-progress{height:3px;background:var(–s2);flex-shrink:0;}
+.onboard-progress-bar{height:100%;background:var(–acc);transition:width .4s ease;}
 .onboard-scroll{flex:1;overflow-y:auto;padding:32px 24px 40px;-webkit-overflow-scrolling:touch;}
 .onboard-scroll::-webkit-scrollbar{display:none;}
 .onboard-step{display:none;animation:fadeUp .25s ease;}
 .onboard-step.active{display:block;}
-.onboard-q{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;text-transform:uppercase;line-height:1.1;margin-bottom:8px;color:var(--t1);}
-.onboard-q em{color:var(--acc);font-style:normal;}
-.onboard-sub{font-size:14px;color:var(--t2);margin-bottom:28px;line-height:1.6;}
+.onboard-q{font-family:‘Barlow Condensed’,sans-serif;font-size:32px;font-weight:800;text-transform:uppercase;line-height:1.1;margin-bottom:8px;color:var(–t1);}
+.onboard-q em{color:var(–acc);font-style:normal;}
+.onboard-sub{font-size:14px;color:var(–t2);margin-bottom:28px;line-height:1.6;}
 .onboard-options{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
-.onboard-option{background:var(--s1);border:2px solid var(--b1);border-radius:14px;padding:16px 18px;cursor:pointer;transition:border-color .15s,background .15s;text-align:left;}
+.onboard-option{background:var(–s1);border:2px solid var(–b1);border-radius:14px;padding:16px 18px;cursor:pointer;transition:border-color .15s,background .15s;text-align:left;}
 .onboard-option:active{transform:scale(.98);}
-.onboard-option.selected{border-color:var(--acc);background:rgba(232,255,71,.06);}
-.onboard-option-title{font-size:15px;font-weight:600;color:var(--t1);}
-.onboard-option-sub{font-size:12px;color:var(--t2);margin-top:3px;}
+.onboard-option.selected{border-color:var(–acc);background:rgba(232,255,71,.06);}
+.onboard-option-title{font-size:15px;font-weight:600;color:var(–t1);}
+.onboard-option-sub{font-size:12px;color:var(–t2);margin-top:3px;}
 .onboard-multi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:24px;}
-.onboard-chip{background:var(--s1);border:2px solid var(--b1);border-radius:12px;padding:12px 10px;cursor:pointer;text-align:center;font-size:13px;font-weight:500;color:var(--t2);transition:all .15s;}
-.onboard-chip.selected{border-color:var(--acc);background:rgba(232,255,71,.08);color:var(--acc);}
-.onboard-footer{padding:16px 24px calc(16px + env(safe-area-inset-bottom,0px));background:var(--bg);border-top:1px solid var(--b1);flex-shrink:0;}
-.onboard-next{width:100%;padding:14px;border-radius:14px;background:var(--acc);color:#000;font-size:16px;font-weight:700;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;}
-.onboard-next:disabled{background:var(--s2);color:var(--t3);cursor:not-allowed;}
-.onboard-back{background:none;border:none;color:var(--t2);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;padding:10px 0;display:block;text-align:center;width:100%;margin-top:6px;}
+.onboard-chip{background:var(–s1);border:2px solid var(–b1);border-radius:12px;padding:12px 10px;cursor:pointer;text-align:center;font-size:13px;font-weight:500;color:var(–t2);transition:all .15s;}
+.onboard-chip.selected{border-color:var(–acc);background:rgba(232,255,71,.08);color:var(–acc);}
+.onboard-footer{padding:16px 24px calc(16px + env(safe-area-inset-bottom,0px));background:var(–bg);border-top:1px solid var(–b1);flex-shrink:0;}
+.onboard-next{width:100%;padding:14px;border-radius:14px;background:var(–acc);color:#000;font-size:16px;font-weight:700;border:none;cursor:pointer;font-family:‘DM Sans’,sans-serif;}
+.onboard-next:disabled{background:var(–s2);color:var(–t3);cursor:not-allowed;}
+.onboard-back{background:none;border:none;color:var(–t2);font-size:13px;cursor:pointer;font-family:‘DM Sans’,sans-serif;padding:10px 0;display:block;text-align:center;width:100%;margin-top:6px;}
 /* FOOD TRACKER */
 .food-tab-row{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px;}
 .food-tab-row::-webkit-scrollbar{display:none;}
-.food-tab{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--b2);background:none;color:var(--t2);font-family:'DM Sans',sans-serif;white-space:nowrap;}
-.food-tab.on{background:var(--acc);color:#000;border-color:var(--acc);}
+.food-tab{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(–b2);background:none;color:var(–t2);font-family:‘DM Sans’,sans-serif;white-space:nowrap;}
+.food-tab.on{background:var(–acc);color:#000;border-color:var(–acc);}
 .macro-ring-row{display:flex;gap:12px;justify-content:center;margin-bottom:16px;}
 .macro-ring-item{display:flex;flex-direction:column;align-items:center;gap:4px;}
 .macro-ring{position:relative;width:72px;height:72px;}
 .macro-ring svg{transform:rotate(-90deg);}
-.mr-track{fill:none;stroke:var(--s2);stroke-width:7;}
+.mr-track{fill:none;stroke:var(–s2);stroke-width:7;}
 .mr-prog{fill:none;stroke-width:7;stroke-linecap:round;transition:stroke-dasharray .5s;}
 .macro-ring-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-.macro-ring-val{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;line-height:1;}
-.macro-ring-lbl{font-size:8px;color:var(--t3);font-weight:500;text-transform:uppercase;}
+.macro-ring-val{font-family:‘Barlow Condensed’,sans-serif;font-size:16px;font-weight:800;line-height:1;}
+.macro-ring-lbl{font-size:8px;color:var(–t3);font-weight:500;text-transform:uppercase;}
 .macro-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
-.macro-bar-label{font-size:12px;color:var(--t2);width:60px;flex-shrink:0;}
-.macro-bar-bg{flex:1;height:6px;background:var(--s2);border-radius:3px;overflow:hidden;}
+.macro-bar-label{font-size:12px;color:var(–t2);width:60px;flex-shrink:0;}
+.macro-bar-bg{flex:1;height:6px;background:var(–s2);border-radius:3px;overflow:hidden;}
 .macro-bar-fill{height:100%;border-radius:3px;transition:width .4s;}
 .macro-bar-val{font-size:11px;font-weight:600;width:48px;text-align:right;flex-shrink:0;}
-.food-log-item{display:flex;align-items:flex-start;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--b1);}
+.food-log-item{display:flex;align-items:flex-start;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(–b1);}
 .food-log-item:last-of-type{border-bottom:none;}
 .food-log-name{font-size:14px;font-weight:500;line-height:1.3;}
-.food-log-meta{font-size:11px;color:var(--t2);margin-top:3px;}
+.food-log-meta{font-size:11px;color:var(–t2);margin-top:3px;}
 .food-log-macros{text-align:right;flex-shrink:0;}
-.food-log-cal{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--acc);line-height:1;}
-.food-log-pfc{font-size:10px;color:var(--t3);margin-top:2px;}
-.scan-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px;border-radius:14px;background:var(--acc);color:#000;border:none;cursor:pointer;font-size:15px;font-weight:700;font-family:'DM Sans',sans-serif;margin-bottom:10px;}
+.food-log-cal{font-family:‘Barlow Condensed’,sans-serif;font-size:20px;font-weight:700;color:var(–acc);line-height:1;}
+.food-log-pfc{font-size:10px;color:var(–t3);margin-top:2px;}
+.scan-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px;border-radius:14px;background:var(–acc);color:#000;border:none;cursor:pointer;font-size:15px;font-weight:700;font-family:‘DM Sans’,sans-serif;margin-bottom:10px;}
 .scan-btn:active{opacity:.8;}
-.food-search-result{display:flex;align-items:flex-start;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--b1);cursor:pointer;}
-.food-search-result:active{background:var(--s2);}
+.food-search-result{display:flex;align-items:flex-start;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(–b1);cursor:pointer;}
+.food-search-result:active{background:var(–s2);}
 .food-search-result:last-of-type{border-bottom:none;}
 /* Scanner overlay */
 .scanner-overlay{position:fixed;inset:0;background:#000;z-index:600;display:flex;flex-direction:column;}
 .scanner-header{padding:16px;display:flex;align-items:center;gap:12px;background:rgba(0,0,0,.7);flex-shrink:0;}
-.scanner-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;text-transform:uppercase;color:#fff;}
+.scanner-title{font-family:‘Barlow Condensed’,sans-serif;font-size:22px;font-weight:700;text-transform:uppercase;color:#fff;}
 .scanner-viewport{flex:1;position:relative;overflow:hidden;}
 #scanner-video{width:100%;height:100%;object-fit:cover;}
-.scanner-aim{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:240px;height:120px;border:2px solid var(--acc);border-radius:8px;box-shadow:0 0 0 2000px rgba(0,0,0,.5);}
-.scanner-aim::before,.scanner-aim::after{content:'';position:absolute;width:20px;height:20px;border-color:var(--acc);border-style:solid;}
+.scanner-aim{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:240px;height:120px;border:2px solid var(–acc);border-radius:8px;box-shadow:0 0 0 2000px rgba(0,0,0,.5);}
+.scanner-aim::before,.scanner-aim::after{content:’’;position:absolute;width:20px;height:20px;border-color:var(–acc);border-style:solid;}
 .scanner-aim::before{top:-2px;left:-2px;border-width:3px 0 0 3px;border-radius:4px 0 0 0;}
 .scanner-aim::after{bottom:-2px;right:-2px;border-width:0 3px 3px 0;border-radius:0 0 4px 0;}
 .scanner-hint{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.8);font-size:13px;text-align:center;white-space:nowrap;}
 /* COACH SCREEN *//* COACH SCREEN */
-.coach-section{background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:16px;margin-bottom:12px;}
+.coach-section{background:var(–s1);border:1px solid var(–b1);border-radius:16px;padding:16px;margin-bottom:12px;}
 .coach-section-title{font-family:Barlow Condensed,sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
 /* PROTEIN */
 .protein-ring-wrap{display:flex;align-items:center;gap:20px;margin-bottom:14px;}
 .protein-ring{position:relative;width:90px;height:90px;flex-shrink:0;}
 .protein-ring svg{transform:rotate(-90deg);}
-.p-track{fill:none;stroke:var(--s2);stroke-width:8;}
-.p-prog{fill:none;stroke:var(--acc);stroke-width:8;stroke-linecap:round;transition:stroke-dasharray .5s;}
+.p-track{fill:none;stroke:var(–s2);stroke-width:8;}
+.p-prog{fill:none;stroke:var(–acc);stroke-width:8;stroke-linecap:round;transition:stroke-dasharray .5s;}
 .protein-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-.protein-g{font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:800;line-height:1;color:var(--acc);}
-.protein-lbl{font-size:9px;color:var(--t3);font-weight:500;text-transform:uppercase;}
+.protein-g{font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:800;line-height:1;color:var(–acc);}
+.protein-lbl{font-size:9px;color:var(–t3);font-weight:500;text-transform:uppercase;}
 .protein-log-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
 .protein-quick-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
-.pq-btn{padding:6px 12px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;font-family:DM Sans,sans-serif;border:1px solid var(--b2);background:var(--s2);color:var(--t1);}
-.pq-btn:active{background:var(--s3);}
-.protein-log-item{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--b1);font-size:13px;}
+.pq-btn{padding:6px 12px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;font-family:DM Sans,sans-serif;border:1px solid var(–b2);background:var(–s2);color:var(–t1);}
+.pq-btn:active{background:var(–s3);}
+.protein-log-item{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(–b1);font-size:13px;}
 .protein-log-item:last-of-type{border-bottom:none;}
 /* BODY METRICS */
 .metric-input-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
-.body-stat-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--b1);}
+.body-stat-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(–b1);}
 .body-stat-row:last-of-type{border-bottom:none;}
 .body-stat-name{font-size:13px;font-weight:500;}
-.body-stat-val{font-family:Barlow Condensed,sans-serif;font-size:20px;font-weight:700;color:var(--acc);}
+.body-stat-val{font-family:Barlow Condensed,sans-serif;font-size:20px;font-weight:700;color:var(–acc);}
 .body-stat-change{font-size:11px;}
 /* WEEKLY SUMMARY */
 .summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
-.sum-box{background:var(--s2);border-radius:10px;padding:12px 8px;text-align:center;}
-.sum-val{font-family:Barlow Condensed,sans-serif;font-size:26px;font-weight:800;color:var(--acc);line-height:1;}
-.sum-lbl{font-size:10px;color:var(--t3);margin-top:3px;text-transform:uppercase;letter-spacing:.05em;}
-.highlight-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--b1);font-size:13px;}
+.sum-box{background:var(–s2);border-radius:10px;padding:12px 8px;text-align:center;}
+.sum-val{font-family:Barlow Condensed,sans-serif;font-size:26px;font-weight:800;color:var(–acc);line-height:1;}
+.sum-lbl{font-size:10px;color:var(–t3);margin-top:3px;text-transform:uppercase;letter-spacing:.05em;}
+.highlight-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(–b1);font-size:13px;}
 .highlight-row:last-of-type{border-bottom:none;}
 .hi-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 /* INTERVAL BUILDER */
-.interval-builder{background:var(--s2);border-radius:12px;padding:12px;margin-top:10px;}
+.interval-builder{background:var(–s2);border-radius:12px;padding:12px;margin-top:10px;}
 .interval-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-.interval-title{font-size:12px;font-weight:500;color:var(--t2);}
+.interval-title{font-size:12px;font-weight:500;color:var(–t2);}
 .interval-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center;margin-bottom:8px;}
-.interval-input{padding:8px 6px;background:var(--s3);border:1px solid var(--b1);border-radius:8px;color:var(--t1);font-size:15px;font-weight:600;text-align:center;-webkit-appearance:none;font-family:DM Sans,sans-serif;width:100%;}
-.interval-input:focus{outline:none;border-color:var(--acc);}
-.del-interval-btn{width:28px;height:28px;border-radius:50%;background:rgba(255,71,71,.15);border:none;color:var(--red);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
-.add-interval-btn{width:100%;padding:9px;border-radius:9px;background:none;border:1px solid var(--b2);color:var(--t2);font-size:13px;font-family:DM Sans,sans-serif;cursor:pointer;margin-bottom:10px;}
-.interval-summary{font-size:12px;color:var(--t3);margin-bottom:8px;}
+.interval-input{padding:8px 6px;background:var(–s3);border:1px solid var(–b1);border-radius:8px;color:var(–t1);font-size:16px;font-weight:600;text-align:center;-webkit-appearance:none;font-family:DM Sans,sans-serif;width:100%;}
+.interval-input:focus{outline:none;border-color:var(–acc);}
+.del-interval-btn{width:28px;height:28px;border-radius:50%;background:rgba(255,71,71,.15);border:none;color:var(–red);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.add-interval-btn{width:100%;padding:9px;border-radius:9px;background:none;border:1px solid var(–b2);color:var(–t2);font-size:13px;font-family:DM Sans,sans-serif;cursor:pointer;margin-bottom:10px;}
+.interval-summary{font-size:12px;color:var(–t3);margin-bottom:8px;}
 /* GLOBAL REST SECTION */
-.global-rest-section{background:var(--s1);border:1px solid var(--b1);border-radius:14px;margin-bottom:10px;overflow:hidden;}
+.global-rest-section{background:var(–s1);border:1px solid var(–b1);border-radius:14px;margin-bottom:10px;overflow:hidden;}
 .global-rest-head{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
 .global-rest-title{font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;text-transform:uppercase;}
 .global-rest-body{padding:0 16px 16px;}
-.rest-preset-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--b1);}
+.rest-preset-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(–b1);}
 .rest-preset-row:last-of-type{border-bottom:none;}
 .rest-preset-lbl{font-size:13px;font-weight:500;}
-.rest-preset-sub{font-size:11px;color:var(--t2);margin-top:2px;}
+.rest-preset-sub{font-size:11px;color:var(–t2);margin-top:2px;}
 .rest-stepper{display:flex;align-items:center;gap:8px;}
-.rs-btn{width:28px;height:28px;border-radius:50%;border:1px solid var(--b2);background:none;color:var(--t1);cursor:pointer;font-size:16px;line-height:1;font-family:DM Sans,sans-serif;}
-.rs-val{font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;color:var(--acc);min-width:46px;text-align:center;}
-.apply-btn{margin-top:12px;padding:9px 16px;border-radius:10px;background:var(--acc);color:#000;font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:DM Sans,sans-serif;width:100%;}
+.rs-btn{width:28px;height:28px;border-radius:50%;border:1px solid var(–b2);background:none;color:var(–t1);cursor:pointer;font-size:16px;line-height:1;font-family:DM Sans,sans-serif;}
+.rs-val{font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;color:var(–acc);min-width:46px;text-align:center;}
+.apply-btn{margin-top:12px;padding:9px 16px;border-radius:10px;background:var(–acc);color:#000;font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:DM Sans,sans-serif;width:100%;}
 /* REPS TOGGLE */
 .reps-toggle-row{display:flex;gap:6px;margin-bottom:10px;}
-.reps-toggle-btn{flex:1;padding:8px;border-radius:9px;font-size:13px;font-weight:500;cursor:pointer;font-family:DM Sans,sans-serif;border:1px solid var(--b2);background:none;color:var(--t2);}
-.reps-toggle-btn.on{background:var(--acc);color:#000;border-color:var(--acc);}
+.reps-toggle-btn{flex:1;padding:8px;border-radius:9px;font-size:13px;font-weight:500;cursor:pointer;font-family:DM Sans,sans-serif;border:1px solid var(–b2);background:none;color:var(–t2);}
+.reps-toggle-btn.on{background:var(–acc);color:#000;border-color:var(–acc);}
 /* LOG PAST SESSION SHEET */
 .log-past-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;}
-.past-ex-block{background:var(--s2);border-radius:10px;padding:12px;margin-bottom:8px;}
+.past-ex-block{background:var(–s2);border-radius:10px;padding:12px;margin-bottom:8px;}
 .past-ex-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
 .past-ex-name{font-size:13px;font-weight:600;}
 .past-set-row{display:grid;grid-template-columns:22px 1fr 1fr;gap:6px;align-items:center;margin-bottom:6px;}
-.past-set-n{font-size:11px;color:var(--t3);}
+.past-set-n{font-size:11px;color:var(–t3);}
 /* Past log date input styling */
-input[type="date"]{color-scheme:dark;}
+input[type=“date”]{color-scheme:dark;color:var(–t1);background:var(–s2);}
 </style>
+
 </head>
 <body>
 
@@ -459,7 +461,8 @@ input[type="date"]{color-scheme:dark;}
 </div>
 
 <!-- ONBOARDING WIZARD -->
-<div id="onboarding" style="display:none;" class="onboard-screen">
+
+<div id="onboarding" style="display:none;" class="onboard-screen" style="padding-top:env(safe-area-inset-top,0px);">
   <div class="onboard-progress"><div class="onboard-progress-bar" id="ob-bar" style="width:0%"></div></div>
   <div class="onboard-scroll" id="ob-scroll"></div>
   <div class="onboard-footer">
@@ -471,6 +474,7 @@ input[type="date"]{color-scheme:dark;}
 <div id="app">
 
 <!-- HOME -->
+
 <div id="s-home" class="scr on">
   <div class="scroll">
     <div class="greet bc">Let's<br><em>Get It.</em></div>
@@ -491,6 +495,7 @@ input[type="date"]{color-scheme:dark;}
 </div>
 
 <!-- WORKOUT -->
+
 <div id="s-workout" class="scr">
   <div class="wk-hdr" id="wk-hdr">
     <button class="icon-btn" onclick="confirmEnd()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg></button>
@@ -517,6 +522,7 @@ input[type="date"]{color-scheme:dark;}
 </div>
 
 <!-- HISTORY -->
+
 <div id="s-history" class="scr">
   <div style="padding:20px 16px 8px;flex-shrink:0;">
     <div class="bc" style="font-size:34px;font-weight:800;text-transform:uppercase;">History</div>
@@ -527,6 +533,7 @@ input[type="date"]{color-scheme:dark;}
 </div>
 
 <!-- CALENDAR -->
+
 <div id="s-calendar" class="scr">
   <div style="padding:20px 16px 8px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
     <div>
@@ -540,6 +547,7 @@ input[type="date"]{color-scheme:dark;}
 </div>
 
 <!-- PROGRESS -->
+
 <div id="s-progress" class="scr">
   <div style="padding:20px 16px 8px;flex-shrink:0;">
     <div class="bc" style="font-size:34px;font-weight:800;text-transform:uppercase;">Progress</div>
@@ -550,6 +558,7 @@ input[type="date"]{color-scheme:dark;}
 </div>
 
 <!-- EDIT SCREEN -->
+
 <div id="s-edit" class="scr">
   <div style="padding:20px 16px 8px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
     <div>
@@ -563,6 +572,7 @@ input[type="date"]{color-scheme:dark;}
 </div>
 
 <!-- VIDEOS SCREEN -->
+
 <div id="s-videos" class="scr" style="background:#0a0a0a;">
   <div style="padding:20px 16px 8px;flex-shrink:0;">
     <div style="font-family:Barlow Condensed,sans-serif;font-size:34px;font-weight:800;text-transform:uppercase;color:#f0f0f0;">Play</div>
@@ -589,8 +599,8 @@ input[type="date"]{color-scheme:dark;}
   <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span>Log</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Food</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb on" onclick="nav('edit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span>Edit</span></button></div>
 </div>
 
-
 <!-- FOOD TRACKER SCREEN -->
+
 <div id="s-food" class="scr">
   <div style="padding:20px 16px 8px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
     <div>
@@ -604,7 +614,8 @@ input[type="date"]{color-scheme:dark;}
 </div>
 
 <!-- BARCODE SCANNER OVERLAY -->
-<div id="scanner-overlay" class="scanner-overlay" style="display:none;">
+
+<div id="scanner-overlay" class="scanner-overlay" style="display:none;padding-top:env(safe-area-inset-top,0px);">
   <div class="scanner-header">
     <button onclick="closeScanner()" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
@@ -623,6 +634,7 @@ input[type="date"]{color-scheme:dark;}
 </div>
 
 <!-- COACH SCREEN -->
+
 <div id="s-coach" class="scr">
   <div style="padding:20px 16px 8px;flex-shrink:0;">
     <div class="bc" style="font-size:34px;font-weight:800;text-transform:uppercase;">Coach</div>
@@ -985,45 +997,89 @@ function getPreferredVoice(){
                voices.find(v=>v.lang.startsWith('en'))||null;
   return _cachedVoice;
 }
-// Prime voice on voices loaded event (iOS fires this async)
+// ── iOS Speech Synthesis - robust implementation ────────────────────────────
+// iOS quirks: async voice loading, requires user gesture unlock, pauses mid-speech
 if(window.speechSynthesis){
-  window.speechSynthesis.onvoiceschanged=()=>{ _cachedVoice=null; getPreferredVoice(); };
+  // Load voices immediately and on change
+  window.speechSynthesis.onvoiceschanged = () => { _cachedVoice = null; getPreferredVoice(); };
+  getPreferredVoice(); // trigger initial load
 }
 
 // iOS requires speech to be triggered within a user gesture at least once.
-// We unlock it on the very first tap anywhere in the app.
-let _speechUnlocked=false;
-function unlockSpeech(){
-  if(_speechUnlocked||!window.speechSynthesis)return;
-  _speechUnlocked=true;
-  const u=new SpeechSynthesisUtterance('');
-  u.volume=0;u.rate=1;
+let _speechUnlocked = false;
+function unlockSpeech() {
+  if(_speechUnlocked || !window.speechSynthesis) return;
+  _speechUnlocked = true;
+  // Speak silent utterance to unlock audio session
+  const u = new SpeechSynthesisUtterance(' ');
+  u.volume = 0; u.rate = 2;
   window.speechSynthesis.speak(u);
 }
-document.addEventListener('touchstart',unlockSpeech,{once:true,passive:true});
-document.addEventListener('click',unlockSpeech,{once:true,passive:true});
+// Unlock on ANY user interaction
+['touchstart','touchend','click','keydown'].forEach(evt =>
+  document.addEventListener(evt, () => unlockSpeech(), {once:false, passive:true})
+);
 
-function speak(text,onDone){
-  if(!voiceEnabled){onDone&&onDone();return;}
-  if(!window.speechSynthesis){onDone&&onDone();return;}
-  // On iOS, cancel() can break the queue — only cancel if something is speaking
-  if(window.speechSynthesis.speaking) window.speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(text);
-  u.rate=1.05;u.pitch=1.0;u.volume=1.0;
-  const pv=getPreferredVoice();
-  if(pv)u.voice=pv;
-  if(onDone)u.onend=onDone;
-  // iOS bug: long pause can cause synthesis to stop mid-sentence
-  // Workaround: resume if paused
-  if(window.speechSynthesis.paused) window.speechSynthesis.resume();
-  window.speechSynthesis.speak(u);
-  // iOS watchdog: if synthesis stalls, resume it
-  const watchdog=setInterval(()=>{
-    if(!window.speechSynthesis.speaking){clearInterval(watchdog);return;}
-    if(window.speechSynthesis.paused){window.speechSynthesis.resume();}
-  },1000);
-  u.onend=()=>{ clearInterval(watchdog); onDone&&onDone(); };
-  u.onerror=()=>{ clearInterval(watchdog); onDone&&onDone(); };
+// speak queue to prevent overlap on iOS
+let _speakQueue = [];
+let _isSpeaking = false;
+
+function speak(text, onDone) {
+  if(!voiceEnabled) { onDone&&onDone(); return; }
+  if(!window.speechSynthesis) { onDone&&onDone(); return; }
+  _speakQueue.push({text, onDone});
+  if(!_isSpeaking) _processSpeak();
+}
+
+function _processSpeak() {
+  if(!_speakQueue.length) { _isSpeaking = false; return; }
+  _isSpeaking = true;
+  const {text, onDone} = _speakQueue.shift();
+
+  // Cancel cleanly
+  if(window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+    window.speechSynthesis.cancel();
+  }
+
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 1.0; u.pitch = 1.0; u.volume = 1.0;
+  const pv = getPreferredVoice();
+  if(pv) u.voice = pv;
+
+  // iOS watchdog: resume if it pauses (known iOS bug after ~15 seconds)
+  const watchdog = setInterval(() => {
+    if(window.speechSynthesis.paused) window.speechSynthesis.resume();
+  }, 250);
+
+  // Timeout fallback in case onend never fires (iOS bug)
+  const timeout = setTimeout(() => {
+    clearInterval(watchdog);
+    onDone&&onDone();
+    _isSpeaking = false;
+    _processSpeak();
+  }, Math.max(text.length * 100, 3000));
+
+  u.onend = () => {
+    clearInterval(watchdog);
+    clearTimeout(timeout);
+    onDone&&onDone();
+    _isSpeaking = false;
+    setTimeout(_processSpeak, 100);
+  };
+  u.onerror = (e) => {
+    clearInterval(watchdog);
+    clearTimeout(timeout);
+    // Ignore 'interrupted' errors (normal when cancelling)
+    if(e.error !== 'interrupted') { onDone&&onDone(); }
+    _isSpeaking = false;
+    setTimeout(_processSpeak, 100);
+  };
+
+  // Small delay before speaking helps iOS process the cancel
+  setTimeout(() => {
+    if(window.speechSynthesis.paused) window.speechSynthesis.resume();
+    window.speechSynthesis.speak(u);
+  }, 50);
 }
 
 // Build the "rest over" announcement based on what's coming next
@@ -1408,8 +1464,8 @@ function launchWk(dayId){
   // Init voice button state
   const vb=eid('wk-voice-btn');
   if(vb){vb.classList.toggle('on',voiceEnabled);vb.textContent=voiceEnabled?'🔊':'🔇';}
-  // Trigger voice unlock on workout start (user interaction)
-  unlockSpeech();
+  // Voice is unlocked globally on any tap; ensure voices are loaded
+  getPreferredVoice();
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
   eid('s-workout').classList.add('on');
 }
@@ -1969,8 +2025,8 @@ function renderPastDetailArea(){
           ${Array.from({length:ex.sets},(_, i)=>`
             <div class="past-set-row">
               <div class="past-set-n">${i+1}</div>
-              <input type="number" inputmode="decimal" placeholder="lbs" style="padding:6px 4px;font-size:13px;text-align:center;background:var(--s3);border:1px solid var(--b2);border-radius:7px;color:var(--t1);" id="pw_${key}_${i}">
-              <input type="number" inputmode="numeric" placeholder="reps" style="padding:6px 4px;font-size:13px;text-align:center;background:var(--s3);border:1px solid var(--b2);border-radius:7px;color:var(--t1);" id="pr_${key}_${i}">
+              <input type="number" inputmode="decimal" placeholder="lbs" style="padding:6px 4px;font-size:16px;text-align:center;background:var(--s3);border:1px solid var(--b2);border-radius:7px;color:var(--t1);" id="pw_${key}_${i}">
+              <input type="number" inputmode="numeric" placeholder="reps" style="padding:6px 4px;font-size:16px;text-align:center;background:var(--s3);border:1px solid var(--b2);border-radius:7px;color:var(--t1);" id="pr_${key}_${i}">
             </div>`).join('')}
         </div>`;
       }).join('');
@@ -3505,56 +3561,54 @@ function checkOnboarding() {
 // Override renderHome initial call
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// FOOD TRACKER
+// FOOD TRACKER v2 — iOS-first, AI-powered, multi-database
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// Extend existing proteinLog to store full macros
-// Each item: {name, g(protein), cal, carbs, fat, serving, servingUnit, barcode, time}
+// Extend protein log to store full macros per item
+// {name, brand, g(protein), cal, carbs, fat, serving, servingUnit, barcode, meal, time}
 let foodGoals = JSON.parse(localStorage.getItem('gainz_food_goals') || 'null') || {
   calories: 2000, protein: proteinGoal||160, carbs: 200, fat: 65
 };
 function saveFoodGoals(){ localStorage.setItem('gainz_food_goals', JSON.stringify(foodGoals)); }
 
-// Migrate proteinGoal into foodGoals
-if(foodGoals.protein !== proteinGoal) {
-  foodGoals.protein = proteinGoal;
-  saveFoodGoals();
+// Keep protein goal in sync
+function syncProteinGoal(){
+  proteinGoal = foodGoals.protein;
+  localStorage.setItem('gainz_protein_goal', String(proteinGoal));
 }
+syncProteinGoal();
 
-function getTodayFood() {
-  const today = todayKey();
-  const entry = proteinLog.find(e => e.date === today);
+function getTodayFoodItems(dateKey) {
+  const dk = dateKey || todayKey();
+  const entry = proteinLog.find(e => e.date === dk);
   return entry ? entry.items : [];
 }
 
-function getTodayTotals() {
-  const items = getTodayFood();
+function getDayTotals(dateKey) {
+  const items = getTodayFoodItems(dateKey);
   return {
-    calories: items.reduce((a,i) => a + (parseInt(i.cal)||0), 0),
-    protein:  items.reduce((a,i) => a + (parseInt(i.g)||0), 0),
-    carbs:    items.reduce((a,i) => a + (parseInt(i.carbs)||0), 0),
-    fat:      items.reduce((a,i) => a + (parseInt(i.fat)||0), 0),
+    calories: items.reduce((a,i) => a + (parseFloat(i.cal)||0), 0),
+    protein:  items.reduce((a,i) => a + (parseFloat(i.g)||0), 0),
+    carbs:    items.reduce((a,i) => a + (parseFloat(i.carbs)||0), 0),
+    fat:      items.reduce((a,i) => a + (parseFloat(i.fat)||0), 0),
   };
 }
 
-function addFoodItem(item) {
-  // item: {name, g(protein), cal, carbs, fat, serving, servingUnit, barcode}
-  const today = todayKey();
-  let entry = proteinLog.find(e => e.date === today);
-  if(!entry){ entry = {date:today, items:[]}; proteinLog.unshift(entry); }
+function addFoodItem(item, dateKey) {
+  const dk = dateKey || todayKey();
+  let entry = proteinLog.find(e => e.date === dk);
+  if(!entry){ entry = {date:dk, items:[]}; proteinLog.unshift(entry); }
   entry.items.push({
     ...item,
     time: new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})
   });
+  proteinLog.sort((a,b) => b.date.localeCompare(a.date));
   saveProteinLog();
-  // Keep proteinGoal in sync
-  proteinGoal = foodGoals.protein;
-  localStorage.setItem('gainz_protein_goal', String(proteinGoal));
 }
 
-function deleteFoodItem(idx) {
-  const today = todayKey();
-  const entry = proteinLog.find(e => e.date === today);
+function deleteFoodItem(idx, dateKey) {
+  const dk = dateKey || foodViewDate;
+  const entry = proteinLog.find(e => e.date === dk);
   if(entry) entry.items.splice(idx, 1);
   saveProteinLog();
   renderFood();
@@ -3566,158 +3620,463 @@ function getRecentFoods() {
   const recent = [];
   for(const entry of proteinLog) {
     for(const item of (entry.items||[])) {
-      const key = item.barcode || item.name;
+      const key = item.barcode || item.name.toLowerCase();
       if(!seen.has(key)) {
         seen.add(key);
-        recent.push(item);
-        if(recent.length >= 10) break;
+        recent.push({...item});
+        if(recent.length >= 8) return recent;
       }
     }
-    if(recent.length >= 10) break;
   }
   return recent;
 }
 
-// ─── OPEN FOOD FACTS API ──────────────────────────────────────────────────────
-async function lookupBarcode(barcode) {
-  try {
-    const url = 'https://world.openfoodfacts.org/api/v0/product/' + barcode + '.json';
-    const res = await fetch(url);
-    const data = await res.json();
-    if(data.status !== 1) return null;
-    const p = data.product;
-    const n = p.nutriments || {};
-    // Prefer per-100g then multiply by serving size
-    const servingG = parseFloat(p.serving_quantity) || 100;
-    const per100 = {
-      cal:     parseFloat(n['energy-kcal_100g']||n['energy_100g']||0),
-      protein: parseFloat(n['proteins_100g']||0),
-      carbs:   parseFloat(n['carbohydrates_100g']||0),
-      fat:     parseFloat(n['fat_100g']||0),
-    };
-    const factor = servingG / 100;
-    return {
-      name:        p.product_name || p.product_name_en || 'Unknown product',
-      brand:       p.brands || '',
-      serving:     servingG,
-      servingUnit: p.serving_size || (servingG + 'g'),
-      cal:         Math.round(per100.cal * factor),
-      g:           Math.round(per100.protein * factor * 10) / 10,
-      carbs:       Math.round(per100.carbs * factor * 10) / 10,
-      fat:         Math.round(per100.fat * factor * 10) / 10,
-      barcode,
-      per100,       // keep for serving size adjustment
-    };
-  } catch(e) {
-    return null;
-  }
+// ─── FOOD DATABASES ───────────────────────────────────────────────────────────
+// ─── LOCAL FOOD DATABASE (works fully offline) ────────────────────────────────
+// ~200 common foods with accurate macros per 100g, plus common serving sizes
+const LOCAL_FOODS = [
+  // PROTEINS
+  {name:'Chicken Breast (cooked)',     brand:'',    serving:100, servingUnit:'100g',  cal:165, g:31,  carbs:0,   fat:3.6},
+  {name:'Chicken Thigh (cooked)',      brand:'',    serving:100, servingUnit:'100g',  cal:209, g:26,  carbs:0,   fat:11},
+  {name:'Ground Beef 80/20 (cooked)', brand:'',    serving:100, servingUnit:'100g',  cal:254, g:26,  carbs:0,   fat:17},
+  {name:'Ground Beef 93% lean',        brand:'',    serving:100, servingUnit:'100g',  cal:175, g:26,  carbs:0,   fat:8},
+  {name:'Salmon (cooked)',             brand:'',    serving:100, servingUnit:'100g',  cal:208, g:20,  carbs:0,   fat:13},
+  {name:'Tuna (canned in water)',      brand:'',    serving:100, servingUnit:'100g',  cal:116, g:26,  carbs:0,   fat:1},
+  {name:'Tilapia (cooked)',            brand:'',    serving:100, servingUnit:'100g',  cal:128, g:26,  carbs:0,   fat:3},
+  {name:'Shrimp (cooked)',             brand:'',    serving:100, servingUnit:'100g',  cal:99,  g:24,  carbs:0.2, fat:0.3},
+  {name:'Turkey Breast (cooked)',      brand:'',    serving:100, servingUnit:'100g',  cal:135, g:30,  carbs:0,   fat:1},
+  {name:'Steak (sirloin, cooked)',     brand:'',    serving:100, servingUnit:'100g',  cal:207, g:26,  carbs:0,   fat:11},
+  {name:'Pork Tenderloin (cooked)',    brand:'',    serving:100, servingUnit:'100g',  cal:143, g:26,  carbs:0,   fat:4},
+  {name:'Bacon (cooked)',              brand:'',    serving:15,  servingUnit:'2 strips', cal:87, g:6, carbs:0.1, fat:7},
+  {name:'Eggs (whole)',                brand:'',    serving:50,  servingUnit:'1 large', cal:72, g:6,  carbs:0.4, fat:5},
+  {name:'Egg Whites',                  brand:'',    serving:100, servingUnit:'100g',  cal:52,  g:11,  carbs:0.7, fat:0.2},
+  {name:'Greek Yogurt (plain, 0%)',    brand:'',    serving:170, servingUnit:'1 cup',  cal:92,  g:17,  carbs:6,   fat:0.5},
+  {name:'Greek Yogurt (plain, 2%)',    brand:'',    serving:170, servingUnit:'1 cup',  cal:130, g:17,  carbs:8,   fat:3},
+  {name:'Cottage Cheese (2%)',         brand:'',    serving:113, servingUnit:'1/2 cup', cal:90, g:12, carbs:5,   fat:2.5},
+  {name:'Cottage Cheese (1%)',         brand:'',    serving:113, servingUnit:'1/2 cup', cal:81, g:14, carbs:3,   fat:1},
+  // DAIRY
+  {name:'Milk (whole)',                brand:'',    serving:240, servingUnit:'1 cup',  cal:149, g:8,   carbs:12,  fat:8},
+  {name:'Milk (2%)',                   brand:'',    serving:240, servingUnit:'1 cup',  cal:122, g:8,   carbs:12,  fat:5},
+  {name:'Milk (skim)',                 brand:'',    serving:240, servingUnit:'1 cup',  cal:83,  g:8,   carbs:12,  fat:0.2},
+  {name:'Cheddar Cheese',             brand:'',    serving:28,  servingUnit:'1 oz',   cal:113, g:7,   carbs:0.4, fat:9},
+  {name:'Mozzarella',                  brand:'',    serving:28,  servingUnit:'1 oz',   cal:85,  g:6,   carbs:1,   fat:6},
+  {name:'String Cheese',              brand:'',    serving:28,  servingUnit:'1 stick', cal:80,  g:7,   carbs:1,   fat:5},
+  // PROTEIN SUPPLEMENTS
+  {name:'Whey Protein Powder',         brand:'',    serving:30,  servingUnit:'1 scoop', cal:120, g:25, carbs:3,   fat:2},
+  {name:'Casein Protein Powder',       brand:'',    serving:30,  servingUnit:'1 scoop', cal:110, g:24, carbs:3,   fat:1},
+  {name:'Plant Protein Powder',        brand:'',    serving:30,  servingUnit:'1 scoop', cal:120, g:20, carbs:8,   fat:2},
+  {name:'Premier Protein Shake',       brand:'Premier Protein', serving:325, servingUnit:'1 bottle', cal:160, g:30, carbs:5, fat:3},
+  {name:'RXBAR',                       brand:'RXBAR',  serving:52,  servingUnit:'1 bar', cal:210, g:12, carbs:23, fat:9},
+  {name:'Quest Bar',                   brand:'Quest',  serving:60,  servingUnit:'1 bar', cal:200, g:21, carbs:22, fat:8},
+  {name:'Kind Protein Bar',            brand:'Kind',   serving:50,  servingUnit:'1 bar', cal:250, g:12, carbs:17, fat:17},
+  // GRAINS & CARBS
+  {name:'White Rice (cooked)',         brand:'',    serving:186, servingUnit:'1 cup',  cal:242, g:4,   carbs:53,  fat:0.4},
+  {name:'Brown Rice (cooked)',         brand:'',    serving:195, servingUnit:'1 cup',  cal:216, g:5,   carbs:45,  fat:1.8},
+  {name:'Oatmeal (cooked)',            brand:'',    serving:234, servingUnit:'1 cup',  cal:158, g:6,   carbs:27,  fat:3},
+  {name:'Oats (dry)',                  brand:'',    serving:40,  servingUnit:'1/2 cup dry', cal:150, g:5, carbs:27, fat:3},
+  {name:'Quinoa (cooked)',             brand:'',    serving:185, servingUnit:'1 cup',  cal:222, g:8,   carbs:39,  fat:3.5},
+  {name:'Pasta (cooked)',              brand:'',    serving:140, servingUnit:'1 cup',  cal:220, g:8,   carbs:43,  fat:1.3},
+  {name:'Whole Wheat Bread',          brand:'',    serving:30,  servingUnit:'1 slice', cal:80,  g:4,   carbs:15,  fat:1},
+  {name:'White Bread',                brand:'',    serving:30,  servingUnit:'1 slice', cal:79,  g:3,   carbs:15,  fat:1},
+  {name:'Bagel (plain)',               brand:'',    serving:98,  servingUnit:'1 medium', cal:270, g:10, carbs:53, fat:2},
+  {name:'English Muffin',             brand:'',    serving:57,  servingUnit:'1 muffin', cal:132, g:5,  carbs:26,  fat:1},
+  {name:'Tortilla (flour, 10")',       brand:'',    serving:72,  servingUnit:'1 tortilla', cal:218, g:6, carbs:36, fat:6},
+  {name:'Corn Tortilla',              brand:'',    serving:26,  servingUnit:'1 tortilla', cal:52,  g:1,  carbs:11,  fat:0.7},
+  {name:'Sweet Potato (baked)',        brand:'',    serving:150, servingUnit:'1 medium', cal:130, g:3,  carbs:30,  fat:0.1},
+  {name:'White Potato (baked)',        brand:'',    serving:173, servingUnit:'1 medium', cal:161, g:4,  carbs:37,  fat:0.2},
+  // VEGETABLES
+  {name:'Broccoli (steamed)',          brand:'',    serving:156, servingUnit:'1 cup',  cal:55,  g:4,   carbs:11,  fat:0.6},
+  {name:'Spinach (raw)',               brand:'',    serving:30,  servingUnit:'1 cup',  cal:7,   g:0.9, carbs:1.1, fat:0.1},
+  {name:'Romaine Lettuce',             brand:'',    serving:47,  servingUnit:'1 cup',  cal:8,   g:0.6, carbs:1.5, fat:0.1},
+  {name:'Kale (raw)',                  brand:'',    serving:67,  servingUnit:'1 cup',  cal:34,  g:2.9, carbs:6.7, fat:0.5},
+  {name:'Bell Pepper',                 brand:'',    serving:119, servingUnit:'1 medium', cal:37, g:1.2, carbs:7,  fat:0.4},
+  {name:'Cucumber',                    brand:'',    serving:119, servingUnit:'1 cup sliced', cal:16, g:0.7, carbs:3.8, fat:0.1},
+  {name:'Tomato',                      brand:'',    serving:123, servingUnit:'1 medium', cal:22, g:1.1, carbs:4.8, fat:0.2},
+  {name:'Carrots (raw)',               brand:'',    serving:61,  servingUnit:'1 medium', cal:25, g:0.6, carbs:6,  fat:0.1},
+  {name:'Celery',                      brand:'',    serving:101, servingUnit:'1 cup',  cal:16,  g:0.7, carbs:3,   fat:0.2},
+  {name:'Asparagus',                   brand:'',    serving:134, servingUnit:'1 cup',  cal:27,  g:3,   carbs:5,   fat:0.3},
+  {name:'Zucchini',                    brand:'',    serving:124, servingUnit:'1 cup',  cal:21,  g:1.5, carbs:3.9, fat:0.4},
+  {name:'Edamame (shelled)',           brand:'',    serving:155, servingUnit:'1 cup',  cal:189, g:17,  carbs:14,  fat:8},
+  {name:'Black Beans (cooked)',        brand:'',    serving:172, servingUnit:'1 cup',  cal:227, g:15,  carbs:41,  fat:0.9},
+  {name:'Chickpeas (cooked)',          brand:'',    serving:164, servingUnit:'1 cup',  cal:269, g:15,  carbs:45,  fat:4},
+  {name:'Lentils (cooked)',            brand:'',    serving:198, servingUnit:'1 cup',  cal:230, g:18,  carbs:40,  fat:0.8},
+  // FRUITS
+  {name:'Banana',                      brand:'',    serving:118, servingUnit:'1 medium', cal:105, g:1.3, carbs:27, fat:0.4},
+  {name:'Apple',                       brand:'',    serving:182, servingUnit:'1 medium', cal:95,  g:0.5, carbs:25, fat:0.3},
+  {name:'Blueberries',                 brand:'',    serving:148, servingUnit:'1 cup',  cal:84,  g:1.1, carbs:21,  fat:0.5},
+  {name:'Strawberries',                brand:'',    serving:152, servingUnit:'1 cup',  cal:49,  g:1,   carbs:12,  fat:0.5},
+  {name:'Orange',                      brand:'',    serving:131, servingUnit:'1 medium', cal:62, g:1.2, carbs:15,  fat:0.2},
+  {name:'Avocado',                     brand:'',    serving:201, servingUnit:'1 whole', cal:322, g:4,  carbs:17,  fat:29},
+  {name:'Mango',                       brand:'',    serving:165, servingUnit:'1 cup',  cal:99,  g:1.4, carbs:25,  fat:0.6},
+  {name:'Grapes',                      brand:'',    serving:92,  servingUnit:'1 cup',  cal:62,  g:0.6, carbs:16,  fat:0.3},
+  // NUTS & FATS
+  {name:'Almonds',                     brand:'',    serving:28,  servingUnit:'1 oz (~23)',  cal:164, g:6, carbs:6,  fat:14},
+  {name:'Peanuts',                     brand:'',    serving:28,  servingUnit:'1 oz',   cal:161, g:7,   carbs:5,   fat:14},
+  {name:'Walnuts',                     brand:'',    serving:28,  servingUnit:'1 oz',   cal:185, g:4.3, carbs:3.9, fat:18},
+  {name:'Cashews',                     brand:'',    serving:28,  servingUnit:'1 oz',   cal:157, g:5.2, carbs:9,   fat:12},
+  {name:'Peanut Butter',              brand:'',    serving:32,  servingUnit:'2 tbsp', cal:191, g:7,   carbs:7,   fat:16},
+  {name:'Almond Butter',              brand:'',    serving:32,  servingUnit:'2 tbsp', cal:196, g:7,   carbs:6,   fat:18},
+  {name:'Olive Oil',                   brand:'',    serving:14,  servingUnit:'1 tbsp', cal:119, g:0,   carbs:0,   fat:14},
+  // FAST FOOD & RESTAURANT
+  {name:'McDonald\'s Big Mac',         brand:'McDonald\'s', serving:213, servingUnit:'1 burger', cal:550, g:25, carbs:44, fat:30},
+  {name:'McDonald\'s McDouble',        brand:'McDonald\'s', serving:176, servingUnit:'1 burger', cal:400, g:22, carbs:34, fat:19},
+  {name:'McDonald\'s Chicken McNuggets (10pc)', brand:'McDonald\'s', serving:162, servingUnit:'10 pieces', cal:440, g:26, carbs:26, fat:27},
+  {name:'McDonald\'s Fries (medium)', brand:'McDonald\'s', serving:117, servingUnit:'medium', cal:320, g:4, carbs:44, fat:15},
+  {name:'Chick-fil-A Grilled Chicken Sandwich', brand:'Chick-fil-A', serving:222, servingUnit:'1 sandwich', cal:380, g:37, carbs:40, fat:7},
+  {name:'Chick-fil-A Waffle Fries (medium)', brand:'Chick-fil-A', serving:127, servingUnit:'medium', cal:420, g:5, carbs:50, fat:22},
+  {name:'Chipotle Chicken Bowl (rice+beans+chicken+salsa)', brand:'Chipotle', serving:450, servingUnit:'1 bowl', cal:655, g:51, carbs:72, fat:17},
+  {name:'Chipotle Chicken Burrito', brand:'Chipotle', serving:550, servingUnit:'1 burrito', cal:855, g:53, carbs:96, fat:24},
+  {name:'Subway Turkey (6")',          brand:'Subway', serving:220, servingUnit:'6" sub', cal:280, g:18, carbs:45, fat:4},
+  {name:'Subway Tuna (6")',            brand:'Subway', serving:240, servingUnit:'6" sub', cal:480, g:22, carbs:44, fat:24},
+  {name:'Panera Bread You Pick 2 Turkey Sandwich', brand:'Panera', serving:206, servingUnit:'half sandwich', cal:430, g:25, carbs:52, fat:13},
+  {name:'Starbucks Egg Bites (Bacon)',brand:'Starbucks', serving:170, servingUnit:'2 bites', cal:310, g:19, carbs:13, fat:20},
+  {name:'Starbucks Oatmeal',          brand:'Starbucks', serving:236, servingUnit:'1 serving', cal:160, g:5, carbs:28, fat:2.5},
+  // BREAKFAST FOODS
+  {name:'Cheerios',                    brand:'General Mills', serving:28, servingUnit:'1 cup', cal:100, g:3, carbs:20, fat:2},
+  {name:'Oatmeal (Quaker Instant, plain)', brand:'Quaker', serving:28, servingUnit:'1 packet', cal:100, g:4, carbs:19, fat:2},
+  {name:'Pancakes (homemade)',         brand:'',    serving:77,  servingUnit:'3 small', cal:175, g:5, carbs:28, fat:6},
+  {name:'Waffles (frozen, Eggo)',      brand:'Eggo', serving:70, servingUnit:'2 waffles', cal:180, g:4, carbs:28, fat:6},
+  // SNACKS
+  {name:'Rice Cakes (plain)',          brand:'',    serving:9,   servingUnit:'1 cake', cal:35,  g:0.7, carbs:7.3, fat:0.3},
+  {name:'Popcorn (air popped)',        brand:'',    serving:28,  servingUnit:'3 cups', cal:108, g:3.6, carbs:22,  fat:1.2},
+  {name:'Pretzels',                    brand:'',    serving:28,  servingUnit:'1 oz',   cal:108, g:2.6, carbs:23,  fat:0.8},
+  {name:'Lay\'s Potato Chips',         brand:'Lay\'s', serving:28, servingUnit:'1 oz (~15)', cal:160, g:2, carbs:15, fat:10},
+  {name:'Tortilla Chips',              brand:'',    serving:28,  servingUnit:'1 oz',   cal:140, g:2,   carbs:19,  fat:7},
+  {name:'Protein Bar (generic 20g)',   brand:'',    serving:60,  servingUnit:'1 bar',  cal:220, g:20,  carbs:22,  fat:8},
+  {name:'Granola Bar (Quaker)',        brand:'Quaker', serving:21, servingUnit:'1 bar', cal:90, g:1, carbs:18, fat:2},
+  // CONDIMENTS & SAUCES
+  {name:'Ketchup',                     brand:'',    serving:17,  servingUnit:'1 tbsp', cal:19,  g:0.3, carbs:4.7, fat:0},
+  {name:'Mustard',                     brand:'',    serving:5,   servingUnit:'1 tsp',  cal:3,   g:0.2, carbs:0.3, fat:0.1},
+  {name:'Mayonnaise',                  brand:'',    serving:13,  servingUnit:'1 tbsp', cal:94,  g:0.1, carbs:0.1, fat:10},
+  {name:'Ranch Dressing',              brand:'',    serving:30,  servingUnit:'2 tbsp', cal:130, g:0.5, carbs:2,   fat:13},
+  {name:'Hot Sauce (Tabasco)',         brand:'',    serving:5,   servingUnit:'1 tsp',  cal:0,   g:0,   carbs:0,   fat:0},
+  {name:'Soy Sauce',                   brand:'',    serving:15,  servingUnit:'1 tbsp', cal:8,   g:1.3, carbs:0.8, fat:0.1},
+  {name:'Hummus',                      brand:'',    serving:30,  servingUnit:'2 tbsp', cal:70,  g:2,   carbs:6,   fat:4},
+  {name:'Salsa',                       brand:'',    serving:30,  servingUnit:'2 tbsp', cal:10,  g:0.5, carbs:2,   fat:0},
+  // BEVERAGES
+  {name:'Whole Milk (1 cup)',          brand:'',    serving:240, servingUnit:'1 cup',  cal:149, g:8,   carbs:12,  fat:8},
+  {name:'Orange Juice',               brand:'',    serving:240, servingUnit:'1 cup',  cal:112, g:1.7, carbs:26,  fat:0.5},
+  {name:'Coca-Cola (12oz)',           brand:'Coca-Cola', serving:355, servingUnit:'12 fl oz', cal:140, g:0, carbs:39, fat:0},
+  {name:'Gatorade (20oz)',            brand:'Gatorade', serving:591, servingUnit:'20 fl oz', cal:130, g:0, carbs:34, fat:0},
+  {name:'Coffee (black)',              brand:'',    serving:240, servingUnit:'8 fl oz', cal:2,   g:0.3, carbs:0,   fat:0},
+  {name:'Latte (whole milk, 12oz)',   brand:'',    serving:354, servingUnit:'12 fl oz', cal:200, g:10, carbs:20, fat:8},
+  {name:'Protein Shake (w/ whole milk)', brand:'', serving:400, servingUnit:'1 shake', cal:400, g:35, carbs:30, fat:10},
+  // PREPARED / FROZEN
+  {name:'Amy\'s Burrito (Bean & Cheese)', brand:'Amy\'s', serving:170, servingUnit:'1 burrito', cal:310, g:11, carbs:46, fat:9},
+  {name:'Lean Cuisine Chicken & Vegetables', brand:'Lean Cuisine', serving:255, servingUnit:'1 meal', cal:180, g:18, carbs:20, fat:3},
+  {name:'Instant Ramen (Maruchan)',   brand:'Maruchan', serving:85, servingUnit:'1 pack (dry)', cal:380, g:8, carbs:52, fat:14},
+];
+
+// Add per100 to all local foods for serving size calculation
+LOCAL_FOODS.forEach(f => {
+  const factor = 100 / (f.serving||100);
+  f.per100 = {
+    cal:     (f.cal||0) * factor,
+    protein: (f.g||0) * factor,
+    carbs:   (f.carbs||0) * factor,
+    fat:     (f.fat||0) * factor,
+  };
+  f.source = 'local';
+});
+
+function searchLocalFoods(query) {
+  if(!query || query.length < 2) return [];
+  const q = query.toLowerCase().trim();
+  const terms = q.split(/\s+/);
+
+  return LOCAL_FOODS
+    .map(f => {
+      const text = (f.name + ' ' + f.brand).toLowerCase();
+      // Score: exact match > starts with > all terms match > partial match
+      let score = 0;
+      if(text === q) score = 100;
+      else if(text.startsWith(q)) score = 80;
+      else if(terms.every(t => text.includes(t))) score = 60;
+      else if(terms.some(t => text.includes(t))) score = 30 * terms.filter(t => text.includes(t)).length / terms.length;
+      return {food: f, score};
+    })
+    .filter(r => r.score > 0)
+    .sort((a,b) => b.score - a.score)
+    .slice(0, 8)
+    .map(r => ({...r.food}));
 }
 
-async function searchFood(query) {
+
+// ─── FOOD DATABASES ───────────────────────────────────────────────────────────
+
+// Call Claude API — works in Claude artifacts (no key needed, proxied)
+async function callClaude(systemPrompt, userMessage, maxTokens) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: maxTokens || 600,
+      system: systemPrompt,
+      messages: [{role: 'user', content: userMessage}]
+    })
+  });
+  if(!res.ok) throw new Error('API error: ' + res.status);
+  const data = await res.json();
+  return data.content?.[0]?.text || '';
+}
+
+// Search using Claude AI — primary search engine (works offline-of-fetch, always available)
+async function searchWithAI(query) {
   try {
-    const url = 'https://world.openfoodfacts.org/cgi/search.pl?search_terms='
-      + encodeURIComponent(query)
-      + '&search_simple=1&action=process&json=1&page_size=10&fields=product_name,brands,nutriments,serving_quantity,serving_size';
-    const res = await fetch(url);
+    const text = await callClaude(
+      'You are a nutrition database. Return ONLY a JSON array of 6 foods matching the query. Each item: {"name":"Food Name","brand":"Brand or empty","serving":100,"servingUnit":"1 cup or 100g etc","cal":200,"protein":20,"carbs":10,"fat":8}. Use accurate USDA/nutrition label values. No markdown, no explanation, just the JSON array.',
+      query,
+      800
+    );
+    const clean = text.replace(/```json?|```/g,'').trim();
+    const items = JSON.parse(clean);
+    return items.map(f => ({
+      name: String(f.name||query),
+      brand: String(f.brand||''),
+      serving: parseFloat(f.serving)||100,
+      servingUnit: String(f.servingUnit||'100g'),
+      cal:   parseInt(f.cal)||0,
+      g:     parseFloat(f.protein)||0,
+      carbs: parseFloat(f.carbs)||0,
+      fat:   parseFloat(f.fat)||0,
+      per100: makePer100(f, parseFloat(f.serving)||100),
+      source: 'ai',
+    }));
+  } catch(e) { return []; }
+}
+
+// Open Food Facts — for real branded products (requires internet)
+async function searchOpenFoodFacts(query) {
+  try {
+    const url = 'https://world.openfoodfacts.org/cgi/search.pl'
+      + '?search_terms=' + encodeURIComponent(query)
+      + '&search_simple=1&action=process&json=1&page_size=10'
+      + '&fields=product_name,brands,nutriments,serving_quantity,serving_size';
+    const res = await fetch(url, {headers: {'User-Agent': 'Gainz-App/1.0'}});
+    if(!res.ok) return [];
     const data = await res.json();
-    if(!data.products) return [];
-    return data.products
+    return (data.products||[])
       .filter(p => p.product_name && p.nutriments)
-      .map(p => {
-        const n = p.nutriments || {};
-        const servingG = parseFloat(p.serving_quantity) || 100;
-        const factor = servingG / 100;
-        return {
-          name:    p.product_name,
-          brand:   p.brands || '',
-          serving: servingG,
-          servingUnit: p.serving_size || (servingG + 'g'),
-          cal:   Math.round((parseFloat(n['energy-kcal_100g']||0)) * factor),
-          g:     Math.round((parseFloat(n['proteins_100g']||0)) * factor * 10) / 10,
-          carbs: Math.round((parseFloat(n['carbohydrates_100g']||0)) * factor * 10) / 10,
-          fat:   Math.round((parseFloat(n['fat_100g']||0)) * factor * 10) / 10,
-          per100: {
-            cal:     parseFloat(n['energy-kcal_100g']||0),
-            protein: parseFloat(n['proteins_100g']||0),
-            carbs:   parseFloat(n['carbohydrates_100g']||0),
-            fat:     parseFloat(n['fat_100g']||0),
-          }
-        };
-      })
-      .filter(p => p.cal > 0 || p.g > 0);
-  } catch(e) {
-    return [];
-  }
+      .map(p => parseOFFProduct(p))
+      .filter(p => p.cal > 0 || p.g > 0)
+      .slice(0, 6);
+  } catch(e) { return []; }
 }
 
-// ─── BARCODE SCANNER ─────────────────────────────────────────────────────────
-let _scanStream = null;
-let _scanInterval = null;
-let _scanCanvas = null;
-let _lastScan = '';
-
-async function openScanner() {
-  const overlay = document.getElementById('scanner-overlay');
-  const video   = document.getElementById('scanner-video');
-  const status  = document.getElementById('scanner-status');
-  if(!overlay || !video) return;
-  // Check BarcodeDetector API support
-  if(!('BarcodeDetector' in window)) {
-    // Fallback: prompt manual entry
-    closeScanner();
-    showManualBarcodeEntry();
-    return;
-  }
+async function lookupOFFBarcode(barcode) {
   try {
-    _scanStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment', width:{ideal:1280}, height:{ideal:720} }
-    });
-    video.srcObject = _scanStream;
-    overlay.style.display = 'flex';
-    _lastScan = '';
-    const detector = new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128','code_39','qr_code']});
-    _scanCanvas = document.createElement('canvas');
-    _scanInterval = setInterval(async () => {
-      if(video.readyState < 2) return;
-      try {
-        const barcodes = await detector.detect(video);
-        if(barcodes.length > 0) {
-          const code = barcodes[0].rawValue;
-          if(code === _lastScan) return;
-          _lastScan = code;
-          if(status) status.textContent = 'Found: ' + code + ' — looking up…';
-          clearInterval(_scanInterval);
-          await handleScannedBarcode(code);
-        }
-      } catch(e) {}
-    }, 500);
-  } catch(err) {
-    closeScanner();
-    if(err.name === 'NotAllowedError') {
-      alert('Camera access denied. Please allow camera access and try again.');
-    } else {
-      showManualBarcodeEntry();
-    }
-  }
+    const res = await fetch('https://world.openfoodfacts.org/api/v0/product/' + barcode + '.json',
+      {headers: {'User-Agent': 'Gainz-App/1.0'}});
+    const data = await res.json();
+    if(data.status !== 1 || !data.product) return null;
+    const result = parseOFFProduct(data.product);
+    return result.name !== 'Unknown' ? result : null;
+  } catch(e) { return null; }
 }
 
-function closeScanner() {
-  clearInterval(_scanInterval);
-  if(_scanStream) { _scanStream.getTracks().forEach(t => t.stop()); _scanStream = null; }
-  const overlay = document.getElementById('scanner-overlay');
-  if(overlay) overlay.style.display = 'none';
+function parseOFFProduct(p) {
+  const n = p.nutriments || {};
+  const servingG = parseFloat(p.serving_quantity) || 100;
+  const factor = servingG / 100;
+  const per100 = {
+    cal:     parseFloat(n['energy-kcal_100g']||n['energy-kcal']||0),
+    protein: parseFloat(n['proteins_100g']||n['proteins']||0),
+    carbs:   parseFloat(n['carbohydrates_100g']||n['carbohydrates']||0),
+    fat:     parseFloat(n['fat_100g']||n['fat']||0),
+  };
+  return {
+    name:        (p.product_name||'Unknown').trim(),
+    brand:       (p.brands||'').split(',')[0].trim(),
+    serving:     servingG,
+    servingUnit: p.serving_size || (servingG + 'g'),
+    cal:         Math.round(per100.cal * factor),
+    g:           Math.round(per100.protein * factor * 10)/10,
+    carbs:       Math.round(per100.carbs * factor * 10)/10,
+    fat:         Math.round(per100.fat * factor * 10)/10,
+    per100,
+    source: 'off',
+  };
+}
+
+function makePer100(f, servingG) {
+  const factor = 100 / (servingG||100);
+  return {
+    cal:     (parseInt(f.cal)||0) * factor,
+    protein: (parseFloat(f.protein)||0) * factor,
+    carbs:   (parseFloat(f.carbs)||0) * factor,
+    fat:     (parseFloat(f.fat)||0) * factor,
+  };
+}
+
+// Combined search — local DB instant, then AI + OFF in parallel
+async function searchFood(query) {
+  if(!query || query.length < 2) return [];
+
+  // 1. Local DB — instant results
+  const local = searchLocalFoods(query);
+
+  // 2. AI + OFF in parallel
+  const [aiRes, offRes] = await Promise.allSettled([
+    searchWithAI(query),
+    searchOpenFoodFacts(query),
+  ]);
+  const aiResults  = aiRes.status  === 'fulfilled' ? aiRes.value  : [];
+  const offResults = offRes.status === 'fulfilled' ? offRes.value : [];
+
+  // Merge: real products (OFF) first, then local, then AI estimates
+  const merged = [...offResults, ...local, ...aiResults];
+  const seen = new Set();
+  return merged.filter(f => {
+    const key = (f.name||'').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,18);
+    if(!key || seen.has(key)) return false;
+    seen.add(key); return true;
+  }).slice(0, 12);
+}
+
+// Barcode lookup — OFF first, then Claude
+async function lookupBarcode(barcode) {
+  // Try Open Food Facts first (most accurate for real products)
+  const offResult = await lookupOFFBarcode(barcode);
+  if(offResult) return offResult;
+
+  // Claude fallback — knows many major US products by barcode
+  try {
+    const text = await callClaude(
+      'You are a nutrition database. Given a product barcode UPC/EAN, return ONLY a JSON object with the product details, or null if unknown. Format: {"name":"Product Name","brand":"Brand","serving":30,"servingUnit":"30g","cal":120,"protein":5,"carbs":20,"fat":3}. No markdown.',
+      'Barcode: ' + barcode,
+      300
+    );
+    const clean = text.replace(/```json?|```/g,'').trim();
+    if(clean === 'null' || !clean) return null;
+    const product = JSON.parse(clean);
+    if(!product || !product.name) return null;
+    const servingG = parseFloat(product.serving)||100;
+    return {
+      name:    String(product.name),
+      brand:   String(product.brand||''),
+      serving: servingG,
+      servingUnit: String(product.servingUnit||servingG+'g'),
+      cal:   parseInt(product.cal)||0,
+      g:     parseFloat(product.protein)||0,
+      carbs: parseFloat(product.carbs)||0,
+      fat:   parseFloat(product.fat)||0,
+      per100: makePer100(product, servingG),
+      barcode,
+      source: 'ai',
+    };
+  } catch(e) { return null; }
+}
+
+// ─── BARCODE SCANNING ─────────────────────────────────────────────────────────
+// Uses iOS camera capture → image → Claude Vision to read barcode + identify product
+
+function openScanner() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.setAttribute('capture', 'environment');
+  input.style.cssText = 'position:fixed;top:-9999px;opacity:0;';
+  document.body.appendChild(input);
+
+  input.onchange = async (e) => {
+    const file = e.target.files?.[0];
+    if(document.body.contains(input)) document.body.removeChild(input);
+    if(!file) return;
+    showFoodLoadingSheet('Identifying product…');
+    await scanImageForFood(file);
+  };
+
+  input.onerror = () => {
+    if(document.body.contains(input)) document.body.removeChild(input);
+    showManualBarcodeEntry();
+  };
+
+  input.click();
+}
+
+async function scanImageForFood(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const base64 = e.target.result.split(',')[1];
+      const mimeType = file.type || 'image/jpeg';
+      try {
+        // Send image to Claude Vision — ask it to identify barcode AND product
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 500,
+            messages: [{
+              role: 'user',
+              content: [
+                {type:'image', source:{type:'base64', media_type:mimeType, data:base64}},
+                {type:'text', text:'Look at this food product image. Return ONLY a JSON object with: {"barcode":"number if visible or null","name":"full product name","brand":"brand name","serving":100,"servingUnit":"1 serving description","cal":0,"protein":0,"carbs":0,"fat":0}. Use accurate nutrition values for this specific product. If you cannot identify the product at all, return {"error":"unknown"}.'}
+              ]
+            }]
+          })
+        });
+        if(!res.ok) throw new Error('API ' + res.status);
+        const data = await res.json();
+        const text = (data.content?.[0]?.text||'').replace(/```json?|```/g,'').trim();
+        const product = JSON.parse(text);
+
+        closeSheets();
+
+        if(product.error || !product.name) {
+          showManualBarcodeEntry();
+          resolve(); return;
+        }
+
+        // If we got a barcode, also try OFF lookup for more accurate data
+        if(product.barcode) {
+          const offResult = await lookupOFFBarcode(product.barcode);
+          if(offResult) { showAddFoodConfirmSheet(offResult); resolve(); return; }
+        }
+
+        // Use Claude's result directly
+        const servingG = parseFloat(product.serving)||100;
+        showAddFoodConfirmSheet({
+          name:        product.name,
+          brand:       product.brand||'',
+          serving:     servingG,
+          servingUnit: product.servingUnit||servingG+'g',
+          cal:         parseInt(product.cal)||0,
+          g:           parseFloat(product.protein)||0,
+          carbs:       parseFloat(product.carbs)||0,
+          fat:         parseFloat(product.fat)||0,
+          per100:      makePer100(product, servingG),
+          barcode:     product.barcode||'',
+          source:      'ai',
+        });
+        resolve();
+      } catch(err) {
+        closeSheets();
+        // API failed — show manual entry with helpful message
+        showNotFoundSheet('photo scan');
+        resolve();
+      }
+    };
+    reader.onerror = () => { closeSheets(); showManualBarcodeEntry(); resolve(); };
+    reader.readAsDataURL(file);
+  });
 }
 
 async function handleScannedBarcode(barcode) {
-  closeScanner();
-  showFoodLoadingSheet('Looking up barcode ' + barcode + '…');
+  showFoodLoadingSheet('Looking up ' + barcode + '…');
   const food = await lookupBarcode(barcode);
   closeSheets();
-  if(food) {
-    showAddFoodConfirmSheet(food);
-  } else {
-    showNotFoundSheet(barcode);
-  }
+  if(food) { food.barcode = barcode; showAddFoodConfirmSheet(food); }
+  else showNotFoundSheet(barcode);
+}
+
+
+function closeScanner() {
+  // No-op — camera input handles its own lifecycle
+  const overlay = document.getElementById('scanner-overlay');
+  if(overlay) overlay.style.display = 'none';
 }
 
 function showManualBarcodeEntry() {
@@ -3725,8 +4084,8 @@ function showManualBarcodeEntry() {
   bg.innerHTML = '<div class="sheet">'
     + '<div class="sheet-handle"></div>'
     + '<div class="sheet-title">Enter Barcode</div>'
-    + '<div class="sheet-sub">BarcodeDetector not supported on this browser. Enter barcode manually.</div>'
-    + '<div class="field"><label>Barcode number</label><input type="number" id="manual-barcode" inputmode="numeric" placeholder="e.g. 0123456789012"></div>'
+    + '<div class="sheet-sub">Type the barcode number from the product label.</div>'
+    + '<div class="field"><label>Barcode number</label><input type="number" id="manual-barcode" inputmode="numeric" placeholder="e.g. 0123456789012" style="font-size:16px;"></div>'
     + '<button class="btn btn-acc btn-full" onclick="submitManualBarcode()">Look up</button>'
     + '<button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="closeSheets()">Cancel</button>'
     + '</div>';
@@ -3738,11 +4097,7 @@ async function submitManualBarcode() {
   const val = document.getElementById('manual-barcode')?.value?.trim();
   if(!val) return;
   closeSheets();
-  showFoodLoadingSheet('Looking up barcode…');
-  const food = await lookupBarcode(val);
-  closeSheets();
-  if(food) showAddFoodConfirmSheet(food);
-  else showNotFoundSheet(val);
+  await handleScannedBarcode(val);
 }
 
 function showNotFoundSheet(barcode) {
@@ -3750,7 +4105,7 @@ function showNotFoundSheet(barcode) {
   bg.innerHTML = '<div class="sheet">'
     + '<div class="sheet-handle"></div>'
     + '<div class="sheet-title">Not Found</div>'
-    + '<div class="sheet-sub">Barcode ' + barcode + ' was not found in the database. You can log it manually.</div>'
+    + '<div class="sheet-sub">Barcode <strong>' + barcode + '</strong> was not in any database. Log it manually below.</div>'
     + '<button class="btn btn-acc btn-full" style="margin-bottom:8px" onclick="closeSheets();showManualFoodSheet()">Log manually</button>'
     + '<button class="btn btn-ghost btn-full" onclick="closeSheets()">Cancel</button>'
     + '</div>';
@@ -3759,6 +4114,7 @@ function showNotFoundSheet(barcode) {
 }
 
 function showFoodLoadingSheet(msg) {
+  closeSheets();
   const bg = document.createElement('div'); bg.className='sheet-bg'; bg.id='food-loading-sheet';
   bg.innerHTML = '<div class="sheet" style="text-align:center;padding:40px 24px;">'
     + '<div style="font-size:32px;margin-bottom:16px;">🔍</div>'
@@ -3768,42 +4124,48 @@ function showFoodLoadingSheet(msg) {
 }
 
 // ─── ADD FOOD CONFIRM SHEET ───────────────────────────────────────────────────
+let _confirmFoodData = null;
+
 function showAddFoodConfirmSheet(food) {
-  // food: {name, brand, serving, servingUnit, cal, g(protein), carbs, fat, per100}
+  _confirmFoodData = food;
   const bg = document.createElement('div'); bg.className='sheet-bg'; bg.id='add-food-sheet';
-  const scaledCal   = food.cal   || 0;
-  const scaledP     = food.g     || 0;
-  const scaledCarbs = food.carbs || 0;
-  const scaledFat   = food.fat   || 0;
+
+  const sourceTag = food.source === 'ai'
+    ? ' <span style="font-size:10px;background:rgba(232,255,71,.15);color:var(--acc);padding:2px 6px;border-radius:20px;font-weight:600;vertical-align:middle;">AI</span>'
+    : food.source === 'usda'
+    ? ' <span style="font-size:10px;background:rgba(71,180,255,.15);color:#47b4ff;padding:2px 6px;border-radius:20px;font-weight:600;vertical-align:middle;">USDA</span>'
+    : '';
 
   bg.innerHTML = '<div class="sheet">'
     + '<div class="sheet-handle"></div>'
     + '<div style="margin-bottom:14px;">'
-    +   '<div style="font-size:17px;font-weight:600;line-height:1.3;">' + food.name + '</div>'
+    +   '<div style="font-size:17px;font-weight:600;line-height:1.3;">' + food.name + sourceTag + '</div>'
     +   (food.brand ? '<div style="font-size:12px;color:var(--t2);margin-top:2px;">' + food.brand + '</div>' : '')
     + '</div>'
     + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;">'
-    +   '<div class="metric-box" style="padding:10px;text-align:center;"><div class="metric-val a" style="font-size:22px;" id="fc-cal">' + scaledCal + '</div><div class="metric-lbl">kcal</div></div>'
-    +   '<div class="metric-box" style="padding:10px;text-align:center;"><div class="metric-val" style="font-size:22px;color:#47b4ff;" id="fc-p">' + scaledP + 'g</div><div class="metric-lbl">protein</div></div>'
-    +   '<div class="metric-box" style="padding:10px;text-align:center;"><div class="metric-val" style="font-size:22px;color:#ffb347;" id="fc-c">' + scaledCarbs + 'g</div><div class="metric-lbl">carbs</div></div>'
-    +   '<div class="metric-box" style="padding:10px;text-align:center;"><div class="metric-val" style="font-size:22px;color:#ff9147;" id="fc-f">' + scaledFat + 'g</div><div class="metric-lbl">fat</div></div>'
+    +   '<div class="metric-box" style="padding:10px;text-align:center;"><div class="metric-val a" id="fc-cal" style="font-size:22px;">' + food.cal + '</div><div class="metric-lbl">kcal</div></div>'
+    +   '<div class="metric-box" style="padding:10px;text-align:center;"><div class="metric-val" id="fc-p" style="font-size:22px;color:#47b4ff;">' + food.g + 'g</div><div class="metric-lbl">protein</div></div>'
+    +   '<div class="metric-box" style="padding:10px;text-align:center;"><div class="metric-val" id="fc-c" style="font-size:22px;color:#ffb347;">' + food.carbs + 'g</div><div class="metric-lbl">carbs</div></div>'
+    +   '<div class="metric-box" style="padding:10px;text-align:center;"><div class="metric-val" id="fc-f" style="font-size:22px;color:#ff9147;">' + food.fat + 'g</div><div class="metric-lbl">fat</div></div>'
     + '</div>'
     + '<div class="field">'
-    +   '<label>Servings</label>'
+    +   '<label>Servings (1 = ' + (food.servingUnit||'1 serving') + ')</label>'
     +   '<div style="display:flex;align-items:center;gap:10px;">'
-    +     '<input type="number" id="fc-servings" value="1" min="0.25" step="0.25" inputmode="decimal" style="flex:1;text-align:center;font-size:18px;font-weight:700;" oninput="updateFoodServing(' + JSON.stringify(food).replace(/'/g,"&apos;") + ',this.value)">'
-    +     '<div style="font-size:13px;color:var(--t2);flex-shrink:0;">' + (food.servingUnit||'serving') + '</div>'
+    +     '<button onclick="adjServings(-0.5)" style="width:40px;height:40px;border-radius:50%;background:var(--s2);border:1px solid var(--b2);color:var(--t1);font-size:20px;cursor:pointer;flex-shrink:0;">−</button>'
+    +     '<input type="number" id="fc-servings" value="1" min="0.25" step="0.25" inputmode="decimal" style="flex:1;text-align:center;font-size:22px;font-weight:700;" oninput="updateFoodServingDisplay(this.value)">'
+    +     '<button onclick="adjServings(0.5)" style="width:40px;height:40px;border-radius:50%;background:var(--s2);border:1px solid var(--b2);color:var(--t1);font-size:20px;cursor:pointer;flex-shrink:0;">+</button>'
     +   '</div>'
     + '</div>'
     + '<div class="field" style="margin-bottom:6px;">'
     +   '<label>Meal</label>'
-    +   '<select id="fc-meal"><option value="Breakfast">Breakfast</option><option value="Lunch">Lunch</option><option value="Dinner" selected>Dinner</option><option value="Snack">Snack</option><option value="Pre-workout">Pre-workout</option><option value="Post-workout">Post-workout</option></select>'
+    +   '<select id="fc-meal"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option><option>Pre-workout</option><option>Post-workout</option></select>'
     + '</div>'
-    + '<button class="btn btn-acc btn-full" style="margin-top:10px;" onclick="confirmAddFood(' + JSON.stringify(food).replace(/'/g,"&apos;") + ')">Add to log</button>'
+    + '<button class="btn btn-acc btn-full" style="margin-top:10px;" onclick="confirmAddFood()">Add to log</button>'
     + '<button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="closeSheets()">Cancel</button>'
     + '</div>';
   bg.addEventListener('click', e => { if(e.target===bg) bg.remove(); });
   document.body.appendChild(bg);
+
   // Auto-detect meal from time
   const hr = new Date().getHours();
   const mealEl = document.getElementById('fc-meal');
@@ -3815,36 +4177,49 @@ function showAddFoodConfirmSheet(food) {
   }
 }
 
-function updateFoodServing(food, servings) {
+function adjServings(delta) {
+  const el = document.getElementById('fc-servings');
+  if(!el) return;
+  const newVal = Math.max(0.25, Math.round((parseFloat(el.value||1) + delta) * 4) / 4);
+  el.value = newVal;
+  updateFoodServingDisplay(newVal);
+}
+
+function updateFoodServingDisplay(servings) {
   const s = parseFloat(servings) || 1;
-  const factor = s * (food.serving||100) / 100;
-  const p = food.per100 || {};
+  const f = _confirmFoodData;
+  if(!f) return;
+  const p = f.per100 || {};
+  const factor = s * (f.serving||100) / 100;
   const cal   = document.getElementById('fc-cal');
   const pEl   = document.getElementById('fc-p');
   const cEl   = document.getElementById('fc-c');
   const fEl   = document.getElementById('fc-f');
-  if(cal)  cal.textContent  = Math.round((p.cal||0)*factor);
-  if(pEl)  pEl.textContent  = Math.round((p.protein||0)*factor*10)/10 + 'g';
-  if(cEl)  cEl.textContent  = Math.round((p.carbs||0)*factor*10)/10 + 'g';
-  if(fEl)  fEl.textContent  = Math.round((p.fat||0)*factor*10)/10 + 'g';
+  if(cal) cal.textContent  = Math.round((p.cal||0)*factor);
+  if(pEl) pEl.textContent  = Math.round((p.protein||0)*factor*10)/10 + 'g';
+  if(cEl) cEl.textContent  = Math.round((p.carbs||0)*factor*10)/10 + 'g';
+  if(fEl) fEl.textContent  = Math.round((p.fat||0)*factor*10)/10 + 'g';
 }
 
-function confirmAddFood(food) {
+function confirmAddFood() {
   const servings = parseFloat(document.getElementById('fc-servings')?.value) || 1;
-  const meal     = document.getElementById('fc-meal')?.value || 'Other';
-  const factor   = servings * (food.serving||100) / 100;
-  const p = food.per100 || {};
+  const meal     = document.getElementById('fc-meal')?.value || 'Dinner';
+  const f = _confirmFoodData;
+  if(!f) return;
+  const factor = servings * (f.serving||100) / 100;
+  const p = f.per100 || {};
   addFoodItem({
-    name:    food.name + (servings !== 1 ? ' ×' + servings : ''),
-    brand:   food.brand || '',
+    name:    f.name,
+    brand:   f.brand || '',
     meal,
-    barcode: food.barcode || '',
-    serving: food.serving,
-    servingUnit: food.servingUnit,
-    cal:   Math.round((p.cal||food.cal||0) * factor),
-    g:     Math.round((p.protein||food.g||0) * factor * 10) / 10,
-    carbs: Math.round((p.carbs||food.carbs||0) * factor * 10) / 10,
-    fat:   Math.round((p.fat||food.fat||0) * factor * 10) / 10,
+    barcode: f.barcode || '',
+    serving: f.serving,
+    servingUnit: f.servingUnit,
+    servings,
+    cal:   Math.round((p.cal||f.cal||0)*factor),
+    g:     Math.round((p.protein||f.g||0)*factor*10)/10,
+    carbs: Math.round((p.carbs||f.carbs||0)*factor*10)/10,
+    fat:   Math.round((p.fat||f.fat||0)*factor*10)/10,
   });
   closeSheets();
   renderFood();
@@ -3856,13 +4231,13 @@ function showManualFoodSheet(prefill) {
   const bg = document.createElement('div'); bg.className='sheet-bg';
   bg.innerHTML = '<div class="sheet">'
     + '<div class="sheet-handle"></div>'
-    + '<div class="sheet-title">Log Food Manually</div>'
-    + '<div class="field"><label>Food name</label><input type="text" id="mf-name" placeholder="e.g. Chicken breast, 200g" value="' + (f.name||'') + '"></div>'
+    + '<div class="sheet-title">Log Food</div>'
+    + '<div class="field"><label>Food name</label><input type="text" id="mf-name" placeholder="e.g. Chicken breast 200g" value="' + (f.name||'') + '"></div>'
     + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
-    + '<div class="field"><label>Calories (kcal)</label><input type="number" id="mf-cal" inputmode="numeric" placeholder="0" value="' + (f.cal||'') + '"></div>'
-    + '<div class="field"><label>Protein (g)</label><input type="number" id="mf-p" inputmode="decimal" placeholder="0" value="' + (f.g||'') + '"></div>'
-    + '<div class="field"><label>Carbs (g)</label><input type="number" id="mf-c" inputmode="decimal" placeholder="0" value="' + (f.carbs||'') + '"></div>'
-    + '<div class="field"><label>Fat (g)</label><input type="number" id="mf-f" inputmode="decimal" placeholder="0" value="' + (f.fat||'') + '"></div>'
+    + '<div class="field"><label>Calories</label><input type="number" id="mf-cal" inputmode="numeric" placeholder="kcal" value="' + (f.cal||'') + '"></div>'
+    + '<div class="field"><label>Protein (g)</label><input type="number" id="mf-p" inputmode="decimal" placeholder="g" value="' + (f.g||'') + '"></div>'
+    + '<div class="field"><label>Carbs (g)</label><input type="number" id="mf-c" inputmode="decimal" placeholder="g" value="' + (f.carbs||'') + '"></div>'
+    + '<div class="field"><label>Fat (g)</label><input type="number" id="mf-f" inputmode="decimal" placeholder="g" value="' + (f.fat||'') + '"></div>'
     + '</div>'
     + '<div class="field"><label>Meal</label><select id="mf-meal"><option>Breakfast</option><option>Lunch</option><option selected>Dinner</option><option>Snack</option><option>Pre-workout</option><option>Post-workout</option></select></div>'
     + '<button class="btn btn-acc btn-full" onclick="submitManualFood()">Add to log</button>'
@@ -3886,58 +4261,70 @@ function submitManualFood() {
   closeSheets(); renderFood();
 }
 
-// ─── FOOD SEARCH ─────────────────────────────────────────────────────────────
-async function runFoodSearch() {
-  const q = document.getElementById('food-search-input')?.value?.trim();
-  if(!q) return;
-  const results = document.getElementById('food-search-results');
-  if(results) results.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t2);">Searching…</div>';
-  const foods = await searchFood(q);
-  if(!results) return;
-  if(!foods.length) {
-    results.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t3);">No results found.<br><button class="btn btn-ghost btn-sm" style="margin-top:10px;" onclick="closeSheets();showManualFoodSheet({name: document.getElementById(\'food-search-input\')?.value})">Log manually</button></div>';
-    return;
-  }
-  results.innerHTML = foods.map((f,i) => {
-    return '<div class="food-search-result" data-fi="' + i + '">'
-      + '<div style="flex:1;min-width:0;">'
-      + '<div class="food-log-name">' + f.name + '</div>'
-      + '<div class="food-log-meta">' + (f.brand||'') + (f.brand&&f.servingUnit?' · ':'') + (f.servingUnit||'') + '</div>'
-      + '</div>'
-      + '<div style="text-align:right;flex-shrink:0;margin-left:12px;">'
-      + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:700;color:var(--acc);">' + f.cal + '</div>'
-      + '<div style="font-size:10px;color:var(--t3);">kcal</div>'
-      + '<div style="font-size:10px;color:#47b4ff;margin-top:1px;">' + f.g + 'g P</div>'
-      + '</div>'
-      + '</div>';
-  }).join('');
-  window._searchFoods = foods;
-  results.querySelectorAll('.food-search-result').forEach(el => {
-    el.addEventListener('click', () => {
-      const fi = parseInt(el.dataset.fi);
-      closeSheets();
-      showAddFoodConfirmSheet(window._searchFoods[fi]);
-    });
-  });
-}
-
+// ─── FOOD SEARCH SHEET ────────────────────────────────────────────────────────
 function showFoodSearchSheet() {
   const bg = document.createElement('div'); bg.className='sheet-bg';
-  bg.innerHTML = '<div class="sheet" style="max-height:92vh;">'
+  bg.innerHTML = '<div class="sheet" style="max-height:92dvh;">'
     + '<div class="sheet-handle"></div>'
     + '<div class="sheet-title">Search Food</div>'
-    + '<div style="display:flex;gap:8px;margin-bottom:14px;">'
-    +   '<input type="text" id="food-search-input" placeholder="e.g. Greek yogurt, Protein bar…" style="flex:1;" onkeydown="if(event.key===\'Enter\')runFoodSearch()">'
+    + '<div style="display:flex;gap:8px;margin-bottom:6px;">'
+    +   '<input type="text" id="food-search-input" placeholder="Greek yogurt, chicken breast…" style="flex:1;" autocomplete="off" autocorrect="off" spellcheck="false">'
     +   '<button class="btn btn-acc btn-sm" style="flex-shrink:0;" onclick="runFoodSearch()">Search</button>'
     + '</div>'
+    + '<div style="font-size:11px;color:var(--t3);margin-bottom:12px;">Searches Open Food Facts, USDA + AI</div>'
     + '<div id="food-search-results"></div>'
     + '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--b1);">'
-    +   '<button class="btn btn-ghost btn-full btn-sm" onclick="closeSheets();showManualFoodSheet()">+ Log manually instead</button>'
+    +   '<button class="btn btn-ghost btn-full btn-sm" onclick="closeSheets();showManualFoodSheet()">+ Log manually</button>'
     + '</div>'
     + '</div>';
   bg.addEventListener('click', e => { if(e.target===bg) bg.remove(); });
   document.body.appendChild(bg);
-  setTimeout(() => document.getElementById('food-search-input')?.focus(), 100);
+
+  const inp = document.getElementById('food-search-input');
+  if(inp) {
+    setTimeout(() => inp.focus(), 150);
+    inp.addEventListener('keydown', e => { if(e.key==='Enter') runFoodSearch(); });
+  }
+}
+
+async function runFoodSearch() {
+  const q = document.getElementById('food-search-input')?.value?.trim();
+  if(!q) return;
+  const results = document.getElementById('food-search-results');
+  if(results) results.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t2);">Searching across databases…</div>';
+
+  const foods = await searchFood(q);
+
+  if(!results) return;
+  if(!foods.length) {
+    results.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t3);">No results found for "' + q + '"</div>';
+    return;
+  }
+
+  const sourceLabel = {off:'', usda:'<span style="font-size:9px;color:#47b4ff;margin-left:4px;">USDA</span>', ai:'<span style="font-size:9px;color:var(--acc);margin-left:4px;">AI</span>'};
+
+  results.innerHTML = '<div style="font-size:11px;color:var(--t3);margin-bottom:8px;">' + foods.length + ' results</div>'
+    + foods.map((f,i) => (
+      '<div class="food-search-result" data-fi="' + i + '">'
+      + '<div style="flex:1;min-width:0;">'
+      + '<div class="food-log-name">' + f.name + (sourceLabel[f.source]||'') + '</div>'
+      + (f.brand ? '<div class="food-log-meta">' + f.brand + ' · ' + (f.servingUnit||'') + '</div>' : '<div class="food-log-meta">' + (f.servingUnit||'') + '</div>')
+      + '</div>'
+      + '<div style="text-align:right;flex-shrink:0;margin-left:12px;">'
+      + '<div style="font-family:Barlow Condensed,sans-serif;font-size:20px;font-weight:700;color:var(--acc);">' + (f.cal||'—') + '</div>'
+      + '<div style="font-size:10px;color:var(--t3);">kcal</div>'
+      + '<div style="font-size:10px;color:#47b4ff;">' + f.g + 'g P</div>'
+      + '</div>'
+      + '</div>'
+    )).join('');
+
+  window._searchFoods = foods;
+  results.querySelectorAll('.food-search-result').forEach(el => {
+    el.addEventListener('click', () => {
+      closeSheets();
+      showAddFoodConfirmSheet(window._searchFoods[parseInt(el.dataset.fi)]);
+    });
+  });
 }
 
 // ─── GOALS SHEET ─────────────────────────────────────────────────────────────
@@ -3946,14 +4333,13 @@ function showFoodGoalsSheet() {
   bg.innerHTML = '<div class="sheet">'
     + '<div class="sheet-handle"></div>'
     + '<div class="sheet-title">Daily Goals</div>'
-    + '<div class="sheet-sub">Set your daily macro targets</div>'
     + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
-    + '<div class="field"><label>Calories (kcal)</label><input type="number" id="fg-cal" value="' + foodGoals.calories + '" inputmode="numeric" min="500" max="6000"></div>'
-    + '<div class="field"><label>Protein (g)</label><input type="number" id="fg-p" value="' + foodGoals.protein + '" inputmode="numeric" min="50" max="400"></div>'
-    + '<div class="field"><label>Carbs (g)</label><input type="number" id="fg-c" value="' + foodGoals.carbs + '" inputmode="numeric" min="0" max="1000"></div>'
-    + '<div class="field"><label>Fat (g)</label><input type="number" id="fg-f" value="' + foodGoals.fat + '" inputmode="numeric" min="0" max="500"></div>'
+    + '<div class="field"><label>Calories (kcal)</label><input type="number" id="fg-cal" value="' + foodGoals.calories + '" inputmode="numeric"></div>'
+    + '<div class="field"><label>Protein (g)</label><input type="number" id="fg-p" value="' + foodGoals.protein + '" inputmode="numeric"></div>'
+    + '<div class="field"><label>Carbs (g)</label><input type="number" id="fg-c" value="' + foodGoals.carbs + '" inputmode="numeric"></div>'
+    + '<div class="field"><label>Fat (g)</label><input type="number" id="fg-f" value="' + foodGoals.fat + '" inputmode="numeric"></div>'
     + '</div>'
-    + '<button class="btn btn-acc btn-full" onclick="saveFoodGoalsFromSheet()">Save goals</button>'
+    + '<button class="btn btn-acc btn-full" onclick="saveFoodGoalsFromSheet()">Save</button>'
     + '<button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="closeSheets()">Cancel</button>'
     + '</div>';
   bg.addEventListener('click', e => { if(e.target===bg) bg.remove(); });
@@ -3966,8 +4352,7 @@ function saveFoodGoalsFromSheet() {
   foodGoals.carbs    = parseInt(document.getElementById('fg-c')?.value)||200;
   foodGoals.fat      = parseInt(document.getElementById('fg-f')?.value)||65;
   saveFoodGoals();
-  proteinGoal = foodGoals.protein;
-  localStorage.setItem('gainz_protein_goal', String(proteinGoal));
+  syncProteinGoal();
   closeSheets(); renderFood();
 }
 
@@ -3984,35 +4369,26 @@ function renderFood() {
     : new Date(foodViewDate + 'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
   if(dl) dl.textContent = displayDate;
 
-  // Get items for selected date
-  const entry = proteinLog.find(e => e.date === foodViewDate);
-  const items = entry ? entry.items : [];
-  const totals = {
-    calories: items.reduce((a,i) => a+(parseInt(i.cal)||0), 0),
-    protein:  items.reduce((a,i) => a+(parseFloat(i.g)||0), 0),
-    carbs:    items.reduce((a,i) => a+(parseFloat(i.carbs)||0), 0),
-    fat:      items.reduce((a,i) => a+(parseFloat(i.fat)||0), 0),
-  };
+  const items = getTodayFoodItems(foodViewDate);
+  const totals = getDayTotals(foodViewDate);
 
-  // Macro ring helper
+  // Macro ring
   function ring(val, goal, color, label, unit) {
-    const pct = Math.min(val/Math.max(goal,1), 1);
+    const pct = Math.min(val / Math.max(goal,1), 1);
     const circ = 2*Math.PI*28;
-    const dash = Math.round(pct*circ);
+    const dash = pct * circ;
     return '<div class="macro-ring-item">'
       + '<div class="macro-ring"><svg width="72" height="72" viewBox="0 0 72 72">'
       + '<circle class="mr-track" cx="36" cy="36" r="28"/>'
-      + '<circle class="mr-prog" cx="36" cy="36" r="28" stroke="' + color + '" stroke-dasharray="' + dash + ' ' + circ + '" stroke-dashoffset="0"/>'
+      + '<circle class="mr-prog" cx="36" cy="36" r="28" stroke="' + color + '" stroke-dasharray="' + dash.toFixed(1) + ' ' + circ.toFixed(1) + '" stroke-dashoffset="0"/>'
       + '</svg>'
-      + '<div class="macro-ring-inner">'
-      + '<div class="macro-ring-val" style="color:' + color + ';">' + Math.round(val) + '</div>'
-      + '<div class="macro-ring-lbl">' + unit + '</div>'
-      + '</div></div>'
-      + '<div style="font-size:11px;color:var(--t2);text-align:center;">' + label + '<br><span style="font-size:10px;color:var(--t3);">/ ' + goal + unit + '</span></div>'
+      + '<div class="macro-ring-inner"><div class="macro-ring-val" style="color:' + color + ';">' + Math.round(val) + '</div><div class="macro-ring-lbl">' + unit + '</div></div>'
+      + '</div>'
+      + '<div style="font-size:11px;color:var(--t2);text-align:center;">' + label + '<br><span style="color:var(--t3);font-size:10px;">/ ' + goal + unit + '</span></div>'
       + '</div>';
   }
 
-  // Group items by meal
+  // Group by meal
   const mealOrder = ['Breakfast','Lunch','Dinner','Snack','Pre-workout','Post-workout','Other'];
   const byMeal = {};
   items.forEach((item, idx) => {
@@ -4021,51 +4397,49 @@ function renderFood() {
     byMeal[meal].push({item, idx});
   });
 
-  const mealSections = mealOrder
-    .filter(m => byMeal[m])
-    .map(meal => {
-      const mealItems = byMeal[meal];
-      const mealCal = mealItems.reduce((a,{item}) => a+(parseInt(item.cal)||0), 0);
-      return '<div style="margin-bottom:12px;">'
-        + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">'
-        + '<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);">' + meal + '</div>'
-        + '<div style="font-size:11px;color:var(--t3);">' + mealCal + ' kcal</div>'
+  const mealSections = mealOrder.filter(m => byMeal[m]).map(meal => {
+    const mealCal = byMeal[meal].reduce((a,{item}) => a+(parseInt(item.cal)||0), 0);
+    return '<div style="margin-bottom:14px;">'
+      + '<div style="display:flex;justify-content:space-between;margin-bottom:6px;">'
+      + '<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);">' + meal + '</div>'
+      + '<div style="font-size:11px;color:var(--t3);">' + mealCal + ' kcal</div>'
+      + '</div>'
+      + byMeal[meal].map(({item, idx}) => (
+        '<div class="food-log-item">'
+        + '<div style="flex:1;min-width:0;">'
+        + '<div class="food-log-name">' + item.name + '</div>'
+        + (item.brand ? '<div class="food-log-meta">' + item.brand + '</div>' : '')
+        + '<div style="font-size:11px;color:var(--t3);margin-top:2px;">'
+        + (item.g ? 'P ' + item.g + 'g ' : '')
+        + (item.carbs ? 'C ' + item.carbs + 'g ' : '')
+        + (item.fat ? 'F ' + item.fat + 'g' : '')
         + '</div>'
-        + mealItems.map(({item,idx}) => {
-          const hasMacros = item.cal||item.carbs||item.fat;
-          return '<div class="food-log-item">'
-            + '<div style="flex:1;min-width:0;">'
-            + '<div class="food-log-name">' + item.name + '</div>'
-            + '<div class="food-log-meta">'
-            + (item.brand ? item.brand + ' · ' : '')
-            + (item.time||'')
-            + '</div>'
-            + (hasMacros ? '<div style="font-size:11px;color:var(--t3);margin-top:2px;">'
-            + (item.g?'P:'+item.g+'g ':'') + (item.carbs?'C:'+item.carbs+'g ':'') + (item.fat?'F:'+item.fat+'g':'')
-            + '</div>' : '')
-            + '</div>'
-            + '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:10px;">'
-            + '<div class="food-log-cal">' + (item.cal||'—') + '<span style="font-size:10px;font-weight:400;"> kcal</span></div>'
-            + '<button data-didx="' + idx + '" class="food-del-btn" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:2px 4px;line-height:1;">×</button>'
-            + '</div>'
-            + '</div>';
-        }).join('')
-        + '</div>';
-    }).join('');
+        + '</div>'
+        + '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:10px;">'
+        + '<div class="food-log-cal">' + (item.cal||'—') + '<span style="font-size:10px;font-weight:400;"> kcal</span></div>'
+        + '<button data-didx="' + idx + '" class="food-del-btn" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:20px;padding:2px 6px;line-height:1;touch-action:manipulation;">×</button>'
+        + '</div>'
+        + '</div>'
+      )).join('')
+      + '</div>';
+  }).join('');
 
   // Recent foods
-  const recent = getRecentFoods().slice(0, 5);
-  const recentHTML = recent.length ? '<div style="margin-top:4px;">'
-    + '<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:8px;">Recent</div>'
-    + recent.map((f,i) => '<div class="food-search-result recent-food-row" data-ri="' + i + '" style="padding:10px 0;">'
-      + '<div style="flex:1;min-width:0;"><div class="food-log-name">' + f.name + '</div>'
-      + '<div class="food-log-meta">' + (f.brand||'') + '</div></div>'
-      + '<div style="text-align:right;flex-shrink:0;margin-left:12px;">'
-      + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:16px;font-weight:700;color:var(--acc);">' + (f.cal||'—') + '</div>'
-      + '<div style="font-size:10px;color:var(--t3);">kcal</div>'
-      + '</div></div>'
-    ).join('')
-    + '</div>' : '';
+  const recent = getRecentFoods();
+  const recentHTML = recent.length
+    ? '<div class="card">'
+      + '<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:10px;">Recent Foods</div>'
+      + recent.map((f,i) => (
+        '<div class="food-search-result recent-food-row" data-ri="' + i + '" style="padding:10px 0;">'
+        + '<div style="flex:1;min-width:0;"><div class="food-log-name">' + f.name + '</div>'
+        + '<div class="food-log-meta">' + (f.brand||'') + (f.servingUnit ? ' · ' + f.servingUnit : '') + '</div></div>'
+        + '<div style="text-align:right;flex-shrink:0;margin-left:10px;">'
+        + '<div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;color:var(--acc);">' + (f.cal||'—') + '</div>'
+        + '<div style="font-size:10px;color:var(--t3);">kcal · ' + (f.g||0) + 'g P</div>'
+        + '</div></div>'
+      )).join('')
+      + '</div>'
+    : '';
 
   const calLeft = Math.max(foodGoals.calories - totals.calories, 0);
   const calOver = totals.calories > foodGoals.calories;
@@ -4073,43 +4447,46 @@ function renderFood() {
   scroll.innerHTML =
     // Date nav
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">'
-    + '<button onclick="shiftFoodDate(-1)" style="width:34px;height:34px;border-radius:50%;background:var(--s2);border:none;color:var(--t1);cursor:pointer;font-size:18px;">‹</button>'
+    + '<button onclick="shiftFoodDate(-1)" style="width:34px;height:34px;border-radius:50%;background:var(--s2);border:none;color:var(--t1);cursor:pointer;font-size:20px;touch-action:manipulation;">‹</button>'
     + '<div style="font-size:13px;font-weight:500;color:var(--t2);">' + displayDate + '</div>'
-    + '<button onclick="shiftFoodDate(1)" style="width:34px;height:34px;border-radius:50%;background:var(--s2);border:none;color:var(--t1);cursor:pointer;font-size:18px;' + (isToday?'opacity:.3;cursor:not-allowed;':'') + '" ' + (isToday?'disabled':'') + '>›</button>'
+    + '<button onclick="shiftFoodDate(1)" style="width:34px;height:34px;border-radius:50%;background:var(--s2);border:none;color:var(--t1);cursor:pointer;font-size:20px;touch-action:manipulation;' + (isToday?'opacity:.3;':'' ) + '" ' + (isToday?'disabled':'') + '>›</button>'
     + '</div>'
-    // Macro rings
+    // Macro summary card
     + '<div class="card" style="padding:16px;">'
     + '<div style="text-align:center;margin-bottom:12px;">'
-    + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:36px;font-weight:800;color:' + (calOver?'var(--red)':'var(--acc)') + ';">' + totals.calories + '</div>'
-    + '<div style="font-size:12px;color:var(--t2);">' + (calOver ? 'over goal by ' + (totals.calories-foodGoals.calories) : calLeft + ' kcal remaining') + ' · goal: ' + foodGoals.calories + '</div>'
+    + '<div style="font-family:Barlow Condensed,sans-serif;font-size:48px;font-weight:800;color:' + (calOver?'var(--red)':'var(--acc)') + ';line-height:1;">' + totals.calories + '</div>'
+    + '<div style="font-size:12px;color:var(--t2);">' + (calOver ? '⚠️ ' + (totals.calories - foodGoals.calories) + ' over goal' : calLeft + ' kcal remaining') + ' · goal: ' + foodGoals.calories + '</div>'
     + '</div>'
     + '<div class="macro-ring-row">'
     + ring(totals.protein, foodGoals.protein, '#47b4ff', 'Protein', 'g')
-    + ring(totals.carbs, foodGoals.carbs, '#ffb347', 'Carbs', 'g')
-    + ring(totals.fat, foodGoals.fat, '#ff9147', 'Fat', 'g')
+    + ring(totals.carbs,   foodGoals.carbs,   '#ffb347', 'Carbs',   'g')
+    + ring(totals.fat,     foodGoals.fat,     '#ff9147', 'Fat',     'g')
     + '</div>'
     + '</div>'
-    // Action buttons
-    + '<button class="scan-btn" onclick="openScanner()">📷 Scan Barcode</button>'
+    // Actions
+    + '<button class="scan-btn" onclick="openScanner()" style="touch-action:manipulation;">📷 Scan Barcode</button>'
     + '<div style="display:flex;gap:8px;margin-bottom:14px;">'
-    + '<button class="btn btn-ghost" style="flex:1;" onclick="showFoodSearchSheet()">🔍 Search food</button>'
-    + '<button class="btn btn-ghost" style="flex:1;" onclick="showManualFoodSheet()">✏️ Log manually</button>'
+    + '<button class="btn btn-ghost" style="flex:1;touch-action:manipulation;" onclick="showFoodSearchSheet()">🔍 Search</button>'
+    + '<button class="btn btn-ghost" style="flex:1;touch-action:manipulation;" onclick="showManualFoodSheet()">✏️ Manual</button>'
     + '</div>'
     // Food log
     + '<div class="card">'
     + (items.length
       ? mealSections
-        + '<div style="border-top:1px solid var(--b1);padding-top:10px;margin-top:4px;display:flex;justify-content:space-between;">'
-        + '<div style="font-size:12px;font-weight:600;color:var(--t2);">Total</div>'
-        + '<div style="font-size:12px;font-weight:600;">' + Math.round(totals.protein) + 'g P · ' + Math.round(totals.carbs) + 'g C · ' + Math.round(totals.fat) + 'g F</div>'
+        + '<div style="border-top:1px solid var(--b1);padding-top:10px;display:flex;justify-content:space-between;font-size:12px;">'
+        + '<span style="font-weight:600;color:var(--t2);">Daily total</span>'
+        + '<span style="font-weight:600;">' + Math.round(totals.protein) + 'g P · ' + Math.round(totals.carbs) + 'g C · ' + Math.round(totals.fat) + 'g F</span>'
         + '</div>'
-      : '<div style="text-align:center;padding:24px 0;color:var(--t3);">Nothing logged yet today.<br>Scan a barcode or search to add food.</div>')
+      : '<div style="text-align:center;padding:28px 0;color:var(--t3);line-height:1.8;">Nothing logged yet.<br>Scan a barcode or search to add food.</div>')
     + '</div>'
-    + (recentHTML ? '<div class="card">' + recentHTML + '</div>' : '');
+    + recentHTML;
 
   // Wire delete buttons
   scroll.querySelectorAll('.food-del-btn').forEach(btn => {
-    btn.addEventListener('click', () => deleteFoodItem(parseInt(btn.dataset.didx)));
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      deleteFoodItem(parseInt(btn.dataset.didx), foodViewDate);
+    });
   });
 
   // Wire recent food clicks
@@ -4117,7 +4494,7 @@ function renderFood() {
   scroll.querySelectorAll('.recent-food-row').forEach(el => {
     el.addEventListener('click', () => {
       const f = window._recentFoods[parseInt(el.dataset.ri)];
-      if(f) showAddFoodConfirmSheet(f);
+      if(f) { f.per100 = f.per100 || {cal:f.cal,protein:f.g,carbs:f.carbs,fat:f.fat}; showAddFoodConfirmSheet(f); }
     });
   });
 }
@@ -4125,8 +4502,7 @@ function renderFood() {
 function shiftFoodDate(dir) {
   const d = new Date(foodViewDate + 'T12:00:00');
   d.setDate(d.getDate() + dir);
-  const today = new Date();
-  if(d > today) return;
+  if(d > new Date()) return;
   foodViewDate = d.toISOString().split('T')[0];
   renderFood();
 }
@@ -4134,5 +4510,6 @@ function shiftFoodDate(dir) {
 
 checkOnboarding();
 </script>
+
 </body>
 </html>
