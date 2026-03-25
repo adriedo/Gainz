@@ -984,9 +984,29 @@ function toggleVibration(){
   localStorage.setItem('gainz_vibration',JSON.stringify(vibrationEnabled));
   document.querySelectorAll('.vibration-toggle-btn').forEach(b=>{
     b.classList.toggle('on',vibrationEnabled);
-    b.textContent=vibrationEnabled?'📳 Vibrate on':'📴 Vibrate off';
+    b.textContent=vibrationEnabled?'📳 Alert on':'📴 Alert off';
   });
-  if(vibrationEnabled&&navigator.vibrate){navigator.vibrate(100);}
+  if(vibrationEnabled){hapticAlert();}
+}
+// hapticAlert: vibrate on Android; flash screen on iOS (Safari blocks navigator.vibrate entirely)
+function hapticAlert(){
+  if(navigator.vibrate){
+    navigator.vibrate([200,100,200]);
+  } else {
+    const f=document.createElement('div');
+    f.style.cssText='position:fixed;inset:0;background:#E8FF47;opacity:0;z-index:99999;pointer-events:none;transition:opacity 80ms ease-in-out;';
+    document.body.appendChild(f);
+    requestAnimationFrame(()=>{
+      f.style.opacity='0.18';
+      setTimeout(()=>{f.style.opacity='0';
+        setTimeout(()=>{f.style.opacity='0.12';
+          setTimeout(()=>{f.style.opacity='0';
+            setTimeout(()=>f.remove(),120);
+          },80);
+        },80);
+      },80);
+    });
+  }
 }
 
 // Cache preferred voice - iOS loads voices async
@@ -1628,7 +1648,7 @@ function startRest(sec,name,setIdx){
   const vb=ov.querySelector('.voice-toggle-btn');
   if(vb){vb.classList.toggle('on',voiceEnabled);vb.textContent=voiceEnabled?'🔊 Voice on':'🔇 Voice off';}
   const vibb=ov.querySelector('.vibration-toggle-btn');
-  if(vibb){vibb.classList.toggle('on',vibrationEnabled);vibb.textContent=vibrationEnabled?'📳 Vibrate on':'📴 Vibrate off';}
+  if(vibb){vibb.classList.toggle('on',vibrationEnabled);vibb.textContent=vibrationEnabled?'📳 Alert on':'📴 Alert off';}
   restInterval=setInterval(()=>{
     restRem--;
     const se=eid('rs'),rpe=eid('rp');
@@ -1642,7 +1662,7 @@ function startRest(sec,name,setIdx){
       clearInterval(restInterval);
       eid('rest-ov-el')?.remove();
       beep();
-      if(vibrationEnabled&&navigator.vibrate){navigator.vibrate([200,100,200]);}
+      if(vibrationEnabled){hapticAlert();}
       if(voiceEnabled){
         // Say "Go!" then chain directly into the full next-set announcement
         const nextMsg=buildNextSetAnnouncement(_announceName,_announceSetIdx);
