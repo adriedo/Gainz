@@ -14,6 +14,7 @@
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20512%20512'%3E%3Crect%20width%3D'512'%20height%3D'512'%20rx%3D'112'%20fill%3D'%230a0a0a'%2F%3E%3Ctext%20x%3D'256'%20y%3D'360'%20text-anchor%3D'middle'%20font-size%3D'300'%20fill%3D'%23e8ff47'%3E%F0%9F%92%AA%3C%2Ftext%3E%3C%2Fsvg%3E">
 <title>Gainz</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <style>
 /* ─── PWA INSTALL BANNER ─────────────────────────────────────────────────── */
 #pwa-banner{
@@ -259,6 +260,27 @@ label{font-size:12px;color:var(--t2);display:block;margin-bottom:5px;}
 .trend-bar.recent{background:#555;}
 .trend-date{font-size:9px;color:var(--t3);text-align:center;white-space:nowrap;overflow:hidden;width:100%;}
 .trend-val-lbl{font-size:9px;color:var(--t2);text-align:center;}
+/* STRENGTH CHART SHEET */
+.ex-chart-sheet{background:var(--s1);border-radius:20px 20px 0 0;padding:16px 16px calc(24px + var(--sb));max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;width:100%;}
+.ex-chart-sheet::-webkit-scrollbar{display:none;}
+.chart-range-row{display:flex;gap:6px;margin-bottom:16px;}
+.chart-range-btn{flex:1;padding:7px 0;border-radius:10px;border:1px solid var(--b2);background:none;color:var(--t2);font-size:12px;font-weight:600;font-family:DM Sans,sans-serif;cursor:pointer;touch-action:manipulation;}
+.chart-range-btn.on{background:var(--acc);border-color:var(--acc);color:#000;}
+.chart-metric-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.chart-metric{background:var(--s2);border-radius:12px;padding:12px 10px;text-align:center;}
+.chart-metric-val{font-family:Barlow Condensed,sans-serif;font-size:24px;font-weight:700;line-height:1;}
+.chart-metric-val.acc{color:var(--acc);}
+.chart-metric-val.grn{color:var(--grn);}
+.chart-metric-val.red{color:var(--red);}
+.chart-metric-lbl{font-size:10px;color:var(--t2);margin-top:3px;line-height:1.2;}
+.chart-canvas-wrap{background:var(--s2);border-radius:14px;padding:14px 10px 10px;margin-bottom:16px;position:relative;}
+.chart-mode-row{display:flex;gap:6px;margin-bottom:12px;}
+.chart-mode-btn{padding:5px 12px;border-radius:20px;border:1px solid var(--b2);background:none;color:var(--t2);font-size:11px;font-weight:600;font-family:DM Sans,sans-serif;cursor:pointer;}
+.chart-mode-btn.on{background:rgba(232,255,71,.15);border-color:var(--acc);color:var(--acc);}
+.pr-badge-inline{font-size:9px;background:rgba(232,255,71,.18);color:var(--acc);padding:2px 6px;border-radius:10px;font-weight:700;vertical-align:middle;margin-left:5px;letter-spacing:.03em;}
+.chart-history-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--b1);}
+.chart-history-row:last-child{border-bottom:none;}
+.chart-no-data{text-align:center;padding:40px 20px;color:var(--t3);font-size:14px;}
 /* CALENDAR */
 .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
 .cal-nav-btn{width:34px;height:34px;border-radius:50%;background:var(--s2);border:none;color:var(--t1);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;}
@@ -1379,7 +1401,7 @@ function getTarget(name){
 
 function computePRs(){const b={};wkLog.forEach(e=>{const m=Math.max(...e.sets.map(s=>parseFloat(s.weight)||0));if(m>0&&(!b[e.exercise]||m>b[e.exercise]))b[e.exercise]=m;});return b;}
 function typeColor(t){return`var(--${t||'full'})`;}
-function closeSheets(){document.querySelectorAll('.sheet-bg').forEach(el=>el.remove());}
+function closeSheets(){document.querySelectorAll('.sheet-bg').forEach(el=>el.remove());if(_exChartInstance){_exChartInstance.destroy();_exChartInstance=null;}}
 
 function findEx(name){
   const ovStr=localStorage.getItem('gainz_ex_overrides');
@@ -2185,31 +2207,288 @@ function renderPRs(prs){
   return'<div class="card">'+rows+'</div>';
 }
 
+/* ── Epley estimated 1RM: weight × (1 + reps/30) ── */
+function calc1RM(weight,reps){
+  if(!weight||!reps)return 0;
+  if(reps===1)return weight;
+  return Math.round(weight*(1+reps/30));
+}
+
+let _exChartInstance=null; // track Chart.js instance for cleanup
+
 function showExTrend(name){
   const entries=wkLog.filter(e=>e.exercise===name).sort((a,b)=>new Date(a.date)-new Date(b.date));
   if(!entries.length)return;
-  const points=entries.map(e=>({date:new Date(e.date),maxW:Math.max(...e.sets.map(s=>parseFloat(s.weight)||0)),maxR:Math.max(...e.sets.map(s=>parseInt(s.reps)||0)),totalVol:e.sets.reduce((a,s)=>(a+(parseFloat(s.weight)||0)*(parseInt(s.reps)||0)),0)})).filter(p=>p.maxW>0);
-  const allPR=Math.max(...points.map(p=>p.maxW));
-  const recent=points.slice(-8);const ex=findEx(name);
-  const chartMax=Math.max(...recent.map(p=>p.maxW),1);
-  const bars=recent.map((p,i)=>{const isPR=p.maxW===allPR;const pct=Math.round(p.maxW/chartMax*100);const d=p.date.toLocaleDateString('en-US',{month:'numeric',day:'numeric'});return`<div class="trend-col"><div class="trend-val-lbl">${p.maxW}</div><div class="trend-bar-outer"><div class="trend-bar${isPR?' is-pr':i===recent.length-1?' recent':''}" style="height:${pct}%"></div></div><div class="trend-date">${d}</div></div>`;}).join('');
-  const first=points[0],last2=points[points.length-1];
-  const volChange=points.length>1?Math.round(((last2.maxW-first.maxW)/first.maxW)*100):0;
-  const bg=document.createElement('div');bg.className='sheet-bg';
-  bg.innerHTML=`<div class="sheet">
+
+  // Build session-level data points
+  const allPoints=entries.map(e=>{
+    const validSets=e.sets.filter(s=>parseFloat(s.weight)>0&&parseInt(s.reps)>0);
+    if(!validSets.length)return null;
+    const best1RM=Math.max(...validSets.map(s=>calc1RM(parseFloat(s.weight),parseInt(s.reps))));
+    const maxW=Math.max(...validSets.map(s=>parseFloat(s.weight)));
+    const maxR=Math.max(...validSets.map(s=>parseInt(s.reps)));
+    const vol=e.sets.reduce((a,s)=>(a+(parseFloat(s.weight)||0)*(parseInt(s.reps)||0)),0);
+    return{date:new Date(e.date),best1RM,maxW,maxR,vol};
+  }).filter(Boolean);
+
+  if(!allPoints.length)return;
+
+  const ex=findEx(name);
+  const allTimePR1RM=Math.max(...allPoints.map(p=>p.best1RM));
+  const allTimePRW=Math.max(...allPoints.map(p=>p.maxW));
+
+  // Range state
+  let chartRange='8w'; // '8w','3m','all'
+  let chartMode='1rm';  // '1rm','weight','vol'
+
+  function getFilteredPoints(){
+    const now=new Date();
+    if(chartRange==='8w'){const cutoff=new Date(now-56*864e5);return allPoints.filter(p=>p.date>=cutoff);}
+    if(chartRange==='3m'){const cutoff=new Date(now-91*864e5);return allPoints.filter(p=>p.date>=cutoff);}
+    return allPoints;
+  }
+
+  function buildChartData(pts){
+    const yKey=chartMode==='1rm'?'best1RM':chartMode==='weight'?'maxW':'vol';
+    const labels=pts.map(p=>p.date.toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+    const values=pts.map(p=>p[yKey]);
+    const prVal=Math.max(...values);
+    const pointColors=pts.map(p=>p[yKey]===prVal&&prVal>0?'#E8FF47':'rgba(255,255,255,0.25)');
+    const pointRadii=pts.map(p=>p[yKey]===prVal&&prVal>0?6:3);
+    const pointBorderColors=pts.map(p=>p[yKey]===prVal&&prVal>0?'#000':'rgba(255,255,255,0.4)');
+    return{labels,values,pointColors,pointRadii,pointBorderColors,prVal,yKey};
+  }
+
+  function renderChart(pts){
+    if(_exChartInstance){_exChartInstance.destroy();_exChartInstance=null;}
+    const canvas=document.getElementById('ex-chart-canvas');
+    if(!canvas)return;
+    const ctx=canvas.getContext('2d');
+    const {labels,values,pointColors,pointRadii,pointBorderColors}=buildChartData(pts);
+    const minVal=Math.min(...values);
+    const maxVal=Math.max(...values);
+    const pad=(maxVal-minVal)*0.15||maxVal*0.1||10;
+    const yLabel=chartMode==='1rm'?'Est. 1RM (lbs)':chartMode==='weight'?'Max Weight (lbs)':'Volume (lbs)';
+
+    // Gradient fill
+    const grad=ctx.createLinearGradient(0,0,0,canvas.offsetHeight||200);
+    grad.addColorStop(0,'rgba(232,255,71,0.18)');
+    grad.addColorStop(1,'rgba(232,255,71,0.0)');
+
+    _exChartInstance=new Chart(ctx,{
+      type:'line',
+      data:{
+        labels,
+        datasets:[{
+          data:values,
+          borderColor:'#E8FF47',
+          borderWidth:2,
+          backgroundColor:grad,
+          fill:true,
+          tension:0.35,
+          pointBackgroundColor:pointColors,
+          pointBorderColor:pointBorderColors,
+          pointBorderWidth:1.5,
+          pointRadius:pointRadii,
+          pointHoverRadius:8,
+          pointHoverBackgroundColor:'#E8FF47',
+          pointHoverBorderColor:'#000',
+          pointHoverBorderWidth:2,
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        animation:{duration:400,easing:'easeOutQuart'},
+        plugins:{
+          legend:{display:false},
+          tooltip:{
+            backgroundColor:'#1e1e1e',
+            borderColor:'rgba(255,255,255,0.12)',
+            borderWidth:1,
+            titleColor:'#888',
+            bodyColor:'#f0f0f0',
+            padding:10,
+            callbacks:{
+              title:ctx2=>[ctx2[0].label],
+              label:ctx2=>{
+                const i=ctx2.dataIndex;
+                const p=pts[i];
+                const lines=[`  ${yLabel.split(' (')[0]}: ${ctx2.parsed.y}`];
+                if(chartMode==='1rm')lines.push(`  Best set: ${p.maxW} lbs × ${p.maxR} reps`);
+                if(ctx2.parsed.y===Math.max(...values)&&values.length>1)lines.push('  ⭐ PR');
+                return lines;
+              }
+            }
+          }
+        },
+        scales:{
+          x:{
+            grid:{color:'rgba(255,255,255,0.05)',drawBorder:false},
+            ticks:{color:'#4a4a4a',font:{size:10,family:'DM Sans'},maxRotation:0,autoSkip:true,maxTicksLimit:6},
+            border:{display:false}
+          },
+          y:{
+            min:Math.max(0,minVal-pad),
+            max:maxVal+pad,
+            grid:{color:'rgba(255,255,255,0.06)',drawBorder:false},
+            ticks:{color:'#4a4a4a',font:{size:10,family:'DM Sans'},maxTicksLimit:5,
+              callback:v=>chartMode==='vol'?(v>=1000?(v/1000).toFixed(1)+'k':v):v
+            },
+            border:{display:false}
+          }
+        }
+      }
+    });
+  }
+
+  function computeMetrics(pts){
+    if(!pts.length)return{pr:0,change:0,sessions:0};
+    const yKey=chartMode==='1rm'?'best1RM':chartMode==='weight'?'maxW':'vol';
+    const vals=pts.map(p=>p[yKey]);
+    const pr=Math.max(...vals);
+    const change=pts.length>1?Math.round(((vals[vals.length-1]-vals[0])/Math.max(vals[0],1))*100):0;
+    return{pr,change,sessions:pts.length};
+  }
+
+  function updateRangeButtons(){
+    ['8w','3m','all'].forEach(r=>{
+      const btn=document.getElementById('cr-'+r);
+      if(btn)btn.className='chart-range-btn'+(chartRange===r?' on':'');
+    });
+  }
+  function updateModeButtons(){
+    ['1rm','weight','vol'].forEach(m=>{
+      const btn=document.getElementById('cm-'+m);
+      if(btn)btn.className='chart-mode-btn'+(chartMode===m?' on':'');
+    });
+  }
+  function updateMetrics(pts){
+    const {pr,change,sessions}=computeMetrics(pts);
+    const prEl=document.getElementById('cm-pr-val');
+    const chEl=document.getElementById('cm-ch-val');
+    const seEl=document.getElementById('cm-se-val');
+    if(prEl)prEl.textContent=chartMode==='vol'?(pr>=1000?(pr/1000).toFixed(1)+'k':pr):pr;
+    if(chEl){
+      chEl.textContent=(change>0?'+':'')+change+'%';
+      chEl.className='chart-metric-val '+(change>0?'grn':change<0?'red':'');
+    }
+    if(seEl)seEl.textContent=sessions;
+  }
+  function updateHistoryList(pts){
+    const el=document.getElementById('ex-history-list');
+    if(!el)return;
+    const yKey=chartMode==='1rm'?'best1RM':chartMode==='weight'?'maxW':'vol';
+    const prVal=Math.max(...pts.map(p=>p[yKey]),0);
+    el.innerHTML=pts.slice().reverse().slice(0,20).map(p=>{
+      const isPR=p[yKey]===prVal&&prVal>0;
+      const valStr=chartMode==='vol'
+        ?(p.vol>=1000?(p.vol/1000).toFixed(1)+'k lbs vol':p.vol+' lbs vol')
+        :chartMode==='1rm'
+          ?`${p.best1RM} lbs 1RM`
+          :`${p.maxW} lbs × ${p.maxR}`;
+      return`<div class="chart-history-row">
+        <div>
+          <div style="font-size:13px;color:var(--t2)">${p.date.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div>
+          ${chartMode==='1rm'?`<div style="font-size:11px;color:var(--t3);margin-top:2px">Best set: ${p.maxW} lbs × ${p.maxR} reps</div>`:''}
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="font-size:14px;font-weight:600">${valStr}</div>
+          ${isPR?'<span class="pr-badge-inline">PR</span>':''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function refreshAll(){
+    const pts=getFilteredPoints();
+    updateRangeButtons();
+    updateModeButtons();
+    updateMetrics(pts);
+    updateHistoryList(pts);
+    // Slight defer so canvas is in DOM
+    requestAnimationFrame(()=>renderChart(pts));
+  }
+
+  // Build the sheet
+  const bg=document.createElement('div');
+  bg.className='sheet-bg';
+  bg.id='ex-chart-sheet-bg';
+  const modeLabel=chartMode==='1rm'?'Est. 1RM':chartMode==='weight'?'Max Weight':'Volume';
+  bg.innerHTML=`<div class="ex-chart-sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-title">${name}</div>
-    <div class="sheet-sub">${ex?.muscle||''} · ${points.length} sessions logged</div>
-    <div class="trend-wrap">
-      <div class="trend-meta"><div><div class="trend-pr-lbl">All-time PR</div><div class="trend-pr-val">${allPR} lbs</div></div>${volChange!==0?`<div style="font-size:12px;color:${volChange>0?'var(--grn)':'var(--red)'}">${volChange>0?'↑':'↓'} ${Math.abs(volChange)}% from first session</div>`:''}</div>
-      <div class="trend-bars">${bars||'<div class="empty" style="padding:10px">Not enough data</div>'}</div>
-      <div style="font-size:10px;color:var(--t3);margin-top:6px;text-align:center">Max weight per session · last ${recent.length} sessions</div>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;">
+      <div>
+        <div class="sheet-title" style="font-size:26px;">${name}</div>
+        <div class="sheet-sub" style="margin-bottom:0">${ex?.muscle||''} · ${allPoints.length} sessions total</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;margin-left:12px;">
+        <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">All-time PR</div>
+        <div style="font-family:Barlow Condensed,sans-serif;font-size:28px;font-weight:800;color:var(--acc);line-height:1">${allTimePR1RM}<span style="font-size:14px;font-weight:600;opacity:.7;margin-left:2px;">lbs</span></div>
+        <div style="font-size:10px;color:var(--t3);">est. 1RM · ${allTimePRW} lbs best set</div>
+      </div>
     </div>
-    ${points.length>1?`<div style="margin-top:12px"><div style="font-size:11px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Session history</div>${points.slice().reverse().slice(0,10).map(p=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--b1)"><div style="font-size:13px;color:var(--t2)">${p.date.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div><div style="display:flex;gap:12px;align-items:center"><div style="font-size:13px;font-weight:600">${p.maxW} lbs × ${p.maxR} reps</div>${p.maxW===allPR?'<span style="font-size:10px;background:rgba(232,255,71,.15);color:var(--acc);padding:2px 7px;border-radius:20px;font-weight:600">PR</span>':''}</div></div>`).join('')}</div>`:''}
-    <button class="btn btn-ghost btn-full" style="margin-top:14px" onclick="closeSheets()">Close</button>
+
+    <div class="chart-range-row" style="margin-top:14px;">
+      <button id="cr-8w" class="chart-range-btn on" onclick="_exChartRange('8w')">8 Weeks</button>
+      <button id="cr-3m" class="chart-range-btn" onclick="_exChartRange('3m')">3 Months</button>
+      <button id="cr-all" class="chart-range-btn" onclick="_exChartRange('all')">All Time</button>
+    </div>
+
+    <div class="chart-metric-row">
+      <div class="chart-metric">
+        <div class="chart-metric-val acc" id="cm-pr-val">—</div>
+        <div class="chart-metric-lbl" id="cm-pr-lbl">Period PR</div>
+      </div>
+      <div class="chart-metric">
+        <div class="chart-metric-val" id="cm-ch-val">—</div>
+        <div class="chart-metric-lbl">Change</div>
+      </div>
+      <div class="chart-metric">
+        <div class="chart-metric-val" id="cm-se-val">—</div>
+        <div class="chart-metric-lbl">Sessions</div>
+      </div>
+    </div>
+
+    <div class="chart-canvas-wrap">
+      <div class="chart-mode-row">
+        <button id="cm-1rm" class="chart-mode-btn on" onclick="_exChartMode('1rm')">Est. 1RM</button>
+        <button id="cm-weight" class="chart-mode-btn" onclick="_exChartMode('weight')">Max Weight</button>
+        <button id="cm-vol" class="chart-mode-btn" onclick="_exChartMode('vol')">Volume</button>
+      </div>
+      <div style="height:180px;position:relative;"><canvas id="ex-chart-canvas"></canvas></div>
+      <div style="font-size:10px;color:var(--t3);margin-top:8px;text-align:center">
+        ⭐ Yellow dot = PR · Est. 1RM uses Epley formula: weight × (1 + reps/30)
+      </div>
+    </div>
+
+    <div style="font-size:11px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Session History</div>
+    <div id="ex-history-list"></div>
+
+    <button class="btn btn-ghost btn-full" style="margin-top:16px" onclick="document.getElementById('ex-chart-sheet-bg').remove();if(_exChartInstance){_exChartInstance.destroy();_exChartInstance=null;}">Close</button>
   </div>`;
-  bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
+
+  // Close on backdrop tap
+  bg.addEventListener('click',e=>{
+    if(e.target===bg){
+      bg.remove();
+      if(_exChartInstance){_exChartInstance.destroy();_exChartInstance=null;}
+    }
+  });
+
+  // Expose toggle handlers globally for inline onclick
+  window._exChartRange=function(r){chartRange=r;refreshAll();};
+  window._exChartMode=function(m){
+    chartMode=m;
+    const mLabels={'1rm':'Est. 1RM (lbs)',weight:'Max Weight (lbs)',vol:'Volume'};
+    const prLbl=document.getElementById('cm-pr-lbl');
+    if(prLbl)prLbl.textContent='Period '+Object.entries({'1rm':'1RM',weight:'Weight',vol:'Volume'}).find(([k])=>k===m)?.[1]||'PR';
+    refreshAll();
+  };
+
   document.body.appendChild(bg);
+  // Init after DOM inserted
+  requestAnimationFrame(()=>refreshAll());
 }
 
 
