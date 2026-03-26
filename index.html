@@ -1087,6 +1087,8 @@ function toggleVoice(){
     // Header btn shows icon only, overlay btn shows full label
     b.textContent=b.id==='wk-voice-btn'?(voiceEnabled?'🔊':'🔇'):(voiceEnabled?'🔊 Voice on':'🔇 Voice off');
   });
+  // iOS Safari: unlock speech synthesis inside this tap handler (direct user gesture)
+  if(voiceEnabled) unlockSpeech();
 }
 
 // Cache preferred voice - iOS loads voices async
@@ -1112,14 +1114,17 @@ let _speechUnlocked = false;
 function unlockSpeech() {
   if(_speechUnlocked || !window.speechSynthesis) return;
   _speechUnlocked = true;
-  // Speak silent utterance to unlock audio session
-  const u = new SpeechSynthesisUtterance(' ');
-  u.volume = 0; u.rate = 2;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance('ready');
+  u.volume = 0.01; // non-zero so iOS honours it, inaudible in practice
+  u.rate = 10;     // fires and ends instantly
+  u.pitch = 1;
+  // No voice assignment — use iOS default so unlock fires immediately
   window.speechSynthesis.speak(u);
 }
-// Unlock on ANY user interaction
-['touchstart','touchend','click','keydown'].forEach(evt =>
-  document.addEventListener(evt, () => unlockSpeech(), {once:false, passive:true})
+// Best-effort fallback — guaranteed path is toggleVoice() and launchWk()
+['touchend','click'].forEach(evt =>
+  document.addEventListener(evt, () => { if(!_speechUnlocked) unlockSpeech(); }, {passive:true})
 );
 
 // speak queue to prevent overlap on iOS
@@ -1129,6 +1134,8 @@ let _isSpeaking = false;
 function speak(text, onDone) {
   if(!voiceEnabled) { onDone&&onDone(); return; }
   if(!window.speechSynthesis) { onDone&&onDone(); return; }
+  // iOS: calls from timers are silently blocked until unlocked by a user gesture
+  if(!_speechUnlocked) { onDone&&onDone(); return; }
   _speakQueue.push({text, onDone});
   if(!_isSpeaking) _processSpeak();
 }
@@ -1177,11 +1184,11 @@ function _processSpeak() {
     setTimeout(_processSpeak, 100);
   };
 
-  // Small delay before speaking helps iOS process the cancel
+  // iOS needs a longer pause after cancel() before speak() is reliable
   setTimeout(() => {
     if(window.speechSynthesis.paused) window.speechSynthesis.resume();
     window.speechSynthesis.speak(u);
-  }, 50);
+  }, 120);
 }
 
 // Build the "rest over" announcement based on what's coming next
@@ -1567,7 +1574,9 @@ function launchWk(dayId){
   // Init voice button state
   const vb=eid('wk-voice-btn');
   if(vb){vb.classList.toggle('on',voiceEnabled);vb.textContent=voiceEnabled?'🔊':'🔇';}
-  // Voice is unlocked globally on any tap; ensure voices are loaded
+  // This function is called from a tap — use the gesture to unlock speech on iOS
+  if(voiceEnabled) unlockSpeech();
+  getPreferredVoice();
   getPreferredVoice();
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
   eid('s-workout').classList.add('on');
