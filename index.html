@@ -176,6 +176,22 @@ label{font-size:12px;color:var(--t2);display:block;margin-bottom:5px;}
 .finish-ttl em{color:var(--acc);font-style:normal;}
 .finish-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;}
 .finish-stat{background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:16px;}
+.pwn-card{background:var(--s1);border:1px solid rgba(71,180,255,.3);border-radius:16px;padding:16px;width:100%;text-align:left;}
+.pwn-title{font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:800;text-transform:uppercase;color:var(--blu);margin-bottom:3px;}
+.pwn-sub{font-size:12px;color:var(--t2);margin-bottom:12px;line-height:1.4;}
+.pwn-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.pwn-log{padding:11px;border-radius:11px;background:var(--blu);color:#000;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif;touch-action:manipulation;}
+.pwn-skip{padding:11px;border-radius:11px;background:none;border:1px solid var(--b2);color:var(--t2);font-size:13px;font-weight:500;cursor:pointer;font-family:DM Sans,sans-serif;touch-action:manipulation;}
+/* PERI-WORKOUT GUIDE SHEET */
+.pwg-macro-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px;}
+.pwg-macro-box{background:var(--s2);border-radius:12px;padding:12px 8px;text-align:center;}
+.pwg-macro-val{font-family:Barlow Condensed,sans-serif;font-size:26px;font-weight:800;line-height:1;}
+.pwg-macro-lbl{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-top:3px;}
+.pwg-meal{background:var(--s2);border-radius:12px;padding:12px 14px;margin-bottom:8px;}
+.pwg-meal-name{font-size:14px;font-weight:600;margin-bottom:2px;}
+.pwg-meal-macros{font-size:11px;color:var(--t2);}
+.pwg-section-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin:14px 0 8px;}
+.pre-wk-pill{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:4px 9px;border-radius:20px;background:rgba(255,179,71,.12);color:var(--org);border:none;cursor:pointer;font-family:DM Sans,sans-serif;touch-action:manipulation;margin-top:6px;}
 .fs-val{font-family:Barlow Condensed,sans-serif;font-size:34px;font-weight:800;color:var(--acc);}
 .fs-lbl{font-size:12px;color:var(--t2);margin-top:2px;}
 /* SHEET */
@@ -1558,7 +1574,10 @@ function renderHome(){
         <div><div class="dc-title bc">${d.day} — ${d.name}</div><div class="dc-sub">${d.focus}</div></div>
         <div class="arrow-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
       </div>
-      <div class="dc-meta"><span class="tag tag-${d.type}">${d.exercises.length} exercises</span><span class="tag tag-${d.type}">${d.exercises.reduce((a,n)=>{const e=findEx(n);return a+e.sets;},0)} sets</span></div>
+      <div class="dc-meta">
+        <span class="tag tag-${d.type}">${d.exercises.length} exercises</span><span class="tag tag-${d.type}">${d.exercises.reduce((a,n)=>{const e=findEx(n);return a+e.sets;},0)} sets</span>
+        <button class="pre-wk-pill" onclick="event.stopPropagation();showPeriWorkoutGuideSheet('pre')">🍌 Pre-workout</button>
+      </div>
     </div>`).join('');
   eid('cardio-grid').innerHTML=CARDIO_SESSIONS.map(c=>{
     const last=getLastCardio(c.id);
@@ -1807,7 +1826,15 @@ function finishWorkout(){
       <div class="finish-stat"><div class="fs-val">${entries.length}</div><div class="fs-lbl">Exercises</div></div>
       <div class="finish-stat"><div class="fs-val bc" style="font-size:22px">${day.name}</div><div class="fs-lbl">Day type</div></div>
     </div>
-    <button class="btn btn-acc btn-full" onclick="goHome()">Back to home</button>
+    <div class="pwn-card">
+      <div class="pwn-title">💧 Post-Workout Meal</div>
+      <div class="pwn-sub">Hit protein + carbs within 60 min to maximise recovery and muscle synthesis.</div>
+      <div class="pwn-btns">
+        <button class="pwn-log" onclick="goHomeAndLogPostWorkout()">Log it now</button>
+        <button class="pwn-skip" onclick="showPeriWorkoutGuideSheet('post')">What should I eat?</button>
+      </div>
+      <button onclick="goHome()" style="margin-top:10px;width:100%;padding:10px;border-radius:11px;background:none;border:1px solid var(--b1);color:var(--t3);font-size:12px;font-weight:500;cursor:pointer;font-family:DM Sans,sans-serif;">Back to home</button>
+    </div>
   </div>`;
 }
 
@@ -1819,6 +1846,163 @@ function goHome(){
   eid('s-home').classList.add('on');
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
   document.querySelector('#s-home .nb')?.classList.add('on');
+}
+
+function goHomeAndLogPostWorkout(){
+  activeWk=null;wkDone=false;
+  eid('wk-hdr').style.display='';eid('wk-footer').style.display='';eid('wk-bar').style.width='0%';
+  // Navigate to Food screen with Post-workout pre-selected
+  _addingForMeal='Post-workout';
+  foodViewDate=todayKey();
+  renderFood();
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  eid('s-food').classList.add('on');
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  // Highlight the Food nav button
+  document.querySelectorAll('.nb').forEach(b=>{
+    if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'food'"))b.classList.add('on');
+  });
+  // Auto-open the food search sheet after a short paint delay
+  setTimeout(()=>showFoodSearchSheet(),120);
+}
+
+// ─── PERI-WORKOUT NUTRITION GUIDE ────────────────────────────────────────────
+function calcPeriWorkoutTargets(type){
+  // Pull from live goals; fall back to sensible defaults
+  const goals=_tdeeGoals||calcTDEEGoals(null);
+  const dailyP  = goals ? goals.protein  : proteinGoal||160;
+  const dailyCal = goals ? goals.calories : 2200;
+  const dailyC   = goals ? goals.carbs    : 200;
+  const goal     = goals ? goals.goal     : 'general';
+
+  if(type==='pre'){
+    // Pre: carb-forward for fuel + moderate protein. ~15–20% of daily calories.
+    // Fat kept low — slows gastric emptying, blunts energy availability.
+    const carbsG  = goal==='fat_loss' ? Math.round(dailyC*0.15) : Math.round(dailyC*0.20);
+    const proteinG = Math.round(dailyP*0.18);
+    const cal      = Math.round(carbsG*4 + proteinG*4);
+    return {cal, protein:proteinG, carbs:carbsG, fat:0, timing:'60–90 min before'};
+  } else {
+    // Post: protein-forward for synthesis + carbs to replenish glycogen. ~25% daily protein.
+    // Fat minimal — slows amino acid absorption.
+    const proteinG = goal==='fat_loss' ? Math.round(dailyP*0.28) : Math.round(dailyP*0.25);
+    const carbsG   = goal==='fat_loss' ? Math.round(dailyC*0.12) : Math.round(dailyC*0.22);
+    const cal      = Math.round(proteinG*4 + carbsG*4);
+    return {cal, protein:proteinG, carbs:carbsG, fat:0, timing:'Within 60 min after'};
+  }
+}
+
+function showPeriWorkoutGuideSheet(type){
+  const isPost = type==='post';
+  const t = calcPeriWorkoutTargets(type);
+  const goals = _tdeeGoals||calcTDEEGoals(null);
+  const goal  = goals ? goals.goal : 'general';
+
+  // Meal suggestions keyed by [type][goal]
+  const MEALS = {
+    pre: {
+      fat_loss:[
+        {name:'Rice cake + turkey slices',      macros:'~25g C · 20g P · 2g F'},
+        {name:'Banana + low-fat Greek yogurt',   macros:'~30g C · 17g P · 0g F'},
+        {name:'Oats + egg whites + berries',     macros:'~35g C · 18g P · 2g F'},
+        {name:'Sourdough toast + cottage cheese',macros:'~28g C · 16g P · 3g F'},
+      ],
+      muscle:[
+        {name:'White rice + chicken breast',     macros:'~60g C · 35g P · 4g F'},
+        {name:'Bagel + peanut butter + banana',  macros:'~65g C · 14g P · 10g F'},
+        {name:'Oats + whey protein + honey',     macros:'~55g C · 30g P · 4g F'},
+        {name:'Pasta + lean turkey mince',       macros:'~70g C · 32g P · 5g F'},
+      ],
+      strength:[
+        {name:'Rice + salmon',                   macros:'~50g C · 35g P · 10g F'},
+        {name:'Potato + eggs + salsa',           macros:'~45g C · 18g P · 8g F'},
+        {name:'Sourdough + tuna + avocado',      macros:'~40g C · 28g P · 12g F'},
+        {name:'Oats + whole eggs',               macros:'~40g C · 20g P · 12g F'},
+      ],
+      general:[
+        {name:'Banana + peanut butter toast',    macros:'~45g C · 10g P · 8g F'},
+        {name:'Smoothie: banana, oats, milk',    macros:'~55g C · 12g P · 4g F'},
+        {name:'Greek yogurt + granola',          macros:'~40g C · 17g P · 5g F'},
+        {name:'Rice cakes + almond butter',      macros:'~30g C · 6g P · 8g F'},
+      ],
+    },
+    post: {
+      fat_loss:[
+        {name:'Grilled chicken + steamed broccoli',    macros:'~8g C · 40g P · 4g F'},
+        {name:'Egg whites + spinach omelette',         macros:'~4g C · 30g P · 2g F'},
+        {name:'Protein shake + apple',                 macros:'~25g C · 30g P · 2g F'},
+        {name:'Cottage cheese + cucumber',             macros:'~8g C · 25g P · 2g F'},
+        {name:'Tuna + rice cakes',                     macros:'~22g C · 28g P · 2g F'},
+      ],
+      muscle:[
+        {name:'Chicken + white rice + banana',         macros:'~75g C · 40g P · 4g F'},
+        {name:'Protein shake + oats + honey',          macros:'~65g C · 35g P · 5g F'},
+        {name:'Salmon + sweet potato',                 macros:'~50g C · 35g P · 10g F'},
+        {name:'Greek yogurt + granola + berries',      macros:'~55g C · 20g P · 5g F'},
+        {name:'Steak + jacket potato',                 macros:'~60g C · 38g P · 12g F'},
+      ],
+      strength:[
+        {name:'Beef + rice + veg',                     macros:'~55g C · 40g P · 12g F'},
+        {name:'Whey shake + banana + milk',            macros:'~50g C · 35g P · 4g F'},
+        {name:'Eggs + toast + orange juice',           macros:'~45g C · 24g P · 10g F'},
+        {name:'Turkey sandwich on wholegrain',         macros:'~45g C · 32g P · 8g F'},
+        {name:'Cottage cheese + fruit + rice cakes',   macros:'~40g C · 28g P · 2g F'},
+      ],
+      general:[
+        {name:'Protein shake + banana',                macros:'~35g C · 28g P · 3g F'},
+        {name:'Chicken + sweet potato',                macros:'~40g C · 35g P · 5g F'},
+        {name:'Greek yogurt + berries',                macros:'~25g C · 17g P · 0g F'},
+        {name:'Tuna + rice + salad',                   macros:'~45g C · 30g P · 3g F'},
+        {name:'Egg wrap + salsa',                      macros:'~30g C · 22g P · 8g F'},
+      ],
+    },
+  };
+
+  const meals = MEALS[type][goal] || MEALS[type]['general'];
+  const hasGoals = !!(goals);
+
+  const bg=document.createElement('div');bg.className='sheet-bg';
+
+  const macroSection = hasGoals
+    ? '<div class="pwg-section-lbl">Your target for this meal</div>'
+      +'<div class="pwg-macro-row">'
+      +'<div class="pwg-macro-box"><div class="pwg-macro-val" style="color:var(--acc);">~'+t.cal+'</div><div class="pwg-macro-lbl">kcal</div></div>'
+      +'<div class="pwg-macro-box"><div class="pwg-macro-val" style="color:#47b4ff;">'+t.protein+'g</div><div class="pwg-macro-lbl">protein</div></div>'
+      +'<div class="pwg-macro-box"><div class="pwg-macro-val" style="color:#ffb347;">'+t.carbs+'g</div><div class="pwg-macro-lbl">carbs</div></div>'
+      +'</div>'
+      +'<div style="font-size:11px;color:var(--t3);margin-bottom:14px;">⏱ '+t.timing+' · Keep fat low — it slows absorption</div>'
+    : '<div style="font-size:12px;color:var(--t2);margin-bottom:14px;padding:10px;background:var(--s2);border-radius:10px;">Complete the Macro Profile in the Food tab to get personalised targets.</div>';
+
+  const mealRows = meals.map(m=>
+    '<div class="pwg-meal" onclick="closeSheets();_addingForMeal=&quot;'+(isPost?'Post-workout':'Pre-workout')+'&quot;;showFoodSearchSheet()">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;">'
+    +'<div class="pwg-meal-name">'+m.name+'</div>'
+    +'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>'
+    +'</div>'
+    +'<div class="pwg-meal-macros">'+m.macros+'</div>'
+    +'</div>'
+  ).join('');
+
+  const why = isPost
+    ? 'Muscles are most receptive to nutrients in the 30–90 min post-workout window. Protein drives muscle protein synthesis; carbs replenish glycogen and spike insulin to drive amino acids into muscle.'
+    : 'Training on the right fuel means more reps at higher intensity. Carbs are the primary fuel for resistance training. Protein before means amino acids are already circulating during your session.';
+
+  bg.innerHTML='<div class="sheet">'
+    +'<div class="sheet-handle"></div>'
+    +'<div class="sheet-title">'+(isPost?'🍗 Post-Workout Nutrition':'🍌 Pre-Workout Nutrition')+'</div>'
+    +'<div class="sheet-sub">'+why+'</div>'
+    +macroSection
+    +'<div class="pwg-section-lbl">Meal ideas for your goal</div>'
+    +mealRows
+    +(isPost
+      ?'<button class="btn btn-acc btn-full" style="margin-top:14px;" onclick="closeSheets();goHomeAndLogPostWorkout()">Log post-workout meal</button>'
+      :'<button class="btn btn-acc btn-full" style="margin-top:14px;" onclick="closeSheets();_addingForMeal=\'Pre-workout\';nav(\'food\',document.querySelector(\'.nb[onclick*=food]\'))">Log pre-workout meal</button>'
+    )
+    +'<button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="closeSheets()">Close</button>'
+    +'</div>';
+
+  bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
+  document.body.appendChild(bg);
 }
 
 // ─── FEATURE 1: Discard activity (also from mid-workout) ─────────────────────
