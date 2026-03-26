@@ -335,6 +335,47 @@ label{font-size:12px;color:var(--t2);display:block;margin-bottom:5px;}
 .onboard-next{width:100%;padding:14px;border-radius:14px;background:var(--acc);color:#000;font-size:16px;font-weight:700;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;}
 .onboard-next:disabled{background:var(--s2);color:var(--t3);cursor:not-allowed;}
 .onboard-back{background:none;border:none;color:var(--t2);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;padding:10px 0;display:block;text-align:center;width:100%;margin-top:6px;}
+/* MACRO PROFILE QUESTIONNAIRE */
+.mq-screen{position:fixed;inset:0;background:var(--bg);z-index:600;display:flex;flex-direction:column;overflow:hidden;padding-top:env(safe-area-inset-top,0px);}
+.mq-header{display:flex;align-items:center;gap:12px;padding:14px 20px 10px;flex-shrink:0;}
+.mq-back{width:36px;height:36px;border-radius:50%;background:var(--s2);border:none;color:var(--t1);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;touch-action:manipulation;}
+.mq-progress{flex:1;height:3px;background:var(--s2);border-radius:2px;overflow:hidden;}
+.mq-progress-bar{height:100%;background:var(--acc);transition:width .4s ease;border-radius:2px;}
+.mq-step-label{font-size:11px;color:var(--t3);white-space:nowrap;font-weight:500;}
+.mq-scroll{flex:1;overflow-y:auto;padding:24px 20px 32px;-webkit-overflow-scrolling:touch;}
+.mq-scroll::-webkit-scrollbar{display:none;}
+.mq-section-tag{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--acc);text-transform:uppercase;margin-bottom:6px;}
+.mq-q{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:800;text-transform:uppercase;line-height:1.1;margin-bottom:6px;color:var(--t1);}
+.mq-q em{color:var(--acc);font-style:normal;}
+.mq-why{font-size:12px;color:var(--t3);margin-bottom:22px;line-height:1.5;font-style:italic;}
+.mq-options{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.mq-option{background:var(--s1);border:2px solid var(--b1);border-radius:14px;padding:14px 16px;cursor:pointer;transition:border-color .15s,background .15s;text-align:left;touch-action:manipulation;}
+.mq-option:active{transform:scale(.98);}
+.mq-option.sel{border-color:var(--acc);background:rgba(232,255,71,.06);}
+.mq-option-title{font-size:14px;font-weight:600;color:var(--t1);}
+.mq-option-sub{font-size:11px;color:var(--t2);margin-top:2px;}
+.mq-chips{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.mq-chip{background:var(--s1);border:2px solid var(--b1);border-radius:12px;padding:11px 8px;cursor:pointer;text-align:center;font-size:13px;font-weight:500;color:var(--t2);transition:all .15s;touch-action:manipulation;}
+.mq-chip.sel{border-color:var(--acc);background:rgba(232,255,71,.08);color:var(--acc);}
+.mq-fields{display:grid;gap:10px;margin-bottom:16px;}
+.mq-fields.two{grid-template-columns:1fr 1fr;}
+.mq-field label{display:block;font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+.mq-field input,.mq-field select{width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:10px;color:var(--t1);font-family:'DM Sans',sans-serif;font-size:16px;padding:11px 12px;outline:none;-webkit-appearance:none;}
+.mq-field input:focus,.mq-field select:focus{border-color:var(--acc);}
+.mq-field select option{background:var(--s2);}
+.mq-slider-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.mq-slider{flex:1;-webkit-appearance:none;appearance:none;height:6px;background:var(--s3);border-radius:3px;outline:none;}
+.mq-slider::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--acc);cursor:pointer;}
+.mq-slider-val{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;color:var(--acc);min-width:40px;text-align:right;}
+.mq-footer{padding:14px 20px calc(14px + env(safe-area-inset-bottom,0px));background:var(--bg);border-top:1px solid var(--b1);flex-shrink:0;display:flex;flex-direction:column;gap:8px;}
+.mq-next{width:100%;padding:14px;border-radius:14px;background:var(--acc);color:#000;font-size:16px;font-weight:700;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;touch-action:manipulation;}
+.mq-skip{background:none;border:none;color:var(--t3);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;padding:4px 0;text-align:center;touch-action:manipulation;}
+.mq-result-card{background:var(--s1);border:1px solid var(--b2);border-radius:16px;padding:18px;margin-bottom:14px;}
+.mq-result-row{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--b1);}
+.mq-result-row:last-child{border-bottom:none;}
+.mq-result-label{font-size:13px;color:var(--t2);}
+.mq-result-val{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:var(--acc);}
+.mq-result-unit{font-size:11px;color:var(--t3);margin-left:3px;}
 /* FOOD TRACKER */
 .food-tab-row{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px;}
 .food-tab-row::-webkit-scrollbar{display:none;}
@@ -621,6 +662,22 @@ input[type="date"]{color-scheme:dark;color:var(--t1);background:var(--s2);}
   <div style="padding:16px;background:rgba(0,0,0,.8);">
     <div id="scanner-status" style="text-align:center;color:rgba(255,255,255,.6);font-size:13px;margin-bottom:12px;">Scanning…</div>
     <button onclick="closeScanner()" style="width:100%;padding:12px;border-radius:12px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif;">Cancel</button>
+  </div>
+</div>
+
+<!-- MACRO PROFILE QUESTIONNAIRE OVERLAY -->
+<div id="macro-profile-screen" class="mq-screen" style="display:none;">
+  <div class="mq-header">
+    <button class="mq-back" id="mq-back-btn" onclick="mqBack()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="mq-progress"><div class="mq-progress-bar" id="mq-bar" style="width:0%"></div></div>
+    <div class="mq-step-label" id="mq-step-label">1 / 10</div>
+  </div>
+  <div class="mq-scroll" id="mq-scroll"></div>
+  <div class="mq-footer">
+    <button class="mq-next" id="mq-next-btn" onclick="mqNext()">Continue</button>
+    <button class="mq-skip" id="mq-skip-btn" onclick="mqSkip()">Skip this section</button>
   </div>
 </div>
 
@@ -975,8 +1032,6 @@ function toggleVoice(){
     // Header btn shows icon only, overlay btn shows full label
     b.textContent=b.id==='wk-voice-btn'?(voiceEnabled?'🔊':'🔇'):(voiceEnabled?'🔊 Voice on':'🔇 Voice off');
   });
-  // iOS Safari: unlock speech synthesis inside this tap handler (direct user gesture)
-  if(voiceEnabled) unlockSpeech();
 }
 
 // Cache preferred voice - iOS loads voices async
@@ -997,29 +1052,19 @@ if(window.speechSynthesis){
   getPreferredVoice(); // trigger initial load
 }
 
-// iOS requires speech to be triggered within a direct user gesture at least once.
-// Key iOS Safari constraints:
-//   1. speak() must be called synchronously within a touchstart/touchend/click handler
-//   2. volume:0 utterances are ignored by iOS — use a tiny but non-zero volume
-//   3. Empty or whitespace-only text is ignored — use a real word at high rate
+// iOS requires speech to be triggered within a user gesture at least once.
 let _speechUnlocked = false;
 function unlockSpeech() {
   if(_speechUnlocked || !window.speechSynthesis) return;
   _speechUnlocked = true;
-  window.speechSynthesis.cancel(); // clear any stale queue first
-  const u = new SpeechSynthesisUtterance('ready');
-  u.volume = 0.01; // non-zero so iOS honours it, inaudible in practice
-  u.rate = 10;     // speak instantly so user never hears it
-  u.pitch = 1;
-  // Don't assign a voice here — let iOS use its default so unlock fires immediately
-  // (custom voice lookup can be async and miss the gesture window)
+  // Speak silent utterance to unlock audio session
+  const u = new SpeechSynthesisUtterance(' ');
+  u.volume = 0; u.rate = 2;
   window.speechSynthesis.speak(u);
 }
-// Best-effort unlock on any tap/touch (catches cases where voice was already on
-// when the workout launched). The *guaranteed* unlock path is toggleVoice() above,
-// which is called synchronously from the button's onclick.
-['touchend','click'].forEach(evt =>
-  document.addEventListener(evt, () => { if(!_speechUnlocked) unlockSpeech(); }, {passive:true})
+// Unlock on ANY user interaction
+['touchstart','touchend','click','keydown'].forEach(evt =>
+  document.addEventListener(evt, () => unlockSpeech(), {once:false, passive:true})
 );
 
 // speak queue to prevent overlap on iOS
@@ -1029,10 +1074,6 @@ let _isSpeaking = false;
 function speak(text, onDone) {
   if(!voiceEnabled) { onDone&&onDone(); return; }
   if(!window.speechSynthesis) { onDone&&onDone(); return; }
-  // iOS Safari: if the audio session hasn't been unlocked by a direct user gesture
-  // yet, calls from timer callbacks will be silently blocked. Skip cleanly rather
-  // than queue up utterances that will never fire.
-  if(!_speechUnlocked) { onDone&&onDone(); return; }
   _speakQueue.push({text, onDone});
   if(!_isSpeaking) _processSpeak();
 }
@@ -1081,11 +1122,11 @@ function _processSpeak() {
     setTimeout(_processSpeak, 100);
   };
 
-  // iOS needs a longer pause after cancel() before speak() is reliable
+  // Small delay before speaking helps iOS process the cancel
   setTimeout(() => {
     if(window.speechSynthesis.paused) window.speechSynthesis.resume();
     window.speechSynthesis.speak(u);
-  }, 120);
+  }, 50);
 }
 
 // Build the "rest over" announcement based on what's coming next
@@ -1471,9 +1512,7 @@ function launchWk(dayId){
   // Init voice button state
   const vb=eid('wk-voice-btn');
   if(vb){vb.classList.toggle('on',voiceEnabled);vb.textContent=voiceEnabled?'🔊':'🔇';}
-  // This function is called from a tap event — use the gesture to unlock speech on iOS
-  if(voiceEnabled) unlockSpeech();
-  // Ensure voices are loaded for when we need them
+  // Voice is unlocked globally on any tap; ensure voices are loaded
   getPreferredVoice();
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
   eid('s-workout').classList.add('on');
@@ -3289,16 +3328,22 @@ function finishOnboarding() {
   program = built.days;
   saveProg();
 
-  // Set protein goal from bodyweight
-  if (a.bodyweight) {
-    const bw = parseFloat(a.bodyweight) || 160;
-    proteinGoal = Math.round(bw * 0.85); // ~0.85g/lb for muscle building
-    localStorage.setItem('gainz_protein_goal', String(proteinGoal));
-  }
-
-  // Save user profile
+  // Save user profile first (calcTDEEGoals reads it)
   localStorage.setItem('gainz_profile', JSON.stringify(a));
   localStorage.setItem(OB_KEY, '1');
+
+  // Calculate TDEE-based food goals from the new profile and save them
+  // Only set if user hasn't already overridden — but since this is first run, always set
+  const tdee = calcTDEEGoals(a);
+  if (tdee) {
+    foodGoals = {calories: tdee.calories, protein: tdee.protein, carbs: tdee.carbs, fat: tdee.fat};
+    _tdeeGoals = tdee;
+    _goalsOverridden = false;
+    saveFoodGoals(false);
+  }
+
+  // Keep protein goal in sync with TDEE calculation (supersedes the old bw × 0.85 approach)
+  syncProteinGoal();
 
   // Hide onboarding, show app
   const ob = document.getElementById('onboarding');
@@ -3575,10 +3620,734 @@ function checkOnboarding() {
 
 // Extend protein log to store full macros per item
 // {name, brand, g(protein), cal, carbs, fat, serving, servingUnit, barcode, meal, time}
-let foodGoals = JSON.parse(localStorage.getItem('gainz_food_goals') || 'null') || {
-  calories: 2000, protein: proteinGoal||160, carbs: 200, fat: 65
-};
-function saveFoodGoals(){ localStorage.setItem('gainz_food_goals', JSON.stringify(foodGoals)); }
+
+// ─── TDEE ENGINE ─────────────────────────────────────────────────────────────
+// Calculates personalised calorie + macro targets from onboarding profile.
+// Inputs available: bodyweight (lbs), goal, daysPerWeek, weightUnit.
+// We use a lean-mass-forward estimate (no height/age/sex collected in onboarding)
+// based on the "bodyweight × factor" method used by most online TDEE tools:
+//   BMR estimate  ≈  bodyweight_lbs × 11  (conservative avg for mixed population)
+//   TDEE          =  BMR × activity_multiplier
+//   Calorie goal  =  TDEE ± goal_adjustment
+
+// ─── MACRO PROFILE QUESTIONNAIRE ────────────────────────────────────────────
+// Stored separately from gainz_profile (onboarding) so the two don't conflict.
+// gainz_macro_profile holds all 10 sections. calcTDEEGoals uses it if present,
+// otherwise falls back to gainz_profile for backwards compatibility.
+
+const MQ_KEY = 'gainz_macro_profile';
+
+function loadMacroProfile() {
+  return JSON.parse(localStorage.getItem(MQ_KEY) || 'null');
+}
+function saveMacroProfile(p) {
+  localStorage.setItem(MQ_KEY, JSON.stringify(p));
+}
+
+// ─── FULL TDEE CALCULATOR ────────────────────────────────────────────────────
+// Uses Mifflin-St Jeor BMR when age/sex/height available (from macro profile),
+// otherwise falls back to the bodyweight-×-11 estimate from onboarding data.
+
+function calcTDEEGoals(profile) {
+  // Prefer detailed macro profile over onboarding profile
+  const mp = loadMacroProfile();
+  const src = mp || profile;
+  if (!src) return null;
+
+  let bmr = 0;
+  let bwLbs = 0;
+
+  if (mp && mp.weight && mp.height_cm && mp.age && mp.sex) {
+    // Mifflin-St Jeor (metric inputs)
+    const weightKg = mp.weight_unit === 'lbs' ? mp.weight * 0.453592 : mp.weight;
+    const heightCm = mp.height_cm;
+    bwLbs = mp.weight_unit === 'lbs' ? parseFloat(mp.weight) : parseFloat(mp.weight) * 2.20462;
+    bmr = mp.sex === 'female'
+      ? (10 * weightKg) + (6.25 * heightCm) - (5 * mp.age) - 161
+      : (10 * weightKg) + (6.25 * heightCm) - (5 * mp.age) + 5;
+  } else if (src.bodyweight) {
+    // Legacy estimate: bodyweight × 11
+    bwLbs = parseFloat(src.bodyweight) || 0;
+    if (bwLbs < 50) return null;
+    bmr = bwLbs * 11;
+  } else {
+    return null;
+  }
+
+  // ── Activity multiplier ──────────────────────────────────────────────────
+  // Blend job activity, steps, and training frequency for a realistic TDEE
+  let actMult = 1.2; // sedentary baseline
+
+  if (mp) {
+    // Job type contribution
+    const jobMult = {desk: 0, standing: 0.05, active: 0.12, very_active: 0.2}[mp.job] || 0;
+
+    // Steps contribution (each 2k steps ≈ +0.03 above sedentary, capped)
+    const steps = parseInt(mp.steps) || 5000;
+    const stepMult = Math.min((steps / 2000) * 0.03, 0.18);
+
+    // Training frequency contribution
+    const trainDays = parseInt(mp.train_days) || parseInt((profile||{}).daysPerWeek) || 3;
+    const trainIntensity = {light: 0.05, moderate: 0.1, hard: 0.15, very_hard: 0.2}[mp.train_intensity] || 0.1;
+    const trainMult = Math.min(trainDays * trainIntensity * 0.4, 0.3);
+
+    actMult = 1.2 + jobMult + stepMult + trainMult;
+  } else {
+    // Fallback: use daysPerWeek from onboarding
+    const days = parseInt((src||{}).daysPerWeek) || 4;
+    actMult = days <= 3 ? 1.375 : days <= 4 ? 1.465 : days <= 5 ? 1.55 : 1.65;
+  }
+
+  const tdee = Math.round(bmr * actMult);
+
+  // ── Goal & deficit/surplus ───────────────────────────────────────────────
+  const goal = (mp && mp.goal) || (src.goal) || 'general';
+  const aggression = (mp && mp.aggression) || 'moderate';
+
+  let calAdjust = 0;
+  if (goal === 'fat_loss' || goal === 'recomp') {
+    calAdjust = aggression === 'aggressive' ? -600
+              : aggression === 'moderate'   ? -350
+              : -150; // gentle
+  } else if (goal === 'muscle' || goal === 'strength') {
+    calAdjust = aggression === 'aggressive' ? 350
+              : aggression === 'moderate'   ? 200
+              : 100;
+  } else if (goal === 'performance') {
+    calAdjust = 100; // slight surplus for fuel
+  }
+  // maintenance / general = 0
+
+  const targetCal = Math.max(1200, Math.round(tdee + calAdjust));
+
+  // ── Protein ──────────────────────────────────────────────────────────────
+  // Higher for fat loss (muscle sparing), lifting, or when user is tracking precisely
+  let proteinFactor = 0.8; // default g/lb
+  if (goal === 'fat_loss' || goal === 'recomp') proteinFactor = 1.0;
+  else if (goal === 'muscle' || goal === 'strength') proteinFactor = 0.9;
+  if (mp && mp.lifts) proteinFactor = Math.max(proteinFactor, 0.9);
+  if (mp && mp.precision === 'exact') proteinFactor += 0.05;
+
+  // Apply body fat adjustment: lean mass needs more per lb
+  if (mp && mp.bf_pct && mp.bf_pct > 0) {
+    const leanFraction = 1 - (mp.bf_pct / 100);
+    // Increase factor if very lean, reduce if high bf (more fat = less metabolic demand)
+    if (leanFraction > 0.85) proteinFactor = Math.min(proteinFactor + 0.05, 1.1);
+    else if (leanFraction < 0.7) proteinFactor = Math.max(proteinFactor - 0.05, 0.7);
+  }
+
+  const proteinG = Math.round(bwLbs * proteinFactor);
+  const proteinCal = proteinG * 4;
+
+  // ── Fat ──────────────────────────────────────────────────────────────────
+  // Endurance athletes need fewer fat %, strength athletes moderate
+  let fatPct = 0.27;
+  if (mp && mp.train_type === 'endurance') fatPct = 0.22;
+  else if (goal === 'fat_loss') fatPct = 0.28;
+  const fatG = Math.round((targetCal * fatPct) / 9);
+  const fatCal = fatG * 9;
+
+  // ── Carbs: fill the rest ─────────────────────────────────────────────────
+  const carbCal = Math.max(0, targetCal - proteinCal - fatCal);
+  const carbG = Math.round(carbCal / 4);
+
+  // ── Precision note ───────────────────────────────────────────────────────
+  // If user said they're eyeballing, round to nearest 5g for cleaner targets
+  const precision = mp ? mp.precision : 'daily';
+  const round5 = (v) => precision === 'rough' ? Math.round(v / 5) * 5 : v;
+
+  return {
+    calories: round5(targetCal),
+    protein:  round5(proteinG),
+    carbs:    round5(carbG),
+    fat:      round5(fatG),
+    tdee:     tdee,
+    bmr:      Math.round(bmr),
+    goal,
+    aggression,
+    _calculated: true,
+    _source: mp ? 'macro_profile' : 'onboarding',
+  };
+}
+
+// ─── QUESTIONNAIRE STEPS ─────────────────────────────────────────────────────
+
+const MQ_STEPS = [
+  {
+    id: 'biometrics',
+    section: '1 — The Basics',
+    q: 'Age, sex, <em>height & weight</em>',
+    why: 'These four numbers anchor your metabolism. If they\'re wrong, your calorie target is wrong and everything downstream breaks.',
+    type: 'biometrics',
+    skippable: false,
+  },
+  {
+    id: 'bodyfat',
+    section: '2 — Body Composition',
+    q: 'Estimated <em>body fat %</em>',
+    why: 'Lean mass is metabolically active. High body fat means your TDEE is lower than your scale weight suggests.',
+    type: 'bodyfat',
+    skippable: true,
+  },
+  {
+    id: 'goal',
+    section: '3 — Goal Clarity',
+    q: 'What exactly <em>do you want?</em>',
+    why: '"Lose weight" is useless. A 300 kcal deficit vs 800 kcal deficit leads to completely different macros.',
+    type: 'single',
+    key: 'goal',
+    options: [
+      {value:'fat_loss',    title:'Lose fat',           sub:'Priority is dropping body fat while preserving muscle'},
+      {value:'muscle',      title:'Build muscle',       sub:'Caloric surplus, progressive overload focus'},
+      {value:'recomp',      title:'Recomp',             sub:'Lose fat and gain muscle simultaneously — slow but possible'},
+      {value:'performance', title:'Performance',        sub:'Fuel athletic performance — endurance, strength, sport'},
+      {value:'maintenance', title:'Maintain',           sub:'Keep current weight and body composition'},
+    ],
+    skippable: false,
+  },
+  {
+    id: 'aggression',
+    section: '3 — Goal Clarity',
+    q: 'How <em>aggressive?</em>',
+    why: '"I want abs in 8 weeks" ≠ "I want sustainable fat loss." Aggression determines your deficit or surplus size.',
+    type: 'single',
+    key: 'aggression',
+    options: [
+      {value:'gentle',     title:'Gentle',     sub:'Slow & sustainable — minimal hunger, muscle preservation priority'},
+      {value:'moderate',   title:'Moderate',   sub:'Standard approach — good progress without excessive sacrifice'},
+      {value:'aggressive', title:'Aggressive', sub:'Faster results — higher hunger risk, requires strict adherence'},
+    ],
+    skippable: false,
+  },
+  {
+    id: 'activity',
+    section: '4 — Activity Level',
+    q: 'Job type & <em>daily steps</em>',
+    why: '"Moderately active" is one of the biggest lies in fitness. This is the single biggest variable in your TDEE.',
+    type: 'activity',
+    skippable: false,
+  },
+  {
+    id: 'training',
+    section: '5 — Training',
+    q: 'How do you <em>train?</em>',
+    why: 'Macros support what you\'re asking your body to do. Lifting shifts protein up. Endurance shifts carbs up.',
+    type: 'training',
+    skippable: true,
+  },
+  {
+    id: 'constraints',
+    section: '6 — Dietary Constraints',
+    q: 'Any <em>dietary constraints?</em>',
+    why: 'Perfect macros you can\'t follow = useless. This shapes what a realistic plan looks like for you.',
+    type: 'chips',
+    key: 'constraints',
+    options: [
+      {value:'vegetarian', label:'Vegetarian'},
+      {value:'vegan',      label:'Vegan'},
+      {value:'gluten',     label:'Gluten-free'},
+      {value:'dairy',      label:'Dairy-free'},
+      {value:'halal',      label:'Halal'},
+      {value:'kosher',     label:'Kosher'},
+      {value:'none',       label:'None'},
+    ],
+    skippable: true,
+  },
+  {
+    id: 'adherence',
+    section: '7 — Adherence Risk',
+    q: 'Your biggest <em>struggle?</em>',
+    why: 'Macros should be engineered around your failure points, not ideal scenarios. This affects how we set targets.',
+    type: 'chips',
+    key: 'struggles',
+    options: [
+      {value:'hunger',    label:'Hunger'},
+      {value:'cravings',  label:'Cravings'},
+      {value:'social',    label:'Social eating'},
+      {value:'latenight', label:'Late-night eating'},
+      {value:'travel',    label:'Travel / chaos'},
+      {value:'weekends',  label:'Weekends'},
+      {value:'none',      label:'None really'},
+    ],
+    skippable: true,
+  },
+  {
+    id: 'history',
+    section: '8 — Biofeedback & History',
+    q: 'What\'s worked <em>before?</em>',
+    why: 'Two people with identical stats can need different macro setups based on their history and response.',
+    type: 'history',
+    skippable: true,
+  },
+  {
+    id: 'precision',
+    section: '10 — Precision Level',
+    q: 'How <em>precisely</em> will you track?',
+    why: 'No point giving you 178g protein / 63g fat / 212g carbs if you\'re eyeballing. Sets how specific your targets are.',
+    type: 'single',
+    key: 'precision',
+    options: [
+      {value:'exact', title:'Weigh everything',     sub:'Scale, MyFitnessPal-level precision — you\'re serious'},
+      {value:'daily', title:'Track daily totals',   sub:'Log meals, don\'t weigh — good middle ground'},
+      {value:'rough', title:'Rough guidelines only', sub:'Ballpark macros, no daily tracking'},
+    ],
+    skippable: false,
+  },
+];
+
+let mqStep = 0;
+let mqAnswers = {};
+let mqOnDone = null; // callback when questionnaire completes
+
+function openMacroQuestionnaire(onDone) {
+  // Pre-fill from existing macro profile if present
+  const existing = loadMacroProfile();
+  mqAnswers = existing ? {...existing} : {};
+  // Clear raw snapshot fields — they'll be re-populated from stored height_cm on render
+  delete mqAnswers._htFt; delete mqAnswers._htIn; delete mqAnswers._htCm;
+  mqOnDone = onDone || null;
+  mqStep = 0;
+  document.getElementById('macro-profile-screen').style.display = 'flex';
+  renderMqStep();
+}
+
+function closeMacroQuestionnaire() {
+  document.getElementById('macro-profile-screen').style.display = 'none';
+}
+
+// Save whatever is currently typed into the biometrics fields before re-rendering.
+// Called by the unit-toggle buttons so typed values survive the re-render.
+function mqSnapshotBiometrics() {
+  const age    = document.getElementById('mq-age');
+  const weight = document.getElementById('mq-weight');
+  const sex    = document.getElementById('mq-sex');
+  const htFt   = document.getElementById('mq-ht-ft');
+  const htIn   = document.getElementById('mq-ht-in');
+  const htCm   = document.getElementById('mq-ht-cm');
+  if (age    && age.value)    mqAnswers.age    = parseInt(age.value)      || mqAnswers.age;
+  if (weight && weight.value) mqAnswers.weight = parseFloat(weight.value) || mqAnswers.weight;
+  if (sex    && sex.value)    mqAnswers.sex    = sex.value;
+  if (htFt   && htFt.value)   mqAnswers._htFt  = parseInt(htFt.value)     || 0;
+  if (htIn   && htIn.value)   mqAnswers._htIn  = parseInt(htIn.value)     || 0;
+  if (htCm   && htCm.value)   mqAnswers._htCm  = parseInt(htCm.value)     || 0;
+}
+
+function mqBack() {
+  if (mqStep === 0) { closeMacroQuestionnaire(); return; }
+  mqStep--;
+  renderMqStep();
+}
+
+function mqSkip() {
+  const step = MQ_STEPS[mqStep];
+  // Mark as skipped so we don't use partial data
+  if (step.key) delete mqAnswers[step.key];
+  mqAdvance();
+}
+
+function mqNext() {
+  const step = MQ_STEPS[mqStep];
+  if (!mqValidateStep(step)) return;
+  mqAdvance();
+}
+
+function mqAdvance() {
+  mqStep++;
+  if (mqStep >= MQ_STEPS.length) {
+    mqFinish();
+  } else {
+    renderMqStep();
+  }
+}
+
+function mqValidateStep(step) {
+  if (step.type === 'biometrics') {
+    const age    = parseInt(document.getElementById('mq-age')?.value);
+    const weight = parseFloat(document.getElementById('mq-weight')?.value);
+    // Always read sex from the DOM element, not from mqAnswers, to avoid stale state
+    const sexEl  = document.getElementById('mq-sex');
+    const sex    = sexEl ? sexEl.value : mqAnswers.sex;
+    const wUnit  = mqAnswers.weight_unit || 'lbs';
+    const hUnit  = mqAnswers.height_unit || 'imperial';
+    const htFt   = parseInt(document.getElementById('mq-ht-ft')?.value || 0);
+    const htIn   = parseInt(document.getElementById('mq-ht-in')?.value || 0);
+    const htCm   = parseInt(document.getElementById('mq-ht-cm')?.value || 0);
+
+    if (!age || age < 10 || age > 100)         { alert('Please enter a valid age.'); return false; }
+    if (!weight || weight < 20)                 { alert('Please enter your weight.'); return false; }
+    if (!sex)                                   { alert('Please select a sex.'); return false; }
+    if (hUnit === 'imperial' && (htFt < 3 || htFt > 8)) { alert('Please enter a valid height.'); return false; }
+    if (hUnit === 'metric'   && (htCm < 100 || htCm > 250)) { alert('Please enter a valid height in cm.'); return false; }
+
+    mqAnswers.age         = age;
+    mqAnswers.weight      = weight;
+    mqAnswers.weight_unit = wUnit;
+    mqAnswers.sex         = sex;
+    mqAnswers.height_unit = hUnit;
+    mqAnswers.height_cm   = hUnit === 'imperial'
+      ? Math.round((htFt * 30.48) + (htIn * 2.54))
+      : htCm;
+    return true;
+  }
+  if (step.type === 'bodyfat') {
+    // Optional — slider value already stored in mqAnswers.bf_pct via oninput
+    return true;
+  }
+  if (step.type === 'single') {
+    if (!mqAnswers[step.key]) { alert('Please make a selection.'); return false; }
+    return true;
+  }
+  if (step.type === 'activity') {
+    const steps = parseInt(document.getElementById('mq-steps')?.value);
+    if (!mqAnswers.job) { alert('Please select your job type.'); return false; }
+    if (!steps || steps < 0) { alert('Please enter daily steps.'); return false; }
+    mqAnswers.steps = steps;
+    return true;
+  }
+  if (step.type === 'training') {
+    // Optional section — all fields are already stored via event handlers
+    return true;
+  }
+  if (step.type === 'chips') {
+    if (!mqAnswers[step.key] || !mqAnswers[step.key].length) { alert('Select at least one option.'); return false; }
+    return true;
+  }
+  if (step.type === 'history') {
+    // Optional — textarea
+    const v = document.getElementById('mq-history-notes')?.value || '';
+    mqAnswers.history_notes = v.trim();
+    return true;
+  }
+  return true;
+}
+
+function mqFinish() {
+  saveMacroProfile(mqAnswers);
+
+  // Recalculate food goals from the new profile
+  const newGoals = calcTDEEGoals(null); // calcTDEEGoals reads MQ_KEY internally
+  if (newGoals) {
+    _tdeeGoals = newGoals;
+    if (!_goalsOverridden) {
+      foodGoals = {calories: newGoals.calories, protein: newGoals.protein, carbs: newGoals.carbs, fat: newGoals.fat};
+      saveFoodGoals(false);
+      syncProteinGoal();
+    }
+  }
+
+  // Show results summary
+  renderMqResults(newGoals);
+}
+
+function renderMqResults(goals) {
+  const scroll = document.getElementById('mq-scroll');
+  const footer = document.querySelector('.mq-footer');
+  const header = document.getElementById('mq-back-btn');
+  if (header) header.style.display = 'none';
+  document.getElementById('mq-bar').style.width = '100%';
+  document.getElementById('mq-step-label').textContent = 'Done';
+
+  const goalNames = {fat_loss:'Fat Loss', muscle:'Build Muscle', recomp:'Recomp', performance:'Performance', maintenance:'Maintenance', general:'Maintenance'};
+  const aggNames  = {gentle:'Gentle', moderate:'Moderate', aggressive:'Aggressive'};
+
+  let html = '<div class="mq-section-tag">Your Results</div>'
+    + '<div class="mq-q">Your <em>macro targets</em></div>'
+    + '<div class="mq-why">Calculated using Mifflin-St Jeor BMR + your activity, goal, and training inputs.</div>';
+
+  if (goals) {
+    html += '<div class="mq-result-card">'
+      + '<div class="mq-result-row"><span class="mq-result-label">BMR (at rest)</span><span><span class="mq-result-val">' + goals.bmr + '</span><span class="mq-result-unit">kcal</span></span></div>'
+      + '<div class="mq-result-row"><span class="mq-result-label">TDEE (maintenance)</span><span><span class="mq-result-val">' + goals.tdee + '</span><span class="mq-result-unit">kcal</span></span></div>'
+      + '<div class="mq-result-row"><span class="mq-result-label">Goal</span><span class="mq-result-val" style="font-size:16px;color:var(--acc);">' + (goalNames[goals.goal]||goals.goal) + ' — ' + (aggNames[goals.aggression]||'') + '</span></div>'
+      + '</div>'
+      + '<div class="mq-result-card">'
+      + '<div class="mq-result-row"><span class="mq-result-label">Daily Calories</span><span><span class="mq-result-val">' + goals.calories + '</span><span class="mq-result-unit">kcal</span></span></div>'
+      + '<div class="mq-result-row"><span class="mq-result-label">Protein</span><span><span class="mq-result-val">' + goals.protein + '</span><span class="mq-result-unit">g</span></span></div>'
+      + '<div class="mq-result-row"><span class="mq-result-label">Carbohydrates</span><span><span class="mq-result-val">' + goals.carbs + '</span><span class="mq-result-unit">g</span></span></div>'
+      + '<div class="mq-result-row"><span class="mq-result-label">Fat</span><span><span class="mq-result-val">' + goals.fat + '</span><span class="mq-result-unit">g</span></span></div>'
+      + '</div>';
+
+    if (_goalsOverridden) {
+      html += '<div style="background:var(--s2);border:1px solid var(--b2);border-radius:12px;padding:12px 14px;font-size:13px;color:var(--t2);line-height:1.5;">'
+        + '⚙️ You have custom targets saved. These calculated targets won\'t override them. '
+        + '<button onclick="applyMqGoals()" style="background:none;border:none;color:var(--acc);font-size:13px;cursor:pointer;font-family:DM Sans,sans-serif;text-decoration:underline;padding:0;">Apply calculated targets</button>'
+        + '</div>';
+    }
+  } else {
+    html += '<div style="color:var(--t2);font-size:14px;">Profile saved. Enter more data to get a full calculation.</div>';
+  }
+
+  scroll.innerHTML = html;
+
+  footer.innerHTML = '<button class="mq-next" onclick="mqDone()">Apply & Close</button>'
+    + '<button class="mq-skip" onclick="closeMacroQuestionnaire()">Close without applying</button>';
+}
+
+function applyMqGoals() {
+  const newGoals = calcTDEEGoals(null);
+  if (newGoals) {
+    foodGoals = {calories: newGoals.calories, protein: newGoals.protein, carbs: newGoals.carbs, fat: newGoals.fat};
+    _tdeeGoals = newGoals;
+    _goalsOverridden = false;
+    saveFoodGoals(false);
+    syncProteinGoal();
+    renderFood();
+  }
+  closeMacroQuestionnaire();
+}
+
+function mqDone() {
+  const newGoals = calcTDEEGoals(null);
+  if (newGoals && !_goalsOverridden) {
+    foodGoals = {calories: newGoals.calories, protein: newGoals.protein, carbs: newGoals.carbs, fat: newGoals.fat};
+    _tdeeGoals = newGoals;
+    saveFoodGoals(false);
+    syncProteinGoal();
+  }
+  closeMacroQuestionnaire();
+  renderFood();
+  if (mqOnDone) { mqOnDone(); mqOnDone = null; }
+}
+
+function mqSelect(key, value) {
+  mqAnswers[key] = value;
+  // Refresh chips/options selection state
+  document.querySelectorAll('[data-mq-key="' + key + '"]').forEach(el => {
+    el.classList.toggle('sel', el.dataset.mqVal === String(value));
+  });
+}
+
+function mqToggleChip(key, value) {
+  if (!mqAnswers[key]) mqAnswers[key] = [];
+  const arr = mqAnswers[key];
+  const idx = arr.indexOf(value);
+  if (idx >= 0) arr.splice(idx, 1); else arr.push(value);
+  document.querySelectorAll('[data-mq-chip-key="' + key + '"]').forEach(el => {
+    el.classList.toggle('sel', arr.includes(el.dataset.mqChipVal));
+  });
+}
+
+function renderMqStep() {
+  const step = MQ_STEPS[mqStep];
+  const pct = Math.round(((mqStep) / MQ_STEPS.length) * 100);
+  document.getElementById('mq-bar').style.width = pct + '%';
+  document.getElementById('mq-step-label').textContent = (mqStep + 1) + ' / ' + MQ_STEPS.length;
+  document.getElementById('mq-back-btn').style.display = '';
+
+  // Rebuild footer FIRST, then reference the new buttons
+  const footer = document.querySelector('.mq-footer');
+  const isLast = mqStep === MQ_STEPS.length - 1;
+  footer.innerHTML = '<button class="mq-next" id="mq-next-btn" onclick="mqNext()">'
+    + (isLast ? 'See My Targets' : 'Continue') + '</button>'
+    + (step.skippable ? '<button class="mq-skip" id="mq-skip-btn" onclick="mqSkip()">Skip this section</button>' : '');
+
+  let html = '<div class="mq-section-tag">' + step.section + '</div>'
+    + '<div class="mq-q">' + step.q + '</div>'
+    + '<div class="mq-why">' + step.why + '</div>';
+
+  if (step.type === 'single') {
+    html += '<div class="mq-options">';
+    step.options.forEach(opt => {
+      const sel = mqAnswers[step.key] === opt.value ? ' sel' : '';
+      html += '<div class="mq-option' + sel + '" data-mq-key="' + step.key + '" data-mq-val="' + opt.value + '" onclick="mqSelect(\'' + step.key + '\',\'' + opt.value + '\')">'
+        + '<div class="mq-option-title">' + opt.title + '</div>'
+        + (opt.sub ? '<div class="mq-option-sub">' + opt.sub + '</div>' : '')
+        + '</div>';
+    });
+    html += '</div>';
+  }
+
+  else if (step.type === 'chips') {
+    const sel = mqAnswers[step.key] || [];
+    html += '<div class="mq-chips">';
+    step.options.forEach(opt => {
+      const active = sel.includes(opt.value) ? ' sel' : '';
+      html += '<div class="mq-chip' + active + '" data-mq-chip-key="' + step.key + '" data-mq-chip-val="' + opt.value + '" onclick="mqToggleChip(\'' + step.key + '\',\'' + opt.value + '\')">' + opt.label + '</div>';
+    });
+    html += '</div>';
+    // No inline Continue button — use the standard footer button
+  }
+
+  else if (step.type === 'biometrics') {
+    const wUnit = mqAnswers.weight_unit || 'lbs';
+    const hUnit = mqAnswers.height_unit || 'imperial';
+    // Use snapshotted raw ft/in/cm values if available, otherwise derive from stored height_cm
+    const existFt = mqAnswers._htFt !== undefined ? mqAnswers._htFt
+                  : (mqAnswers.height_cm ? Math.floor(mqAnswers.height_cm / 30.48) : '');
+    const existIn = mqAnswers._htIn !== undefined ? mqAnswers._htIn
+                  : (mqAnswers.height_cm ? Math.round((mqAnswers.height_cm % 30.48) / 2.54) : '');
+    const existCm = mqAnswers._htCm !== undefined ? mqAnswers._htCm
+                  : (mqAnswers.height_cm || '');
+
+    html += '<div class="mq-fields two">'
+      + '<div class="mq-field"><label>Age</label><input type="number" id="mq-age" inputmode="numeric" placeholder="e.g. 28" min="10" max="100" value="' + (mqAnswers.age||'') + '"></div>'
+      + '<div class="mq-field"><label>Sex</label><select id="mq-sex">'
+      + '<option value="" disabled ' + (!mqAnswers.sex?'selected':'') + '>Select</option>'
+      + '<option value="male" '   + (mqAnswers.sex==='male'   ?'selected':'') + '>Male</option>'
+      + '<option value="female" ' + (mqAnswers.sex==='female' ?'selected':'') + '>Female</option>'
+      + '</select></div>'
+      + '</div>'
+      // Weight row with unit toggle
+      + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">'
+      + '<div class="mq-field" style="flex:1;margin-bottom:0;"><label>Weight</label><input type="number" id="mq-weight" inputmode="decimal" placeholder="' + (wUnit==='lbs'?'e.g. 175':'e.g. 79') + '" value="' + (mqAnswers.weight||'') + '"></div>'
+      + '<div style="display:flex;border:1px solid var(--b2);border-radius:10px;overflow:hidden;margin-top:18px;">'
+      + '<button onclick="mqSnapshotBiometrics();mqAnswers.weight_unit=\'lbs\';renderMqStep()" style="padding:10px 12px;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:DM Sans,sans-serif;background:' + (wUnit==='lbs'?'var(--acc)':'var(--s2)') + ';color:' + (wUnit==='lbs'?'#000':'var(--t2)') + ';">lbs</button>'
+      + '<button onclick="mqSnapshotBiometrics();mqAnswers.weight_unit=\'kg\';renderMqStep()" style="padding:10px 12px;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:DM Sans,sans-serif;background:' + (wUnit==='kg'?'var(--acc)':'var(--s2)') + ';color:' + (wUnit==='kg'?'#000':'var(--t2)') + ';">kg</button>'
+      + '</div></div>'
+      // Height row with unit toggle
+      + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">'
+      + '<div style="flex:1;">'
+      + (hUnit === 'imperial'
+        ? '<label style="display:block;font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">Height</label>'
+          + '<div style="display:flex;gap:6px;">'
+          + '<div class="mq-field" style="flex:1;margin-bottom:0;"><input type="number" id="mq-ht-ft" inputmode="numeric" placeholder="ft" min="3" max="8" value="' + existFt + '"><div style="font-size:10px;color:var(--t3);text-align:center;margin-top:2px;">ft</div></div>'
+          + '<div class="mq-field" style="flex:1;margin-bottom:0;"><input type="number" id="mq-ht-in" inputmode="numeric" placeholder="in" min="0" max="11" value="' + existIn + '"><div style="font-size:10px;color:var(--t3);text-align:center;margin-top:2px;">in</div></div>'
+          + '</div>'
+        : '<label style="display:block;font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">Height</label>'
+          + '<div class="mq-field" style="margin-bottom:0;"><input type="number" id="mq-ht-cm" inputmode="numeric" placeholder="e.g. 178" min="100" max="250" value="' + existCm + '"><div style="font-size:10px;color:var(--t3);margin-top:2px;">cm</div></div>'
+      )
+      + '</div>'
+      + '<div style="display:flex;border:1px solid var(--b2);border-radius:10px;overflow:hidden;margin-top:18px;">'
+      + '<button onclick="mqSnapshotBiometrics();mqAnswers.height_unit=\'imperial\';renderMqStep()" style="padding:10px 9px;font-size:11px;font-weight:600;border:none;cursor:pointer;font-family:DM Sans,sans-serif;background:' + (hUnit==='imperial'?'var(--acc)':'var(--s2)') + ';color:' + (hUnit==='imperial'?'#000':'var(--t2)') + ';">ft/in</button>'
+      + '<button onclick="mqSnapshotBiometrics();mqAnswers.height_unit=\'metric\';renderMqStep()" style="padding:10px 9px;font-size:11px;font-weight:600;border:none;cursor:pointer;font-family:DM Sans,sans-serif;background:' + (hUnit==='metric'?'var(--acc)':'var(--s2)') + ';color:' + (hUnit==='metric'?'#000':'var(--t2)') + ';">cm</button>'
+      + '</div></div>';
+  }
+
+  else if (step.type === 'bodyfat') {
+    const bf = mqAnswers.bf_pct || 20;
+    const bfDesc = bf < 10 ? 'Very lean — visible abs, vascularity'
+                 : bf < 15 ? 'Lean — some ab definition'
+                 : bf < 20 ? 'Average — no visible abs'
+                 : bf < 25 ? 'Above average'
+                 : bf < 30 ? 'High — soft midsection'
+                 : 'Very high';
+    html += '<div class="mq-slider-row">'
+      + '<input type="range" class="mq-slider" id="mq-bf-slider" min="5" max="45" value="' + bf + '" oninput="mqAnswers.bf_pct=parseInt(this.value);document.getElementById(\'mq-bf-val\').textContent=this.value+\'%\';document.getElementById(\'mq-bf-desc\').textContent=' + JSON.stringify({5:'Very lean',10:'Very lean — visible abs, vascularity',14:'Lean — some ab definition',19:'Average — no visible abs',24:'Above average',29:'High — soft midsection',45:'Very high'}).toString().replace(/"/g,"'") + '[Object.keys(' + JSON.stringify({5:5,10:10,14:14,19:19,24:24,29:29,45:45}) + ').reverse().find(k=>parseInt(this.value)>=k)]||\'Very high\'">'
+      + '<span class="mq-slider-val" id="mq-bf-val">' + bf + '%</span>'
+      + '</div>'
+      + '<div id="mq-bf-desc" style="font-size:13px;color:var(--t2);margin-top:6px;margin-bottom:20px;">' + bfDesc + '</div>'
+      // Visual reference tiles
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:16px;">'
+      + ['10–12%\nVery lean','15–17%\nLean','20–22%\nAverage','25–30%\nAbove avg'].map((t,i) => {
+          const vals = [11,16,21,27];
+          return '<div onclick="mqAnswers.bf_pct=' + vals[i] + ';document.getElementById(\'mq-bf-slider\').value=' + vals[i] + ';document.getElementById(\'mq-bf-val\').textContent=\'' + vals[i] + '%\';" style="background:var(--s2);border:1px solid var(--b2);border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;font-size:11px;color:var(--t2);line-height:1.4;white-space:pre-line;">' + t + '</div>';
+        }).join('')
+      + '</div>';
+
+    // Fix the oninput handler to use a simpler approach
+    html = html.replace(/oninput="[^"]*"/, 'oninput="mqBfInput(this.value)"');
+  }
+
+  else if (step.type === 'activity') {
+    const jobOptions = [
+      {value:'desk',        title:'Desk / remote',         sub:'Sitting most of the day'},
+      {value:'standing',    title:'Standing / retail',     sub:'On your feet but not walking much'},
+      {value:'active',      title:'Active job',            sub:'Walking, lifting — physically demanding'},
+      {value:'very_active', title:'Very active job',       sub:'Manual labour, construction, etc.'},
+    ];
+    html += '<div class="mq-options" style="margin-bottom:18px;">';
+    jobOptions.forEach(opt => {
+      const sel = mqAnswers.job === opt.value ? ' sel' : '';
+      html += '<div class="mq-option' + sel + '" data-mq-key="job" data-mq-val="' + opt.value + '" onclick="mqSelect(\'job\',\'' + opt.value + '\')">'
+        + '<div class="mq-option-title">' + opt.title + '</div>'
+        + '<div class="mq-option-sub">' + opt.sub + '</div></div>';
+    });
+    html += '</div>'
+      + '<div class="mq-field"><label>Daily Steps (average)</label>'
+      + '<input type="number" id="mq-steps" inputmode="numeric" placeholder="e.g. 8000" min="0" max="40000" value="' + (mqAnswers.steps||'') + '">'
+      + '<div style="font-size:11px;color:var(--t3);margin-top:4px;">Check your phone\'s Health app for your real average. Don\'t guess.</div></div>';
+  }
+
+  else if (step.type === 'training') {
+    const trainTypes = [
+      {value:'lifting',   title:'Strength / lifting',  sub:'Barbell, dumbbells, machines'},
+      {value:'endurance', title:'Endurance',            sub:'Running, cycling, swimming'},
+      {value:'mixed',     title:'Mixed',                sub:'Lifting + cardio'},
+      {value:'sport',     title:'Sport / team',        sub:'Football, basketball, martial arts, etc.'},
+    ];
+    const trainDays = parseInt(mqAnswers.train_days) || 4;
+    const trainInt = mqAnswers.train_intensity || 'moderate';
+    html += '<div class="mq-options" style="margin-bottom:16px;">';
+    trainTypes.forEach(opt => {
+      const sel = mqAnswers.train_type === opt.value ? ' sel' : '';
+      html += '<div class="mq-option' + sel + '" data-mq-key="train_type" data-mq-val="' + opt.value + '" onclick="mqSelect(\'train_type\',\'' + opt.value + '\')">'
+        + '<div class="mq-option-title">' + opt.title + '</div>'
+        + '<div class="mq-option-sub">' + opt.sub + '</div></div>';
+    });
+    html += '</div>'
+      + '<div class="mq-fields two" style="margin-bottom:10px;">'
+      + '<div class="mq-field"><label>Days / week</label>'
+      + '<input type="number" id="mq-train-days" inputmode="numeric" min="1" max="7" placeholder="e.g. 4" value="' + (mqAnswers.train_days||'') + '" oninput="mqAnswers.train_days=parseInt(this.value)||4"></div>'
+      + '<div class="mq-field"><label>Intensity</label><select onchange="mqAnswers.train_intensity=this.value">'
+      + ['light','moderate','hard','very_hard'].map(v => '<option value="' + v + '" ' + (trainInt===v?'selected':'') + '>' + v.charAt(0).toUpperCase()+v.slice(1).replace('_',' ') + '</option>').join('')
+      + '</select></div></div>';
+  }
+
+  else if (step.type === 'history') {
+    const histOptions = [
+      {value:'low_carb',  label:'Low carb worked'},
+      {value:'high_carb', label:'High carb worked'},
+      {value:'if',        label:'Intermittent fasting'},
+      {value:'calorie_counting', label:'Calorie counting'},
+      {value:'nothing',   label:'Nothing consistent'},
+      {value:'na',        label:'No experience'},
+    ];
+    const sel = mqAnswers.what_worked || [];
+    html += '<div class="mq-chips" style="margin-bottom:16px;">';
+    histOptions.forEach(opt => {
+      const active = sel.includes(opt.value) ? ' sel' : '';
+      html += '<div class="mq-chip' + active + '" data-mq-chip-key="what_worked" data-mq-chip-val="' + opt.value + '" onclick="mqToggleChip(\'what_worked\',\'' + opt.value + '\')">' + opt.label + '</div>';
+    });
+    html += '</div>'
+      + '<div class="mq-field"><label>Notes (optional)</label>'
+      + '<textarea id="mq-history-notes" rows="3" placeholder="e.g. \'Always plateau at 175 lbs\', \'High protein kills hunger for me\'" style="width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:10px;color:var(--t1);font-family:DM Sans,sans-serif;font-size:14px;padding:10px 12px;outline:none;resize:none;-webkit-appearance:none;">' + (mqAnswers.history_notes||'') + '</textarea></div>';
+  }
+
+  const scrollEl = document.getElementById('mq-scroll');
+  scrollEl.innerHTML = html;
+  scrollEl.scrollTop = 0;
+}
+
+// Simple bf% input handler (avoids JSON.stringify in oninput attr)
+function mqBfInput(val) {
+  const v = parseInt(val);
+  mqAnswers.bf_pct = v;
+  const el = document.getElementById('mq-bf-val');
+  if (el) el.textContent = v + '%';
+  const desc = document.getElementById('mq-bf-desc');
+  if (desc) desc.textContent = v < 10 ? 'Very lean — visible abs, vascularity'
+    : v < 15 ? 'Lean — some ab definition'
+    : v < 20 ? 'Average — no visible abs'
+    : v < 25 ? 'Above average'
+    : v < 30 ? 'High — soft midsection' : 'Very high';
+}
+
+
+
+// Load stored override, or calculate from profile, or fall back to defaults
+const _storedFoodGoals = JSON.parse(localStorage.getItem('gainz_food_goals') || 'null');
+const _profile = JSON.parse(localStorage.getItem('gainz_profile') || 'null');
+const _tdeeCalc = calcTDEEGoals(_profile);
+
+// _goalsOverridden = user has manually saved custom targets
+// We respect manual overrides, but still know the calculated value for display
+let _goalsOverridden = _storedFoodGoals ? (_storedFoodGoals._overridden === true) : false;
+
+let foodGoals = _goalsOverridden
+  ? _storedFoodGoals                                    // user's manual values
+  : (_tdeeCalc || _storedFoodGoals || {                 // calculated or old stored or fallback
+      calories: 2000, protein: proteinGoal||160, carbs: 200, fat: 65
+    });
+
+// Always keep _calculated reference available for the "reset to calculated" button
+let _tdeeGoals = _tdeeCalc;
+
+function saveFoodGoals(override){
+  // override=true means user manually set values; false = recalculated
+  if(override !== undefined) _goalsOverridden = !!override;
+  const toSave = {...foodGoals, _overridden: _goalsOverridden};
+  localStorage.setItem('gainz_food_goals', JSON.stringify(toSave));
+}
 
 // Keep protein goal in sync
 function syncProteinGoal(){
@@ -4460,17 +5229,61 @@ function renderSearchResults(foods, q, resultsEl, isPartial) {
 }
 
 function showFoodGoalsSheet() {
+  const calc = _tdeeGoals;
+  const mp = loadMacroProfile();
+
+  // Goal label — prefer macro profile, fall back to onboarding
+  const goalLabelMap = {
+    fat_loss:'Fat Loss', hypertrophy:'Build Muscle', strength:'Get Stronger',
+    general:'Maintenance', muscle:'Build Muscle', recomp:'Recomp',
+    performance:'Performance', maintenance:'Maintenance'
+  };
+  const activeGoal = (mp && mp.goal) || (_profile && _profile.goal) || 'general';
+  const goalLabel = goalLabelMap[activeGoal] || 'Maintenance';
+
+  // Source badge
+  const sourceNote = calc
+    ? (mp
+        ? '<div style="font-size:11px;color:var(--acc);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Mifflin-St Jeor &middot; Macro Profile</div>'
+        : '<div style="font-size:11px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Estimated from onboarding data</div>')
+    : '';
+
+  const infoBanner = calc
+    ? '<div style="background:var(--s2);border:1px solid var(--b2);border-radius:10px;padding:10px 12px;margin-bottom:12px;">'
+      + sourceNote
+      + '<div style="font-size:12px;color:var(--t2);line-height:1.6;">'
+      + 'Goal: <strong style="color:var(--t1);">' + goalLabel + '</strong> &nbsp;&middot;&nbsp; '
+      + 'TDEE: <strong style="color:var(--t1);">~' + calc.tdee + ' kcal</strong> &nbsp;&middot;&nbsp; '
+      + 'Target: <strong style="color:var(--acc);">' + calc.calories + ' kcal</strong>'
+      + '</div>'
+      + (_goalsOverridden ? '<div style="font-size:11px;color:var(--t3);margin-top:3px;">\u2699\uFE0F Currently using custom targets</div>' : '')
+      + '</div>'
+    : '<div style="background:var(--s2);border:1px solid var(--b2);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--t2);">Complete the Macro Profile for a personalised TDEE calculation.</div>';
+
+  const resetBtn = (calc && _goalsOverridden)
+    ? '<button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="resetFoodGoalsToCalc()">\u21BA Reset to calculated targets</button>'
+    : '';
+
   const bg = document.createElement('div'); bg.className='sheet-bg';
   bg.innerHTML = '<div class="sheet">'
     + '<div class="sheet-handle"></div>'
-    + '<div class="sheet-title">Daily Goals</div>'
+    + '<div class="sheet-title">Daily Targets</div>'
+    // Edit macro profile CTA — primary action
+    + '<button class="btn btn-ghost btn-full" style="margin-bottom:14px;gap:8px;" onclick="closeSheets();openMacroQuestionnaire()">'
+    + '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>'
+    + (mp ? 'Edit Macro Profile' : 'Set Up Macro Profile')
+    + '</button>'
+    + infoBanner
+    + '<div style="font-size:12px;font-weight:600;color:var(--t2);margin-bottom:8px;">Override manually</div>'
     + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
     + '<div class="field"><label>Calories (kcal)</label><input type="number" id="fg-cal" value="' + foodGoals.calories + '" inputmode="numeric"></div>'
     + '<div class="field"><label>Protein (g)</label><input type="number" id="fg-p" value="' + foodGoals.protein + '" inputmode="numeric"></div>'
     + '<div class="field"><label>Carbs (g)</label><input type="number" id="fg-c" value="' + foodGoals.carbs + '" inputmode="numeric"></div>'
     + '<div class="field"><label>Fat (g)</label><input type="number" id="fg-f" value="' + foodGoals.fat + '" inputmode="numeric"></div>'
     + '</div>'
-    + '<button class="btn btn-acc btn-full" onclick="saveFoodGoalsFromSheet()">Save</button>'
+    + '<div style="font-size:11px;color:var(--t3);margin-top:2px;margin-bottom:12px;">Manual values override the calculated targets.</div>'
+    + '<button class="btn btn-acc btn-full" onclick="saveFoodGoalsFromSheet()">Save Custom Targets</button>'
+    + resetBtn
     + '<button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="closeSheets()">Cancel</button>'
     + '</div>';
   bg.addEventListener('click', e => { if(e.target===bg) bg.remove(); });
@@ -4482,10 +5295,21 @@ function saveFoodGoalsFromSheet() {
   foodGoals.protein  = parseInt(document.getElementById('fg-p')?.value)||160;
   foodGoals.carbs    = parseInt(document.getElementById('fg-c')?.value)||200;
   foodGoals.fat      = parseInt(document.getElementById('fg-f')?.value)||65;
-  saveFoodGoals();
+  saveFoodGoals(true);  // mark as user override
   syncProteinGoal();
   closeSheets(); renderFood();
 }
+
+function resetFoodGoalsToCalc() {
+  if(!_tdeeGoals) return;
+  foodGoals = {calories:_tdeeGoals.calories, protein:_tdeeGoals.protein, carbs:_tdeeGoals.carbs, fat:_tdeeGoals.fat};
+  _goalsOverridden = false;
+  saveFoodGoals(false);
+  syncProteinGoal();
+  closeSheets(); renderFood();
+}
+
+
 
 // ─── RENDER FOOD SCREEN ───────────────────────────────────────────────────────
 let foodViewDate = todayKey();
@@ -4512,45 +5336,64 @@ function renderFood() {
   // Macro bar helper
   function macroBar(label, val, goal, color) {
     const pct = Math.min(val / Math.max(goal, 1), 1) * 100;
+    const over = val > goal;
+    const rem = Math.max(0, Math.round(goal - val));
+    const rightLabel = over
+      ? '<span style="font-size:11px;color:var(--red);">+' + Math.round(val-goal) + 'g over</span>'
+      : '<span style="font-size:11px;color:var(--t2);">' + Math.round(val) + '<span style="color:var(--t3);"> / ' + goal + 'g</span></span>';
     return '<div style="margin-bottom:10px;">'
-      + '<div style="display:flex;justify-content:space-between;margin-bottom:4px;">'
-      + '<span style="font-size:12px;font-weight:500;">' + label + '</span>'
-      + '<span style="font-size:12px;color:var(--t2);">' + Math.round(val) + ' / ' + goal + 'g</span>'
+      + '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">'
+      + '<span style="font-size:12px;font-weight:600;">' + label + '</span>'
+      + rightLabel
       + '</div>'
       + '<div style="height:6px;background:var(--s3);border-radius:3px;overflow:hidden;">'
-      + '<div style="height:100%;width:' + pct.toFixed(1) + '%;background:' + color + ';border-radius:3px;transition:width .4s;"></div>'
+      + '<div style="height:100%;width:' + pct.toFixed(1) + '%;background:' + (over?'var(--red)':color) + ';border-radius:3px;transition:width .4s;"></div>'
       + '</div>'
       + '</div>';
   }
 
-  // Summary card — MFP style: calories remaining prominently, then macros below
+  // Summary card — goal-aware: show source tag, remaining prominently
+  const goalLabelMap = {fat_loss:'Fat Loss',hypertrophy:'Build Muscle',strength:'Get Stronger',general:'Maintenance'};
+  const goalLabel = goalLabelMap[(_profile&&_profile.goal)||'general']||'Maintenance';
+  const sourceTag = _tdeeGoals
+    ? (_goalsOverridden
+        ? '<span style="font-size:10px;background:var(--s3);color:var(--t3);padding:2px 7px;border-radius:10px;font-weight:600;">CUSTOM</span>'
+        : '<span style="font-size:10px;background:var(--acc);color:#000;padding:2px 7px;border-radius:10px;font-weight:700;">' + goalLabel.toUpperCase() + '</span>')
+    : '';
+
   const summaryCard = '<div class="card" style="padding:16px 16px 12px;">'
-    // Date nav
-    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">'
-    + '<button onclick="shiftFoodDate(-1)" style="width:32px;height:32px;border-radius:50%;background:var(--s2);border:none;color:var(--t1);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;touch-action:manipulation;">‹</button>'
-    + '<div style="font-size:13px;font-weight:600;color:var(--t2);">' + displayDate + '</div>'
-    + '<button onclick="shiftFoodDate(1)" style="width:32px;height:32px;border-radius:50%;background:var(--s2);border:none;color:var(--t1);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;touch-action:manipulation;' + (isToday ? 'opacity:.25;' : '') + '" ' + (isToday ? 'disabled' : '') + '>›</button>'
+    // Date nav row
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">'
+    + '<button onclick="shiftFoodDate(-1)" style="width:32px;height:32px;border-radius:50%;background:var(--s2);border:none;color:var(--t1);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;touch-action:manipulation;">&#8249;</button>'
+    + '<div style="text-align:center;">'
+    +   '<div style="font-size:13px;font-weight:600;color:var(--t2);">' + displayDate + '</div>'
+    +   '<div style="margin-top:3px;">' + sourceTag + '</div>'
     + '</div>'
-    // Big calorie number — MFP style
-    + '<div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:0;margin-bottom:14px;">'
+    + '<button onclick="shiftFoodDate(1)" style="width:32px;height:32px;border-radius:50%;background:var(--s2);border:none;color:var(--t1);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;touch-action:manipulation;' + (isToday ? 'opacity:.25;' : '') + '" ' + (isToday ? 'disabled' : '') + '>&#8250;</button>'
+    + '</div>'
+    // Calorie triple — Goal  −  Eaten  =  Remaining
+    + '<div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:0;margin-bottom:12px;">'
     + '<div style="text-align:center;">'
     +   '<div style="font-size:11px;color:var(--t2);margin-bottom:2px;">Goal</div>'
-    +   '<div style="font-family:Barlow Condensed,sans-serif;font-size:26px;font-weight:800;">' + g.calories + '</div>'
+    +   '<div style="font-family:Barlow Condensed,sans-serif;font-size:28px;font-weight:800;">' + g.calories + '</div>'
+    +   '<div style="font-size:9px;color:var(--t3);">kcal</div>'
     + '</div>'
-    + '<div style="text-align:center;padding:0 8px;">'
-    +   '<div style="font-size:11px;color:var(--t2);margin-bottom:2px;">Food</div>'
-    +   '<div style="font-family:Barlow Condensed,sans-serif;font-size:26px;font-weight:800;color:var(--t2);">− ' + t.calories + '</div>'
+    + '<div style="text-align:center;padding:0 10px;">'
+    +   '<div style="font-size:11px;color:var(--t2);margin-bottom:2px;">Eaten</div>'
+    +   '<div style="font-family:Barlow Condensed,sans-serif;font-size:28px;font-weight:800;color:var(--t2);">' + Math.round(t.calories) + '</div>'
+    +   '<div style="font-size:9px;color:var(--t3);">kcal</div>'
     + '</div>'
     + '<div style="text-align:center;">'
-    +   '<div style="font-size:11px;color:var(--t2);margin-bottom:2px;">' + (calOver ? 'Over' : 'Remaining') + '</div>'
-    +   '<div style="font-family:Barlow Condensed,sans-serif;font-size:26px;font-weight:800;color:' + (calOver ? 'var(--red)' : 'var(--acc)') + ';">' + (calOver ? t.calories - g.calories : calLeft) + '</div>'
+    +   '<div style="font-size:11px;color:var(--t2);margin-bottom:2px;">' + (calOver ? 'Over' : 'Left') + '</div>'
+    +   '<div style="font-family:Barlow Condensed,sans-serif;font-size:28px;font-weight:800;color:' + (calOver ? 'var(--red)' : 'var(--acc)') + ';">' + (calOver ? Math.round(t.calories - g.calories) : Math.round(calLeft)) + '</div>'
+    +   '<div style="font-size:9px;color:' + (calOver ? 'var(--red)' : 'var(--t3)') + ';">' + (calOver ? 'over' : 'kcal') + '</div>'
     + '</div>'
     + '</div>'
     // Calorie progress bar
     + '<div style="height:8px;background:var(--s3);border-radius:4px;overflow:hidden;margin-bottom:14px;">'
     + '<div style="height:100%;width:' + (calPct * 100).toFixed(1) + '%;background:' + (calOver ? 'var(--red)' : 'var(--acc)') + ';border-radius:4px;transition:width .4s;"></div>'
     + '</div>'
-    // Macro bars
+    // Macro bars with remaining shown
     + macroBar('Protein', t.protein, g.protein, '#47b4ff')
     + macroBar('Carbs', t.carbs, g.carbs, '#ffb347')
     + macroBar('Fat', t.fat, g.fat, '#ff9147')
