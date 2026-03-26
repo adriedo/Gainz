@@ -295,6 +295,19 @@ label{font-size:12px;color:var(--t2);display:block;margin-bottom:5px;}
 .cal-dot{display:none;width:6px;height:6px;border-radius:50%;position:absolute;bottom:3px;}
 .cal-day.empty-day{pointer-events:none;}
 .cal-day:not(.empty-day):hover{background:var(--s2);color:var(--t1);}
+.cal-day.has-food .cal-food-dot{display:block;}
+.cal-food-dot{display:none;width:6px;height:6px;border-radius:50%;position:absolute;bottom:3px;}
+/* When both workout and food exist, offset them */
+.cal-day.worked.has-food .cal-dot{left:calc(50% - 6px);bottom:3px;}
+.cal-day.worked.has-food .cal-food-dot{left:calc(50% + 2px);bottom:3px;}
+/* Day detail sheet styles */
+.cal-day-section{background:var(--s2);border-radius:14px;padding:14px;margin-bottom:10px;}
+.cal-day-section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.cal-day-section-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t2);}
+.cal-day-macro-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px;}
+.cal-macro-chip{background:var(--s3);border-radius:8px;padding:6px 4px;text-align:center;}
+.cal-macro-chip .cmv{font-size:14px;font-weight:700;font-family:Barlow Condensed,sans-serif;}
+.cal-macro-chip .cml{font-size:10px;color:var(--t3);margin-top:1px;}
 .cal-streak{display:flex;align-items:center;gap:10px;background:var(--s2);border-radius:12px;padding:14px;margin-top:14px;}
 .streak-n{font-family:Barlow Condensed,sans-serif;font-size:42px;font-weight:800;color:var(--acc);line-height:1;}
 .cal-week-vol{margin-top:14px;}
@@ -541,6 +554,26 @@ input[type="date"]{color-scheme:dark;color:var(--t1);background:var(--s2);}
     <div class="greet bc">Let's<br><em>Get It.</em></div>
     <div style="font-size:13px;color:var(--t2);margin-bottom:20px;" id="dateline"></div>
     <div class="stat-grid" id="home-stats"></div>
+    <div onclick="nav('edit',null)" style="display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:13px 14px;margin-bottom:12px;cursor:pointer;">
+      <div style="width:36px;height:36px;border-radius:10px;background:rgba(232,255,71,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--acc)" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:600;">Edit Program</div>
+        <div style="font-size:11px;color:var(--t2);margin-top:2px;">Add or modify workout days &amp; exercises</div>
+      </div>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+    <div onclick="nav('videos',null)" style="display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:13px 14px;margin-bottom:12px;cursor:pointer;">
+      <div style="width:36px;height:36px;border-radius:10px;background:rgba(71,180,255,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="#47b4ff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:600;">Workout Videos</div>
+        <div style="font-size:11px;color:var(--t2);margin-top:2px;">Guided cardio &amp; strength videos</div>
+      </div>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
     <div class="slbl">Strength Work</div>
     <div id="day-grid"></div>
     <div class="slbl" style="display:flex;align-items:center;justify-content:space-between;">
@@ -552,7 +585,7 @@ input[type="date"]{color-scheme:dark;color:var(--t1);background:var(--s2);}
     </div>
     <div id="cardio-grid"></div>
   </div>
-  <div class="nav"><button class="nb on" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span>Log</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Food</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('edit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span>Edit</span></button><button class="nb" onclick="nav('videos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg><span>Play</span></button></div>
+  <div class="nav"><button class="nb on" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span>Log</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Food</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Cal</span></button></div>
 </div>
 
 <!-- WORKOUT -->
@@ -588,7 +621,7 @@ input[type="date"]{color-scheme:dark;color:var(--t1);background:var(--s2);}
     <div style="font-size:13px;color:var(--t2);margin-top:2px;">Tap any session to review it</div>
   </div>
   <div class="scroll" id="hist-list"></div>
-  <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb on" onclick="nav('history',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span>Log</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Food</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('edit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span>Edit</span></button><button class="nb" onclick="nav('videos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg><span>Play</span></button></div>
+  <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb on" onclick="nav('history',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span>Log</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Food</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Cal</span></button></div>
 </div>
 
 <!-- CALENDAR -->
@@ -596,12 +629,12 @@ input[type="date"]{color-scheme:dark;color:var(--t1);background:var(--s2);}
   <div style="padding:20px 16px 8px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
     <div>
       <div class="bc" style="font-size:34px;font-weight:800;text-transform:uppercase;">Calendar</div>
-      <div style="font-size:13px;color:var(--t2);margin-top:2px;">Your training consistency</div>
+      <div style="font-size:13px;color:var(--t2);margin-top:2px;">Workouts &amp; nutrition, every day</div>
     </div>
     <button class="btn btn-acc btn-sm" onclick="showLogPastSheet()">+ Log past</button>
   </div>
   <div class="scroll" id="cal-scroll"></div>
-  <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span>Log</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Food</span></button><button class="nb on" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('edit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span>Edit</span></button><button class="nb" onclick="nav('videos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg><span>Play</span></button></div>
+  <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span>Log</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Food</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb on" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Cal</span></button></div>
 </div>
 
 <!-- PROGRESS -->
@@ -611,7 +644,7 @@ input[type="date"]{color-scheme:dark;color:var(--t1);background:var(--s2);}
     <div style="font-size:13px;color:var(--t2);margin-top:2px;">Volume, PRs &amp; trends</div>
   </div>
   <div class="scroll" id="prog-list"></div>
-  <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span>Log</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Food</span></button><button class="nb on" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('edit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span>Edit</span></button><button class="nb" onclick="nav('videos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg><span>Play</span></button></div>
+  <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span>Log</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Food</span></button><button class="nb on" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Cal</span></button></div>
 </div>
 
 <!-- EDIT SCREEN -->
@@ -624,7 +657,7 @@ input[type="date"]{color-scheme:dark;color:var(--t1);background:var(--s2);}
     <button class="btn btn-acc btn-sm" onclick="showNewDaySheet()">+ New day</button>
   </div>
   <div class="scroll" id="edit-list"></div>
-  <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span>Log</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Food</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('edit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span>Edit</span></button><button class="nb on" onclick="nav('videos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg><span>Play</span></button></div>
+  <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span>Log</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Food</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Cal</span></button></div>
 </div>
 
 <!-- VIDEOS SCREEN -->
@@ -651,7 +684,7 @@ input[type="date"]{color-scheme:dark;color:var(--t1);background:var(--s2);}
     <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:#4a4a4a;margin:18px 0 10px;">Total Body</div>
     <div onclick="window.open('https://youtu.be/Jpxc0TUr9BI?si=4iArg2LGWk4I3W-_')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#ffb347"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">Total Body Workout</div><div style="font-size:11px;color:#888;margin-top:3px;">Full body · guided</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
     </div>
-  <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span>Log</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Food</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('edit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span>Edit</span></button><button class="nb on" onclick="nav('videos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg><span>Play</span></button></div>
+  <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span>Log</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Food</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Cal</span></button></div>
 </div>
 
 
@@ -665,7 +698,7 @@ input[type="date"]{color-scheme:dark;color:var(--t1);background:var(--s2);}
     <button onclick="showFoodGoalsSheet()" style="font-size:11px;font-weight:600;padding:6px 12px;border-radius:20px;background:var(--s2);border:1px solid var(--b2);color:var(--t2);cursor:pointer;font-family:'DM Sans',sans-serif;">Goals</button>
   </div>
   <div class="scroll" id="food-scroll"></div>
-  <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span>Log</span></button><button class="nb on" onclick="nav('food',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Food</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('edit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span>Edit</span></button><button class="nb" onclick="nav('videos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg><span>Play</span></button></div>
+  <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span>Log</span></button><button class="nb on" onclick="nav('food',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Food</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Cal</span></button></div>
 </div>
 
 <!-- BARCODE SCANNER OVERLAY -->
@@ -710,7 +743,7 @@ input[type="date"]{color-scheme:dark;color:var(--t1);background:var(--s2);}
     <div style="font-size:13px;color:var(--t2);margin-top:2px;">Your weekly summary &amp; health tracking</div>
   </div>
   <div class="scroll" id="coach-scroll"></div>
-  <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span>Log</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Food</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb on" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('edit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span>Edit</span></button><button class="nb" onclick="nav('videos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg><span>Play</span></button></div>
+  <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span>Log</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Food</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb on" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Cal</span></button></div>
 </div>
 
 </div><!-- #app -->
@@ -1902,12 +1935,32 @@ function renderCalendar(){
   const sessions=getSessions();
   const dateMap={};
   sessions.forEach(s=>{const dk=new Date(s.date).toDateString();if(!dateMap[dk])dateMap[dk]=[];dateMap[dk].push(s);});
+
+  // Build food date map: dateKey (YYYY-MM-DD) → calorie total
+  const foodDateMap={};
+  (proteinLog||[]).forEach(entry=>{
+    if(entry.items&&entry.items.length>0){
+      const cal=entry.items.reduce((a,i)=>a+(parseFloat(i.cal)||0),0);
+      foodDateMap[entry.date]=Math.round(cal);
+    }
+  });
+
   const today=new Date();
   const firstDay=new Date(calYear,calMonth,1).getDay();
   const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
   const monthName=new Date(calYear,calMonth).toLocaleDateString('en-US',{month:'long',year:'numeric'});
+
+  // Streak: consecutive days with at least a workout OR food logged
   let streak=0;let check=new Date(today);check.setHours(0,0,0,0);
-  while(true){const dk=check.toDateString();if(dateMap[dk]){streak++;check.setDate(check.getDate()-1);}else if(check.toDateString()===today.toDateString()){check.setDate(check.getDate()-1);}else break;}
+  while(true){
+    const dk=check.toDateString();
+    const isoKey=check.toISOString().split('T')[0];
+    const hasActivity=!!dateMap[dk]||!!foodDateMap[isoKey];
+    if(hasActivity){streak++;check.setDate(check.getDate()-1);}
+    else if(check.toDateString()===today.toDateString()){check.setDate(check.getDate()-1);}
+    else break;
+  }
+
   const weeklyVol=[];
   for(let w=7;w>=0;w--){
     const wStart=new Date(today);wStart.setDate(today.getDate()-w*7-6);wStart.setHours(0,0,0,0);
@@ -1917,39 +1970,45 @@ function renderCalendar(){
     weeklyVol.push({label:new Date(wEnd).toLocaleDateString('en-US',{month:'short',day:'numeric'}),vol:Math.round(vol)});
   }
   const maxVol=Math.max(...weeklyVol.map(w=>w.vol),1);
+
   let daysCells='';
   for(let i=0;i<firstDay;i++)daysCells+=`<div class="cal-day empty-day"></div>`;
   for(let d=1;d<=daysInMonth;d++){
     const dt=new Date(calYear,calMonth,d);
     const dk=dt.toDateString();
+    const dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const isToday=dk===today.toDateString();
     const hasSess=!!dateMap[dk];
+    const hasFood=!!foodDateMap[dateStr];
     const isFuture=dt>today;
     const sess=dateMap[dk]?.[0];
     const tc=sess?(sess.isCardio?'cardio':program.find(p=>p.id===sess.dayId)?.type||'full'):null;
     const dotColor=tc?TYPE_COLORS[tc]||'#e8ff47':'#e8ff47';
-    // Format date for click handler
-    const dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    let clickAttr='';
-    if(hasSess){
-      const count=dateMap[dk].length;
-      if(count===1){
-        const sidEncoded=String(sess.sid).replace(/'/g,"\\'");
-        clickAttr=`onclick="viewSession('${sidEncoded}')"`;
-      } else {
-        const dkEncoded=dk.replace(/'/g,"\\'");
-        clickAttr=`onclick="viewDaySessions('${dkEncoded}')"`;
-      }
-    } else if(!isFuture){
-      clickAttr=`onclick="showLogPastSheet('${dateStr}')"`;
+    const sessCount=dateMap[dk]?.length||0;
+
+    // All past days (with or without data) open the unified day detail sheet
+    const clickAttr=isFuture?'':(`onclick="showDayDetailSheet('${dateStr}')"`);
+
+    let dotsHtml='';
+    if(hasSess&&sessCount>1){
+      dotsHtml=`<span style="font-size:8px;font-weight:700;background:var(--acc);color:#000;border-radius:20px;padding:1px 4px;position:absolute;bottom:2px;line-height:1.4;">${sessCount}</span>`;
+    } else if(hasSess){
+      dotsHtml=`<span class="cal-dot" style="background:${dotColor}"></span>`;
     }
-    daysCells+=`<div class="cal-day${hasSess?' worked':''}${isToday?' today':''}${isFuture?' empty-day':''}" ${clickAttr}>
-      <span>${d}</span>
-      ${hasSess?(dateMap[dk].length>1?`<span style="font-size:8px;font-weight:700;background:var(--acc);color:#000;border-radius:20px;padding:1px 4px;position:absolute;bottom:2px;line-height:1.4;">${dateMap[dk].length}</span>`:`<span class="cal-dot" style="background:${dotColor}"></span>`):''}
+    if(hasFood){
+      dotsHtml+=`<span class="cal-food-dot" style="background:#47b4ff;${hasSess?'left:calc(50% + 2px);':'' }"></span>`;
+    }
+
+    daysCells+=`<div class="cal-day${hasSess?' worked':''}${hasFood?' has-food':''}${isToday?' today':''}${isFuture?' empty-day':''}" ${clickAttr}>
+      <span>${d}</span>${dotsHtml}
     </div>`;
   }
+
   const typesSeen=[...new Set(sessions.map(s=>s.isCardio?'cardio':program.find(p=>p.id===s.dayId)?.type||'full'))];
   const legend=typesSeen.filter(t=>TYPE_COLORS[t]).map(t=>`<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--t2)"><span style="width:8px;height:8px;border-radius:50%;background:${TYPE_COLORS[t]};display:inline-block"></span>${t}</span>`).join('');
+
+  const totalFoodDays=Object.keys(foodDateMap).length;
+
   scroll.innerHTML=`
     <div class="card">
       <div class="cal-nav">
@@ -1957,15 +2016,398 @@ function renderCalendar(){
         <div class="cal-month">${monthName}</div>
         <button class="cal-nav-btn" onclick="calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCalendar()">›</button>
       </div>
-      <div style="font-size:11px;color:var(--t3);margin-bottom:8px;">Tap any past day to log a session there</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px;">
+        <span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--t2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--acc);display:inline-block"></span>Workout</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--t2)"><span style="width:8px;height:8px;border-radius:50%;background:#47b4ff;display:inline-block"></span>Nutrition logged</span>
+        ${legend}
+      </div>
+      <div style="font-size:11px;color:var(--t3);margin-bottom:8px;">Tap any day to view or add entries</div>
       <div class="cal-grid">${['S','M','T','W','T','F','S'].map(d=>`<div class="cal-dow">${d}</div>`).join('')}${daysCells}</div>
-      ${legend?`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid var(--b1)">${legend}</div>`:''}
     </div>
-    <div class="card"><div style="display:flex;align-items:center;gap:14px"><div><div class="streak-n">${streak}🔥</div></div><div><div style="font-weight:500;font-size:15px">Day streak</div><div style="font-size:12px;color:var(--t2);margin-top:2px">${sessions.length} total sessions logged</div></div></div></div>
+    <div class="card">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div style="background:var(--s2);border-radius:12px;padding:12px;text-align:center;">
+          <div class="streak-n" style="font-size:36px;">${streak}🔥</div>
+          <div style="font-size:12px;color:var(--t2);margin-top:2px;">Active streak</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="background:var(--s2);border-radius:12px;padding:10px 12px;flex:1;">
+            <div style="font-size:22px;font-weight:800;font-family:Barlow Condensed,sans-serif;color:var(--acc);">${sessions.length}</div>
+            <div style="font-size:11px;color:var(--t2);">Workouts logged</div>
+          </div>
+          <div style="background:var(--s2);border-radius:12px;padding:10px 12px;flex:1;">
+            <div style="font-size:22px;font-weight:800;font-family:Barlow Condensed,sans-serif;color:#47b4ff;">${totalFoodDays}</div>
+            <div style="font-size:11px;color:var(--t2);">Days tracked food</div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="card"><div style="font-size:11px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">Weekly volume (lbs)</div>${weeklyVol.map(w=>`<div class="vol-bar-wrap"><div class="vol-day-lbl">${w.label}</div><div class="vol-bar-bg"><div class="vol-bar" style="width:${w.vol?Math.round(w.vol/maxVol*100):0}%"></div></div><div class="vol-n">${w.vol?w.vol.toLocaleString():''}</div></div>`).join('')}</div>`;
 }
 
-// ─── FEATURE 4: Log Past Session ─────────────────────────────────────────────
+// ─── CALENDAR: UNIFIED DAY DETAIL SHEET ──────────────────────────────────────
+function showDayDetailSheet(dateStr){
+  // dateStr = 'YYYY-MM-DD'
+  const dt = new Date(dateStr + 'T12:00:00');
+  const displayDate = dt.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  const dk = dt.toDateString(); // "Mon Jan 01 2024" for workout lookup
+  const isToday = dateStr === todayKey();
+
+  // ── Workout data ──
+  const sessions = getSessions();
+  const daySessions = sessions.filter(s => new Date(s.date).toDateString() === dk);
+
+  let workoutHtml = '';
+  if(daySessions.length === 0){
+    workoutHtml = '<div style="font-size:13px;color:var(--t3);padding:4px 0 2px;">No workout logged this day.</div>';
+  } else {
+    workoutHtml = daySessions.map(s=>{
+      const tc = s.isCardio?'cardio':program.find(p=>p.id===s.dayId)?.type||'full';
+      const col = typeColor(tc);
+      const sets = s.entries.reduce((a,e)=>a+e.sets.length,0);
+      const vol = Math.round(s.entries.reduce((a,e)=>a+e.sets.reduce((b,x)=>(b+(parseFloat(x.weight)||0)*(parseInt(x.reps)||0)),0),0));
+      const timeStr = new Date(s.date).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+      const sidSafe = String(s.sid).replace(/'/g,"\\'");
+      return `<div onclick="document.getElementById('day-detail-bg')?.remove();viewSession('${sidSafe}')" style="display:flex;align-items:center;justify-content:space-between;background:var(--s3);border-radius:10px;padding:11px 13px;margin-bottom:6px;cursor:pointer;">
+        <div>
+          <div class="bc" style="font-size:16px;font-weight:700;text-transform:uppercase;color:${col};">${s.dayName}</div>
+          <div style="font-size:11px;color:var(--t2);margin-top:2px;">${s.entries.length} exercises · ${sets} sets${vol>0?' · '+vol.toLocaleString()+' lb vol':''}</div>
+        </div>
+        <div style="font-size:11px;color:var(--t3);">${timeStr} ›</div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Food data ──
+  const foodItems = getTodayFoodItems(dateStr);
+  const g = foodGoals;
+  let foodHtml = '';
+  if(foodItems.length === 0){
+    foodHtml = '<div style="font-size:13px;color:var(--t3);padding:4px 0 2px;">No food logged this day.</div>';
+  } else {
+    const t = getDayTotals(dateStr);
+    const calPct = Math.min(t.calories / Math.max(g.calories,1) * 100, 100).toFixed(1);
+    const calColor = t.calories > g.calories ? 'var(--red)' : 'var(--acc)';
+    // Meals grouped
+    const mealOrder = ['Breakfast','Lunch','Dinner','Snack','Pre-workout','Post-workout','Other'];
+    const byMeal = {};
+    foodItems.forEach(item=>{
+      const m = item.meal || 'Other';
+      if(!byMeal[m]) byMeal[m]=[];
+      byMeal[m].push(item);
+    });
+    const mealRows = mealOrder.filter(m=>byMeal[m]).map(m=>{
+      const items = byMeal[m];
+      const mCal = items.reduce((a,i)=>a+(parseFloat(i.cal)||0),0);
+      const itemList = items.slice(0,3).map(i=>`<div style="font-size:12px;color:var(--t2);padding:2px 0;">${i.name}${i.cal?` <span style="color:var(--t3);">${Math.round(i.cal)} kcal</span>`:''}</div>`).join('');
+      const more = items.length > 3 ? `<div style="font-size:11px;color:var(--t3);">+${items.length-3} more</div>` : '';
+      return `<div style="margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+          <span style="font-size:12px;font-weight:700;color:var(--t1);">${m}</span>
+          <span style="font-size:11px;color:var(--t3);">${Math.round(mCal)} kcal</span>
+        </div>${itemList}${more}</div>`;
+    }).join('');
+
+    foodHtml = `<div style="margin-bottom:10px;">
+      <div style="height:6px;background:var(--s3);border-radius:3px;overflow:hidden;margin-bottom:4px;">
+        <div style="height:100%;width:${calPct}%;background:${calColor};border-radius:3px;transition:width .4s;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t2);">
+        <span>${Math.round(t.calories)} / ${g.calories} kcal</span>
+        <span style="color:${calColor};">${t.calories > g.calories ? '+'+Math.round(t.calories-g.calories)+' over' : Math.round(g.calories-t.calories)+' remaining'}</span>
+      </div>
+    </div>
+    <div class="cal-day-macro-row" style="margin-bottom:10px;">
+      <div class="cal-macro-chip"><div class="cmv" style="color:#47b4ff;">${Math.round(t.protein)}g</div><div class="cml">Protein</div></div>
+      <div class="cal-macro-chip"><div class="cmv" style="color:#ffb347;">${Math.round(t.carbs)}g</div><div class="cml">Carbs</div></div>
+      <div class="cal-macro-chip"><div class="cmv" style="color:#ff9147;">${Math.round(t.fat)}g</div><div class="cml">Fat</div></div>
+      <div class="cal-macro-chip"><div class="cmv" style="color:var(--acc);">${foodItems.length}</div><div class="cml">Items</div></div>
+    </div>
+    ${mealRows}`;
+  }
+
+  const bg = document.createElement('div'); bg.className='sheet-bg'; bg.id='day-detail-bg';
+  bg.innerHTML = `<div class="sheet" style="max-height:92dvh;overflow-y:auto;">
+    <div class="sheet-handle"></div>
+    <div style="margin-bottom:16px;">
+      <div class="bc" style="font-size:26px;font-weight:800;text-transform:uppercase;line-height:1;">${isToday?'Today':dt.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'})}</div>
+      <div style="font-size:12px;color:var(--t2);margin-top:2px;">${dt.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div>
+    </div>
+
+    <div class="cal-day-section">
+      <div class="cal-day-section-hdr">
+        <span class="cal-day-section-title">💪 Workout</span>
+        <button onclick="document.getElementById('day-detail-bg')?.remove();showLogPastSheet('${dateStr}')" style="font-size:12px;font-weight:600;color:var(--acc);background:rgba(232,255,71,.1);border:none;border-radius:8px;padding:5px 10px;cursor:pointer;">+ Add</button>
+      </div>
+      ${workoutHtml}
+    </div>
+
+    <div class="cal-day-section">
+      <div class="cal-day-section-hdr">
+        <span class="cal-day-section-title">🥗 Nutrition</span>
+        <button onclick="document.getElementById('day-detail-bg')?.remove();showCalFoodSheet('${dateStr}')" style="font-size:12px;font-weight:600;color:#47b4ff;background:rgba(71,180,255,.1);border:none;border-radius:8px;padding:5px 10px;cursor:pointer;">+ Add</button>
+      </div>
+      ${foodHtml}
+    </div>
+
+    <button onclick="document.getElementById('day-detail-bg')?.remove()" class="btn btn-ghost btn-full" style="margin-top:4px;">Close</button>
+  </div>`;
+  bg.addEventListener('click', e=>{ if(e.target===bg) bg.remove(); });
+  document.body.appendChild(bg);
+}
+
+// ─── CALENDAR: ADD FOOD TO A SPECIFIC DATE ────────────────────────────────────
+let _calFoodTargetDate = null; // date string YYYY-MM-DD for calendar food logging
+
+function showCalFoodSheet(dateStr) {
+  _calFoodTargetDate = dateStr;
+  const dt = new Date(dateStr + 'T12:00:00');
+  const label = dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+
+  const bg = document.createElement('div'); bg.className='sheet-bg'; bg.id='cal-food-sheet';
+  bg.innerHTML = `<div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Log Food</div>
+    <div class="sheet-sub">Adding to ${label}</div>
+    <button onclick="document.getElementById('cal-food-sheet')?.remove();showCalFoodSearchSheet('${dateStr}')" class="btn btn-ghost btn-full" style="margin-bottom:8px;justify-content:flex-start;gap:12px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Search food database
+    </button>
+    <button onclick="document.getElementById('cal-food-sheet')?.remove();showCalManualFoodSheet('${dateStr}')" class="btn btn-ghost btn-full" style="margin-bottom:8px;justify-content:flex-start;gap:12px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Enter manually
+    </button>
+    <button onclick="document.getElementById('cal-food-sheet')?.remove()" class="btn btn-ghost btn-full btn-sm" style="margin-top:4px;color:var(--t3);">Cancel</button>
+  </div>`;
+  bg.addEventListener('click', e=>{ if(e.target===bg) bg.remove(); });
+  document.body.appendChild(bg);
+}
+
+function showCalFoodSearchSheet(targetDate) {
+  _calFoodTargetDate = targetDate;
+  const dt = new Date(targetDate + 'T12:00:00');
+  const label = dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+
+  const bg = document.createElement('div'); bg.className='sheet-bg'; bg.id='cal-food-search-sheet';
+  bg.innerHTML = '<div class="sheet" style="max-height:94dvh;">'
+    + '<div class="sheet-handle"></div>'
+    + '<div class="sheet-title">Search Food</div>'
+    + `<div class="sheet-sub">Adding to ${label}</div>`
+    + '<div style="display:flex;gap:8px;margin-bottom:6px;">'
+    +   '<input type="text" id="cal-food-search-input" placeholder="Chicken breast, Quest bar…" style="flex:1;" autocomplete="off" autocorrect="off" spellcheck="false">'
+    +   '<button class="btn btn-acc btn-sm" style="flex-shrink:0;min-width:60px;" onclick="runCalFoodSearch()">Search</button>'
+    + '</div>'
+    + '<div style="font-size:11px;color:var(--t3);margin-bottom:8px;">Open Food Facts · USDA · AI — 3M+ products</div>'
+    + '<div id="cal-food-search-results"><div style="padding:20px;text-align:center;color:var(--t3);">Type a food, brand, or product name</div></div>'
+    + '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--b1);">'
+    +   `<button class="btn btn-ghost btn-full btn-sm" onclick="document.getElementById('cal-food-search-sheet')?.remove();showCalManualFoodSheet('${targetDate}')">+ Log manually instead</button>`
+    + '</div>'
+    + '</div>';
+  bg.addEventListener('click', e => { if(e.target===bg) bg.remove(); });
+  document.body.appendChild(bg);
+
+  const inp = document.getElementById('cal-food-search-input');
+  if(inp) {
+    setTimeout(() => inp.focus(), 150);
+    inp.addEventListener('keydown', e => { if(e.key==='Enter') runCalFoodSearch(); });
+  }
+}
+
+async function runCalFoodSearch() {
+  const q = (document.getElementById('cal-food-search-input')?.value || '').trim();
+  if(!q) return;
+  const resultsEl = document.getElementById('cal-food-search-results');
+  const localResults = searchLocalFoods(q);
+  if(resultsEl) {
+    if(localResults.length) {
+      renderCalSearchResults(localResults, q, resultsEl, true);
+    } else {
+      resultsEl.innerHTML = '<div style="text-align:center;padding:24px;color:var(--t2);"><div style="font-size:24px;margin-bottom:8px;">🔍</div>' + (_networkAvailable===false ? 'Searching local database…' : 'Searching all databases…') + '</div>';
+    }
+  }
+  const foods = await searchFood(q);
+  if(resultsEl) renderCalSearchResults(foods, q, resultsEl, false);
+}
+
+function renderCalSearchResults(foods, q, resultsEl, isPartial) {
+  if(!foods || foods.length === 0) {
+    if(!isPartial) resultsEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--t3);">No results found. Try a different name or log manually.</div>';
+    return;
+  }
+  resultsEl.innerHTML = foods.map((f,i) => {
+    const src = f.source==='ai' ? '<span style="font-size:10px;background:rgba(232,255,71,.15);color:var(--acc);padding:1px 5px;border-radius:10px;font-weight:600;margin-left:5px;">AI</span>'
+      : f.source==='usda' ? '<span style="font-size:10px;background:rgba(71,180,255,.15);color:#47b4ff;padding:1px 5px;border-radius:10px;font-weight:600;margin-left:5px;">USDA</span>' : '';
+    return `<div class="food-search-result" data-cfi="${i}">
+      <div style="flex:1;min-width:0;padding-right:10px;">
+        <div style="font-size:14px;font-weight:500;">${f.name}${src}</div>
+        ${f.brand?`<div style="font-size:11px;color:var(--t2);">${f.brand}</div>`:''}
+        <div style="font-size:11px;color:var(--t3);margin-top:2px;">${f.cal||'?'} kcal · ${f.g||0}g protein per ${f.servingUnit||'serving'}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <div style="font-size:16px;font-weight:700;color:var(--acc);">${f.cal||'?'}</div>
+        <div style="font-size:10px;color:var(--t3);">kcal</div>
+      </div>
+    </div>`;
+  }).join('');
+  window._calSearchFoods = foods;
+  resultsEl.querySelectorAll('.food-search-result[data-cfi]').forEach(el => {
+    el.addEventListener('click', () => {
+      const f = window._calSearchFoods[parseInt(el.dataset.cfi)];
+      if(f) {
+        document.getElementById('cal-food-search-sheet')?.remove();
+        showCalFoodConfirmSheet(f, _calFoodTargetDate);
+      }
+    });
+  });
+}
+
+let _calConfirmFoodData = null;
+function showCalFoodConfirmSheet(food, targetDate) {
+  _calConfirmFoodData = food;
+  _calFoodTargetDate = targetDate;
+  const dt = new Date(targetDate + 'T12:00:00');
+  const label = dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+
+  const sourceTag = food.source==='ai'
+    ? '<span style="font-size:10px;background:rgba(232,255,71,.15);color:var(--acc);padding:2px 6px;border-radius:20px;font-weight:600;vertical-align:middle;">AI</span>'
+    : food.source==='usda'
+    ? '<span style="font-size:10px;background:rgba(71,180,255,.15);color:#47b4ff;padding:2px 6px;border-radius:20px;font-weight:600;vertical-align:middle;">USDA</span>'
+    : '';
+
+  const bg = document.createElement('div'); bg.className='sheet-bg'; bg.id='cal-add-food-sheet';
+  bg.innerHTML = '<div class="sheet">'
+    + '<div class="sheet-handle"></div>'
+    + `<div style="font-size:11px;color:var(--acc);font-weight:600;margin-bottom:8px;">Adding to ${label}</div>`
+    + '<div style="margin-bottom:14px;">'
+    +   '<div style="font-size:17px;font-weight:600;line-height:1.3;">' + food.name + sourceTag + '</div>'
+    +   (food.brand ? '<div style="font-size:12px;color:var(--t2);margin-top:2px;">' + food.brand + '</div>' : '')
+    + '</div>'
+    + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;">'
+    +   '<div class="metric-box" style="padding:10px;text-align:center;"><div class="metric-val a" id="cfc-cal" style="font-size:22px;">' + food.cal + '</div><div class="metric-lbl">kcal</div></div>'
+    +   '<div class="metric-box" style="padding:10px;text-align:center;"><div class="metric-val" id="cfc-p" style="font-size:22px;color:#47b4ff;">' + food.g + 'g</div><div class="metric-lbl">protein</div></div>'
+    +   '<div class="metric-box" style="padding:10px;text-align:center;"><div class="metric-val" id="cfc-c" style="font-size:22px;color:#ffb347;">' + food.carbs + 'g</div><div class="metric-lbl">carbs</div></div>'
+    +   '<div class="metric-box" style="padding:10px;text-align:center;"><div class="metric-val" id="cfc-f" style="font-size:22px;color:#ff9147;">' + food.fat + 'g</div><div class="metric-lbl">fat</div></div>'
+    + '</div>'
+    + '<div class="field">'
+    +   '<label>Servings (1 = ' + (food.servingUnit||'1 serving') + ')</label>'
+    +   '<div style="display:flex;align-items:center;gap:10px;">'
+    +     '<button onclick="adjCalServings(-0.5)" style="width:40px;height:40px;border-radius:50%;background:var(--s2);border:1px solid var(--b2);color:var(--t1);font-size:20px;cursor:pointer;flex-shrink:0;">−</button>'
+    +     '<input type="number" id="cfc-servings" value="1" min="0.25" step="0.25" inputmode="decimal" style="flex:1;text-align:center;font-size:22px;font-weight:700;" oninput="updateCalFoodServingDisplay(this.value)">'
+    +     '<button onclick="adjCalServings(0.5)" style="width:40px;height:40px;border-radius:50%;background:var(--s2);border:1px solid var(--b2);color:var(--t1);font-size:20px;cursor:pointer;flex-shrink:0;">+</button>'
+    +   '</div>'
+    + '</div>'
+    + '<div class="field" style="margin-bottom:6px;">'
+    +   '<label>Meal</label>'
+    +   '<select id="cfc-meal"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option><option>Pre-workout</option><option>Post-workout</option></select>'
+    + '</div>'
+    + '<button class="btn btn-acc btn-full" style="margin-top:10px;" onclick="confirmCalAddFood()">Add to log</button>'
+    + '<button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="document.getElementById(\'cal-add-food-sheet\')?.remove()">Cancel</button>'
+    + '</div>';
+  bg.addEventListener('click', e => { if(e.target===bg) bg.remove(); });
+  document.body.appendChild(bg);
+
+  const hr = new Date().getHours();
+  const mealEl = document.getElementById('cfc-meal');
+  if(mealEl) {
+    if(hr < 10) mealEl.value = 'Breakfast';
+    else if(hr < 13) mealEl.value = 'Lunch';
+    else if(hr < 17) mealEl.value = 'Snack';
+    else mealEl.value = 'Dinner';
+  }
+}
+
+function adjCalServings(delta) {
+  const el = document.getElementById('cfc-servings');
+  if(!el) return;
+  const newVal = Math.max(0.25, Math.round((parseFloat(el.value||1)+delta)*4)/4);
+  el.value = newVal;
+  updateCalFoodServingDisplay(newVal);
+}
+
+function updateCalFoodServingDisplay(servings) {
+  const s = parseFloat(servings)||1;
+  const f = _calConfirmFoodData;
+  if(!f) return;
+  const p = f.per100||{};
+  const factor = s*(f.serving||100)/100;
+  const cal=document.getElementById('cfc-cal'); const pEl=document.getElementById('cfc-p');
+  const cEl=document.getElementById('cfc-c'); const fEl=document.getElementById('cfc-f');
+  if(cal) cal.textContent = Math.round((p.cal||0)*factor);
+  if(pEl) pEl.textContent = Math.round((p.protein||0)*factor*10)/10+'g';
+  if(cEl) cEl.textContent = Math.round((p.carbs||0)*factor*10)/10+'g';
+  if(fEl) fEl.textContent = Math.round((p.fat||0)*factor*10)/10+'g';
+}
+
+function confirmCalAddFood() {
+  const servings = parseFloat(document.getElementById('cfc-servings')?.value)||1;
+  const meal = document.getElementById('cfc-meal')?.value||'Dinner';
+  const f = _calConfirmFoodData;
+  if(!f) return;
+  const factor = servings*(f.serving||100)/100;
+  const p = f.per100||{};
+  addFoodItem({
+    name: f.name, brand: f.brand||'', meal,
+    barcode: f.barcode||'', serving: f.serving, servingUnit: f.servingUnit, servings,
+    cal:   Math.round((p.cal||f.cal||0)*factor),
+    g:     Math.round((p.protein||f.g||0)*factor*10)/10,
+    carbs: Math.round((p.carbs||f.carbs||0)*factor*10)/10,
+    fat:   Math.round((p.fat||f.fat||0)*factor*10)/10,
+  }, _calFoodTargetDate);
+  document.getElementById('cal-add-food-sheet')?.remove();
+  renderCalendar();
+  // Briefly show a toast-style confirmation
+  const toast = document.createElement('div');
+  toast.style.cssText='position:fixed;bottom:calc(100px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:#1a1a1a;border:1px solid rgba(232,255,71,.35);border-radius:12px;padding:10px 18px;font-size:13px;font-weight:600;color:var(--acc);z-index:9999;pointer-events:none;animation:pwaSlideUp .25s ease;';
+  toast.textContent = '✓ Added to ' + new Date(_calFoodTargetDate+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  document.body.appendChild(toast);
+  setTimeout(()=>toast.remove(), 2200);
+}
+
+function showCalManualFoodSheet(targetDate) {
+  _calFoodTargetDate = targetDate;
+  const dt = new Date(targetDate + 'T12:00:00');
+  const label = dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+
+  const bg = document.createElement('div'); bg.className='sheet-bg'; bg.id='cal-manual-food-sheet';
+  bg.innerHTML = '<div class="sheet">'
+    + '<div class="sheet-handle"></div>'
+    + '<div class="sheet-title">Log Food</div>'
+    + `<div style="font-size:11px;color:var(--acc);font-weight:600;margin-bottom:12px;">Adding to ${label}</div>`
+    + '<div class="field"><label>Food name</label><input type="text" id="cmf-name" placeholder="e.g. Chicken breast 200g"></div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
+    + '<div class="field"><label>Calories</label><input type="number" id="cmf-cal" inputmode="numeric" placeholder="kcal"></div>'
+    + '<div class="field"><label>Protein (g)</label><input type="number" id="cmf-p" inputmode="decimal" placeholder="g"></div>'
+    + '<div class="field"><label>Carbs (g)</label><input type="number" id="cmf-c" inputmode="decimal" placeholder="g"></div>'
+    + '<div class="field"><label>Fat (g)</label><input type="number" id="cmf-f" inputmode="decimal" placeholder="g"></div>'
+    + '</div>'
+    + '<div class="field"><label>Meal</label><select id="cmf-meal"><option>Breakfast</option><option>Lunch</option><option selected>Dinner</option><option>Snack</option><option>Pre-workout</option><option>Post-workout</option></select></div>'
+    + '<button class="btn btn-acc btn-full" onclick="submitCalManualFood()">Add to log</button>'
+    + '<button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="document.getElementById(\'cal-manual-food-sheet\')?.remove()">Cancel</button>'
+    + '</div>';
+  bg.addEventListener('click', e => { if(e.target===bg) bg.remove(); });
+  document.body.appendChild(bg);
+}
+
+function submitCalManualFood() {
+  const name = document.getElementById('cmf-name')?.value?.trim();
+  if(!name) { alert('Enter a food name.'); return; }
+  addFoodItem({
+    name,
+    meal:  document.getElementById('cmf-meal')?.value||'Other',
+    cal:   parseInt(document.getElementById('cmf-cal')?.value)||0,
+    g:     parseFloat(document.getElementById('cmf-p')?.value)||0,
+    carbs: parseFloat(document.getElementById('cmf-c')?.value)||0,
+    fat:   parseFloat(document.getElementById('cmf-f')?.value)||0,
+  }, _calFoodTargetDate);
+  document.getElementById('cal-manual-food-sheet')?.remove();
+  renderCalendar();
+  const toast = document.createElement('div');
+  toast.style.cssText='position:fixed;bottom:calc(100px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:#1a1a1a;border:1px solid rgba(232,255,71,.35);border-radius:12px;padding:10px 18px;font-size:13px;font-weight:600;color:var(--acc);z-index:9999;pointer-events:none;animation:pwaSlideUp .25s ease;';
+  toast.textContent = '✓ Added to ' + new Date(_calFoodTargetDate+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  document.body.appendChild(toast);
+  setTimeout(()=>toast.remove(), 2200);
+}
+
 
 function viewDaySessions(dk){
   const sessions=getSessions();
