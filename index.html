@@ -478,6 +478,27 @@ label{font-size:12px;color:var(--t2);display:block;margin-bottom:5px;}
 .body-stat-name{font-size:13px;font-weight:500;}
 .body-stat-val{font-family:Barlow Condensed,sans-serif;font-size:20px;font-weight:700;color:var(--acc);}
 .body-stat-change{font-size:11px;}
+/* CHECK-IN */
+.checkin-banner{background:linear-gradient(135deg,rgba(232,255,71,.08),rgba(232,255,71,.03));border:1px solid rgba(232,255,71,.25);border-radius:16px;padding:16px;margin-bottom:12px;}
+.checkin-banner-title{font-family:Barlow Condensed,sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;color:var(--acc);margin-bottom:4px;}
+.checkin-banner-sub{font-size:13px;color:var(--t2);margin-bottom:12px;}
+.checkin-summary{background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:14px 16px;margin-bottom:12px;}
+.checkin-summary-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.checkin-summary-title{font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:800;text-transform:uppercase;}
+.checkin-summary-date{font-size:11px;color:var(--t3);}
+.checkin-scores{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.checkin-score-box{background:var(--s2);border-radius:10px;padding:10px 6px;text-align:center;}
+.checkin-score-val{font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:800;line-height:1;}
+.checkin-score-lbl{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-top:3px;}
+.checkin-score-emoji{font-size:14px;line-height:1;margin-bottom:2px;}
+/* CHECK-IN SHEET RATING */
+.rating-row{margin-bottom:18px;}
+.rating-label{font-size:13px;font-weight:500;margin-bottom:8px;color:var(--t1);}
+.rating-label span{font-size:11px;color:var(--t3);font-weight:400;margin-left:6px;}
+.rating-btns{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+.rating-btn{padding:10px 4px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif;border:1px solid var(--b2);background:var(--s2);color:var(--t2);text-align:center;transition:background .12s,color .12s,border-color .12s;}
+.rating-btn.sel{background:var(--acc);color:#000;border-color:var(--acc);}
+.rating-btn:active{opacity:.75;}
 /* WEEKLY SUMMARY */
 .summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
 .sum-box{background:var(--s2);border-radius:10px;padding:12px 8px;text-align:center;}
@@ -3910,6 +3931,89 @@ let proteinLog=JSON.parse(localStorage.getItem('gainz_protein_log')||'[]');
 let bodyMetrics=JSON.parse(localStorage.getItem('gainz_body')||'[]');
 // [{date:'2026-03-23',weight:185,waist:32,hips:38,chest:42,arms:15,notes:''}]
 
+let checkIns=JSON.parse(localStorage.getItem('gainz_checkins')||'{}');
+// {'2026-03-23':{sleep:4,energy:3,soreness:2,nutrition:5,note:'',date:'2026-03-23'}}
+
+function saveCheckIns(){localStorage.setItem('gainz_checkins',JSON.stringify(checkIns));}
+
+function getWeekStartKey(){
+  const now=new Date();
+  const day=now.getDay(); // 0=Sun
+  const start=new Date(now);
+  start.setDate(now.getDate()-day);
+  return start.toISOString().split('T')[0];
+}
+
+function getThisWeekCheckIn(){return checkIns[getWeekStartKey()]||null;}
+
+function saveThisWeekCheckIn(data){
+  const key=getWeekStartKey();
+  checkIns[key]={...data,date:key};
+  saveCheckIns();
+}
+
+// Labels and emoji for check-in scores
+const CI_META={
+  sleep:   {label:'Sleep Quality',   emoji:['😫','😴','😐','😊','🌟']},
+  energy:  {label:'Energy Levels',   emoji:['⚡️1','⚡️2','⚡️3','⚡️4','⚡️5']},
+  soreness:{label:'Muscle Soreness', emoji:['💀','😣','😐','🟢','✅']},
+  nutrition:{label:'Nutrition',      emoji:['🍔','😬','😐','🥗','🏆']},
+};
+
+function showCheckInSheet(){
+  const existing=getThisWeekCheckIn()||{};
+  let ratings={sleep:existing.sleep||0,energy:existing.energy||0,soreness:existing.soreness||0,nutrition:existing.nutrition||0};
+  const weekKey=getWeekStartKey();
+  const weekStart=new Date(weekKey+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+
+  const bg=document.createElement('div');bg.className='sheet-bg';
+
+  function ratingHTML(field){
+    const meta=CI_META[field];
+    return '<div class="rating-row">'
+      +'<div class="rating-label">'+meta.label+'<span>tap to rate</span></div>'
+      +'<div class="rating-btns" id="ci-'+field+'">'
+      +[1,2,3,4,5].map(n=>'<button class="rating-btn'+(ratings[field]===n?' sel':'')+'" onclick="ciRate(&quot;'+field+'&quot;,'+n+')" data-field="'+field+'" data-val="'+n+'">'+n+'</button>').join('')
+      +'</div></div>';
+  }
+
+  bg.innerHTML='<div class="sheet">'
+    +'<div class="sheet-handle"></div>'
+    +'<div class="sheet-title">Weekly Check-In</div>'
+    +'<div class="sheet-sub">Week of '+weekStart+' — How did this week feel?</div>'
+    +ratingHTML('sleep')+ratingHTML('energy')+ratingHTML('soreness')+ratingHTML('nutrition')
+    +'<div class="field" style="margin-top:4px;"><label>Notes (optional)</label>'
+    +'<input type="text" id="ci-note" placeholder="e.g. Felt tired Mon/Tue, great session Thu" value="'+(existing.note||'')+'"></div>'
+    +'<button class="btn btn-acc btn-full" onclick="submitCheckIn()" style="margin-bottom:8px;">Save Check-In</button>'
+    +'<button class="btn btn-ghost btn-full" onclick="closeSheets()">Cancel</button>'
+    +'</div>';
+
+  // expose ratings to inline onclick
+  window._ciRatings=ratings;
+  bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
+  document.body.appendChild(bg);
+}
+
+function ciRate(field,val){
+  window._ciRatings=window._ciRatings||{};
+  window._ciRatings[field]=val;
+  // Update button styles
+  document.querySelectorAll('#ci-'+field+' .rating-btn').forEach(btn=>{
+    btn.classList.toggle('sel',parseInt(btn.dataset.val)===val);
+  });
+}
+
+function submitCheckIn(){
+  const r=window._ciRatings||{};
+  if(!r.sleep||!r.energy||!r.soreness||!r.nutrition){
+    alert('Please rate all four areas before saving.');return;
+  }
+  const note=(document.getElementById('ci-note')?.value||'').trim();
+  saveThisWeekCheckIn({sleep:r.sleep,energy:r.energy,soreness:r.soreness,nutrition:r.nutrition,note});
+  closeSheets();
+  renderCoach();
+}
+
 function saveProteinLog(){localStorage.setItem('gainz_protein_log',JSON.stringify(proteinLog));}
 function saveBodyMetrics(){localStorage.setItem('gainz_body',JSON.stringify(bodyMetrics));}
 
@@ -4116,7 +4220,47 @@ function renderCoach(){
         :'<div style="font-size:13px;color:var(--t3);text-align:center;padding:16px 0;">No measurements yet.<br>Tap "+ Log" to start tracking.</div>'))
     +'</div>';
 
-  scroll.innerHTML=weeklySummaryHTML+proteinHTML+bodyHTML;
+  // ── Check-In ──
+  const thisCI=getThisWeekCheckIn();
+  let checkInHTML='';
+
+  if(!thisCI){
+    // Prompt to do check-in — show banner at top
+    checkInHTML=
+      '<div class="checkin-banner">'
+      +'<div class="checkin-banner-title">📋 Weekly Check-In</div>'
+      +'<div class="checkin-banner-sub">Rate your sleep, energy, soreness, and nutrition for the week — takes 30 seconds.</div>'
+      +'<button class="btn btn-acc" onclick="showCheckInSheet()" style="width:100%;font-size:14px;">Start Check-In</button>'
+      +'</div>';
+  } else {
+    // Show last check-in summary
+    const ciDate=new Date(thisCI.date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    const scoreColor=(v)=>v>=4?'var(--grn)':v<=2?'var(--red)':'var(--acc)';
+    const scoreBox=(field,val)=>{
+      const meta=CI_META[field];
+      return '<div class="checkin-score-box">'
+        +'<div class="checkin-score-emoji">'+meta.emoji[val-1]+'</div>'
+        +'<div class="checkin-score-val" style="color:'+scoreColor(val)+';">'+val+'</div>'
+        +'<div class="checkin-score-lbl">'+meta.label.split(' ')[0]+'</div>'
+        +'</div>';
+    };
+    checkInHTML=
+      '<div class="checkin-summary">'
+      +'<div class="checkin-summary-header">'
+      +'<div class="checkin-summary-title">📋 This Week\'s Check-In</div>'
+      +'<button onclick="showCheckInSheet()" style="font-size:11px;padding:5px 10px;border-radius:20px;background:var(--s2);border:1px solid var(--b2);color:var(--t2);cursor:pointer;font-family:DM Sans,sans-serif;">Edit</button>'
+      +'</div>'
+      +'<div class="checkin-scores">'
+      +scoreBox('sleep',thisCI.sleep)
+      +scoreBox('energy',thisCI.energy)
+      +scoreBox('soreness',thisCI.soreness)
+      +scoreBox('nutrition',thisCI.nutrition)
+      +'</div>'
+      +(thisCI.note?'<div style="font-size:12px;color:var(--t2);margin-top:10px;padding-top:10px;border-top:1px solid var(--b1);">💬 '+thisCI.note+'</div>':'')
+      +'</div>';
+  }
+
+  scroll.innerHTML=checkInHTML+weeklySummaryHTML+proteinHTML+bodyHTML;
 }
 
 function quickAddProtein(g,name){
