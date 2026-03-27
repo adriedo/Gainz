@@ -1247,14 +1247,17 @@ let _speechUnlocked = false;
 function unlockSpeech() {
   if(_speechUnlocked || !window.speechSynthesis) return;
   _speechUnlocked = true;
-  // Speak silent utterance to unlock audio session
-  const u = new SpeechSynthesisUtterance(' ');
-  u.volume = 0; u.rate = 2;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance('ready');
+  u.volume = 0.01; // non-zero so iOS honours it, inaudible in practice
+  u.rate = 10;     // fires and ends instantly
+  u.pitch = 1;
+  // No voice assignment — use iOS default so unlock fires immediately
   window.speechSynthesis.speak(u);
 }
-// Unlock on ANY user interaction
-['touchstart','touchend','click','keydown'].forEach(evt =>
-  document.addEventListener(evt, () => unlockSpeech(), {once:false, passive:true})
+// Best-effort fallback — guaranteed path is toggleVoice() and launchWk()
+['touchend','click'].forEach(evt =>
+  document.addEventListener(evt, () => { if(!_speechUnlocked) unlockSpeech(); }, {passive:true})
 );
 
 // speak queue to prevent overlap on iOS
