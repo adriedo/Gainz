@@ -527,22 +527,6 @@ label{font-size:12px;color:var(--t2);display:block;margin-bottom:5px;}
 .wn-avg-goal{font-size:10px;color:var(--t3);margin-top:2px;}
 .wn-avg-bar{height:4px;background:var(--s3);border-radius:2px;margin-top:6px;overflow:hidden;}
 .wn-avg-bar-fill{height:100%;border-radius:2px;transition:width .4s;}
-/* RPE × CHECK-IN CORRELATION CARD */
-.corr-card{border-radius:16px;padding:16px;margin-bottom:12px;border:1px solid;}
-.corr-card.overreaching{background:rgba(255,71,71,.07);border-color:rgba(255,71,71,.3);}
-.corr-card.adapting{background:rgba(71,255,138,.07);border-color:rgba(71,255,138,.3);}
-.corr-card.manageable{background:rgba(232,255,71,.06);border-color:rgba(232,255,71,.2);}
-.corr-card.non-training{background:rgba(71,180,255,.06);border-color:rgba(71,180,255,.2);}
-.corr-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;}
-.corr-icon{font-size:28px;line-height:1;flex-shrink:0;margin-top:2px;}
-.corr-title{font-family:Barlow Condensed,sans-serif;font-size:19px;font-weight:800;text-transform:uppercase;line-height:1.1;margin-bottom:3px;}
-.corr-headline{font-size:12px;font-weight:600;opacity:.8;margin-bottom:0;}
-.corr-signals{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
-.corr-pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;}
-.corr-pill.high{background:rgba(255,71,71,.15);color:var(--red);}
-.corr-pill.mid{background:rgba(232,255,71,.12);color:var(--acc);}
-.corr-pill.low{background:rgba(255,255,255,.07);color:var(--t2);}
-.corr-detail{font-size:12px;color:var(--t2);line-height:1.6;padding-top:10px;border-top:1px solid rgba(255,255,255,.06);}
 /* PROTEIN */
 .protein-ring-wrap{display:flex;align-items:center;gap:20px;margin-bottom:14px;}
 .protein-ring{position:relative;width:90px;height:90px;flex-shrink:0;}
@@ -4545,7 +4529,7 @@ function buildWeeklySummary(){
     }
   });
 
-  return{weekSessions,strengthSessions,cardioSessions,totalSets,totalVol,totalCardioMins,weekPRs,readyToProgress,avgProtein,avgRpe,highRpeSets,rpeOverreaching,rpeSpikes,allRpeSets,start,end};
+  return{weekSessions,strengthSessions,cardioSessions,totalSets,totalVol,totalCardioMins,weekPRs,readyToProgress,avgProtein,avgRpe,highRpeSets,rpeOverreaching,rpeSpikes,start,end};
 }
 
 // ─── BODY METRICS ─────────────────────────────────────────────────────────────
@@ -4571,128 +4555,6 @@ function getBodyTrend(field){
   if(entries.length<2)return null;
   const diff=entries[0][field]-entries[1][field];
   return{latest:entries[0][field],prev:entries[1][field],diff:Math.round(diff*10)/10};
-}
-
-// ─── RPE × CHECK-IN CORRELATION ENGINE ───────────────────────────────────────
-// Scores: sleep/energy/nutrition 1=bad 5=great | soreness 1=very sore 5=fresh
-// RPE: 6=easy 10=max effort
-function buildCorrelationInsight(ws, ci){
-  // Need both data sources
-  if(!ws.avgRpe || !ci) return null;
-
-  const rpe   = ws.avgRpe;          // 6–10
-  const sets  = ws.allRpeSets?.length || 0;
-  const energy    = ci.energy;      // 1–5
-  const sleep     = ci.sleep;       // 1–5
-  const soreness  = ci.soreness;    // 1=wrecked, 5=fresh
-  const nutrition = ci.nutrition;   // 1–5
-
-  // Need at least 3 rated sets to trust the RPE signal
-  if(sets < 3) return null;
-
-  // ── Severity scoring ─────────────────────────────────────────────────────
-  // Each signal contributes points toward an overreaching score (0–10)
-  let score = 0;
-  const signals = [];
-
-  // RPE contribution (0–4 pts)
-  if     (rpe >= 9.0) { score += 4; signals.push({k:'rpe', msg:`avg RPE ${rpe}`, severity:'high'}); }
-  else if(rpe >= 8.5) { score += 3; signals.push({k:'rpe', msg:`avg RPE ${rpe}`, severity:'high'}); }
-  else if(rpe >= 8.0) { score += 2; signals.push({k:'rpe', msg:`avg RPE ${rpe}`, severity:'mid'}); }
-  else if(rpe >= 7.5) { score += 1; signals.push({k:'rpe', msg:`avg RPE ${rpe}`, severity:'low'}); }
-
-  // Energy contribution (0–3 pts)
-  if     (energy === 1) { score += 3; signals.push({k:'energy', msg:`energy ${energy}/5`, severity:'high'}); }
-  else if(energy === 2) { score += 2; signals.push({k:'energy', msg:`energy ${energy}/5`, severity:'mid'}); }
-  else if(energy === 3) { score += 1; signals.push({k:'energy', msg:`energy ${energy}/5`, severity:'low'}); }
-
-  // Sleep contribution (0–2 pts)
-  if     (sleep === 1) { score += 2; signals.push({k:'sleep', msg:`sleep ${sleep}/5`, severity:'high'}); }
-  else if(sleep === 2) { score += 1; signals.push({k:'sleep', msg:`sleep ${sleep}/5`, severity:'mid'}); }
-
-  // Soreness contribution (0–2 pts) — low score = very sore
-  if     (soreness === 1) { score += 2; signals.push({k:'soreness', msg:`still very sore`, severity:'high'}); }
-  else if(soreness === 2) { score += 1; signals.push({k:'soreness', msg:`soreness above normal`, severity:'mid'}); }
-
-  // Positive signals — subtract from score
-  if(energy >= 4)   score -= 1;
-  if(sleep  >= 4)   score -= 1;
-  if(soreness >= 4) score -= 1;
-  if(rpe    <= 7.0) score -= 1;
-
-  score = Math.max(0, score);
-
-  // ── Classify outcome ─────────────────────────────────────────────────────
-  // Overreaching: score ≥ 5 AND at least RPE + one subjective signal
-  const hasRpeSignal  = signals.some(s => s.k === 'rpe');
-  const hasSubjSignal = signals.some(s => s.k !== 'rpe');
-
-  if(score >= 5 && hasRpeSignal && hasSubjSignal){
-    // Build the headline from the top two signals
-    const rpeSignal   = signals.find(s => s.k === 'rpe');
-    const subjSignals = signals.filter(s => s.k !== 'rpe').slice(0, 2);
-    const subjStr     = subjSignals.map(s => s.msg).join(' and ');
-
-    // Recommendation varies by which signals dominate
-    let rec = '';
-    if(sleep <= 2 && energy <= 2){
-      rec = 'Reduce training volume by 30–40%, prioritise 8+ hrs sleep, and push your next heavy session back by a day.';
-    } else if(soreness === 1){
-      rec = 'Your muscles haven\'t recovered from the last block. Take a full rest day or swap your next session for light mobility work.';
-    } else if(energy <= 2){
-      rec = 'Low energy with high effort is a classic accumulation sign. Eat at or above calorie goal today and cut intensity by one notch.';
-    } else {
-      rec = 'You\'re accumulating fatigue faster than you\'re recovering. Consider a deload: same exercises, 40–50% of normal volume.';
-    }
-
-    return {
-      type: 'overreaching',
-      score,
-      rpe,
-      headline: `RPE ${rpe} · ${subjStr}`,
-      detail: rec,
-      signals,
-    };
-  }
-
-  // Adaptation: RPE holding steady or dropping while check-in scores are strong
-  if(rpe <= 7.5 && energy >= 4 && (sleep >= 3 || soreness >= 4)){
-    return {
-      type: 'adapting',
-      score,
-      rpe,
-      headline: `RPE ${rpe} avg with energy ${energy}/5`,
-      detail: `Your effort scores are controlled and you're feeling good between sessions. This is the adaptation window — a good time to add a small amount of volume or intensity.`,
-      signals,
-    };
-  }
-
-  // Mixed: high RPE but subjective scores are OK (body managing load)
-  if(rpe >= 8.0 && energy >= 3 && sleep >= 3 && soreness >= 3){
-    return {
-      type: 'manageable',
-      score,
-      rpe,
-      headline: `RPE ${rpe} avg but check-in scores look fine`,
-      detail: `You're working hard but recovering well. Keep monitoring — if energy or soreness scores drop in next week's check-in with RPE still high, pull back load.`,
-      signals,
-    };
-  }
-
-  // High check-in distress but RPE was actually moderate (not training-related fatigue)
-  if(rpe < 7.5 && (energy <= 2 || sleep <= 2)){
-    return {
-      type: 'non_training',
-      score,
-      rpe,
-      headline: `Low ${energy<=2?'energy':'sleep'} score but RPE was only ${rpe}`,
-      detail: `Your fatigue this week doesn't look training-related — your RPE was moderate. Life stress, poor sleep, or nutrition are more likely culprits than volume.`,
-      signals,
-    };
-  }
-
-  // Insufficient contrast to say anything meaningful
-  return null;
 }
 
 // ─── WEEKLY NUTRITION SUMMARY ────────────────────────────────────────────────
@@ -4780,6 +4642,14 @@ function renderCoach(){
           +'<div><strong>'+sp.name+'</strong><br><span style="font-size:11px;color:var(--t2);">RPE '+sp.prevAvg+' → '+sp.thisAvg+' (+'+sp.delta+') — harder than usual, watch recovery</span></div>'
           +'</div>'
         ).join('')
+      :'')
+    // Check-in RPE correlation
+    +(ws.avgRpe&&thisCI&&thisCI.energy<=2&&ws.avgRpe>=8
+      ?'<div style="display:flex;align-items:flex-start;gap:10px;background:rgba(71,180,255,.07);border:1px solid rgba(71,180,255,.2);border-radius:12px;padding:12px 14px;margin:10px 0 4px;">'
+        +'<div style="font-size:18px;flex-shrink:0;">🔗</div>'
+        +'<div><div style="font-size:13px;font-weight:600;color:var(--blu);margin-bottom:3px;">Low energy + high RPE</div>'
+        +'<div style="font-size:12px;color:var(--t2);line-height:1.5;">You rated energy '+thisCI.energy+'/5 this week and your sets averaged RPE '+ws.avgRpe+'. Your body is telling you the same thing in and out of the gym — prioritise sleep and recovery.</div></div>'
+        +'</div>'
       :'')
     +(ws.weekPRs.length?'<div style="font-size:11px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin:12px 0 8px;">🏆 PRs this week</div>'+prRows:'')
     +(ws.readyToProgress.length?'<div style="font-size:11px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin:12px 0 8px;">🚀 Ready to progress</div>'+progressRows:'')
@@ -5017,52 +4887,7 @@ function renderCoach(){
       +'<button class="btn btn-ghost btn-full" style="margin-top:10px;font-size:13px;" onclick="nav(\'food\',null)">Go to Food →</button>'
       +'</div>';
 
-  // ── RPE × Check-In Correlation Card ──
-  const corr = buildCorrelationInsight(ws, thisCI);
-  let correlationHTML = '';
-
-  if(corr){
-    const typeMap = {
-      overreaching:  { cls:'overreaching',  icon:'⚠️',  title:'Overreaching Signal' },
-      adapting:      { cls:'adapting',       icon:'📈',  title:'Adapting Well' },
-      manageable:    { cls:'manageable',     icon:'🎯',  title:'Load Under Control' },
-      non_training:  { cls:'non-training',   icon:'🔍',  title:'Not Training-Related' },
-    };
-    const tm = typeMap[corr.type];
-    const titleColor = corr.type==='overreaching'?'var(--red)':corr.type==='adapting'?'var(--grn)':corr.type==='manageable'?'var(--acc)':'var(--blu)';
-
-    const pills = corr.signals.map(s =>
-      `<span class="corr-pill ${s.severity}">${s.msg}</span>`
-    ).join('');
-
-    correlationHTML =
-      `<div class="corr-card ${tm.cls}">`
-      +`<div class="corr-header">`
-      +  `<div class="corr-icon">${tm.icon}</div>`
-      +  `<div>`
-      +    `<div class="corr-title" style="color:${titleColor};">${tm.title}</div>`
-      +    `<div class="corr-headline">${corr.headline}</div>`
-      +  `</div>`
-      +`</div>`
-      +(pills ? `<div class="corr-signals">${pills}</div>` : '')
-      +`<div class="corr-detail">${corr.detail}</div>`
-      +`</div>`;
-  } else if(ws.avgRpe && !thisCI){
-    // Have RPE but no check-in yet — nudge them to complete it
-    correlationHTML =
-      `<div class="corr-card non-training" style="background:rgba(232,255,71,.05);border-color:rgba(232,255,71,.18);">`
-      +`<div class="corr-header">`
-      +  `<div class="corr-icon">🔗</div>`
-      +  `<div>`
-      +    `<div class="corr-title" style="color:var(--acc);">Complete Your Check-In</div>`
-      +    `<div class="corr-headline">You have RPE data — add check-in scores to unlock the full coaching loop</div>`
-      +  `</div>`
-      +`</div>`
-      +`<button class="btn btn-acc btn-full" style="font-size:13px;" onclick="showCheckInSheet()">Start Weekly Check-In →</button>`
-      +`</div>`;
-  }
-
-  scroll.innerHTML=checkInHTML+weeklySummaryHTML+correlationHTML+weekNutritionHTML+proteinHTML+bodyHTML+backupHTML;
+  scroll.innerHTML=checkInHTML+weeklySummaryHTML+weekNutritionHTML+proteinHTML+bodyHTML+backupHTML;
 }
 
 function quickAddProtein(g,name){
