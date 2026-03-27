@@ -1217,11 +1217,6 @@ function toggleVoice(){
 function toggleVibration(){
   vibrationEnabled=!vibrationEnabled;
   localStorage.setItem('gainz_vibrate',JSON.stringify(vibrationEnabled));
-  document.querySelectorAll('.vibration-toggle-btn').forEach(b=>{
-    b.classList.toggle('on',vibrationEnabled);
-    b.textContent=vibrationEnabled?'📳 Vibrate on':'📳 Vibrate off';
-  });
-  if(vibrationEnabled&&navigator.vibrate)navigator.vibrate(100);
 }
 
 // Cache preferred voice - iOS loads voices async
@@ -1317,12 +1312,13 @@ function _processSpeak() {
     setTimeout(_processSpeak, 100);
   };
 
-  // Small delay before speaking helps iOS process the cancel
+  // iOS needs a longer pause after cancel() before speak() is reliable
   setTimeout(() => {
     if(window.speechSynthesis.paused) window.speechSynthesis.resume();
     window.speechSynthesis.speak(u);
-  }, 50);
+  }, 120);
 }
+
 
 // Build the "rest over" announcement based on what's coming next
 function buildNextSetAnnouncement(currentExName,currentSetIdx){
