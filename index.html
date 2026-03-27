@@ -27,7 +27,6 @@
   animation:pwaSlideUp .3s ease;
 }
 @keyframes pwaSlideUp{from{opacity:0;transform:translateX(-50%) translateY(18px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 #pwa-banner .pi{font-size:26px;flex-shrink:0;line-height:1;}
 #pwa-banner .pt{flex:1;min-width:0;}
 #pwa-banner .pt-h{font-size:13px;font-weight:600;color:#f0f0f0;white-space:nowrap;}
@@ -559,40 +558,6 @@ label{font-size:12px;color:var(--t2);display:block;margin-bottom:5px;}
 .pq-btn:active{background:var(--s3);}
 .protein-log-item{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--b1);font-size:13px;}
 .protein-log-item:last-of-type{border-bottom:none;}
-/* PROGRESS PHOTOS */
-.photo-checkin-card{background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:16px;margin-bottom:10px;}
-.photo-slot{position:relative;border-radius:12px;overflow:hidden;background:var(--s2);border:1.5px dashed var(--b2);cursor:pointer;aspect-ratio:3/4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;}
-.photo-slot img{width:100%;height:100%;object-fit:cover;display:block;}
-.photo-slot-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);}
-.photo-slot-add{width:32px;height:32px;border-radius:50%;background:var(--s3);display:flex;align-items:center;justify-content:center;}
-.photo-slot.has-photo .photo-slot-overlay{position:absolute;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:space-between;padding:8px;opacity:0;transition:opacity .2s;}
-.photo-slot.has-photo:active .photo-slot-overlay{opacity:1;}
-.photo-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0;}
-.photo-checkin-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--b1);}
-.photo-checkin-row:last-child{border-bottom:none;}
-.photo-thumb-strip{display:flex;gap:4px;}
-.photo-thumb{width:36px;height:48px;border-radius:6px;object-fit:cover;background:var(--s2);}
-.photo-thumb-empty{width:36px;height:48px;border-radius:6px;background:var(--s2);border:1px dashed var(--b2);}
-.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.compare-col{display:flex;flex-direction:column;gap:6px;}
-.compare-img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:10px;background:var(--s2);}
-.compare-lbl{font-size:11px;color:var(--t3);text-align:center;}
-
-/* HYDRATION */
-.hydration-arc-wrap{display:flex;align-items:center;gap:16px;margin-bottom:14px;}
-.hydration-arc{position:relative;width:80px;height:80px;flex-shrink:0;}
-.hydration-arc svg{transform:rotate(-90deg);}
-.h-track{fill:none;stroke:var(--s2);stroke-width:8;}
-.h-prog{fill:none;stroke:#378ADD;stroke-width:8;stroke-linecap:round;transition:stroke-dasharray .5s;}
-.hydration-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-.hydration-oz{font-family:Barlow Condensed,sans-serif;font-size:20px;font-weight:800;line-height:1;color:#378ADD;}
-.hydration-lbl{font-size:9px;color:var(--t3);font-weight:500;text-transform:uppercase;}
-.water-quick-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
-.wq-btn{padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;border:1px solid #378ADD;background:rgba(55,138,221,.1);color:#378ADD;}
-.wq-btn:active{background:rgba(55,138,221,.25);}
-.water-log-item{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--b1);font-size:13px;}
-.water-log-item:last-of-type{border-bottom:none;}
-
 /* BODY METRICS */
 .metric-input-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
 .body-stat-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--b1);}
@@ -1159,7 +1124,6 @@ function beep(){try{const c=new(window.AudioContext||window.webkitAudioContext)(
 
 // ─── VOICE ────────────────────────────────────────────────────────────────
 let voiceEnabled=JSON.parse(localStorage.getItem('gainz_voice')||'true');
-let vibrationEnabled=JSON.parse(localStorage.getItem('gainz_vibrate')||'true');
 // logUnit: what unit the user currently logs IN (stored with each entry)
 // viewUnit: what unit to display in progress view (can convert)
 let logUnit=localStorage.getItem('gainz_log_unit')||'mi';   // 'mi' or 'km' — per entry input
@@ -1210,16 +1174,6 @@ function toggleVoice(){
     // Header btn shows icon only, overlay btn shows full label
     b.textContent=b.id==='wk-voice-btn'?(voiceEnabled?'🔊':'🔇'):(voiceEnabled?'🔊 Voice on':'🔇 Voice off');
   });
-}
-
-function toggleVibration(){
-  vibrationEnabled=!vibrationEnabled;
-  localStorage.setItem('gainz_vibrate',JSON.stringify(vibrationEnabled));
-  document.querySelectorAll('.vibration-toggle-btn').forEach(b=>{
-    b.classList.toggle('on',vibrationEnabled);
-    b.textContent=vibrationEnabled?'📳 Vibrate on':'📳 Vibrate off';
-  });
-  if(vibrationEnabled&&navigator.vibrate)navigator.vibrate(100);
 }
 
 // Cache preferred voice - iOS loads voices async
@@ -1585,7 +1539,7 @@ function getTarget(name){
 
 function computePRs(){const b={};wkLog.forEach(e=>{const m=Math.max(...e.sets.map(s=>parseFloat(s.weight)||0));if(m>0&&(!b[e.exercise]||m>b[e.exercise]))b[e.exercise]=m;});return b;}
 function typeColor(t){return`var(--${t||'full'})`;}
-function closeSheets(){document.querySelectorAll('.sheet-bg').forEach(el=>el.remove());if(_exChartInstance){_exChartInstance.destroy();_exChartInstance=null;}if(_cardioChartInstance){_cardioChartInstance.destroy();_cardioChartInstance=null;}if(_bodyChartInstance){_bodyChartInstance.destroy();_bodyChartInstance=null;}}
+function closeSheets(){document.querySelectorAll('.sheet-bg').forEach(el=>el.remove());if(_exChartInstance){_exChartInstance.destroy();_exChartInstance=null;}if(_cardioChartInstance){_cardioChartInstance.destroy();_cardioChartInstance=null;}}
 
 function findEx(name){
   const ovStr=localStorage.getItem('gainz_ex_overrides');
@@ -1606,7 +1560,7 @@ function nav(screen,btn){
   if(screen==='home')renderHome();
   if(screen==='history')renderHistory();
   if(screen==='calendar')renderCalendar();
-  if(screen==='progress'){renderProgress();renderPhotoCard();}
+  if(screen==='progress')renderProgress();
   if(screen==='edit')renderEdit();
   if(screen==='coach')renderCoach();
   if(screen==='food')renderFood();
@@ -1906,14 +1860,11 @@ function startRest(sec,name,setIdx){
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;">
       <button class="skip-btn" onclick="skipRest()">Skip rest</button>
       <button class="voice-toggle-btn voice-btn" onclick="toggleVoice()" style="padding:10px 14px;"></button>
-      <button class="vibration-toggle-btn voice-btn" onclick="toggleVibration()" style="padding:10px 14px;"></button>
     </div>`;
   // Set initial voice button state after DOM insert
   document.body.appendChild(ov);
   const vb=ov.querySelector('.voice-toggle-btn');
   if(vb){vb.classList.toggle('on',voiceEnabled);vb.textContent=voiceEnabled?'🔊 Voice on':'🔇 Voice off';}
-  const vibBtn=ov.querySelector('.vibration-toggle-btn');
-  if(vibBtn){vibBtn.classList.toggle('on',vibrationEnabled);vibBtn.textContent=vibrationEnabled?'📳 Vibrate on':'📳 Vibrate off';}
   restInterval=setInterval(()=>{
     restRem--;
     const se=eid('rs'),rpe=eid('rp');
@@ -1927,7 +1878,6 @@ function startRest(sec,name,setIdx){
       clearInterval(restInterval);
       eid('rest-ov-el')?.remove();
       beep();
-      if(vibrationEnabled&&navigator.vibrate)navigator.vibrate([200,100,200,100,200]);
       if(voiceEnabled){
         // Say "Go!" then chain directly into the full next-set announcement
         const nextMsg=buildNextSetAnnouncement(_announceName,_announceSetIdx);
@@ -1971,28 +1921,7 @@ function finishWorkout(){
     if(sets.length)entries.push({exercise:n,dayName:day.name,dayId:day.id,sessionId:activeWk.sessionId,date:new Date().toISOString(),sets});
   });
   wkLog=[...entries,...wkLog];saveLog();
-  const total=entries.reduce((a,e)=>a+e.sets.length,0);
-  const mins=Math.floor(wkSecs/60);
-
-  // ── Planned vs. actual volume ───────────────────────────────────────────
-  const plannedSets=day.exercises.reduce((a,n)=>a+(findEx(n)?.sets||3),0);
-  const volPct=plannedSets>0?Math.min(Math.round((total/plannedSets)*100),100):100;
-  const volColor=volPct>=100?'var(--grn)':volPct>=75?'var(--acc)':'var(--red)';
-  const volLabel=volPct>=100?'Full session ✓':volPct>=75?'Solid effort':'Partial session';
-  const volHTML=`<div style="background:var(--s2);border-radius:14px;padding:14px 16px;margin-bottom:14px;">
-    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
-      <div style="font-size:12px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;">Volume completed</div>
-      <div style="font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:800;color:${volColor};">${volPct}%</div>
-    </div>
-    <div style="height:6px;background:var(--s3);border-radius:3px;overflow:hidden;margin-bottom:8px;">
-      <div style="height:100%;width:${volPct}%;background:${volColor};border-radius:3px;transition:width .6s ease;"></div>
-    </div>
-    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t3);">
-      <span>${volLabel}</span>
-      <span>${total} / ${plannedSets} sets</span>
-    </div>
-  </div>`;
-
+  const total=entries.reduce((a,e)=>a+e.sets.length,0);const mins=Math.floor(wkSecs/60);
   eid('wk-hdr').style.display='none';eid('wk-footer').style.display='none';eid('wk-bar').style.width='100%';
   eid('wk-scroll').innerHTML=`<div class="finish-wrap fu">
     <div style="font-size:56px">🔥</div>
@@ -2003,7 +1932,30 @@ function finishWorkout(){
       <div class="finish-stat"><div class="fs-val">${entries.length}</div><div class="fs-lbl">Exercises</div></div>
       <div class="finish-stat"><div class="fs-val bc" style="font-size:22px">${day.name}</div><div class="fs-lbl">Day type</div></div>
     </div>
-    ${volHTML}
+    <button class="btn btn-acc btn-full" onclick="goHome()">Back to home</button>
+  </div>`;
+}
+
+function finishWorkout(){
+  if(wkDone)return;wkDone=true;
+  clearInterval(wkTimer);clearInterval(restInterval);eid('rest-ov-el')?.remove();
+  const day=activeWk.day;const entries=[];
+  day.exercises.forEach(n=>{
+    const sets=activeWk.sets[n].filter(s=>s.done||s.weight||s.reps);
+    if(sets.length)entries.push({exercise:n,dayName:day.name,dayId:day.id,sessionId:activeWk.sessionId,date:new Date().toISOString(),sets});
+  });
+  wkLog=[...entries,...wkLog];saveLog();
+  const total=entries.reduce((a,e)=>a+e.sets.length,0);const mins=Math.floor(wkSecs/60);
+  eid('wk-hdr').style.display='none';eid('wk-footer').style.display='none';eid('wk-bar').style.width='100%';
+  eid('wk-scroll').innerHTML=`<div class="finish-wrap fu">
+    <div style="font-size:56px">🔥</div>
+    <div class="finish-ttl bc">Session<br><em>Complete</em></div>
+    <div class="finish-grid">
+      <div class="finish-stat"><div class="fs-val">${mins}</div><div class="fs-lbl">Minutes</div></div>
+      <div class="finish-stat"><div class="fs-val">${total}</div><div class="fs-lbl">Sets done</div></div>
+      <div class="finish-stat"><div class="fs-val">${entries.length}</div><div class="fs-lbl">Exercises</div></div>
+      <div class="finish-stat"><div class="fs-val bc" style="font-size:22px">${day.name}</div><div class="fs-lbl">Day type</div></div>
+    </div>
     <div class="pwn-card">
       <div class="pwn-title">💧 Post-Workout Meal</div>
       <div class="pwn-sub">Hit protein + carbs within 60 min to maximise recovery and muscle synthesis.</div>
@@ -3118,9 +3070,8 @@ function renderProgress(){
       <button class="prog-tab${progTab==='prs'?' on':''}" onclick="progTab='prs';renderProgress()">Strength PRs</button>
       <button class="prog-tab${progTab==='vol'?' on':''}" onclick="progTab='vol';renderProgress()">Volume</button>
       <button class="prog-tab${progTab==='cardio'?' on':''}" onclick="progTab='cardio';renderProgress()">Cardio</button>
-      <button class="prog-tab${progTab==='body'?' on':''}" onclick="progTab='body';renderProgress()">Body</button>
     </div>
-    ${progTab==='prs'?renderPRs(prs):progTab==='vol'?renderMuscleVol(topMuscles,maxMVol):progTab==='cardio'?renderCardioProgress():renderBodyProgress()}`;
+    ${progTab==='prs'?renderPRs(prs):progTab==='vol'?renderMuscleVol(topMuscles,maxMVol):renderCardioProgress()}`;
 }
 
 function renderPRs(prs){
@@ -4406,10 +4357,7 @@ let proteinLog=JSON.parse(localStorage.getItem('gainz_protein_log')||'[]');
 // [{date:'2026-03-23',items:[{name:'Chicken breast',g:40,time:'13:00'},...]}]
 
 let bodyMetrics=JSON.parse(localStorage.getItem('gainz_body')||'[]');
-// [{date:'2026-03-23',weight:185,bodyFat:11.2,muscleMass:133.6,fatFreeMass:140.4,
-//   visceralFat:5,bmr:1734,bodyWater:62.1,
-//   skeletalMusclePct:48.2,subcutFat:8.1,boneMass:7.2,proteinPct:18.1,metabolicAge:25,
-//   waist:32,hips:38,chest:42,arms:15,notes:''}]
+// [{date:'2026-03-23',weight:185,waist:32,hips:38,chest:42,arms:15,notes:''}]
 
 // ─── WEEKLY CHECK-IN ─────────────────────────────────────────────────────────
 let checkIns=JSON.parse(localStorage.getItem('gainz_checkins')||'{}');
@@ -4499,523 +4447,6 @@ function submitCheckIn(){
 
 function saveProteinLog(){localStorage.setItem('gainz_protein_log',JSON.stringify(proteinLog));}
 function saveBodyMetrics(){localStorage.setItem('gainz_body',JSON.stringify(bodyMetrics));}
-
-function saveBodyMetrics(){localStorage.setItem('gainz_body',JSON.stringify(bodyMetrics));}
-
-// ─── PROGRESS PHOTOS (IndexedDB) ─────────────────────────────────────────────
-// Schema: store 'checkins' — each record: { id, date, front, side, back, notes }
-// front/side/back are base64 JPEG strings or null
-// Photos stored in IndexedDB (not localStorage) — supports 100s of MB on device
-
-let _photoDB=null;
-
-function openPhotoDB(){
-  if(_photoDB)return Promise.resolve(_photoDB);
-  return new Promise((res,rej)=>{
-    const req=indexedDB.open('gainz_photos',1);
-    req.onupgradeneeded=e=>{
-      const db=e.target.result;
-      if(!db.objectStoreNames.contains('checkins')){
-        const store=db.createObjectStore('checkins',{keyPath:'id',autoIncrement:true});
-        store.createIndex('date','date',{unique:false});
-      }
-    };
-    req.onsuccess=e=>{_photoDB=e.target.result;res(_photoDB);};
-    req.onerror=e=>rej(e.target.error);
-  });
-}
-
-async function getAllPhotoCheckins(){
-  const db=await openPhotoDB();
-  return new Promise((res,rej)=>{
-    const tx=db.transaction('checkins','readonly');
-    const req=tx.objectStore('checkins').getAll();
-    req.onerror=e=>rej(e.target.error);
-    tx.oncomplete=()=>res((req.result||[]).sort((a,b)=>b.date.localeCompare(a.date)));
-    tx.onerror=e=>rej(e.target.error);
-  });
-}
-
-async function savePhotoCheckin(record){
-  const db=await openPhotoDB();
-  return new Promise((res,rej)=>{
-    const tx=db.transaction('checkins','readwrite');
-    const store=tx.objectStore('checkins');
-    // For new records, remove id entirely so autoIncrement takes over
-    // For existing records (edit), keep id for put()
-    let req;
-    if(record.id){
-      req=store.put(record);
-    } else {
-      const {id:_drop,...clean}=record;
-      req=store.add(clean);
-    }
-    req.onerror=e=>rej(e.target.error);
-    tx.oncomplete=()=>res(req.result);
-    tx.onerror=e=>rej(e.target.error);
-    tx.onabort=e=>rej(new Error('Transaction aborted'));
-  });
-}
-
-async function deletePhotoCheckin(id){
-  const db=await openPhotoDB();
-  return new Promise((res,rej)=>{
-    const tx=db.transaction('checkins','readwrite');
-    tx.objectStore('checkins').delete(id);
-    tx.oncomplete=()=>res();
-    tx.onerror=e=>rej(e.target.error);
-    tx.onabort=e=>rej(new Error('Transaction aborted'));
-  });
-}
-
-// Compress photo to 800px/70% JPEG before storing
-function compressPhoto(file){
-  return new Promise((res,rej)=>{
-    // Step 1: read file as base64 data URL via FileReader (safe on iOS PWA)
-    const reader=new FileReader();
-    reader.onerror=()=>rej(new Error('FileReader failed'));
-    reader.onload=e=>{
-      // Step 2: load into Image from data URL
-      const img=new Image();
-      img.onerror=()=>rej(new Error('Image decode failed'));
-      img.onload=()=>{
-        try{
-          const MAX=800;
-          let w=img.width,h=img.height;
-          // Portrait: cap height; landscape: cap width
-          if(h>w){if(h>MAX*1.5){w=Math.round(w*(MAX*1.5/h));h=Math.round(MAX*1.5);}}
-          else{if(w>MAX){h=Math.round(h*(MAX/w));w=MAX;}}
-          const canvas=document.createElement('canvas');
-          canvas.width=w;canvas.height=h;
-          const ctx=canvas.getContext('2d');
-          if(!ctx){res(e.target.result);return;} // fallback: return original if no canvas
-          ctx.drawImage(img,0,0,w,h);
-          const out=canvas.toDataURL('image/jpeg',0.70);
-          res(out||e.target.result);
-        }catch(err){
-          // Canvas failed — return the original uncompressed
-          res(e.target.result);
-        }
-      };
-      img.src=e.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-// ── Photo check-in sheet ──────────────────────────────────────────────────────
-async function showPhotoCheckinSheet(existingId){
-  const allCheckins=await getAllPhotoCheckins();
-  const existing=existingId?allCheckins.find(c=>c.id===existingId):null;
-
-  // Suggest date: today
-  const dateVal=existing?.date||todayKey();
-  const draft={id:existing?.id||null, date:dateVal,
-    front:existing?.front||null, side:existing?.side||null, back:existing?.back||null,
-    notes:existing?.notes||''};
-
-  const bg=document.createElement('div');bg.className='sheet-bg';
-
-  // File input lives permanently on bg — never inside the re-rendered sheet div
-  const fileInput=document.createElement('input');
-  fileInput.type='file';
-  fileInput.accept='image/*'; // no capture= so photo library is available on iOS
-  fileInput.style.display='none';
-  fileInput.addEventListener('change',()=>handlePhotoUpload(fileInput));
-
-  function renderSheet(){
-    const slots=['front','side','back'].map(angle=>{
-      const img=draft[angle];
-      return`<div class="photo-slot${img?' has-photo':''}" onclick="triggerPhotoUpload('${angle}')">
-        ${img
-          ?`<img src="${img}" alt="${angle}">
-             <div class="photo-slot-overlay">
-               <span style="font-size:11px;font-weight:600;color:#fff;text-transform:uppercase;">${angle}</span>
-               <button onclick="event.stopPropagation();draftRemovePhoto('${angle}')" style="background:rgba(255,71,71,.8);border:none;border-radius:6px;color:#fff;font-size:11px;font-weight:600;padding:3px 8px;cursor:pointer;">Remove</button>
-             </div>`
-          :`<div class="photo-slot-add"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--t2)" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
-            <div class="photo-slot-lbl">${angle}</div>`}
-      </div>`;
-    }).join('');
-
-    const anyPhoto=draft.front||draft.side||draft.back;
-
-    bg.innerHTML=`<div class="sheet" style="max-height:92vh;">
-      <div class="sheet-handle"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
-        <div class="sheet-title" style="margin-bottom:0;">Progress Photos</div>
-        <div style="font-size:12px;color:var(--t3);">${new Date(draft.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>
-      </div>
-      <div style="background:rgba(232,255,71,.07);border:0.5px solid rgba(232,255,71,.2);border-radius:10px;padding:10px 12px;margin-bottom:14px;">
-        <div style="font-size:12px;font-weight:600;color:var(--acc);margin-bottom:3px;">📋 Coach's conditions for accurate tracking</div>
-        <div style="font-size:12px;color:var(--t2);line-height:1.6;">Morning · Fasted · Same lighting · Same clothing · Relaxed pose</div>
-      </div>
-      <div class="photo-grid-3">${slots}</div>
-      <div class="field" style="margin-top:4px;">
-        <label>Notes (optional)</label>
-        <input type="text" id="photo-notes-input" placeholder="e.g. Week 8, feeling leaner" value="${draft.notes||''}">
-      </div>
-      ${anyPhoto
-        ?`<button class="btn btn-acc btn-full" onclick="submitPhotoCheckin()" style="margin-bottom:8px;">Save Photos</button>`
-        :`<div style="font-size:12px;color:var(--t3);text-align:center;padding:8px 0 12px;">Tap any slot above to add a photo</div>`}
-      <button class="btn btn-ghost btn-full" onclick="closeSheets()">Cancel</button>
-    </div>`;
-
-    // Re-append the persistent file input after each innerHTML replacement
-    bg.appendChild(fileInput);
-    bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
-  }
-
-  window._photoDraft=draft;
-  window._photoSheetRender=renderSheet;
-  window._photoSheetBg=bg;
-  window._photoFileInput=fileInput;
-
-  renderSheet();
-  document.body.appendChild(bg);
-}
-
-function triggerPhotoUpload(angle){
-  window._photoUploadAngle=angle;
-  const inp=window._photoFileInput;
-  if(inp){inp.value='';inp.click();}
-}
-
-async function handlePhotoUpload(input){
-  const file=input.files?.[0];
-  if(!file||!window._photoDraft)return;
-  try{
-    const dataUrl=await compressPhoto(file);
-    window._photoDraft[window._photoUploadAngle]=dataUrl;
-    window._photoDraft.notes=document.getElementById('photo-notes-input')?.value||window._photoDraft.notes;
-    window._photoSheetRender();
-  }catch(e){
-    console.error('Photo upload error:',e);
-    alert('Could not load photo — try another image.');
-  }
-  input.value='';
-}
-
-function draftRemovePhoto(angle){
-  if(!window._photoDraft)return;
-  window._photoDraft[angle]=null;
-  window._photoDraft.notes=document.getElementById('photo-notes-input')?.value||window._photoDraft.notes;
-  window._photoSheetRender();
-}
-
-async function submitPhotoCheckin(){
-  if(!window._photoDraft)return;
-  const notes=document.getElementById('photo-notes-input')?.value||'';
-  const record={...window._photoDraft,notes};
-  if(!record.front&&!record.side&&!record.back){alert('Add at least one photo.');return;}
-
-  // Show saving state on button
-  const saveBtn=document.querySelector('.btn-acc');
-  if(saveBtn){saveBtn.disabled=true;saveBtn.textContent='Saving…';}
-
-  try{
-    await savePhotoCheckin(record);
-  }catch(err){
-    console.error('Save photo error:',err);
-    alert('Could not save photos: '+(err?.message||String(err)));
-    if(saveBtn){saveBtn.disabled=false;saveBtn.textContent='Save Photos';}
-    return;
-  }
-
-  closeSheets();
-  if(document.getElementById('s-progress')?.classList.contains('active')){renderProgress();renderPhotoCard();}
-  const t=document.createElement('div');
-  t.style.cssText='position:fixed;bottom:calc(100px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:#1a1a1a;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 18px;font-size:13px;font-weight:500;color:var(--t1);z-index:10001;pointer-events:none;animation:pwaSlideUp .25s ease;white-space:nowrap;';
-  t.textContent='Photos saved ✓';
-  document.body.appendChild(t);setTimeout(()=>t.remove(),2200);
-}
-
-// ── Photo history / comparison view ──────────────────────────────────────────
-async function showPhotoHistorySheet(){
-  const checkins=await getAllPhotoCheckins();
-  const bg=document.createElement('div');bg.className='sheet-bg';
-
-  if(!checkins.length){
-    bg.innerHTML=`<div class="sheet"><div class="sheet-handle"></div>
-      <div class="sheet-title">Progress Photos</div>
-      <div style="text-align:center;padding:32px 0;">
-        <div style="font-size:40px;margin-bottom:12px;">📸</div>
-        <div style="font-size:14px;font-weight:600;color:var(--t1);margin-bottom:6px;">No photos yet</div>
-        <div style="font-size:13px;color:var(--t3);margin-bottom:20px;line-height:1.5;">Log your first check-in to start<br>tracking your visual progress.</div>
-        <button class="btn btn-acc" onclick="closeSheets();showPhotoCheckinSheet()">Log First Check-In</button>
-      </div>
-      <button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="closeSheets()">Close</button>
-    </div>`;
-    bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
-    document.body.appendChild(bg);
-    return;
-  }
-
-  // Build rows
-  const rows=checkins.map(c=>{
-    const fmtD=new Date(c.date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
-    const thumbs=['front','side','back'].map(a=>
-      c[a]?`<img class="photo-thumb" src="${c[a]}" alt="${a}">`
-           :`<div class="photo-thumb-empty"></div>`
-    ).join('');
-    const photoCount=[c.front,c.side,c.back].filter(Boolean).length;
-    return`<div class="photo-checkin-row">
-      <div class="photo-thumb-strip">${thumbs}</div>
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:13px;font-weight:600;color:var(--t1);">${fmtD}</div>
-        <div style="font-size:12px;color:var(--t3);margin-top:2px;">${photoCount} photo${photoCount===1?'':'s'}${c.notes?' · '+c.notes:''}</div>
-      </div>
-      <div style="display:flex;gap:6px;flex-shrink:0;">
-        <button onclick="openPhotoDetail(${c.id})" style="padding:6px 10px;border-radius:8px;background:var(--s2);border:1px solid var(--b2);color:var(--t1);font-size:12px;cursor:pointer;font-family:DM Sans,sans-serif;">View</button>
-        <button onclick="confirmDeletePhotoCheckin(${c.id})" style="width:30px;height:30px;border-radius:50%;background:rgba(255,71,71,.12);border:none;color:var(--red);cursor:pointer;display:flex;align-items:center;justify-content:center;">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-        </button>
-      </div>
-    </div>`;
-  }).join('');
-
-  // Compare button — only if 2+ check-ins
-  const compareBtn=checkins.length>=2
-    ?`<button class="btn btn-full" style="background:var(--s2);border:1px solid var(--b2);color:var(--t1);margin-bottom:10px;" onclick="showCompareSelector()">↔ Compare Two Check-Ins</button>`
-    :'';
-
-  bg.innerHTML=`<div class="sheet" style="max-height:92vh;">
-    <div class="sheet-handle"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-      <div class="sheet-title" style="margin-bottom:0;">Progress Photos</div>
-      <button onclick="closeSheets();showPhotoCheckinSheet()" style="font-size:12px;font-weight:600;padding:7px 14px;border-radius:10px;background:var(--acc);color:#000;border:none;cursor:pointer;font-family:DM Sans,sans-serif;">+ New</button>
-    </div>
-    ${compareBtn}
-    <div>${rows}</div>
-    <button class="btn btn-ghost btn-full" style="margin-top:12px;" onclick="closeSheets()">Close</button>
-  </div>`;
-
-  window._photoCheckins=checkins;
-  bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
-  document.body.appendChild(bg);
-}
-
-async function openPhotoDetail(id){
-  const checkins=await getAllPhotoCheckins();
-  const c=checkins.find(x=>x.id===id);
-  if(!c)return;
-  const fmtD=new Date(c.date+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-  const angles=['front','side','back'];
-  const photos=angles.filter(a=>c[a]);
-
-  const bg=document.createElement('div');bg.className='sheet-bg';
-  bg.innerHTML=`<div class="sheet" style="max-height:92vh;">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title" style="margin-bottom:2px;">${fmtD}</div>
-    ${c.notes?`<div style="font-size:13px;color:var(--t2);margin-bottom:12px;">${c.notes}</div>`:''}
-    <div class="photo-grid-3">
-      ${angles.map(a=>c[a]
-        ?`<div style="position:relative;"><img src="${c[a]}" style="width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:10px;" onclick="openFullscreenPhoto('${a}',${id})">
-           <div style="text-align:center;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-top:4px;">${a}</div></div>`
-        :`<div style="aspect-ratio:3/4;background:var(--s2);border-radius:10px;border:1px dashed var(--b2);display:flex;align-items:center;justify-content:center;">
-           <div style="font-size:10px;color:var(--t3);text-transform:uppercase;">${a}</div></div>`
-      ).join('')}
-    </div>
-    <div style="display:flex;gap:8px;margin-top:14px;">
-      <button class="btn btn-ghost btn-full" onclick="closeSheets();showPhotoCheckinSheet(${id})">Edit</button>
-      <button class="btn btn-ghost btn-full" onclick="closeSheets()">Close</button>
-    </div>
-  </div>`;
-  bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
-  document.body.appendChild(bg);
-}
-
-function openFullscreenPhoto(angle,checkinId){
-  getAllPhotoCheckins().then(checkins=>{
-    const c=checkins.find(x=>x.id===checkinId);
-    if(!c||!c[angle])return;
-    const ov=document.createElement('div');
-    ov.style.cssText='position:fixed;inset:0;background:#000;z-index:20000;display:flex;align-items:center;justify-content:center;';
-    ov.innerHTML=`<img src="${c[angle]}" style="max-width:100%;max-height:100%;object-fit:contain;">
-      <button onclick="this.parentElement.remove()" style="position:absolute;top:calc(env(safe-area-inset-top,0px) + 16px);right:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>`;
-    ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});
-    document.body.appendChild(ov);
-  });
-}
-
-async function confirmDeletePhotoCheckin(id){
-  const bg=document.createElement('div');bg.className='sheet-bg';
-  bg.innerHTML=`<div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">Delete Check-In?</div>
-    <div style="font-size:13px;color:var(--t2);margin-bottom:20px;">All photos in this check-in will be permanently deleted.</div>
-    <button class="btn btn-full" style="background:var(--red);color:#fff;margin-bottom:8px;" onclick="doDeletePhotoCheckin(${id})">Delete</button>
-    <button class="btn btn-ghost btn-full" onclick="this.closest('.sheet-bg').remove()">Cancel</button>
-  </div>`;
-  bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
-  document.body.appendChild(bg);
-}
-
-async function doDeletePhotoCheckin(id){
-  await deletePhotoCheckin(id);
-  closeSheets();
-  if(document.getElementById('s-progress')?.classList.contains('active')){renderProgress();renderPhotoCard();}
-}
-
-async function showCompareSelector(){
-  const checkins=await getAllPhotoCheckins();
-  if(checkins.length<2)return;
-  let selA=null,selB=null;
-
-  const bg=document.createElement('div');bg.className='sheet-bg';
-
-  function renderSel(){
-    const rows=checkins.map(c=>{
-      const fmtD=new Date(c.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-      const isA=selA===c.id,isB=selB===c.id;
-      const border=isA?'border-color:var(--acc);':isB?'border-color:#378ADD;':'';
-      return`<div onclick="photoCompareSelect(${c.id})" style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;border:1.5px solid var(--b2);margin-bottom:6px;cursor:pointer;${border}">
-        <div class="photo-thumb-strip">${['front','side','back'].map(a=>c[a]?`<img class="photo-thumb" src="${c[a]}">`:`<div class="photo-thumb-empty"></div>`).join('')}</div>
-        <div style="flex:1;"><div style="font-size:13px;font-weight:600;color:var(--t1);">${fmtD}</div>${c.notes?`<div style="font-size:12px;color:var(--t3);">${c.notes}</div>`:''}</div>
-        ${isA?'<div style="font-size:11px;font-weight:700;color:var(--acc);">A</div>':''}
-        ${isB?'<div style="font-size:11px;font-weight:700;color:#378ADD;">B</div>':''}
-      </div>`;
-    }).join('');
-    bg.innerHTML=`<div class="sheet" style="max-height:92vh;">
-      <div class="sheet-handle"></div>
-      <div class="sheet-title">Compare Check-Ins</div>
-      <div style="font-size:13px;color:var(--t2);margin-bottom:12px;">Select two check-ins to compare side by side.</div>
-      <div>${rows}</div>
-      ${selA&&selB?`<button class="btn btn-acc btn-full" style="margin-top:8px;" onclick="openCompareView(${selA},${selB})">Compare →</button>`:''}
-      <button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="closeSheets()">Cancel</button>
-    </div>`;
-    bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
-  }
-
-  window._photoCheckins=checkins;
-  window._compareSel={get a(){return selA;},get b(){return selB;},
-    pick(id){if(!selA){selA=id;}else if(!selB&&id!==selA){selB=id;}else{selA=id;selB=null;}renderSel();}};
-  window.photoCompareSelect=(id)=>window._compareSel.pick(id);
-
-  renderSel();
-  document.body.appendChild(bg);
-}
-
-async function openCompareView(idA,idB){
-  const checkins=await getAllPhotoCheckins();
-  const a=checkins.find(c=>c.id===idA);
-  const b=checkins.find(c=>c.id===idB);
-  if(!a||!b)return;
-  const fmtD=d=>new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-
-  const bg=document.createElement('div');bg.className='sheet-bg';
-  const angles=['front','side','back'];
-  const compareRows=angles.map(angle=>{
-    if(!a[angle]&&!b[angle])return'';
-    return`<div style="margin-bottom:14px;">
-      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:6px;">${angle}</div>
-      <div class="compare-grid">
-        <div class="compare-col">
-          ${a[angle]?`<img class="compare-img" src="${a[angle]}" onclick="openFullscreenPhoto('${angle}',${idA})">`:`<div class="compare-img" style="display:flex;align-items:center;justify-content:center;"><span style="font-size:12px;color:var(--t3);">No photo</span></div>`}
-          <div class="compare-lbl" style="color:var(--acc);">A · ${fmtD(a.date)}</div>
-        </div>
-        <div class="compare-col">
-          ${b[angle]?`<img class="compare-img" src="${b[angle]}" onclick="openFullscreenPhoto('${angle}',${idB})">`:`<div class="compare-img" style="display:flex;align-items:center;justify-content:center;"><span style="font-size:12px;color:var(--t3);">No photo</span></div>`}
-          <div class="compare-lbl" style="color:#378ADD;">B · ${fmtD(b.date)}</div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-
-  bg.innerHTML=`<div class="sheet" style="max-height:92vh;">
-    <div class="sheet-handle"></div>
-    <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;">
-      <div style="flex:1;text-align:center;font-size:13px;font-weight:600;color:var(--acc);">A · ${fmtD(a.date)}</div>
-      <div style="font-size:18px;color:var(--t3);">↔</div>
-      <div style="flex:1;text-align:center;font-size:13px;font-weight:600;color:#378ADD;">B · ${fmtD(b.date)}</div>
-    </div>
-    ${compareRows}
-    <button class="btn btn-ghost btn-full" style="margin-top:4px;" onclick="closeSheets()">Close</button>
-  </div>`;
-  bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
-  document.body.appendChild(bg);
-}
-// gainz_water: { 'YYYY-MM-DD': [ {oz:8, time:'9:32 AM'}, ... ] }
-let waterLog=JSON.parse(localStorage.getItem('gainz_water')||'{}');
-function saveWaterLog(){localStorage.setItem('gainz_water',JSON.stringify(waterLog));}
-
-function getWaterGoalOz(){
-  // 0.5 oz per lb of bodyweight; fall back to 64 oz if no weight logged
-  const bw=bodyMetrics.find(e=>e.weight>0);
-  return bw?Math.round(bw.weight*0.5):64;
-}
-
-function getTodayWaterOz(dateKey){
-  const key=dateKey||todayKey();
-  return(waterLog[key]||[]).reduce((a,e)=>a+(e.oz||0),0);
-}
-
-function logWaterOz(oz,label){
-  const key=todayKey();
-  if(!waterLog[key])waterLog[key]=[];
-  waterLog[key].push({oz,label:label||oz+'oz',time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})});
-  saveWaterLog();
-  renderCoach();
-}
-
-function deleteWaterEntry(dateKey,idx){
-  if(!waterLog[dateKey])return;
-  waterLog[dateKey].splice(idx,1);
-  if(!waterLog[dateKey].length)delete waterLog[dateKey];
-  saveWaterLog();
-  renderCoach();
-}
-
-function showWaterLogSheet(){
-  const goal=getWaterGoalOz();
-  const today=todayKey();
-  const todayItems=waterLog[today]||[];
-  const total=getTodayWaterOz();
-  const pct=Math.min(Math.round((total/goal)*100),100);
-  const circ=2*Math.PI*34;
-  const offset=circ*(1-pct/100);
-
-  const bg=document.createElement('div');bg.className='sheet-bg';
-  const itemRows=todayItems.length
-    ?todayItems.map((it,i)=>`<div class="water-log-item">
-        <div style="color:var(--t2);">${it.label}<span style="font-size:11px;color:var(--t3);margin-left:8px;">${it.time}</span></div>
-        <button onclick="deleteWaterEntry('${today}',${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:2px 4px;">✕</button>
-      </div>`).join('')
-    :'<div style="font-size:12px;color:var(--t3);text-align:center;padding:10px 0;">Nothing logged yet today</div>';
-
-  bg.innerHTML=`<div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">Hydration</div>
-    <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;">
-      <div style="position:relative;width:80px;height:80px;flex-shrink:0;">
-        <svg width="80" height="80" viewBox="0 0 80 80" style="transform:rotate(-90deg)">
-          <circle class="h-track" cx="40" cy="40" r="34"/>
-          <circle class="h-prog" cx="40" cy="40" r="34" stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/>
-        </svg>
-        <div class="hydration-inner"><div class="hydration-oz">${total}</div><div class="hydration-lbl">/ ${goal} oz</div></div>
-      </div>
-      <div style="flex:1;">
-        <div style="font-size:22px;font-weight:700;color:#378ADD;font-family:Barlow Condensed,sans-serif;">${pct}% of goal</div>
-        <div style="font-size:12px;color:var(--t2);margin-top:2px;">Goal: ${goal} oz/day · Based on your weight</div>
-        <div style="font-size:12px;color:var(--t3);margin-top:2px;">${Math.max(goal-total,0)} oz remaining</div>
-      </div>
-    </div>
-    <div class="water-quick-btns" style="margin-bottom:14px;">
-      <button class="wq-btn" onclick="logWaterOz(8,'8oz glass');closeSheets();">+ 8oz</button>
-      <button class="wq-btn" onclick="logWaterOz(12,'12oz bottle');closeSheets();">+ 12oz</button>
-      <button class="wq-btn" onclick="logWaterOz(16,'16oz bottle');closeSheets();">+ 16oz</button>
-      <button class="wq-btn" onclick="logWaterOz(20,'20oz bottle');closeSheets();">+ 20oz</button>
-    </div>
-    <div style="display:flex;gap:8px;margin-bottom:14px;">
-      <input type="number" id="water-custom-oz" inputmode="decimal" placeholder="Custom oz" style="flex:1;padding:10px 12px;border-radius:10px;background:var(--s2);border:1px solid var(--b2);color:var(--t1);font-size:14px;font-family:DM Sans,sans-serif;">
-      <button onclick="(function(){const v=parseFloat(document.getElementById('water-custom-oz').value);if(v>0){logWaterOz(v,v+'oz custom');closeSheets();}})()" style="padding:10px 16px;border-radius:10px;background:#378ADD;color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:DM Sans,sans-serif;">Add</button>
-    </div>
-    ${todayItems.length?`<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:6px;">Today's log</div>${itemRows}`:''}
-    <button class="btn btn-ghost btn-full" style="margin-top:12px;" onclick="closeSheets()">Close</button>
-  </div>`;
-  bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
-  document.body.appendChild(bg);
-}
 
 function todayKey(){return new Date().toISOString().split('T')[0];}
 
@@ -5119,58 +4550,20 @@ function buildWeeklySummary(){
 
 // ─── BODY METRICS ─────────────────────────────────────────────────────────────
 function logBodyMetrics(){
-  // Tier 1 — Renpho core
   const weight=parseFloat(eid('bm-weight')?.value)||0;
-  const bodyFat=parseFloat(eid('bm-bodyfat')?.value)||0;
-  const muscleMass=parseFloat(eid('bm-muscle')?.value)||0;
-  const fatFreeMass=parseFloat(eid('bm-ffm')?.value)||0;
-  const visceralFat=parseFloat(eid('bm-visceral')?.value)||0;
-  const bmr=parseFloat(eid('bm-bmr')?.value)||0;
-  const bodyWater=parseFloat(eid('bm-water')?.value)||0;
-  // Measurements
   const waist=parseFloat(eid('bm-waist')?.value)||0;
   const hips=parseFloat(eid('bm-hips')?.value)||0;
   const chest=parseFloat(eid('bm-chest')?.value)||0;
   const arms=parseFloat(eid('bm-arms')?.value)||0;
-  // Tier 2 — occasional
-  const skeletalMusclePct=parseFloat(eid('bm-skel')?.value)||0;
-  const subcutFat=parseFloat(eid('bm-subcut')?.value)||0;
-  const boneMass=parseFloat(eid('bm-bone')?.value)||0;
-  const proteinPct=parseFloat(eid('bm-protein')?.value)||0;
-  const metabolicAge=parseFloat(eid('bm-metage')?.value)||0;
   const notes=eid('bm-notes')?.value||'';
-
-  const hasAny=weight||bodyFat||muscleMass||fatFreeMass||visceralFat||bmr||waist||hips||chest||arms;
-  if(!hasAny){alert('Enter at least one measurement.');return;}
-
+  if(!weight&&!waist&&!hips&&!chest&&!arms){alert('Enter at least one measurement.');return;}
   const today=todayKey();
+  // Replace today's entry if exists
   bodyMetrics=bodyMetrics.filter(e=>e.date!==today);
-  bodyMetrics.unshift({date:today,weight,bodyFat,muscleMass,fatFreeMass,visceralFat,bmr,bodyWater,
-    skeletalMusclePct,subcutFat,boneMass,proteinPct,metabolicAge,
-    waist,hips,chest,arms,notes});
+  bodyMetrics.unshift({date:today,weight,waist,hips,chest,arms,notes});
   bodyMetrics=bodyMetrics.sort((a,b)=>b.date.localeCompare(a.date));
   saveBodyMetrics();
-
-  // ── BMR recalibration trigger ──────────────────────────────────────────────
-  if(bmr>0){
-    const mp=loadMacroProfile();
-    const storedBMR=mp?.bmr||0;
-    if(storedBMR>0&&Math.abs(bmr-storedBMR)>50){
-      localStorage.setItem('gainz_bmr_recal_pending','1');
-    }
-  }
-
-  // ── Hydration quality flag ─────────────────────────────────────────────────
-  if(bodyWater>0&&bodyWater<58){
-    const t=document.createElement('div');
-    t.style.cssText='position:fixed;bottom:calc(100px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:#1a1a1a;border:1px solid rgba(239,159,39,.4);border-radius:12px;padding:10px 18px;font-size:13px;font-weight:500;color:#EF9F27;z-index:10001;pointer-events:none;animation:pwaSlideUp .25s ease;max-width:300px;text-align:center;';
-    t.textContent='💧 Body water '+bodyWater+'% — weigh-in may be inaccurate (low hydration)';
-    document.body.appendChild(t);setTimeout(()=>t.remove(),4000);
-  }
-
-  closeSheets();
   renderCoach();
-  if(document.getElementById('s-progress')?.classList.contains('active')){renderProgress();renderPhotoCard();}
 }
 
 function getBodyTrend(field){
@@ -5178,319 +4571,6 @@ function getBodyTrend(field){
   if(entries.length<2)return null;
   const diff=entries[0][field]-entries[1][field];
   return{latest:entries[0][field],prev:entries[1][field],diff:Math.round(diff*10)/10};
-}
-
-// ─── BODY PROGRESS TAB ────────────────────────────────────────────────────────
-let _bodyChartInstance=null;
-
-function renderBodyProgress(){
-  if(!bodyMetrics.length){
-    return'<div class="empty">No body entries yet.<br>Tap "+ Log" to start tracking.</div>';
-  }
-
-  const last=bodyMetrics[0];
-  const fmtDate=d=>new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-
-  // ── Recomp Score ──────────────────────────────────────────────────────────
-  // muscle gained – fat lost over all logged data (lbs)
-  const muscleEntries=bodyMetrics.filter(e=>e.muscleMass>0);
-  const fatEntries=bodyMetrics.filter(e=>e.bodyFat>0&&e.weight>0);
-  let recompHTML='';
-  if(muscleEntries.length>=2&&fatEntries.length>=2){
-    const muscleDelta=Math.round((muscleEntries[0].muscleMass-muscleEntries[muscleEntries.length-1].muscleMass)*10)/10;
-    const fatMassFirst=(fatEntries[fatEntries.length-1].weight*(fatEntries[fatEntries.length-1].bodyFat/100));
-    const fatMassLast=(fatEntries[0].weight*(fatEntries[0].bodyFat/100));
-    const fatDelta=Math.round((fatMassLast-fatMassFirst)*10)/10;
-    const score=Math.round((muscleDelta+(-fatDelta))*10)/10;
-    const scoreColor=score>0?'var(--grn)':score<0?'var(--red)':'var(--t2)';
-    const arrow=score>0?'↑':score<0?'↓':'→';
-    recompHTML=`<div class="card" style="margin-bottom:12px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);">Recomp Score</div>
-        <div style="font-size:10px;color:var(--t3);">${fmtDate(fatEntries[fatEntries.length-1].date)} → ${fmtDate(fatEntries[0].date)}</div>
-      </div>
-      <div style="display:flex;align-items:baseline;gap:6px;">
-        <div style="font-family:Barlow Condensed,sans-serif;font-size:44px;font-weight:800;line-height:1;color:${scoreColor};">${score>0?'+':''}${score}</div>
-        <div style="font-size:13px;color:var(--t2);">lbs ${arrow}</div>
-      </div>
-      <div style="font-size:12px;color:var(--t3);margin-top:4px;">Muscle gained minus fat lost — positive = effective recomp</div>
-      <div style="display:flex;gap:16px;margin-top:10px;padding-top:10px;border-top:1px solid var(--b1);">
-        <div><div style="font-size:11px;color:var(--t3);">Muscle Δ</div><div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;color:${muscleDelta>=0?'var(--grn)':'var(--red)'};">${muscleDelta>=0?'+':''}${muscleDelta} lb</div></div>
-        <div><div style="font-size:11px;color:var(--t3);">Fat Δ</div><div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;color:${fatDelta<=0?'var(--grn)':'var(--red)'};">${fatDelta>=0?'+':''}${fatDelta} lb</div></div>
-        ${last.visceralFat>0?'<div><div style="font-size:11px;color:var(--t3);">Visceral</div><div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;color:var(--acc);">'+last.visceralFat+'</div></div>':''}
-      </div>
-    </div>`;
-  }
-
-  // ── BMR recal banner ──────────────────────────────────────────────────────
-  let recalBanner='';
-  if(localStorage.getItem('gainz_bmr_recal_pending')==='1'){
-    recalBanner=`<div style="background:rgba(55,138,221,.12);border:0.5px solid rgba(55,138,221,.3);border-radius:14px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:flex-start;gap:10px;">
-      <div style="font-size:18px;flex-shrink:0;">📊</div>
-      <div style="flex:1;">
-        <div style="font-size:13px;font-weight:600;color:#378ADD;margin-bottom:3px;">Macro Recalibration Suggested</div>
-        <div style="font-size:12px;color:var(--t2);line-height:1.5;">Your BMR has shifted by more than 50 kcal since your last macro setup. Update your targets to stay on track.</div>
-        <button onclick="localStorage.removeItem('gainz_bmr_recal_pending');document.getElementById('macro-profile-screen').style.display='flex';startMQ();" style="margin-top:8px;font-size:12px;font-weight:600;padding:6px 14px;border-radius:10px;background:#378ADD;color:#fff;border:none;cursor:pointer;font-family:DM Sans,sans-serif;">Recalibrate Macros</button>
-        <button onclick="localStorage.removeItem('gainz_bmr_recal_pending');renderProgress();" style="margin-top:8px;margin-left:8px;font-size:12px;font-weight:500;padding:6px 14px;border-radius:10px;background:none;color:var(--t2);border:1px solid var(--b2);cursor:pointer;font-family:DM Sans,sans-serif;">Dismiss</button>
-      </div>
-    </div>`;
-  }
-
-  // ── Metric rows ───────────────────────────────────────────────────────────
-  const METRICS=[
-    {field:'weight',          label:'Weight',           unit:' lb',  color:'var(--acc)', lowerBetter:false},
-    {field:'muscleMass',      label:'Muscle Mass',      unit:' lb',  color:'var(--grn)', lowerBetter:false},
-    {field:'bodyFat',         label:'Body Fat %',       unit:'%',    color:'#EF9F27',    lowerBetter:true},
-    {field:'fatFreeMass',     label:'Fat-Free Mass',    unit:' lb',  color:'var(--acc)', lowerBetter:false},
-    {field:'visceralFat',     label:'Visceral Fat',     unit:'',     color:'#EF9F27',    lowerBetter:true},
-    {field:'bmr',             label:'BMR',              unit:' kcal',color:'var(--t2)',  lowerBetter:false},
-    {field:'bodyWater',       label:'Body Water %',     unit:'%',    color:'#378ADD',    lowerBetter:false},
-    {field:'skeletalMusclePct',label:'Skeletal Muscle %',unit:'%',   color:'var(--grn)', lowerBetter:false},
-    {field:'subcutFat',       label:'Subcutaneous Fat %',unit:'%',   color:'#EF9F27',    lowerBetter:true},
-    {field:'boneMass',        label:'Bone Mass',        unit:' lb',  color:'var(--t2)',  lowerBetter:false},
-    {field:'proteinPct',      label:'Protein %',        unit:'%',    color:'var(--t2)',  lowerBetter:false},
-    {field:'metabolicAge',    label:'Metabolic Age',    unit:'',     color:'var(--t2)',  lowerBetter:true},
-    {field:'waist',           label:'Waist',            unit:' in',  color:'var(--t2)',  lowerBetter:true},
-    {field:'hips',            label:'Hips',             unit:' in',  color:'var(--t2)',  lowerBetter:false},
-    {field:'chest',           label:'Chest',            unit:' in',  color:'var(--t2)',  lowerBetter:false},
-    {field:'arms',            label:'Arms',             unit:' in',  color:'var(--t2)',  lowerBetter:false},
-  ];
-
-  const metricRows=METRICS.map(m=>{
-    const trend=getBodyTrend(m.field);
-    if(!trend&&!last[m.field])return'';
-    const val=last[m.field]||'—';
-    let changeHTML='';
-    if(trend&&trend.diff!==0){
-      const positive=m.lowerBetter?trend.diff<0:trend.diff>0;
-      const c=positive?'var(--grn)':'var(--red)';
-      changeHTML=`<span style="font-size:12px;color:${c};margin-left:6px;">${trend.diff>0?'+':''}${trend.diff}${m.unit}</span>`;
-    }
-    const entryCount=bodyMetrics.filter(e=>e[m.field]>0).length;
-    const hasHistory=entryCount>=2;
-    const chartable=entryCount>=1;
-    return`<div class="body-stat-row" style="cursor:${chartable?'pointer':'default'}" onclick="${chartable?`showBodyMetricChart('${m.field}','${m.label}','${m.unit}',${m.lowerBetter})`:''}">
-      <div>
-        <div class="body-stat-name">${m.label}</div>
-        ${hasHistory?'<div style="font-size:11px;color:var(--t3);">Tap to chart</div>':''}
-      </div>
-      <div style="display:flex;align-items:center;">
-        <span style="font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:700;color:${m.color};">${val}${val!=='—'?m.unit:''}</span>
-        ${changeHTML}
-        ${chartable?'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" style="margin-left:8px;"><path d="M9 18l6-6-6-6"/></svg>':''}
-      </div>
-    </div>`;
-  }).filter(Boolean).join('');
-
-  // ── History list with delete ───────────────────────────────────────────────
-  const historyRows=bodyMetrics.slice(0,20).map((e,i)=>{
-    const parts=[];
-    if(e.weight>0)parts.push(e.weight+' lb');
-    if(e.bodyFat>0)parts.push(e.bodyFat+'% fat');
-    if(e.muscleMass>0)parts.push(e.muscleMass+' lb muscle');
-    const hydWarn=e.bodyWater>0&&e.bodyWater<58?'<span style="color:#EF9F27;margin-left:4px;font-size:11px;">💧</span>':'';
-    return`<div style="padding:9px 0;border-bottom:0.5px solid var(--b1);display:flex;justify-content:space-between;align-items:center;gap:8px;">
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:12px;color:var(--t3);display:flex;align-items:center;">${fmtDate(e.date)}${hydWarn}</div>
-        <div style="font-size:13px;color:var(--t1);margin-top:1px;">${parts.join(' · ')||'—'}</div>
-      </div>
-      <button onclick="deleteBodyEntry('${e.date}')" style="width:30px;height:30px;border-radius:50%;background:rgba(255,71,71,.12);border:none;color:var(--red);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-      </button>
-    </div>`;
-  }).join('');
-
-  return recalBanner
-    +recompHTML
-    +(metricRows?`<div class="card" style="margin-bottom:12px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);">Latest — ${fmtDate(last.date)}</div>
-        <button onclick="showBodyLogSheet()" style="font-size:12px;font-weight:600;padding:6px 14px;border-radius:10px;background:var(--acc);color:#000;border:none;cursor:pointer;font-family:DM Sans,sans-serif;">+ Log</button>
-      </div>
-      ${metricRows}
-    </div>`
-    :`<div class="card" style="text-align:center;padding:20px 0;"><div style="font-size:13px;color:var(--t3);">Log body metrics to see stats here.</div><button onclick="showBodyLogSheet()" style="margin-top:12px;font-size:13px;font-weight:600;padding:8px 20px;border-radius:10px;background:var(--acc);color:#000;border:none;cursor:pointer;font-family:DM Sans,sans-serif;">+ Log</button></div>`)
-    +`<div id="photo-section-card"></div>`
-    +(bodyMetrics.length?`<div class="card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:8px;">History</div>${historyRows}</div>`:'');
-}
-
-async function renderPhotoCard(){
-  // Only renders when the Body tab is active
-  if(progTab!=='body')return;
-  const el=document.getElementById('photo-section-card');
-  if(!el)return;
-
-  const checkins=await getAllPhotoCheckins();
-  const latest=checkins[0]||null;
-
-  // Cadence check — recommend every 4 weeks
-  let cadenceBanner='';
-  if(latest){
-    const daysSince=Math.floor((new Date()-new Date(latest.date+'T12:00:00'))/(864e5));
-    if(daysSince>=28){
-      cadenceBanner=`<div style="background:rgba(232,255,71,.07);border:0.5px solid rgba(232,255,71,.2);border-radius:10px;padding:10px 12px;margin-bottom:10px;">
-        <div style="font-size:12px;font-weight:600;color:var(--acc);margin-bottom:2px;">📸 Time for your 4-week check-in</div>
-        <div style="font-size:12px;color:var(--t2);">Last photos were ${daysSince} days ago — log a new set to track your progress.</div>
-      </div>`;
-    }
-  }
-
-  // Preview strip of latest check-in thumbnails
-  const previewStrip=latest
-    ?`<div style="display:flex;gap:6px;margin-bottom:10px;">
-        ${['front','side','back'].map(a=>latest[a]
-          ?`<img src="${latest[a]}" style="flex:1;aspect-ratio:3/4;object-fit:cover;border-radius:8px;min-width:0;" onclick="openPhotoDetail(${latest.id})">`
-          :`<div style="flex:1;aspect-ratio:3/4;background:var(--s2);border-radius:8px;border:1px dashed var(--b2);display:flex;align-items:center;justify-content:center;min-width:0;"><span style="font-size:10px;color:var(--t3);text-transform:uppercase;">${a}</span></div>`
-        ).join('')}
-      </div>
-      <div style="font-size:11px;color:var(--t3);margin-bottom:10px;">Last check-in: ${new Date(latest.date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'})}${latest.notes?' · '+latest.notes:''}</div>`
-    :`<div style="text-align:center;padding:16px 0 10px;">
-        <div style="font-size:32px;margin-bottom:8px;">📸</div>
-        <div style="font-size:13px;font-weight:600;color:var(--t1);margin-bottom:4px;">Start your visual record</div>
-        <div style="font-size:12px;color:var(--t3);line-height:1.5;margin-bottom:14px;">Log front, side, and back photos every 4 weeks.<br>Consistent conditions = accurate comparison.</div>
-      </div>`;
-
-  el.innerHTML=`<div class="card" style="margin-bottom:10px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-      <div>
-        <div style="font-size:13px;font-weight:600;color:var(--t1);">Progress Photos</div>
-        <div style="font-size:11px;color:var(--t3);margin-top:1px;">Every 4 weeks · Front, side, back</div>
-      </div>
-      <div style="display:flex;gap:6px;">
-        ${checkins.length?`<button onclick="showPhotoHistorySheet()" style="font-size:12px;font-weight:500;padding:6px 12px;border-radius:10px;background:var(--s2);border:1px solid var(--b2);color:var(--t1);cursor:pointer;font-family:DM Sans,sans-serif;">All (${checkins.length})</button>`:''}
-        <button onclick="showPhotoCheckinSheet()" style="font-size:12px;font-weight:600;padding:6px 14px;border-radius:10px;background:var(--acc);color:#000;border:none;cursor:pointer;font-family:DM Sans,sans-serif;">+ Log</button>
-      </div>
-    </div>
-    ${cadenceBanner}
-    ${previewStrip}
-    ${checkins.length>=2?`<button onclick="showCompareSelector()" style="width:100%;padding:8px;border-radius:10px;background:var(--s2);border:1px solid var(--b2);color:var(--t1);font-size:13px;font-weight:500;cursor:pointer;font-family:DM Sans,sans-serif;">↔ Compare Check-Ins</button>`:''}
-  </div>`;
-}
-
-function deleteBodyEntry(date){
-  const bg=document.createElement('div');bg.className='sheet-bg';
-  const entry=bodyMetrics.find(e=>e.date===date);
-  if(!entry){return;}
-  const fmtDate=d=>new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'long',day:'numeric'});
-  const parts=[];
-  if(entry.weight>0)parts.push(entry.weight+' lb');
-  if(entry.bodyFat>0)parts.push(entry.bodyFat+'% fat');
-  if(entry.muscleMass>0)parts.push(entry.muscleMass+' lb muscle');
-  bg.innerHTML=`<div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">Delete Entry?</div>
-    <div style="background:var(--s2);border-radius:12px;padding:12px 14px;margin-bottom:16px;">
-      <div style="font-size:13px;font-weight:600;color:var(--t1);margin-bottom:2px;">${fmtDate(date)}</div>
-      <div style="font-size:13px;color:var(--t2);">${parts.join(' · ')||'—'}</div>
-    </div>
-    <div style="font-size:13px;color:var(--t2);margin-bottom:20px;">This entry will be permanently removed. Trend and chart data will update.</div>
-    <button class="btn btn-full" style="background:var(--red);color:#fff;margin-bottom:8px;" onclick="confirmDeleteBodyEntry('${date}')">Delete Entry</button>
-    <button class="btn btn-ghost btn-full" onclick="this.closest('.sheet-bg').remove()">Cancel</button>
-  </div>`;
-  bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
-  document.body.appendChild(bg);
-}
-
-function confirmDeleteBodyEntry(date){
-  bodyMetrics=bodyMetrics.filter(e=>e.date!==date);
-  saveBodyMetrics();
-  closeSheets();
-  renderProgress();
-  renderCoach();
-  const t=document.createElement('div');
-  t.style.cssText='position:fixed;bottom:calc(100px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:#1a1a1a;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 18px;font-size:13px;font-weight:500;color:var(--t1);z-index:10001;pointer-events:none;animation:pwaSlideUp .25s ease;white-space:nowrap;';
-  t.textContent='Entry deleted';
-  document.body.appendChild(t);setTimeout(()=>t.remove(),2200);
-}
-
-function showBodyMetricChart(field,label,unit,lowerBetter){
-  const allPts=bodyMetrics.filter(e=>e[field]>0).sort((a,b)=>a.date.localeCompare(b.date));
-  if(allPts.length<1)return;
-
-  let chartRange='all';
-  if(allPts.length>20)chartRange='3m';
-
-  function getFilteredPts(){
-    const now=new Date();
-    if(chartRange==='8w'){const c=new Date(now-56*864e5);return allPts.filter(p=>new Date(p.date+'T12:00:00')>=c);}
-    if(chartRange==='3m'){const c=new Date(now-91*864e5);return allPts.filter(p=>new Date(p.date+'T12:00:00')>=c);}
-    return allPts;
-  }
-
-  const bg=document.createElement('div');bg.id='body-chart-sheet-bg';bg.className='sheet-bg';
-
-  function buildSheet(){
-    const pts=getFilteredPts();
-    const values=pts.map(p=>p[field]);
-    const first=values[0],last2=values[values.length-1];
-    const delta=pts.length>=2?Math.round((last2-first)*10)/10:0;
-    const pct=pts.length>=2&&first>0?Math.round(((last2-first)/first)*1000)/10:0;
-    const positive=lowerBetter?delta<0:delta>0;
-    const dColor=positive?'var(--grn)':delta===0?'var(--t2)':'var(--red)';
-    const rangeTabs=['8w','3m','all'].map(r=>`<button onclick="(function(){window._bChartRange='${r}';document.getElementById('body-chart-sheet-bg').querySelector('.body-range-btns').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.textContent==='${r}'));rebuildBodyChart();})();" class="chart-range-btn${chartRange===r?' on':''}">${r==='8w'?'8 Wks':r==='3m'?'3 Mo':'All'}</button>`).join('');
-    const chartBlock=pts.length>=2
-      ?`<div class="body-range-btns" style="display:flex;gap:6px;margin-bottom:12px;">${rangeTabs}</div><div style="height:200px;position:relative;"><canvas id="body-chart-canvas"></canvas></div>`
-      :`<div style="text-align:center;padding:24px 0;font-size:13px;color:var(--t3);">Log a second entry to see your trend chart.</div>`;
-    const statsBlock=pts.length>=2
-      ?`<div style="display:flex;gap:16px;margin-top:12px;padding-top:12px;border-top:1px solid var(--b1);">
-          <div><div style="font-size:11px;color:var(--t3);">First</div><div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;color:var(--t1);">${first}${unit}</div></div>
-          <div><div style="font-size:11px;color:var(--t3);">Latest</div><div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;color:var(--acc);">${last2}${unit}</div></div>
-          <div><div style="font-size:11px;color:var(--t3);">Change</div><div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;color:${dColor};">${delta>=0?'+':''}${delta}${unit}</div></div>
-          <div><div style="font-size:11px;color:var(--t3);">Entries</div><div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;color:var(--t1);">${allPts.length}</div></div>
-        </div>`
-      :`<div style="font-size:12px;color:var(--t3);margin-top:10px;">Logged ${new Date(pts[0].date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div>`;
-    bg.innerHTML=`<div class="sheet" style="max-height:90vh;">
-      <div class="sheet-handle"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-        <div class="sheet-title" style="margin-bottom:0;">${label}</div>
-        <div style="text-align:right;"><div style="font-family:Barlow Condensed,sans-serif;font-size:28px;font-weight:800;line-height:1;color:var(--acc);">${last2}${unit}</div>${pts.length>=2?`<div style="font-size:12px;color:${dColor};">${delta>=0?'+':''}${delta}${unit} (${pct>=0?'+':''}${pct}%)</div>`:'<div style="font-size:12px;color:var(--t3);">1 entry</div>'}</div>
-      </div>
-      ${chartBlock}
-      ${statsBlock}
-      <button class="btn btn-ghost btn-full" style="margin-top:16px;" onclick="document.getElementById('body-chart-sheet-bg').remove();if(_bodyChartInstance){_bodyChartInstance.destroy();_bodyChartInstance=null;}">Close</button>
-    </div>`;
-    if(pts.length>=2)setTimeout(()=>renderBodyChart(pts,values),50);
-  }
-
-  function renderBodyChart(pts,values){
-    if(_bodyChartInstance){_bodyChartInstance.destroy();_bodyChartInstance=null;}
-    const canvas=document.getElementById('body-chart-canvas');
-    if(!canvas)return;
-    const ctx=canvas.getContext('2d');
-    const labels=pts.map(p=>new Date(p.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}));
-    const minVal=Math.min(...values),maxVal=Math.max(...values);
-    const pad=(maxVal-minVal)*0.15||maxVal*0.08||1;
-    const grad=ctx.createLinearGradient(0,0,0,canvas.offsetHeight||200);
-    grad.addColorStop(0,'rgba(232,255,71,0.18)');grad.addColorStop(1,'rgba(232,255,71,0.0)');
-    _bodyChartInstance=new Chart(ctx,{
-      type:'line',
-      data:{labels,datasets:[{data:values,borderColor:'#E8FF47',borderWidth:2,backgroundColor:grad,fill:true,tension:0.35,
-        pointBackgroundColor:values.map(v=>v===maxVal&&!lowerBetter||v===minVal&&lowerBetter?'#E8FF47':'rgba(255,255,255,0.25)'),
-        pointBorderColor:values.map(v=>v===maxVal&&!lowerBetter||v===minVal&&lowerBetter?'#000':'rgba(255,255,255,0.4)'),
-        pointBorderWidth:1.5,
-        pointRadius:values.map(v=>v===maxVal&&!lowerBetter||v===minVal&&lowerBetter?6:3),
-        pointHoverRadius:8,pointHoverBackgroundColor:'#E8FF47',pointHoverBorderColor:'#000',pointHoverBorderWidth:2}]},
-      options:{responsive:true,maintainAspectRatio:false,animation:{duration:400,easing:'easeOutQuart'},
-        plugins:{legend:{display:false},tooltip:{backgroundColor:'#1e1e1e',borderColor:'rgba(255,255,255,0.12)',borderWidth:1,titleColor:'#888',bodyColor:'#f0f0f0',padding:10,
-          callbacks:{label:c2=>`  ${label}: ${c2.parsed.y}${unit}`}}},
-        scales:{
-          x:{grid:{color:'rgba(255,255,255,0.05)',drawBorder:false},ticks:{color:'#4a4a4a',font:{size:10,family:'DM Sans'},maxRotation:0,autoSkip:true,maxTicksLimit:6},border:{display:false}},
-          y:{min:minVal-pad,max:maxVal+pad,grid:{color:'rgba(255,255,255,0.05)',drawBorder:false},ticks:{color:'#4a4a4a',font:{size:10,family:'DM Sans'},maxTicksLimit:5},border:{display:false}}
-        }}
-    });
-  }
-
-  window._bChartRange=chartRange;
-  window.rebuildBodyChart=function(){
-    chartRange=window._bChartRange;
-    const pts=getFilteredPts();
-    const values=pts.map(p=>p[field]);
-    renderBodyChart(pts,values);
-  };
-
-  bg.addEventListener('click',e=>{if(e.target===bg){bg.remove();if(_bodyChartInstance){_bodyChartInstance.destroy();_bodyChartInstance=null;}}});
-  document.body.appendChild(bg);
-  buildSheet();
 }
 
 // ─── RPE × CHECK-IN CORRELATION ENGINE ───────────────────────────────────────
@@ -5706,39 +4786,6 @@ function renderCoach(){
     +(ws.weekSessions.length===0?'<div style="font-size:13px;color:var(--t3);text-align:center;padding:12px 0;">No sessions logged yet this week. Lets get moving! \u{1F4AA}</div>':'')
     +'</div>';
 
-  // ── Hydration ──
-  const waterGoal=getWaterGoalOz();
-  const waterTotal=getTodayWaterOz();
-  const waterPct=Math.min(waterTotal/waterGoal,1);
-  const waterCirc=2*Math.PI*36;
-  const waterTodayItems=waterLog[todayKey()]||[];
-
-  const hydrationHTML=
-    '<div class="coach-section">'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">'
-    +'<div class="coach-section-title" style="margin-bottom:0;">💧 Hydration</div>'
-    +'<button onclick="showWaterLogSheet()" style="font-size:12px;font-weight:600;padding:7px 14px;border-radius:10px;background:#378ADD;color:#fff;border:none;cursor:pointer;font-family:DM Sans,sans-serif;">+ Log</button>'
-    +'</div>'
-    +'<div class="hydration-arc-wrap">'
-    +'<div class="hydration-arc"><svg width="80" height="80" viewBox="0 0 80 80" style="transform:rotate(-90deg)">'
-    +'<circle class="h-track" cx="40" cy="40" r="34"/>'
-    +'<circle class="h-prog" cx="40" cy="40" r="34" stroke-dasharray="'+Math.round(waterPct*waterCirc*2.126)+' '+(waterCirc*2.126)+'" stroke-dashoffset="0"/>'
-    +'</svg>'
-    +'<div class="hydration-inner"><div class="hydration-oz">'+waterTotal+'</div><div class="hydration-lbl">oz</div></div></div>'
-    +'<div style="flex:1;">'
-    +(waterTotal>=waterGoal
-      ?'<div style="font-size:14px;font-weight:600;color:#378ADD;">✓ Goal hit!</div><div style="font-size:12px;color:var(--t2);margin-top:4px;">Well hydrated today — great work.</div>'
-      :'<div style="font-size:14px;font-weight:600;">'+(waterGoal-waterTotal)+' oz to go</div><div style="font-size:12px;color:var(--t2);margin-top:4px;">Goal: '+waterGoal+' oz/day</div>')
-    +'<div class="water-quick-btns" style="margin-top:8px;">'
-    +'<button class="wq-btn" onclick="logWaterOz(8,\'8oz glass\')">+ 8oz</button>'
-    +'<button class="wq-btn" onclick="logWaterOz(12,\'12oz\')">+ 12oz</button>'
-    +'<button class="wq-btn" onclick="logWaterOz(16,\'16oz\')">+ 16oz</button>'
-    +'</div></div></div>'
-    +(waterTodayItems.length
-      ?'<div style="font-size:11px;color:var(--t3);margin-top:8px;">'+waterTodayItems.length+' entr'+(waterTodayItems.length===1?'y':'ies')+' today · <button onclick="showWaterLogSheet()" style="background:none;border:none;color:#378ADD;font-size:11px;cursor:pointer;font-family:DM Sans,sans-serif;padding:0;">View log →</button></div>'
-      :'')
-    +'</div>';
-
   // ── Protein Tracker ──
   const todayTotal=getTodayProteinTotal();
   const pct=Math.min(todayTotal/proteinGoal,1);
@@ -5771,13 +4818,7 @@ function renderCoach(){
   // ── Body Metrics ──
   const lastEntry=bodyMetrics[0];
   const weightTrend=getBodyTrend('weight');
-  const trendStr=(t,unit,lowerBetter)=>!t?'—':t.latest+unit+(t.diff!==0?' <span style="color:'+(lowerBetter?(t.diff<0?'var(--grn)':'var(--red)'):(t.diff>0?'var(--grn)':'var(--red)'))+';">'+(t.diff>0?'+':'')+t.diff+unit+'</span>':'');
-
-  function bodyRow(label,field,unit,lb){
-    const t=getBodyTrend(field);
-    if(!t&&!(lastEntry&&lastEntry[field]>0))return'';
-    return'<div class="body-stat-row"><div class="body-stat-name">'+label+'</div><div class="body-stat-val">'+trendStr(t,unit,lb)+'</div></div>';
-  }
+  const trendStr=(t,unit)=>!t?'—':t.latest+unit+(t.diff!==0?' <span style="color:'+(t.diff<0?'var(--grn)':'var(--red)')+';">'+(t.diff>0?'+':'')+t.diff+unit+'</span>':'');
 
   const bodyHTML=
     '<div class="coach-section">'
@@ -5787,20 +4828,17 @@ function renderCoach(){
     +'</div>'
     +(bodyMetrics.length>=2
       ?'<div>'
-        +bodyRow('Weight','weight',' lb',false)
-        +bodyRow('Body Fat %','bodyFat','%',true)
-        +bodyRow('Muscle Mass','muscleMass',' lb',false)
-        +bodyRow('Fat-Free Mass','fatFreeMass',' lb',false)
-        +bodyRow('Visceral Fat','visceralFat','',true)
-        +bodyRow('Waist','waist',' in',true)
-        +bodyRow('Arms','arms',' in',false)
-        +(lastEntry&&lastEntry.bodyWater>0&&lastEntry.bodyWater<58?'<div style="font-size:12px;color:#EF9F27;margin-top:6px;">💧 Last weigh-in may be inaccurate — hydration was low ('+lastEntry.bodyWater+'%)</div>':'')
+        +'<div class="body-stat-row"><div><div class="body-stat-name">Weight</div></div><div class="body-stat-val">'+trendStr(weightTrend,' lb')+'</div></div>'
+        +'<div class="body-stat-row"><div><div class="body-stat-name">Waist</div></div><div class="body-stat-val">'+trendStr(getBodyTrend('waist'),' in')+'</div></div>'
+        +'<div class="body-stat-row"><div><div class="body-stat-name">Hips</div></div><div class="body-stat-val">'+trendStr(getBodyTrend('hips'),' in')+'</div></div>'
+        +'<div class="body-stat-row"><div><div class="body-stat-name">Chest</div></div><div class="body-stat-val">'+trendStr(getBodyTrend('chest'),' in')+'</div></div>'
+        +'<div class="body-stat-row"><div><div class="body-stat-name">Arms</div></div><div class="body-stat-val">'+trendStr(getBodyTrend('arms'),' in')+'</div></div>'
         +'<div style="font-size:11px;color:var(--t3);margin-top:8px;">Last logged: '+new Date(bodyMetrics[0].date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})+'</div>'
         +'</div>'
       :(lastEntry
         ?'<div>'
           +'<div class="body-stat-row"><span class="body-stat-name">Weight</span><span class="body-stat-val">'+(lastEntry.weight||'—')+' lb</span></div>'
-          +((lastEntry.muscleMass>0)?'<div class="body-stat-row"><span class="body-stat-name">Muscle Mass</span><span class="body-stat-val">'+lastEntry.muscleMass+' lb</span></div>':'')
+          +'<div class="body-stat-row"><span class="body-stat-name">Waist</span><span class="body-stat-val">'+(lastEntry.waist||'—')+' in</span></div>'
           +'<div style="font-size:11px;color:var(--t3);margin-top:8px;">Log again to see trends</div>'
           +'</div>'
         :'<div style="font-size:13px;color:var(--t3);text-align:center;padding:16px 0;">No measurements yet.<br>Tap "+ Log" to start tracking.</div>'))
@@ -6082,182 +5120,20 @@ function saveProteinGoal(){
 function showBodyLogSheet(){
   const last=bodyMetrics[0]||{};
   const bg=document.createElement('div');bg.className='sheet-bg';
-
-  const field=(id,label,ph,step,val)=>`<div class="field"><label>${label}</label><input type="number" id="${id}" inputmode="decimal" placeholder="${ph}" step="${step}" value="${val||''}"></div>`;
-
-  bg.innerHTML='<div class="sheet"><div class="sheet-handle"></div>'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">'
-    +'<div class="sheet-title" style="margin-bottom:0;">Log Body Metrics</div>'
-    +'<button onclick="triggerRenphoScan()" id="renpho-scan-btn" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;background:var(--s2);border:1px solid var(--b2);color:var(--t1);font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;flex-shrink:0;">'
-    +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>'
-    +'Scan Renpho</button>'
-    +'</div>'
-    +'<div class="sheet-sub" style="margin-bottom:10px;">Screenshot from Renpho app — or fill manually</div>'
-    +'<input type="file" id="renpho-file-input" accept="image/*" style="display:none;" onchange="handleRenphoFile(this)">'
-    +'<div id="renpho-scan-status" style="display:none;"></div>'
-
-    // ── Tier 1: Scale metrics ──
-    +'<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin:0 0 8px;">Scale Metrics</div>'
+  bg.innerHTML='<div class="sheet"><div class="sheet-handle"></div><div class="sheet-title">Log Body Metrics</div><div class="sheet-sub">Leave blank to skip fields you are not tracking</div>'
     +'<div class="metric-input-grid">'
-    +field('bm-weight','Weight (lb)','e.g. 185','0.1',last.weight)
-    +field('bm-bodyfat','Body Fat %','e.g. 11.2','0.1',last.bodyFat)
-    +field('bm-muscle','Muscle Mass (lb)','e.g. 133.6','0.1',last.muscleMass)
-    +field('bm-ffm','Fat-Free Mass (lb)','e.g. 140.4','0.1',last.fatFreeMass)
-    +field('bm-visceral','Visceral Fat','e.g. 5','1',last.visceralFat)
-    +field('bm-bmr','BMR (kcal)','e.g. 1734','1',last.bmr)
-    +field('bm-water','Body Water %','e.g. 62.1','0.1',last.bodyWater)
+    +'<div class="field"><label>Weight (lb)</label><input type="number" id="bm-weight" inputmode="decimal" placeholder="e.g. 185" step="0.1" value="'+(last.weight||'')+'"></div>'
+    +'<div class="field"><label>Waist (in)</label><input type="number" id="bm-waist" inputmode="decimal" placeholder="e.g. 32" step="0.5" value="'+(last.waist||'')+'"></div>'
+    +'<div class="field"><label>Hips (in)</label><input type="number" id="bm-hips" inputmode="decimal" placeholder="e.g. 38" step="0.5" value="'+(last.hips||'')+'"></div>'
+    +'<div class="field"><label>Chest (in)</label><input type="number" id="bm-chest" inputmode="decimal" placeholder="e.g. 42" step="0.5" value="'+(last.chest||'')+'"></div>'
+    +'<div class="field"><label>Arms (in)</label><input type="number" id="bm-arms" inputmode="decimal" placeholder="e.g. 15" step="0.25" value="'+(last.arms||'')+'"></div>'
+    +'<div class="field"><label>Notes</label><input type="text" id="bm-notes" placeholder="Optional notes"></div>'
     +'</div>'
-
-    // ── Measurements ──
-    +'<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin:8px 0 8px;">Measurements</div>'
-    +'<div class="metric-input-grid">'
-    +field('bm-waist','Waist (in)','e.g. 32','0.5',last.waist)
-    +field('bm-hips','Hips (in)','e.g. 38','0.5',last.hips)
-    +field('bm-chest','Chest (in)','e.g. 42','0.5',last.chest)
-    +field('bm-arms','Arms (in)','e.g. 15','0.25',last.arms)
-    +'</div>'
-
-    // ── Tier 2: collapsible ──
-    +'<button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\';this.querySelector(\'.t2-arrow\').style.transform=this.nextElementSibling.style.display===\'none\'?\'rotate(0deg)\':\'rotate(90deg)\'" style="width:100%;background:none;border:none;padding:10px 0 6px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-family:DM Sans,sans-serif;">'
-    +'<span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);">More Metrics</span>'
-    +'<svg class="t2-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" style="transition:transform .2s;"><path d="M9 18l6-6-6-6"/></svg>'
-    +'</button>'
-    +'<div style="display:none;">'
-    +'<div class="metric-input-grid">'
-    +field('bm-skel','Skeletal Muscle %','e.g. 48.2','0.1',last.skeletalMusclePct)
-    +field('bm-subcut','Subcutaneous Fat %','e.g. 8.1','0.1',last.subcutFat)
-    +field('bm-bone','Bone Mass (lb)','e.g. 7.2','0.1',last.boneMass)
-    +field('bm-protein','Protein %','e.g. 18.1','0.1',last.proteinPct)
-    +field('bm-metage','Metabolic Age','e.g. 25','1',last.metabolicAge)
-    +'</div></div>'
-
-    +'<div class="field" style="margin-top:4px;"><label>Notes (optional)</label><input type="text" id="bm-notes" placeholder="e.g. post-workout, morning weigh-in" value="'+(last.notes||'')+'"></div>'
-    +'<button class="btn btn-acc btn-full" onclick="logBodyMetrics()">Save Entry</button>'
+    +'<button class="btn btn-acc btn-full" onclick="logBodyMetrics()">Save measurements</button>'
     +(bodyMetrics.length?'<div style="font-size:11px;color:var(--t3);margin-top:10px;text-align:center;">Previous: '+new Date(bodyMetrics[0].date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})+'</div>':'')
     +'<button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="closeSheets()">Cancel</button></div>';
-
   bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
   document.body.appendChild(bg);
-}
-
-function triggerRenphoScan(){
-  const inp=document.getElementById('renpho-file-input');
-  if(inp)inp.click();
-}
-
-async function handleRenphoFile(input){
-  const file=input.files?.[0];
-  if(!file)return;
-
-  // Show loading state
-  const btn=document.getElementById('renpho-scan-btn');
-  const statusEl=document.getElementById('renpho-scan-status');
-  if(btn){btn.disabled=true;btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg> Scanning…';}
-  if(statusEl){statusEl.style.display='block';statusEl.innerHTML='<div style="background:var(--s2);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--t2);margin-bottom:10px;">📸 Reading your Renpho screenshot…</div>';}
-
-  try{
-    // Compress aggressively — Renpho numbers are large bold text, readable at 400px
-    const {b64, mime} = await new Promise((res,rej)=>{
-      const img=new Image();
-      const objectUrl=URL.createObjectURL(file);
-      img.onload=()=>{
-        try{
-          URL.revokeObjectURL(objectUrl);
-          const MAX=400;
-          let w=img.width,h=img.height;
-          if(w>MAX){h=Math.round(h*(MAX/w));w=MAX;}
-          const canvas=document.createElement('canvas');
-          canvas.width=w;canvas.height=h;
-          const ctx=canvas.getContext('2d');
-          if(!ctx){rej(new Error('Canvas not available'));return;}
-          ctx.drawImage(img,0,0,w,h);
-          const dataUrl=canvas.toDataURL('image/jpeg',0.4);
-          if(!dataUrl||dataUrl==='data:,'){rej(new Error('Canvas export failed'));return;}
-          res({b64:dataUrl.split(',')[1], mime:'image/jpeg'});
-        }catch(e){rej(e);}
-      };
-      img.onerror=()=>{
-        URL.revokeObjectURL(objectUrl);
-        const reader=new FileReader();
-        reader.onload=e=>{
-          const parts=e.target.result.split(',');
-          res({b64:parts[1], mime:file.type||'image/jpeg'});
-        };
-        reader.onerror=()=>rej(new Error('Could not read image file'));
-        reader.readAsDataURL(file);
-      };
-      img.src=objectUrl;
-    });
-
-    // Log compressed size for debugging
-    const kb=Math.round(b64.length*0.75/1024);
-    console.log('Renpho scan: sending ~'+kb+'KB to API');
-    if(statusEl){statusEl.innerHTML='<div style="background:var(--s2);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--t2);margin-bottom:10px;">🤖 Image compressed to ~'+kb+'KB — waiting for API response…</div>';}
-
-    // Call Claude vision API
-    const metrics=await scanRenphoImage(b64, mime);
-
-    // Fill fields
-    let filled=0;
-    const fieldMap={
-      weight:'bm-weight', bodyFat:'bm-bodyfat', muscleMass:'bm-muscle',
-      fatFreeMass:'bm-ffm', visceralFat:'bm-visceral', bmr:'bm-bmr',
-      bodyWater:'bm-water', skeletalMusclePct:'bm-skel', subcutFat:'bm-subcut',
-      boneMass:'bm-bone', proteinPct:'bm-protein', metabolicAge:'bm-metage'
-    };
-    Object.entries(fieldMap).forEach(([key,id])=>{
-      if(metrics[key]!=null&&metrics[key]>0){
-        const el=document.getElementById(id);
-        if(el){el.value=metrics[key];filled++;}
-        // Auto-expand More Metrics section if Tier 2 fields were found
-        if(['bm-skel','bm-subcut','bm-bone','bm-protein','bm-metage'].includes(id)&&metrics[key]>0){
-          const tier2=el?.closest('.metric-input-grid')?.parentElement;
-          if(tier2&&tier2.style.display==='none')tier2.style.display='block';
-        }
-      }
-    });
-
-    if(filled>0){
-      if(statusEl){statusEl.innerHTML=`<div style="background:rgba(29,158,117,.12);border:0.5px solid rgba(29,158,117,.3);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--grn);margin-bottom:10px;">✓ ${filled} metric${filled===1?'':'s'} extracted — review and tap Save</div>`;}
-    } else {
-      if(statusEl){statusEl.innerHTML='<div style="background:rgba(255,71,71,.1);border:0.5px solid rgba(255,71,71,.25);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:10px;">Couldn\'t read metrics — make sure it\'s a Renpho screenshot showing the values grid</div>';}
-    }
-  } catch(err){
-    const msg=err instanceof Error?err.message:String(err);
-    console.error('Renpho scan error:',msg);
-    if(statusEl){statusEl.innerHTML='<div style="background:rgba(255,71,71,.1);border:0.5px solid rgba(255,71,71,.25);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:10px;">Scan failed: '+msg+'</div>';}
-  } finally {
-    if(btn){btn.disabled=false;btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> Scan Renpho';}
-    input.value='';
-  }
-}
-
-async function scanRenphoImage(base64,mimeType){
-  const res=await fetchWithTimeout('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{
-      'Content-Type':'application/json',
-      'anthropic-version':'2023-06-01',
-      'anthropic-dangerous-direct-browser-access':'true',
-    },
-    body:JSON.stringify({
-      model:'claude-haiku-4-5-20251001',
-      max_tokens:300,
-      messages:[{
-        role:'user',
-        content:[
-          {type:'image',source:{type:'base64',media_type:mimeType,data:base64}},
-          {type:'text',text:'Extract Renpho scale metrics from this screenshot. Return ONLY a JSON object with any of these keys that are visible: weight, bodyFat, muscleMass, fatFreeMass, visceralFat, bmr, bodyWater, skeletalMusclePct, subcutFat, boneMass, proteinPct, metabolicAge. Use the large primary numbers only, not deltas. JSON only, no markdown.'}
-        ]
-      }]
-    })
-  },30000);
-
-  if(!res.ok){const t=await res.text().catch(()=>'');throw new Error('API '+res.status+': '+t.slice(0,200));}
-  const data=await res.json();
-  const text=data.content?.[0]?.text||'';
-  const clean=text.replace(/```json?|```/g,'').trim();
-  return JSON.parse(clean);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -6268,7 +5144,7 @@ const GAINZ_KEYS = [
   'gainz_rest','gainz_global_rest','gainz_custom_ex','gainz_ex_overrides',
   'gainz_profile','gainz_onboard_done','gainz_log_unit','gainz_view_unit',
   'gainz_protein_goal','gainz_protein_log','gainz_food_goals','gainz_macro_profile',
-  'gainz_checkins','gainz_voice','gainz_vibrate','gainz_water','gainz_pwa_dismissed'
+  'gainz_checkins','gainz_voice','gainz_pwa_dismissed'
 ];
 
 async function exportGainzData(){
