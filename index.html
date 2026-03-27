@@ -6233,7 +6233,7 @@ async function handleRenphoFile(input){
 }
 
 async function scanRenphoImage(base64,mimeType){
-  const res=await fetch('https://api.anthropic.com/v1/messages',{
+  const res=await fetchWithTimeout('https://api.anthropic.com/v1/messages',{
     method:'POST',
     headers:{
       'Content-Type':'application/json',
@@ -6243,16 +6243,15 @@ async function scanRenphoImage(base64,mimeType){
     body:JSON.stringify({
       model:'claude-haiku-4-5-20251001',
       max_tokens:300,
-      system:'Extract Renpho scale metrics from this screenshot. Return ONLY a JSON object with any of these keys that are visible: weight, bodyFat, muscleMass, fatFreeMass, visceralFat, bmr, bodyWater, skeletalMusclePct, subcutFat, boneMass, proteinPct, metabolicAge. Use the large primary numbers only, not deltas. JSON only, no markdown.',
       messages:[{
         role:'user',
         content:[
           {type:'image',source:{type:'base64',media_type:mimeType,data:base64}},
-          {type:'text',text:'Extract metrics.'}
+          {type:'text',text:'Extract Renpho scale metrics from this screenshot. Return ONLY a JSON object with any of these keys that are visible: weight, bodyFat, muscleMass, fatFreeMass, visceralFat, bmr, bodyWater, skeletalMusclePct, subcutFat, boneMass, proteinPct, metabolicAge. Use the large primary numbers only, not deltas. JSON only, no markdown.'}
         ]
       }]
     })
-  });
+  },30000);
 
   if(!res.ok){const t=await res.text().catch(()=>'');throw new Error('API '+res.status+': '+t.slice(0,200));}
   const data=await res.json();
