@@ -5006,6 +5006,53 @@ function deleteWaterEntry(dateKey,idx){
   if(!waterLog[dateKey].length)delete waterLog[dateKey];
   saveWaterLog();
   renderCoach();
+  // Re-render the open sheet in place so delete is instant
+  const existingSheet=document.querySelector('.sheet-bg .sheet');
+  if(existingSheet){
+    const goal=getWaterGoalOz();
+    const today=todayKey();
+    const todayItems=waterLog[today]||[];
+    const total=getTodayWaterOz();
+    const pct=Math.min(Math.round((total/goal)*100),100);
+    const circ=2*Math.PI*34;
+    const filled=circ*(pct/100);
+    const itemRows=todayItems.length
+      ?todayItems.map((it,i)=>`<div class="water-log-item">
+          <div style="color:var(--t2);">${it.label}<span style="font-size:11px;color:var(--t3);margin-left:8px;">${it.time}</span></div>
+          <button onclick="deleteWaterEntry('${today}',${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:2px 4px;">✕</button>
+        </div>`).join('')
+      :'<div style="font-size:12px;color:var(--t3);text-align:center;padding:10px 0;">Nothing logged yet today</div>';
+    existingSheet.innerHTML=`
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">Hydration</div>
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;">
+        <div style="position:relative;width:80px;height:80px;flex-shrink:0;">
+          <svg width="80" height="80" viewBox="0 0 80 80" style="transform:rotate(-90deg)">
+            <circle class="h-track" cx="40" cy="40" r="34"/>
+            <circle class="h-prog" cx="40" cy="40" r="34" stroke-dasharray="${filled.toFixed(1)} ${circ.toFixed(1)}" stroke-dashoffset="0"/>
+          </svg>
+          <div class="hydration-inner"><div class="hydration-oz">${total}</div><div class="hydration-lbl">/ ${goal} oz</div></div>
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:22px;font-weight:700;color:#378ADD;font-family:Barlow Condensed,sans-serif;">${pct}% of goal</div>
+          <div style="font-size:12px;color:var(--t2);margin-top:2px;">Goal: ${goal} oz/day · Based on your weight</div>
+          <div style="font-size:12px;color:var(--t3);margin-top:2px;">${Math.max(goal-total,0)} oz remaining</div>
+        </div>
+      </div>
+      <div class="water-quick-btns" style="margin-bottom:14px;">
+        <button class="wq-btn" onclick="logWaterOz(8,'8oz glass');closeSheets();">+ 8oz</button>
+        <button class="wq-btn" onclick="logWaterOz(12,'12oz bottle');closeSheets();">+ 12oz</button>
+        <button class="wq-btn" onclick="logWaterOz(16,'16oz bottle');closeSheets();">+ 16oz</button>
+        <button class="wq-btn" onclick="logWaterOz(20,'20oz bottle');closeSheets();">+ 20oz</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <input type="number" id="water-custom-oz" inputmode="decimal" placeholder="Custom oz" style="flex:1;padding:10px 12px;border-radius:10px;background:var(--s2);border:1px solid var(--b2);color:var(--t1);font-size:14px;font-family:DM Sans,sans-serif;">
+        <button onclick="(function(){const v=parseFloat(document.getElementById('water-custom-oz').value);if(v>0){logWaterOz(v,v+'oz custom');closeSheets();}})()" style="padding:10px 16px;border-radius:10px;background:#378ADD;color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:DM Sans,sans-serif;">Add</button>
+      </div>
+      ${todayItems.length?`<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:6px;">Today's log</div>${itemRows}`:''}
+      <button class="btn btn-ghost btn-full" style="margin-top:12px;" onclick="closeSheets()">Close</button>
+    `;
+  }
 }
 
 function showWaterLogSheet(){
@@ -5748,6 +5795,64 @@ function buildWeekNutrition(){
   return{days,avgCalories,avgProtein,avgCarbs,avgFat,daysLogged};
 }
 
+// ─── MUSCLE GROUP WEEKLY VOLUME ───────────────────────────────────────────────
+// Volume target band (sets): scientific hypertrophy range per muscle group per week
+const MUSCLE_SET_TARGETS={
+  Chest:    {min:10,max:20},
+  Back:     {min:10,max:20},
+  Shoulders:{min:8, max:16},
+  Biceps:   {min:8, max:14},
+  Triceps:  {min:8, max:14},
+  Quads:    {min:10,max:20},
+  Hamstrings:{min:8,max:16},
+  Glutes:   {min:8, max:16},
+  Calves:   {min:8, max:16},
+  Abs:      {min:6, max:12},
+};
+
+// Expanded getMuscleGroupKey — returns fine-grained groups for the volume tracker
+function getMuscleGroupForVol(muscle){
+  if(!muscle) return null;
+  const m=muscle.toLowerCase();
+  if(m.includes('abs')||m.includes('core')||m.includes('oblique')) return 'Abs';
+  if(m.includes('chest')) return 'Chest';
+  if(m.includes('tricep')) return 'Triceps';
+  if(m.includes('bicep')||m.includes('brachialis')) return 'Biceps';
+  if(m.includes('shoulder')||m.includes('delt')) return 'Shoulders';
+  // Back — split lats vs mid/upper back; both count toward 'Back'
+  if(m.includes('lat')||m.includes('back')||m.includes('trap')||m.includes('rhomboid')) return 'Back';
+  if(m.includes('glute')) return 'Glutes';
+  if(m.includes('ham')) return 'Hamstrings';
+  if(m.includes('calf')||m.includes('calves')) return 'Calves';
+  if(m.includes('quad')||m.includes('leg')||m.includes('lunge')) return 'Quads';
+  return null;
+}
+
+// Count completed sets per muscle group for the given strength sessions
+function buildMuscleGroupSets(strengthSessions){
+  const groups={};
+  strengthSessions.forEach(s=>{
+    s.entries.forEach(e=>{
+      const ex=findEx(e.exercise);
+      const primary=getMuscleGroupForVol(ex?.muscle);
+      if(!primary) return;
+      // Each entry's sets array = logged sets
+      const setCount=e.sets.filter(x=>x.reps>0||x.weight>0).length||e.sets.length;
+      groups[primary]=(groups[primary]||0)+setCount;
+      // If muscle string contains slash (e.g. "Quads/Glutes"), credit secondary too
+      if(ex?.muscle&&ex.muscle.includes('/')){
+        const parts=ex.muscle.split('/');
+        parts.forEach((p,i)=>{
+          if(i===0) return; // primary already counted
+          const sec=getMuscleGroupForVol(p.trim());
+          if(sec&&sec!==primary) groups[sec]=(groups[sec]||0)+Math.round(setCount*0.5);
+        });
+      }
+    });
+  });
+  return groups;
+}
+
 // ─── RENDER COACH ─────────────────────────────────────────────────────────────
 function renderCoach(){
   const scroll=eid('coach-scroll');
@@ -5809,11 +5914,65 @@ function renderCoach(){
     +(ws.weekSessions.length===0?'<div style="font-size:13px;color:var(--t3);text-align:center;padding:12px 0;">No sessions logged yet this week. Lets get moving! \u{1F4AA}</div>':'')
     +'</div>';
 
+  // ── Muscle Group Volume ──
+  const mgSets=buildMuscleGroupSets(ws.strengthSessions);
+  // Only show groups that have sessions OR have a target (to avoid empty card when no data)
+  const trainedGroups=Object.keys(mgSets).filter(g=>mgSets[g]>0);
+  let muscleVolHTML='';
+  if(trainedGroups.length>0){
+    // Sort: primary movers first (defined order), then anything else
+    const ORDER=['Chest','Back','Shoulders','Biceps','Triceps','Quads','Hamstrings','Glutes','Calves','Abs'];
+    const sorted=[...new Set([...ORDER,...trainedGroups])].filter(g=>trainedGroups.includes(g));
+    const maxSets=Math.max(...sorted.map(g=>mgSets[g]||0),20);
+    const bars=sorted.map(g=>{
+      const sets=mgSets[g]||0;
+      const tgt=MUSCLE_SET_TARGETS[g]||{min:10,max:20};
+      const pct=Math.min(sets/maxSets,1)*100;
+      // Color: under band = muted/yellow, in band = green, over band = blue (more is fine for back/legs)
+      const color=sets<tgt.min?'var(--acc)':sets>tgt.max?'#47b4ff':'var(--grn)';
+      const statusLabel=sets<tgt.min?sets===0?'Not trained':'Low':sets>tgt.max?'High':'✓ In range';
+      const statusColor=sets<tgt.min?sets===0?'var(--t3)':'var(--acc)':sets>tgt.max?'#47b4ff':'var(--grn)';
+      // Target band marker: position of min and max as % of maxSets
+      const minPct=(tgt.min/maxSets*100).toFixed(1);
+      const maxPct=(tgt.max/maxSets*100).toFixed(1);
+      return `<div style="margin-bottom:11px;">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px;">
+          <div style="font-size:13px;font-weight:600;color:var(--t1);">${g}</div>
+          <div style="display:flex;align-items:baseline;gap:6px;">
+            <span style="font-family:Barlow Condensed,sans-serif;font-size:19px;font-weight:700;color:${color};line-height:1;">${sets}</span>
+            <span style="font-size:10px;color:var(--t3);">sets</span>
+            <span style="font-size:10px;font-weight:600;color:${statusColor};">${statusLabel}</span>
+          </div>
+        </div>
+        <div style="position:relative;height:8px;border-radius:4px;background:var(--s3);overflow:hidden;">
+          <div style="position:absolute;left:${minPct}%;width:${Math.max(0,parseFloat(maxPct)-parseFloat(minPct)).toFixed(1)}%;height:100%;background:rgba(72,207,109,.15);border-left:1px solid rgba(72,207,109,.4);border-right:1px solid rgba(72,207,109,.4);"></div>
+          <div style="position:absolute;left:0;width:${pct.toFixed(1)}%;height:100%;border-radius:4px;background:${color};transition:width .3s ease;"></div>
+        </div>
+      </div>`;
+    }).join('');
+    // Count groups in/under/over band
+    const inBand=sorted.filter(g=>{const s=mgSets[g];const t=MUSCLE_SET_TARGETS[g]||{min:10,max:20};return s>=t.min&&s<=t.max;}).length;
+    const underBand=sorted.filter(g=>{const s=mgSets[g];const t=MUSCLE_SET_TARGETS[g]||{min:10,max:20};return s<t.min;}).length;
+    const insight=underBand>0
+      ?`<div style="font-size:12px;color:var(--acc);background:rgba(232,255,71,.06);border-radius:8px;padding:8px 10px;margin-top:12px;">💡 ${underBand} group${underBand>1?'s':''} below the 10–20 set hypertrophy range this week.</div>`
+      :`<div style="font-size:12px;color:var(--grn);background:rgba(72,207,109,.06);border-radius:8px;padding:8px 10px;margin-top:12px;">🎯 All trained groups are in the hypertrophy range. Well balanced week!</div>`;
+    muscleVolHTML=
+      '<div class="coach-section">'
+      +'<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;">'
+      +'<div class="coach-section-title" style="margin-bottom:0;">💪 Muscle Group Volume</div>'
+      +'<div style="font-size:10px;color:var(--t3);font-weight:500;">Target: 10–20 sets/wk</div>'
+      +'</div>'
+      +bars
+      +insight
+      +'</div>';
+  }
+
   // ── Hydration ──
   const waterGoal=getWaterGoalOz();
   const waterTotal=getTodayWaterOz();
   const waterPct=Math.min(waterTotal/waterGoal,1);
-  const waterCirc=2*Math.PI*36;
+  const waterCirc=2*Math.PI*34;
+  const waterFilled=waterCirc*waterPct;
   const waterTodayItems=waterLog[todayKey()]||[];
 
   const hydrationHTML=
@@ -5825,7 +5984,7 @@ function renderCoach(){
     +'<div class="hydration-arc-wrap">'
     +'<div class="hydration-arc"><svg width="80" height="80" viewBox="0 0 80 80" style="transform:rotate(-90deg)">'
     +'<circle class="h-track" cx="40" cy="40" r="34"/>'
-    +'<circle class="h-prog" cx="40" cy="40" r="34" stroke-dasharray="'+Math.round(waterPct*waterCirc*2.126)+' '+(waterCirc*2.126)+'" stroke-dashoffset="0"/>'
+    +'<circle class="h-prog" cx="40" cy="40" r="34" stroke-dasharray="'+waterFilled.toFixed(1)+' '+waterCirc.toFixed(1)+'" stroke-dashoffset="0"/>'
     +'</svg>'
     +'<div class="hydration-inner"><div class="hydration-oz">'+waterTotal+'</div><div class="hydration-lbl">oz</div></div></div>'
     +'<div style="flex:1;">'
@@ -6127,7 +6286,7 @@ function renderCoach(){
       +`</div>`;
   }
 
-  scroll.innerHTML=checkInHTML+weeklySummaryHTML+correlationHTML+weekNutritionHTML+proteinHTML+bodyHTML+backupHTML;
+  scroll.innerHTML=checkInHTML+weeklySummaryHTML+muscleVolHTML+correlationHTML+weekNutritionHTML+proteinHTML+hydrationHTML+bodyHTML+backupHTML;
 }
 
 function quickAddProtein(g,name){
