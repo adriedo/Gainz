@@ -2364,6 +2364,7 @@ function renderCalendar(){
     const isToday=dk===today.toDateString();
     const hasSess=!!dateMap[dk];
     const hasFood=!!foodDateMap[dateStr];
+    const hasBody=bodyMetrics.some(e=>e.date===dateStr);
     const isFuture=dt>today;
     const sess=dateMap[dk]?.[0];
     const tc=sess?(sess.isCardio?'cardio':program.find(p=>p.id===sess.dayId)?.type||'full'):null;
@@ -2381,6 +2382,10 @@ function renderCalendar(){
     }
     if(hasFood){
       dotsHtml+=`<span class="cal-food-dot" style="background:#47b4ff;${hasSess?'left:calc(50% + 2px);':'' }"></span>`;
+    }
+    if(hasBody){
+      const bodyDotOffset=(hasSess&&hasFood)?'16px':(hasSess||hasFood)?'8px':'3px';
+      dotsHtml+=`<span style="width:6px;height:6px;border-radius:50%;background:#1D9E75;position:absolute;bottom:3px;right:calc(50% - ${bodyDotOffset});display:inline-block;"></span>`;
     }
 
     daysCells+=`<div class="cal-day${hasSess?' worked':''}${hasFood?' has-food':''}${isToday?' today':''}${isFuture?' empty-day':''}" ${clickAttr}>
@@ -2525,6 +2530,26 @@ function showDayDetailSheet(dateStr){
     return { workoutHtml, foodHtml };
   }
 
+  function buildBodyContent(dateStr){
+    const entry=bodyMetrics.find(e=>e.date===dateStr);
+    if(!entry) return '<div style="font-size:13px;color:var(--t3);padding:4px 0 2px;">No body metrics logged this day.</div>';
+    const pairs=[
+      ['Weight',entry.weight,'lb'],['BMI',entry.bmi,''],['Body Fat',entry.bodyFat,'%'],
+      ['Skeletal Muscle',entry.skeletalMusclePct,'%'],['Fat-Free Mass',entry.fatFreeMass,'lb'],
+      ['Subcutaneous Fat',entry.subcutFat,'%'],['Visceral Fat',entry.visceralFat,''],
+      ['Body Water',entry.bodyWater,'%'],['Muscle Mass',entry.muscleMass,'lb'],
+      ['Bone Mass',entry.boneMass,'lb'],['Protein',entry.proteinPct,'%'],
+      ['BMR',entry.bmr,'kcal'],['Metabolic Age',entry.metabolicAge,''],
+      ['Waist',entry.waist,'in'],['Hips',entry.hips,'in'],['Chest',entry.chest,'in'],['Arms',entry.arms,'in'],
+    ].filter(([,v])=>v>0);
+    const rows=pairs.map(([l,v,u])=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:0.5px solid var(--b1);font-size:13px;">
+      <span style="color:var(--t2);">${l}</span>
+      <span style="font-weight:600;color:var(--t1);">${v}${u?(' '+u):''}</span>
+    </div>`).join('');
+    return `<div style="margin-bottom:4px;">${rows}</div>
+      ${entry.notes?`<div style="font-size:12px;color:var(--t3);margin-top:6px;">📝 ${entry.notes}</div>`:''}`;
+  }
+
   // Wire up all interactive elements after rendering
   function wireSheet(sheet, dateStr){
     // View session
@@ -2570,6 +2595,10 @@ function showDayDetailSheet(dateStr){
       document.getElementById('day-detail-bg')?.remove();
       showCalFoodSheet(dateStr);
     });
+    // Add body metrics
+    sheet.querySelector('[data-add-body]')?.addEventListener('click', ()=>{
+      showPastBodyLogSheet(dateStr, ()=>rerenderDayDetail());
+    });
     // Close
     sheet.querySelector('[data-close-day]')?.addEventListener('click', ()=>{
       document.getElementById('day-detail-bg')?.remove();
@@ -2582,8 +2611,10 @@ function showDayDetailSheet(dateStr){
     const { workoutHtml, foodHtml } = buildContent();
     const wkSection = existing.querySelector('#dds-workout-body');
     const fSection  = existing.querySelector('#dds-food-body');
+    const bSection  = existing.querySelector('#dds-body-body');
     if(wkSection) wkSection.innerHTML = workoutHtml;
     if(fSection)  fSection.innerHTML  = foodHtml;
+    if(bSection)  bSection.innerHTML  = buildBodyContent(dateStr);
     wireSheet(existing, dateStr);
     renderCalendar();
   }
@@ -2611,6 +2642,14 @@ function showDayDetailSheet(dateStr){
         <button data-add-food style="font-size:12px;font-weight:600;color:#47b4ff;background:rgba(71,180,255,.1);border:none;border-radius:8px;padding:5px 10px;cursor:pointer;">+ Add</button>
       </div>
       <div id="dds-food-body">${foodHtml}</div>
+    </div>
+
+    <div class="cal-day-section">
+      <div class="cal-day-section-hdr">
+        <span class="cal-day-section-title">⚖️ Body Metrics</span>
+        <button data-add-body style="font-size:12px;font-weight:600;color:#1D9E75;background:rgba(29,158,117,.1);border:none;border-radius:8px;padding:5px 10px;cursor:pointer;">+ Add</button>
+      </div>
+      <div id="dds-body-body">${buildBodyContent(dateStr)}</div>
     </div>
 
     <button data-close-day class="btn btn-ghost btn-full" style="margin-top:4px;">Close</button>
@@ -4409,7 +4448,7 @@ let proteinLog=JSON.parse(localStorage.getItem('gainz_protein_log')||'[]');
 // [{date:'2026-03-23',items:[{name:'Chicken breast',g:40,time:'13:00'},...]}]
 
 let bodyMetrics=JSON.parse(localStorage.getItem('gainz_body')||'[]');
-// [{date:'2026-03-23',weight:185,bodyFat:11.2,muscleMass:133.6,fatFreeMass:140.4,
+// [{date:'2026-03-23',weight:185,bmi:22.1,bodyFat:11.2,muscleMass:133.6,fatFreeMass:140.4,
 //   visceralFat:5,bmr:1734,bodyWater:62.1,
 //   skeletalMusclePct:48.2,subcutFat:8.1,boneMass:7.2,proteinPct:18.1,metabolicAge:25,
 //   waist:32,hips:38,chest:42,arms:15,notes:''}]
@@ -5122,7 +5161,6 @@ function buildWeeklySummary(){
 
 // ─── BODY METRICS ─────────────────────────────────────────────────────────────
 function logBodyMetrics(){
-  // Tier 1 — Renpho core
   const weight=parseFloat(eid('bm-weight')?.value)||0;
   const bodyFat=parseFloat(eid('bm-bodyfat')?.value)||0;
   const muscleMass=parseFloat(eid('bm-muscle')?.value)||0;
@@ -5130,25 +5168,69 @@ function logBodyMetrics(){
   const visceralFat=parseFloat(eid('bm-visceral')?.value)||0;
   const bmr=parseFloat(eid('bm-bmr')?.value)||0;
   const bodyWater=parseFloat(eid('bm-water')?.value)||0;
-  // Measurements
-  const waist=parseFloat(eid('bm-waist')?.value)||0;
-  const hips=parseFloat(eid('bm-hips')?.value)||0;
-  const chest=parseFloat(eid('bm-chest')?.value)||0;
-  const arms=parseFloat(eid('bm-arms')?.value)||0;
-  // Tier 2 — occasional
   const skeletalMusclePct=parseFloat(eid('bm-skel')?.value)||0;
   const subcutFat=parseFloat(eid('bm-subcut')?.value)||0;
   const boneMass=parseFloat(eid('bm-bone')?.value)||0;
   const proteinPct=parseFloat(eid('bm-protein')?.value)||0;
   const metabolicAge=parseFloat(eid('bm-metage')?.value)||0;
+  // BMI: auto-compute from weight + stored height, fallback to manual entry
+  const _mp=loadMacroProfile();
+  const _hCm=_mp?.height_cm||0;
+  const bmi=_hCm>0&&weight>0
+    ?Math.round((weight*0.453592)/Math.pow(_hCm/100,2)*10)/10
+    :parseFloat(eid('bm-bmi')?.value)||0;
+  // Measurements
+  const waist=parseFloat(eid('bm-waist')?.value)||0;
+  const hips=parseFloat(eid('bm-hips')?.value)||0;
+  const chest=parseFloat(eid('bm-chest')?.value)||0;
+  const arms=parseFloat(eid('bm-arms')?.value)||0;
   const notes=eid('bm-notes')?.value||'';
 
   const hasAny=weight||bodyFat||muscleMass||fatFreeMass||visceralFat||bmr||waist||hips||chest||arms;
   if(!hasAny){alert('Enter at least one measurement.');return;}
 
   const today=todayKey();
-  bodyMetrics=bodyMetrics.filter(e=>e.date!==today);
-  bodyMetrics.unshift({date:today,weight,bodyFat,muscleMass,fatFreeMass,visceralFat,bmr,bodyWater,
+  const existing=bodyMetrics.find(e=>e.date===today);
+
+  // ── Warn before overwriting today's entry ────────────────────────────────
+  if(existing){
+    const parts=[];
+    if(existing.weight>0)parts.push(existing.weight+' lb');
+    if(existing.bodyFat>0)parts.push(existing.bodyFat+'% fat');
+    if(existing.muscleMass>0)parts.push(existing.muscleMass+' lb muscle');
+    const warn=document.createElement('div');warn.className='sheet-bg';
+    warn.innerHTML=`<div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">Overwrite Today&#x2019;s Entry?</div>
+      <div style="background:var(--s2);border-radius:12px;padding:12px 14px;margin-bottom:14px;">
+        <div style="font-size:12px;color:var(--t3);margin-bottom:2px;">Logged today</div>
+        <div style="font-size:14px;font-weight:600;color:var(--t1);">${parts.join(' · ')||'—'}</div>
+      </div>
+      <div style="font-size:13px;color:var(--t2);margin-bottom:20px;line-height:1.5;">You already have an entry for today. Saving will replace it with the new values.</div>
+      <button class="btn btn-full" style="background:var(--acc);color:#000;margin-bottom:8px;" onclick="this.closest('.sheet-bg').remove();commitBodyMetrics();">Overwrite</button>
+      <button class="btn btn-ghost btn-full" onclick="this.closest('.sheet-bg').remove();">Keep existing</button>
+    </div>`;
+    warn.addEventListener('click',e=>{if(e.target===warn)warn.remove();});
+    document.body.appendChild(warn);
+    // Store pending record for commitBodyMetrics to pick up
+    window._pendingBodyRecord={date:today,weight,bmi,bodyFat,muscleMass,fatFreeMass,visceralFat,bmr,bodyWater,
+      skeletalMusclePct,subcutFat,boneMass,proteinPct,metabolicAge,waist,hips,chest,arms,notes};
+    return;
+  }
+
+  commitBodyMetrics({date:today,weight,bmi,bodyFat,muscleMass,fatFreeMass,visceralFat,bmr,bodyWater,
+    skeletalMusclePct,subcutFat,boneMass,proteinPct,metabolicAge,waist,hips,chest,arms,notes});
+}
+
+function commitBodyMetrics(record){
+  if(!record)record=window._pendingBodyRecord;
+  if(!record)return;
+  window._pendingBodyRecord=null;
+  const {date,weight,bmi,bodyFat,muscleMass,fatFreeMass,visceralFat,bmr,bodyWater,
+    skeletalMusclePct,subcutFat,boneMass,proteinPct,metabolicAge,waist,hips,chest,arms,notes}=record;
+
+  bodyMetrics=bodyMetrics.filter(e=>e.date!==date);
+  bodyMetrics.unshift({date,weight,bmi,bodyFat,muscleMass,fatFreeMass,visceralFat,bmr,bodyWater,
     skeletalMusclePct,subcutFat,boneMass,proteinPct,metabolicAge,
     waist,hips,chest,arms,notes});
   bodyMetrics=bodyMetrics.sort((a,b)=>b.date.localeCompare(a.date));
@@ -5242,6 +5324,7 @@ function renderBodyProgress(){
   // ── Metric rows ───────────────────────────────────────────────────────────
   const METRICS=[
     {field:'weight',          label:'Weight',           unit:' lb',  color:'var(--acc)', lowerBetter:false},
+    {field:'bmi',             label:'BMI',              unit:'',     color:'var(--acc)', lowerBetter:false},
     {field:'muscleMass',      label:'Muscle Mass',      unit:' lb',  color:'var(--grn)', lowerBetter:false},
     {field:'bodyFat',         label:'Body Fat %',       unit:'%',    color:'#EF9F27',    lowerBetter:true},
     {field:'fatFreeMass',     label:'Fat-Free Mass',    unit:' lb',  color:'var(--acc)', lowerBetter:false},
@@ -6105,27 +6188,35 @@ function showBodyLogSheet(){
 
   const field=(id,label,ph,step,val)=>`<div class="field"><label>${label}</label><input type="number" id="${id}" inputmode="decimal" placeholder="${ph}" step="${step}" value="${val||''}"></div>`;
 
-  bg.innerHTML='<div class="sheet"><div class="sheet-handle"></div>'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">'
-    +'<div class="sheet-title" style="margin-bottom:0;">Log Body Metrics</div>'
-    +'<button onclick="triggerRenphoScan()" id="renpho-scan-btn" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;background:var(--s2);border:1px solid var(--b2);color:var(--t1);font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;flex-shrink:0;">'
-    +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>'
-    +'Scan Renpho</button>'
-    +'</div>'
-    +'<div class="sheet-sub" style="margin-bottom:10px;">Screenshot from Renpho app — or fill manually</div>'
-    +'<input type="file" id="renpho-file-input" accept="image/*" style="display:none;" onchange="handleRenphoFile(this)">'
-    +'<div id="renpho-scan-status" style="display:none;"></div>'
+  // Auto-compute BMI from weight + stored height
+  const mp=loadMacroProfile();
+  const heightCm=mp?.height_cm||0;
+  const lastBMI=heightCm>0&&last.weight>0?Math.round((last.weight*0.453592)/Math.pow(heightCm/100,2)*10)/10:null;
 
-    // ── Tier 1: Scale metrics ──
+  const bmiField=heightCm>0
+    ?`<div class="field"><label>BMI <span style="font-size:10px;color:var(--t3);font-weight:400;">(auto)</span></label><input type="number" id="bm-bmi" inputmode="decimal" placeholder="auto" step="0.1" value="${lastBMI||''}" readonly style="background:var(--s3);color:var(--t3);cursor:default;"></div>`
+    :`<div class="field"><label>BMI <span style="font-size:10px;color:var(--t3);font-weight:400;">(set height in profile)</span></label><input type="number" id="bm-bmi" inputmode="decimal" placeholder="e.g. 22.1" step="0.1" value="${last.bmi||''}"></div>`;
+
+  bg.innerHTML='<div class="sheet"><div class="sheet-handle"></div>'
+    +'<div class="sheet-title">Log Body Metrics</div>'
+    +'<div class="sheet-sub">From your Renpho — leave blank to skip</div>'
+
+    // ── Scale metrics — Renpho order ──
     +'<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin:0 0 8px;">Scale Metrics</div>'
     +'<div class="metric-input-grid">'
-    +field('bm-weight','Weight (lb)','e.g. 185','0.1',last.weight)
+    +field('bm-weight','Weight (lb)','e.g. 158.2','0.1',last.weight)
     +field('bm-bodyfat','Body Fat %','e.g. 11.2','0.1',last.bodyFat)
-    +field('bm-muscle','Muscle Mass (lb)','e.g. 133.6','0.1',last.muscleMass)
-    +field('bm-ffm','Fat-Free Mass (lb)','e.g. 140.4','0.1',last.fatFreeMass)
+    +field('bm-skel','Skeletal Muscle %','e.g. 57.4','0.1',last.skeletalMusclePct)
+    +field('bm-ffm','Fat-Free Mass (lb)','e.g. 140.6','0.1',last.fatFreeMass)
+    +field('bm-subcut','Subcutaneous Fat %','e.g. 9.7','0.1',last.subcutFat)
     +field('bm-visceral','Visceral Fat','e.g. 5','1',last.visceralFat)
+    +field('bm-water','Body Water %','e.g. 64.1','0.1',last.bodyWater)
+    +field('bm-muscle','Muscle Mass (lb)','e.g. 133.6','0.1',last.muscleMass)
+    +field('bm-bone','Bone Mass (lb)','e.g. 7.0','0.1',last.boneMass)
+    +field('bm-protein','Protein %','e.g. 20.2','0.1',last.proteinPct)
     +field('bm-bmr','BMR (kcal)','e.g. 1734','1',last.bmr)
-    +field('bm-water','Body Water %','e.g. 62.1','0.1',last.bodyWater)
+    +field('bm-metage','Metabolic Age','e.g. 25','1',last.metabolicAge)
+    +bmiField
     +'</div>'
 
     // ── Measurements ──
@@ -6137,20 +6228,6 @@ function showBodyLogSheet(){
     +field('bm-arms','Arms (in)','e.g. 15','0.25',last.arms)
     +'</div>'
 
-    // ── Tier 2: collapsible ──
-    +'<button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\';this.querySelector(\'.t2-arrow\').style.transform=this.nextElementSibling.style.display===\'none\'?\'rotate(0deg)\':\'rotate(90deg)\'" style="width:100%;background:none;border:none;padding:10px 0 6px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-family:DM Sans,sans-serif;">'
-    +'<span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);">More Metrics</span>'
-    +'<svg class="t2-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" style="transition:transform .2s;"><path d="M9 18l6-6-6-6"/></svg>'
-    +'</button>'
-    +'<div style="display:none;">'
-    +'<div class="metric-input-grid">'
-    +field('bm-skel','Skeletal Muscle %','e.g. 48.2','0.1',last.skeletalMusclePct)
-    +field('bm-subcut','Subcutaneous Fat %','e.g. 8.1','0.1',last.subcutFat)
-    +field('bm-bone','Bone Mass (lb)','e.g. 7.2','0.1',last.boneMass)
-    +field('bm-protein','Protein %','e.g. 18.1','0.1',last.proteinPct)
-    +field('bm-metage','Metabolic Age','e.g. 25','1',last.metabolicAge)
-    +'</div></div>'
-
     +'<div class="field" style="margin-top:4px;"><label>Notes (optional)</label><input type="text" id="bm-notes" placeholder="e.g. post-workout, morning weigh-in" value="'+(last.notes||'')+'"></div>'
     +'<button class="btn btn-acc btn-full" onclick="logBodyMetrics()">Save Entry</button>'
     +(bodyMetrics.length?'<div style="font-size:11px;color:var(--t3);margin-top:10px;text-align:center;">Previous: '+new Date(bodyMetrics[0].date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})+'</div>':'')
@@ -6160,125 +6237,93 @@ function showBodyLogSheet(){
   document.body.appendChild(bg);
 }
 
-function triggerRenphoScan(){
-  const inp=document.getElementById('renpho-file-input');
-  if(inp)inp.click();
-}
+// Body metrics log sheet for a specific past date (used from Calendar day detail)
+function showPastBodyLogSheet(dateStr, onSaved){
+  const existing=bodyMetrics.find(e=>e.date===dateStr);
+  const last=existing||{};
+  const dt=new Date(dateStr+'T12:00:00');
+  const dateLabel=dt.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric',year:'numeric'});
 
-async function handleRenphoFile(input){
-  const file=input.files?.[0];
-  if(!file)return;
+  const bg=document.createElement('div');bg.className='sheet-bg';
+  const field=(id,label,ph,step,val)=>`<div class="field"><label>${label}</label><input type="number" id="${id}" inputmode="decimal" placeholder="${ph}" step="${step}" value="${val||''}"></div>`;
 
-  // Show loading state
-  const btn=document.getElementById('renpho-scan-btn');
-  const statusEl=document.getElementById('renpho-scan-status');
-  if(btn){btn.disabled=true;btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg> Scanning…';}
-  if(statusEl){statusEl.style.display='block';statusEl.innerHTML='<div style="background:var(--s2);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--t2);margin-bottom:10px;">📸 Reading your Renpho screenshot…</div>';}
+  const mp=loadMacroProfile();
+  const heightCm=mp?.height_cm||0;
+  const lastBMI=heightCm>0&&last.weight>0?Math.round((last.weight*0.453592)/Math.pow(heightCm/100,2)*10)/10:null;
+  const bmiField=heightCm>0
+    ?`<div class="field"><label>BMI <span style="font-size:10px;color:var(--t3);font-weight:400;">(auto)</span></label><input type="number" id="pbm-bmi" placeholder="auto" step="0.1" value="${lastBMI||''}" readonly style="background:var(--s3);color:var(--t3);cursor:default;"></div>`
+    :`<div class="field"><label>BMI</label><input type="number" id="pbm-bmi" inputmode="decimal" placeholder="e.g. 22.1" step="0.1" value="${last.bmi||''}"></div>`;
 
-  try{
-    // Compress aggressively — Renpho numbers are large bold text, readable at 400px
-    const {b64, mime} = await new Promise((res,rej)=>{
-      const img=new Image();
-      const objectUrl=URL.createObjectURL(file);
-      img.onload=()=>{
-        try{
-          URL.revokeObjectURL(objectUrl);
-          const MAX=400;
-          let w=img.width,h=img.height;
-          if(w>MAX){h=Math.round(h*(MAX/w));w=MAX;}
-          const canvas=document.createElement('canvas');
-          canvas.width=w;canvas.height=h;
-          const ctx=canvas.getContext('2d');
-          if(!ctx){rej(new Error('Canvas not available'));return;}
-          ctx.drawImage(img,0,0,w,h);
-          const dataUrl=canvas.toDataURL('image/jpeg',0.4);
-          if(!dataUrl||dataUrl==='data:,'){rej(new Error('Canvas export failed'));return;}
-          res({b64:dataUrl.split(',')[1], mime:'image/jpeg'});
-        }catch(e){rej(e);}
-      };
-      img.onerror=()=>{
-        URL.revokeObjectURL(objectUrl);
-        const reader=new FileReader();
-        reader.onload=e=>{
-          const parts=e.target.result.split(',');
-          res({b64:parts[1], mime:file.type||'image/jpeg'});
-        };
-        reader.onerror=()=>rej(new Error('Could not read image file'));
-        reader.readAsDataURL(file);
-      };
-      img.src=objectUrl;
-    });
+  bg.innerHTML=`<div class="sheet"><div class="sheet-handle"></div>
+    <div class="sheet-title" style="margin-bottom:2px;">Log Body Metrics</div>
+    <div style="font-size:13px;color:#1D9E75;font-weight:600;margin-bottom:12px;">📅 ${dateLabel}</div>
+    ${existing?`<div style="background:rgba(255,71,71,.08);border:0.5px solid rgba(255,71,71,.2);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:13px;color:var(--t2);">An entry already exists for this date. Saving will replace it.</div>`:''}
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:8px;">Scale Metrics</div>
+    <div class="metric-input-grid">
+      ${field('pbm-weight','Weight (lb)','e.g. 158.2','0.1',last.weight)}
+      ${field('pbm-bodyfat','Body Fat %','e.g. 11.2','0.1',last.bodyFat)}
+      ${field('pbm-skel','Skeletal Muscle %','e.g. 57.4','0.1',last.skeletalMusclePct)}
+      ${field('pbm-ffm','Fat-Free Mass (lb)','e.g. 140.6','0.1',last.fatFreeMass)}
+      ${field('pbm-subcut','Subcutaneous Fat %','e.g. 9.7','0.1',last.subcutFat)}
+      ${field('pbm-visceral','Visceral Fat','e.g. 5','1',last.visceralFat)}
+      ${field('pbm-water','Body Water %','e.g. 64.1','0.1',last.bodyWater)}
+      ${field('pbm-muscle','Muscle Mass (lb)','e.g. 133.6','0.1',last.muscleMass)}
+      ${field('pbm-bone','Bone Mass (lb)','e.g. 7.0','0.1',last.boneMass)}
+      ${field('pbm-protein','Protein %','e.g. 20.2','0.1',last.proteinPct)}
+      ${field('pbm-bmr','BMR (kcal)','e.g. 1734','1',last.bmr)}
+      ${field('pbm-metage','Metabolic Age','e.g. 25','1',last.metabolicAge)}
+      ${bmiField}
+    </div>
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin:8px 0 8px;">Measurements</div>
+    <div class="metric-input-grid">
+      ${field('pbm-waist','Waist (in)','e.g. 32','0.5',last.waist)}
+      ${field('pbm-hips','Hips (in)','e.g. 38','0.5',last.hips)}
+      ${field('pbm-chest','Chest (in)','e.g. 42','0.5',last.chest)}
+      ${field('pbm-arms','Arms (in)','e.g. 15','0.25',last.arms)}
+    </div>
+    <div class="field" style="margin-top:4px;"><label>Notes (optional)</label><input type="text" id="pbm-notes" placeholder="e.g. morning weigh-in" value="${last.notes||''}"></div>
+    <button class="btn btn-acc btn-full" id="pbm-save-btn">Save Entry</button>
+    ${existing?`<button class="btn btn-ghost btn-full" style="margin-top:8px;color:var(--red);border-color:rgba(255,71,71,.3);" id="pbm-delete-btn">Delete This Entry</button>`:''}
+    <button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="this.closest('.sheet-bg').remove()">Cancel</button>
+  </div>`;
 
-    // Log compressed size for debugging
-    const kb=Math.round(b64.length*0.75/1024);
-    console.log('Renpho scan: sending ~'+kb+'KB to API');
-    if(statusEl){statusEl.innerHTML='<div style="background:var(--s2);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--t2);margin-bottom:10px;">🤖 Image compressed to ~'+kb+'KB — waiting for API response…</div>';}
-
-    // Call Claude vision API
-    const metrics=await scanRenphoImage(b64, mime);
-
-    // Fill fields
-    let filled=0;
-    const fieldMap={
-      weight:'bm-weight', bodyFat:'bm-bodyfat', muscleMass:'bm-muscle',
-      fatFreeMass:'bm-ffm', visceralFat:'bm-visceral', bmr:'bm-bmr',
-      bodyWater:'bm-water', skeletalMusclePct:'bm-skel', subcutFat:'bm-subcut',
-      boneMass:'bm-bone', proteinPct:'bm-protein', metabolicAge:'bm-metage'
-    };
-    Object.entries(fieldMap).forEach(([key,id])=>{
-      if(metrics[key]!=null&&metrics[key]>0){
-        const el=document.getElementById(id);
-        if(el){el.value=metrics[key];filled++;}
-        // Auto-expand More Metrics section if Tier 2 fields were found
-        if(['bm-skel','bm-subcut','bm-bone','bm-protein','bm-metage'].includes(id)&&metrics[key]>0){
-          const tier2=el?.closest('.metric-input-grid')?.parentElement;
-          if(tier2&&tier2.style.display==='none')tier2.style.display='block';
-        }
-      }
-    });
-
-    if(filled>0){
-      if(statusEl){statusEl.innerHTML=`<div style="background:rgba(29,158,117,.12);border:0.5px solid rgba(29,158,117,.3);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--grn);margin-bottom:10px;">✓ ${filled} metric${filled===1?'':'s'} extracted — review and tap Save</div>`;}
-    } else {
-      if(statusEl){statusEl.innerHTML='<div style="background:rgba(255,71,71,.1);border:0.5px solid rgba(255,71,71,.25);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:10px;">Couldn\'t read metrics — make sure it\'s a Renpho screenshot showing the values grid</div>';}
+  bg.querySelector('#pbm-save-btn').addEventListener('click',()=>{
+    const g=(id)=>parseFloat(bg.querySelector('#'+id)?.value)||0;
+    const weight=g('pbm-weight'),bodyFat=g('pbm-bodyfat'),muscleMass=g('pbm-muscle'),
+      fatFreeMass=g('pbm-ffm'),visceralFat=g('pbm-visceral'),bmr=g('pbm-bmr'),
+      bodyWater=g('pbm-water'),skeletalMusclePct=g('pbm-skel'),subcutFat=g('pbm-subcut'),
+      boneMass=g('pbm-bone'),proteinPct=g('pbm-protein'),metabolicAge=g('pbm-metage'),
+      waist=g('pbm-waist'),hips=g('pbm-hips'),chest=g('pbm-chest'),arms=g('pbm-arms');
+    const hCm=mp?.height_cm||0;
+    const bmi=hCm>0&&weight>0?Math.round((weight*0.453592)/Math.pow(hCm/100,2)*10)/10:g('pbm-bmi');
+    const notes=bg.querySelector('#pbm-notes')?.value||'';
+    if(!weight&&!bodyFat&&!muscleMass&&!fatFreeMass&&!visceralFat&&!bmr&&!waist&&!hips&&!chest&&!arms){
+      alert('Enter at least one measurement.');return;
     }
-  } catch(err){
-    const msg=err instanceof Error?err.message:String(err);
-    console.error('Renpho scan error:',msg);
-    if(statusEl){statusEl.innerHTML='<div style="background:rgba(255,71,71,.1);border:0.5px solid rgba(255,71,71,.25);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:10px;">Scan failed: '+msg+'</div>';}
-  } finally {
-    if(btn){btn.disabled=false;btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> Scan Renpho';}
-    input.value='';
-  }
+    bodyMetrics=bodyMetrics.filter(e=>e.date!==dateStr);
+    bodyMetrics.unshift({date:dateStr,weight,bmi,bodyFat,muscleMass,fatFreeMass,visceralFat,bmr,bodyWater,
+      skeletalMusclePct,subcutFat,boneMass,proteinPct,metabolicAge,waist,hips,chest,arms,notes});
+    bodyMetrics=bodyMetrics.sort((a,b)=>b.date.localeCompare(a.date));
+    saveBodyMetrics();
+    bg.remove();
+    refreshBodyTab();
+    renderCalendar();
+    if(onSaved)onSaved();
+  });
+
+  bg.querySelector('#pbm-delete-btn')?.addEventListener('click',()=>{
+    bodyMetrics=bodyMetrics.filter(e=>e.date!==dateStr);
+    saveBodyMetrics();
+    bg.remove();
+    refreshBodyTab();
+    renderCalendar();
+    if(onSaved)onSaved();
+  });
+
+  bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
+  document.body.appendChild(bg);
 }
 
-async function scanRenphoImage(base64,mimeType){
-  const res=await fetchWithTimeout('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{
-      'Content-Type':'application/json',
-      'anthropic-version':'2023-06-01',
-      'anthropic-dangerous-direct-browser-access':'true',
-    },
-    body:JSON.stringify({
-      model:'claude-haiku-4-5-20251001',
-      max_tokens:300,
-      messages:[{
-        role:'user',
-        content:[
-          {type:'image',source:{type:'base64',media_type:mimeType,data:base64}},
-          {type:'text',text:'Extract Renpho scale metrics from this screenshot. Return ONLY a JSON object with any of these keys that are visible: weight, bodyFat, muscleMass, fatFreeMass, visceralFat, bmr, bodyWater, skeletalMusclePct, subcutFat, boneMass, proteinPct, metabolicAge. Use the large primary numbers only, not deltas. JSON only, no markdown.'}
-        ]
-      }]
-    })
-  },30000);
-
-  if(!res.ok){const t=await res.text().catch(()=>'');throw new Error('API '+res.status+': '+t.slice(0,200));}
-  const data=await res.json();
-  const text=data.content?.[0]?.text||'';
-  const clean=text.replace(/```json?|```/g,'').trim();
-  return JSON.parse(clean);
-}
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // DATA EXPORT / IMPORT
