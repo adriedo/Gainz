@@ -89,6 +89,21 @@ label{font-size:12px;color:var(--t2);display:block;margin-bottom:5px;}
 /* HOME */
 .greet{font-family:Barlow Condensed,sans-serif;font-size:46px;font-weight:800;text-transform:uppercase;letter-spacing:-1px;line-height:1.05;margin-bottom:6px;}
 .greet em{color:var(--acc);font-style:normal;}
+/* CONSISTENCY CARD */
+.consist-card{background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:14px 16px;margin-bottom:10px;}
+.consist-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.consist-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);}
+.consist-score{font-family:Barlow Condensed,sans-serif;font-size:15px;font-weight:700;color:var(--acc);}
+.consist-msg{font-size:13px;font-weight:600;line-height:1.3;}
+.consist-sub{font-size:11px;color:var(--t2);margin-top:2px;}
+.consist-dots{display:flex;gap:6px;align-items:center;}
+.cdot-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.cdot{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;transition:background .2s;}
+.cdot.done{background:var(--acc);color:#000;}
+.cdot.today-empty{background:var(--s2);border:1.5px dashed var(--acc);color:var(--acc);}
+.cdot.missed{background:rgba(255,80,80,.12);color:rgba(255,80,80,.6);}
+.cdot.future{background:var(--s2);color:var(--t3);}
+.cdot-day{font-size:9px;color:var(--t3);font-weight:500;letter-spacing:.04em;}
 .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px;}
 .stat-box{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:14px 10px;}
 .stat-n{font-family:Barlow Condensed,sans-serif;font-size:30px;font-weight:700;line-height:1;}
@@ -692,6 +707,7 @@ input[type="date"]{color-scheme:dark;color:var(--t1);background:var(--s2);}
   <div class="scroll">
     <div class="greet bc">Let's<br><em>Get It.</em></div>
     <div style="font-size:13px;color:var(--t2);margin-bottom:20px;" id="dateline"></div>
+    <div id="consist-card"></div>
     <div class="stat-grid" id="home-stats"></div>
     <div onclick="nav('edit',null)" style="display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:13px 14px;margin-bottom:12px;cursor:pointer;">
       <div style="width:36px;height:36px;border-radius:10px;background:rgba(232,255,71,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
@@ -1677,8 +1693,69 @@ function buildIntervalUI(id){
   </div>`;
 }
 
+function buildConsistencyCard(){
+  // Week boundaries (Sun–Sat)
+  const now=new Date();
+  const todayIdx=now.getDay(); // 0=Sun
+  const weekStart=new Date(now);weekStart.setDate(now.getDate()-todayIdx);weekStart.setHours(0,0,0,0);
+  const weekEnd=new Date(weekStart);weekEnd.setDate(weekStart.getDate()+6);weekEnd.setHours(23,59,59,999);
+
+  // Unique active dates this week (strength + cardio)
+  const allSessions=getSessions();
+  const activeDates=new Set(
+    allSessions
+      .filter(s=>{const d=new Date(s.date);return d>=weekStart&&d<=weekEnd;})
+      .map(s=>new Date(s.date).toDateString())
+  );
+
+  const planned=Math.max(program.length,1);
+  const done=activeDates.size;
+  // Days elapsed (0=just Sunday, 6=full week done)
+  const elapsed=todayIdx; // days before today
+  const missed=Math.max(0,elapsed-(done)); // past days with no session (rough — doesn't need to be day-matched)
+
+  // Coach message
+  let msg,sub,scoreColor;
+  const pct=Math.round((done/planned)*100);
+  if(done===0&&elapsed===0){msg='Week starts today';sub='First workout sets the tone.';scoreColor='var(--t2)';}
+  else if(done===0){msg='No sessions yet';sub=`${elapsed} day${elapsed!==1?'s':''} in — time to move.`;scoreColor='rgba(255,80,80,.8)';}
+  else if(done>=planned){msg='Week complete 🏆';sub='All planned sessions done.';scoreColor='var(--acc)';}
+  else if(done===planned-1){msg='One more to go';sub=`${done} of ${planned} planned days hit.`;scoreColor='var(--acc)';}
+  else{msg=`${done} of ${planned} planned days`;sub=missed>1?`${missed} days missed so far this week.`:'Keep the momentum going.';scoreColor=done>0?'var(--acc)':'var(--t2)';}
+
+  // Day dots: S M T W T F S
+  const dayLabels=['S','M','T','W','T','F','S'];
+  const dots=dayLabels.map((lbl,i)=>{
+    const d=new Date(weekStart);d.setDate(weekStart.getDate()+i);
+    const isToday=i===todayIdx;
+    const isPast=i<todayIdx;
+    const isFuture=i>todayIdx;
+    const trained=activeDates.has(d.toDateString());
+    let cls,inner;
+    if(trained){cls='cdot done';inner=`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`;}
+    else if(isToday){cls='cdot today-empty';inner=lbl;}
+    else if(isPast){cls='cdot missed';inner=`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(255,80,80,.6)" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;}
+    else{cls='cdot future';inner=lbl;}
+    return`<div class="cdot-wrap"><div class="${cls}">${inner}</div><div class="cdot-day">${lbl}</div></div>`;
+  }).join('');
+
+  return`<div class="consist-card">
+    <div class="consist-top">
+      <span class="consist-label">This Week</span>
+      <span class="consist-score" style="color:${scoreColor}">${done}/${planned} days</span>
+    </div>
+    <div class="consist-dots">${dots}</div>
+    <div style="margin-top:10px;">
+      <div class="consist-msg">${msg}</div>
+      <div class="consist-sub">${sub}</div>
+    </div>
+  </div>`;
+}
+
 function renderHome(){
   eid('dateline').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  // Consistency card
+  const cc=eid('consist-card');if(cc)cc.innerHTML=buildConsistencyCard();
   // Style active log unit button
   ['mi','km'].forEach(u=>{
     const b=eid('lu-'+u);
@@ -5371,18 +5448,29 @@ function renderBodyProgress(){
     </div>`;
   }
 
-  // ── BMR recal banner ──────────────────────────────────────────────────────
+  // ── Macro recalibration banner ────────────────────────────────────────────
   let recalBanner='';
-  if(localStorage.getItem('gainz_bmr_recal_pending')==='1'){
-    recalBanner=`<div style="background:rgba(55,138,221,.12);border:0.5px solid rgba(55,138,221,.3);border-radius:14px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:flex-start;gap:10px;">
-      <div style="font-size:18px;flex-shrink:0;">📊</div>
+  const recalSnoozeKey='gainz_recal_snoozed';
+  const snoozed=localStorage.getItem(recalSnoozeKey);
+  // Snooze expires after 7 days
+  const snoozeActive=snoozed&&(Date.now()-parseInt(snoozed,10))<7*24*60*60*1000;
+  if(!snoozeActive){
+    const recal=checkMacroRecalNeeded();
+    if(recal.needed){
+      const icons={weight_drift:'⚖️',stale:'📅',bmr:'📊'};
+      const titles={weight_drift:'Weight Drift Detected',stale:'Macro Profile Outdated',bmr:'Macro Recalibration Suggested'};
+      const icon=icons[recal.reason]||'📊';
+      const title=titles[recal.reason]||'Macro Recalibration Suggested';
+      recalBanner=`<div style="background:rgba(55,138,221,.12);border:0.5px solid rgba(55,138,221,.3);border-radius:14px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:flex-start;gap:10px;">
+      <div style="font-size:18px;flex-shrink:0;">${icon}</div>
       <div style="flex:1;">
-        <div style="font-size:13px;font-weight:600;color:#378ADD;margin-bottom:3px;">Macro Recalibration Suggested</div>
-        <div style="font-size:12px;color:var(--t2);line-height:1.5;">Your BMR has shifted by more than 50 kcal since your last macro setup. Update your targets to stay on track.</div>
-        <button onclick="localStorage.removeItem('gainz_bmr_recal_pending');document.getElementById('macro-profile-screen').style.display='flex';startMQ();" style="margin-top:8px;font-size:12px;font-weight:600;padding:6px 14px;border-radius:10px;background:#378ADD;color:#fff;border:none;cursor:pointer;font-family:DM Sans,sans-serif;">Recalibrate Macros</button>
-        <button onclick="localStorage.removeItem('gainz_bmr_recal_pending');renderProgress();" style="margin-top:8px;margin-left:8px;font-size:12px;font-weight:500;padding:6px 14px;border-radius:10px;background:none;color:var(--t2);border:1px solid var(--b2);cursor:pointer;font-family:DM Sans,sans-serif;">Dismiss</button>
+        <div style="font-size:13px;font-weight:600;color:#378ADD;margin-bottom:3px;">${title}</div>
+        <div style="font-size:12px;color:var(--t2);line-height:1.5;">${recal.detail}</div>
+        <button onclick="localStorage.removeItem('gainz_bmr_recal_pending');localStorage.removeItem('gainz_recal_snoozed');openMacroQuestionnaire();" style="margin-top:8px;font-size:12px;font-weight:600;padding:6px 14px;border-radius:10px;background:#378ADD;color:#fff;border:none;cursor:pointer;font-family:DM Sans,sans-serif;">Update Macros</button>
+        <button onclick="localStorage.setItem('gainz_recal_snoozed',Date.now().toString());renderProgress();" style="margin-top:8px;margin-left:8px;font-size:12px;font-weight:500;padding:6px 14px;border-radius:10px;background:none;color:var(--t2);border:1px solid var(--b2);cursor:pointer;font-family:DM Sans,sans-serif;">Remind me later</button>
       </div>
     </div>`;
+    }
   }
 
   // ── Metric rows ───────────────────────────────────────────────────────────
@@ -7533,6 +7621,48 @@ function saveMacroProfile(p) {
   localStorage.setItem(MQ_KEY, JSON.stringify(p));
 }
 
+// Returns {needed:bool, reason:string, detail:string} for the recalibration banner.
+// Priority: weight drift > staleness > BMR shift.
+function checkMacroRecalNeeded(){
+  const mp=loadMacroProfile();
+  if(!mp) return {needed:false};
+
+  // ── 1. Weight drift: latest logged weight vs profile weight ──────────────
+  const latestEntry=bodyMetrics.find(e=>e.weight>0);
+  if(latestEntry&&mp.weight){
+    const profileLbs=mp.weight_unit==='kg'?parseFloat(mp.weight)*2.20462:parseFloat(mp.weight);
+    const loggedLbs=parseFloat(latestEntry.weight); // bodyMetrics always stores in lbs
+    const drift=Math.abs(loggedLbs-profileLbs);
+    if(drift>=5){
+      const dir=loggedLbs>profileLbs?'up':'down';
+      return{needed:true,reason:'weight_drift',
+        detail:`Your weight is ${Math.round(drift)} lb ${dir} from your macro profile. Your calorie targets may be off.`};
+    }
+  }
+
+  // ── 2. Staleness: 8+ weeks since last questionnaire completion ───────────
+  if(mp.savedAt){
+    const weeksSince=(Date.now()-new Date(mp.savedAt).getTime())/(1000*60*60*24*7);
+    if(weeksSince>=8){
+      const weeks=Math.floor(weeksSince);
+      return{needed:true,reason:'stale',
+        detail:`Your macro profile is ${weeks} weeks old. Body composition and activity levels change — a refresh keeps targets accurate.`};
+    }
+  } else {
+    // Profile exists but pre-dates the savedAt stamp — treat as stale
+    return{needed:true,reason:'stale',
+      detail:'Your macro profile has never been updated. A quick refresh ensures your targets match your current stats.'};
+  }
+
+  // ── 3. BMR shift (existing flag) ─────────────────────────────────────────
+  if(localStorage.getItem('gainz_bmr_recal_pending')==='1'){
+    return{needed:true,reason:'bmr',
+      detail:'Your BMR has shifted by more than 50 kcal since your last macro setup. Update your targets to stay on track.'};
+  }
+
+  return{needed:false};
+}
+
 // ─── FULL TDEE CALCULATOR ────────────────────────────────────────────────────
 // Uses Mifflin-St Jeor BMR when age/sex/height available (from macro profile),
 // otherwise falls back to the bodyweight-×-11 estimate from onboarding data.
@@ -7911,7 +8041,11 @@ function mqValidateStep(step) {
 }
 
 function mqFinish() {
+  mqAnswers.savedAt = new Date().toISOString();
   saveMacroProfile(mqAnswers);
+  // Clear all recal flags so banner doesn't fire immediately after completing
+  localStorage.removeItem('gainz_bmr_recal_pending');
+  localStorage.removeItem('gainz_recal_snoozed');
 
   // Recalculate food goals from the new profile
   const newGoals = calcTDEEGoals(null); // calcTDEEGoals reads MQ_KEY internally
