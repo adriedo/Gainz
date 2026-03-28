@@ -593,6 +593,23 @@ label{font-size:12px;color:var(--t2);display:block;margin-bottom:5px;}
 .water-log-item{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--b1);font-size:13px;}
 .water-log-item:last-of-type{border-bottom:none;}
 
+/* SUPPLEMENTS */
+.supp-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--b1);cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.supp-row:last-of-type{border-bottom:none;}
+.supp-check{width:24px;height:24px;border-radius:50%;border:2px solid var(--b2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.supp-check.done{background:var(--acc);border-color:var(--acc);}
+.supp-check.done::after{content:'✓';font-size:13px;font-weight:700;color:#000;}
+.supp-info{flex:1;min-width:0;}
+.supp-name{font-size:14px;font-weight:600;color:var(--t1);}
+.supp-timing{font-size:11px;color:var(--t3);margin-top:1px;}
+.supp-dose{font-size:11px;font-weight:600;color:var(--acc);white-space:nowrap;margin-left:auto;}
+.supp-timing-badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;margin-top:3px;}
+.supp-manage-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--b1);}
+.supp-manage-row:last-of-type{border-bottom:none;}
+.supp-suggestion{background:rgba(232,255,71,.05);border:1px solid rgba(232,255,71,.2);border-radius:10px;padding:10px 12px;margin-bottom:8px;}
+.supp-suggestion-name{font-size:13px;font-weight:600;color:var(--acc);margin-bottom:2px;}
+.supp-suggestion-why{font-size:12px;color:var(--t2);line-height:1.4;}
+
 /* BODY METRICS */
 .metric-input-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
 .body-stat-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--b1);}
@@ -5795,6 +5812,265 @@ function buildWeekNutrition(){
   return{days,avgCalories,avgProtein,avgCarbs,avgFat,daysLogged};
 }
 
+// ─── SUPPLEMENT LOG ───────────────────────────────────────────────────────────
+// rec: true = coach recommends | optional: true = skip on rest days
+const SUPP_DB=[
+  {id:'creatine',name:'Creatine Monohydrate',icon:'⚡',dose:'5g',category:'performance',rec:true,
+   timingLabel:'Post-workout or with any meal',timingColor:'rgba(72,207,109,.15)',timingTextColor:'var(--grn)',
+   why:'Daily consistency matters more than exact timing. Post-workout with carbs gives a slight absorption edge — insulin helps shuttle creatine into muscle. No loading phase needed.',
+   coachNote:'The single most evidence-backed supplement for strength and power output. Every meta-analysis agrees. Take it every day, including rest days, or the saturation benefit is lost.',
+   evidence:'★★★★★'},
+  {id:'fish_oil',name:'Fish Oil (Omega-3)',icon:'🐟',dose:'2–3g EPA/DHA',category:'health',rec:true,
+   timingLabel:'With your largest meal',timingColor:'rgba(71,180,255,.15)',timingTextColor:'#47b4ff',
+   why:'Fat-soluble — needs dietary fat to absorb properly. Biggest meal = most fat = best uptake. Also reduces fishy aftertaste. Check the label: you want 2–3g of combined EPA+DHA, not total fish oil weight.',
+   coachNote:'Anti-inflammatory, supports joint health, recovery, and cardiovascular function. Genuinely underrated for anyone training hard. Most people are chronically low in omega-3s.',
+   evidence:'★★★★☆'},
+  {id:'magnesium',name:'Magnesium',icon:'🌙',dose:'300–400mg',category:'recovery',rec:true,
+   timingLabel:'Before bed',timingColor:'rgba(180,130,255,.15)',timingTextColor:'#b482ff',
+   why:'Evening timing aligns with its calming effect on the nervous system — supports sleep onset and muscle relaxation overnight. Glycinate or malate form are best absorbed; oxide is cheap but largely wasted.',
+   coachNote:'Most athletes are deficient and don\'t know it. Critical for 300+ enzymatic reactions including ATP production and muscle contraction. If you\'re on oxide, switching to glycinate is one of the highest-ROI changes you can make.',
+   evidence:'★★★★☆'},
+  {id:'multivitamin',name:'Multivitamin',icon:'💊',dose:'1 serving',category:'health',rec:true,
+   timingLabel:'With breakfast',timingColor:'rgba(255,180,71,.15)',timingTextColor:'#ffb347',
+   why:'Fat-soluble vitamins (A, D, E, K) need dietary fat to absorb — breakfast usually provides this. Avoid taking within an hour of coffee, which reduces absorption of iron and some B vitamins.',
+   coachNote:'Think of it as insurance, not a foundation. Most multis under-dose vitamin D (400–1000 IU vs the 2000–5000 IU active people need). Check yours — a separate D3+K2 is often worth adding.',
+   evidence:'★★★☆☆'},
+  {id:'whey',name:'Whey Protein',icon:'🥤',dose:'25–35g',category:'performance',rec:true,
+   timingLabel:'Within 90 min post-workout',timingColor:'rgba(72,207,109,.15)',timingTextColor:'var(--grn)',
+   why:'The post-workout window (30–90 min) is when muscle protein synthesis is most elevated. Whey is fast-digesting and leucine-rich — ideal for this window. On rest days, skip it if your food protein is on track.',
+   coachNote:'Not magic — just a convenient protein source. If you\'re hitting your daily protein goal from food, whey adds nothing. Use it as a tool on training days or when food is inconvenient. Blend with milk for extra leucine and casein.',
+   evidence:'★★★★☆'},
+  {id:'vitamin_d',name:'Vitamin D3 + K2',icon:'☀️',dose:'2000–5000 IU D3',category:'health',rec:true,
+   timingLabel:'With breakfast (with fat)',timingColor:'rgba(255,180,71,.15)',timingTextColor:'#ffb347',
+   why:'D3 is fat-soluble — take with food containing fat. K2 (MK-7 form) pairs with D3 to direct calcium into bones rather than arteries. Critical combo.',
+   coachNote:'This is my top recommendation for most strength athletes. Most multis have 400–1000 IU; optimal levels for active people are closer to 2000–5000 IU/day. Vitamin D is involved in testosterone production, immune function, and muscle protein synthesis. Get bloodwork — aim for 50–80 ng/mL.',
+   evidence:'★★★★★'},
+  {id:'zinc',name:'Zinc',icon:'🔩',dose:'15–30mg',category:'health',rec:true,
+   timingLabel:'Before bed (away from dairy)',timingColor:'rgba(180,130,255,.15)',timingTextColor:'#b482ff',
+   why:'Zinc and calcium compete for the same absorption receptors — take away from dairy. Night is convenient and avoids interference with daytime meals. Don\'t exceed 40mg/day long-term.',
+   coachNote:'Depleted through sweat in every hard training session. Critical for testosterone synthesis, immune function, and wound healing. Most multis under-dose it. Worthwhile if you train 4+ days a week.',
+   evidence:'★★★★☆'},
+  {id:'ashwagandha',name:'Ashwagandha KSM-66',icon:'🌿',dose:'300–600mg',category:'recovery',rec:false,
+   timingLabel:'Before bed',timingColor:'rgba(180,130,255,.15)',timingTextColor:'#b482ff',
+   why:'Adaptogen — works by lowering cortisol over time, not acutely. Best taken consistently in the evening. KSM-66 is the most studied extract; Sensoril is also validated.',
+   coachNote:'Worth considering if your weekly check-in energy or sleep scores are consistently low. Has solid evidence for cortisol reduction and modest testosterone support in stressed or sleep-deprived men. Not a stimulant — no energy spike, builds over weeks.',
+   evidence:'★★★☆☆'},
+  {id:'beta_alanine',name:'Beta-Alanine',icon:'🔥',dose:'3.2–6.4g',category:'performance',rec:false,
+   timingLabel:'Pre-workout or split through day',timingColor:'rgba(255,100,71,.15)',timingTextColor:'#ff6447',
+   why:'Buffers muscle acidity during high-rep or high-intensity sets. Split dosing (2x daily) reduces the harmless but annoying skin tingling (paresthesia). Takes 4+ weeks of daily use to saturate.',
+   coachNote:'Useful for sets in the 8–15 rep range and HIIT cardio. Less relevant for pure strength work under 6 reps. If tingling bothers you, halve the dose and build up slowly. Not a day-1 addition.',
+   evidence:'★★★★☆'},
+  {id:'caffeine',name:'Caffeine',icon:'☕',dose:'100–200mg',category:'performance',rec:false,
+   timingLabel:'30–45 min pre-workout',timingColor:'rgba(255,180,71,.15)',timingTextColor:'#ffb347',
+   why:'Peak plasma levels hit at 30–45 minutes. Tolerance builds fast — cycling off for 1–2 weeks every couple months restores sensitivity. Cut off by early afternoon to protect sleep.',
+   coachNote:'Genuinely effective for strength and endurance — one of the most researched ergogenics. But it\'s a tool, not a crutch. If you can\'t train without it, your recovery or sleep is the real problem to fix.',
+   evidence:'★★★★★'},
+  {id:'citrulline',name:'L-Citrulline',icon:'🩸',dose:'6–8g',category:'performance',rec:false,
+   timingLabel:'30–60 min pre-workout',timingColor:'rgba(255,100,71,.15)',timingTextColor:'#ff6447',
+   why:'Increases nitric oxide → better blood flow → better muscle pump and oxygen delivery. Citrulline malate (2:1 ratio) is the studied form. More effective than arginine at raising plasma arginine.',
+   coachNote:'Nice addition if you\'re doing high-volume hypertrophy work. Modest but real effect on rep performance. If your pre-workout already contains it, check the dose — most underdose at 2–3g.',
+   evidence:'★★★☆☆'},
+  {id:'collagen',name:'Collagen Peptides',icon:'🦴',dose:'15–20g',category:'health',rec:false,
+   timingLabel:'With vitamin C, 30–60 min pre-workout',timingColor:'rgba(71,180,255,.15)',timingTextColor:'#47b4ff',
+   why:'Collagen synthesis peaks in connective tissue after exercise. Taking it with vitamin C (required cofactor) 30–60 min before training maximises delivery to tendons and ligaments.',
+   coachNote:'Not a muscle-builder — it\'s a joint and tendon support tool. Worth considering if you have recurring joint discomfort or want to front-load connective tissue resilience. Hydrolysed form (peptides) is best absorbed.',
+   evidence:'★★★☆☆'},
+  {id:'melatonin',name:'Melatonin',icon:'😴',dose:'0.5–2mg',category:'recovery',rec:false,
+   timingLabel:'30–60 min before bed',timingColor:'rgba(180,130,255,.15)',timingTextColor:'#b482ff',
+   why:'Low doses (0.5–1mg) are often more effective than high doses (5–10mg) for sleep onset — higher doses can cause grogginess. Use for travel, shift changes, or disrupted sleep patterns, not nightly.',
+   coachNote:'If you\'re already sleeping well, this adds nothing. If sleep is an issue, fix it with habits first (consistent wake time, dark room, no screens). Use melatonin situationally, not as a permanent solution.',
+   evidence:'★★★☆☆'},
+  {id:'berberine',name:'Berberine',icon:'🌱',dose:'500mg 3x/day',category:'health',rec:false,
+   timingLabel:'With meals (3x daily)',timingColor:'rgba(255,180,71,.15)',timingTextColor:'#ffb347',
+   why:'Short half-life requires split dosing with meals for sustained blood glucose control. Space doses evenly (e.g. breakfast, lunch, dinner).',
+   coachNote:'Often called "nature\'s metformin" — improves insulin sensitivity and lipid profiles. Relevant if you\'re in a fat loss phase or managing blood sugar. Not needed if metabolic markers are healthy.',
+   evidence:'★★★★☆'},
+  {id:'hmb',name:'HMB',icon:'💪',dose:'3g',category:'performance',rec:false,
+   timingLabel:'With a meal',timingColor:'rgba(72,207,109,.15)',timingTextColor:'var(--grn)',
+   why:'HMB (β-Hydroxy β-Methylbutyrate) is a leucine metabolite. Split into smaller doses with meals for best absorption.',
+   coachNote:'Evidence is mixed — strongest in untrained beginners or during caloric restriction/muscle preservation. Limited added benefit if you\'re already getting adequate protein and creatine.',
+   evidence:'★★☆☆☆'},
+];
+
+// gainz_supps: { stack:['id1','id2',...], log:{'YYYY-MM-DD':['id1','id2',...]} }
+let suppData=(function(){
+  try{
+    const d=JSON.parse(localStorage.getItem('gainz_supps')||'null');
+    if(d){
+      // Migrate old format {stack:[{id,active},...]} → new format {stack:['id',...]}
+      if(d.stack&&typeof d.stack[0]==='object'){
+        d.stack=d.stack.filter(s=>s.active).map(s=>s.id);
+      }
+      if(Array.isArray(d.stack))return d;
+    }
+  }catch(e){}
+  return{stack:['fish_oil','magnesium','creatine','multivitamin','whey'],log:{}};
+})();
+
+function saveSuppData(){localStorage.setItem('gainz_supps',JSON.stringify(suppData));}
+function getSuppById(id){return SUPP_DB.find(s=>s.id===id);}
+function getTodaySuppLog(){return suppData.log[todayKey()]||[];}
+function isInStack(id){return suppData.stack.includes(id);}
+
+function getActiveStack(){
+  return suppData.stack.map(id=>getSuppById(id)).filter(Boolean);
+}
+
+function getSuppCompletionToday(){
+  const stack=getActiveStack();
+  const taken=getTodaySuppLog();
+  const required=stack.filter(s=>!s.optional);
+  const takenRequired=required.filter(s=>taken.includes(s.id));
+  return{total:required.length,taken:takenRequired.length,allTaken:takenRequired.length>=required.length&&required.length>0};
+}
+
+function toggleSuppTaken(id){
+  const key=todayKey();
+  if(!suppData.log[key])suppData.log[key]=[];
+  const idx=suppData.log[key].indexOf(id);
+  if(idx>=0) suppData.log[key].splice(idx,1);
+  else suppData.log[key].push(id);
+  saveSuppData();
+  renderCoach();
+}
+
+function suppAddToStack(id){
+  if(!suppData.stack.includes(id)) suppData.stack.push(id);
+  saveSuppData();
+  renderCoach();
+}
+
+function suppRemoveFromStack(id){
+  suppData.stack=suppData.stack.filter(s=>s!==id);
+  saveSuppData();
+  renderCoach();
+}
+
+// Detail sheet for a single supplement — learn more, add/remove from stack
+function showSuppDetailSheet(id){
+  const s=getSuppById(id);
+  if(!s)return;
+  const inStack=isInStack(id);
+  const bg=document.createElement('div');bg.className='sheet-bg';
+  const stars=s.evidence||'';
+  const recBadge=s.rec
+    ?'<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:rgba(232,255,71,.12);color:var(--acc);border:1px solid rgba(232,255,71,.3);">✓ Coach Recommended</span>'
+    :'<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:var(--s2);color:var(--t3);border:1px solid var(--b2);">Not Recommended</span>';
+  bg.innerHTML=`<div class="sheet">
+    <div class="sheet-handle"></div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+      <div style="font-size:36px;line-height:1;">${s.icon}</div>
+      <div>
+        <div style="font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:800;">${s.name}</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">${recBadge}</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+      <div style="background:var(--s2);border-radius:10px;padding:10px 12px;">
+        <div style="font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Dose</div>
+        <div style="font-size:14px;font-weight:600;">${s.dose}</div>
+      </div>
+      <div style="background:var(--s2);border-radius:10px;padding:10px 12px;">
+        <div style="font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Evidence</div>
+        <div style="font-size:14px;">${stars}</div>
+      </div>
+    </div>
+    <div style="background:var(--s2);border-radius:10px;padding:12px;margin-bottom:10px;">
+      <div style="font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">⏱ When to take</div>
+      <div style="font-size:13px;font-weight:600;color:${s.timingTextColor};margin-bottom:6px;">${s.timingLabel}</div>
+      <div style="font-size:13px;color:var(--t2);line-height:1.55;">${s.why}</div>
+    </div>
+    <div style="background:rgba(232,255,71,.05);border:1px solid rgba(232,255,71,.15);border-radius:10px;padding:12px;margin-bottom:16px;">
+      <div style="font-size:10px;color:var(--acc);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">💡 Coach's take</div>
+      <div style="font-size:13px;color:var(--t1);line-height:1.55;">${s.coachNote}</div>
+    </div>
+    ${inStack
+      ?`<button class="btn btn-full" onclick="suppRemoveFromStack('${id}');closeSheets();" style="background:rgba(255,71,71,.08);border:1px solid rgba(255,71,71,.3);color:var(--red);border-radius:12px;padding:14px;font-size:15px;font-weight:700;font-family:DM Sans,sans-serif;cursor:pointer;margin-bottom:8px;">Remove from my stack</button>`
+      :`<button class="btn btn-acc btn-full" onclick="suppAddToStack('${id}');closeSheets();" style="margin-bottom:8px;">Add to my stack</button>`
+    }
+    <button class="btn btn-ghost btn-full" onclick="closeSheets()">Close</button>
+  </div>`;
+  bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
+  document.body.appendChild(bg);
+}
+
+// Recommendations sheet — all rec:true items with in/out-of-stack status
+function showSuppRecsSheet(){
+  const recSupps=SUPP_DB.filter(s=>s.rec);
+  const rows=recSupps.map(s=>{
+    const inStack=isInStack(s.id);
+    return`<div onclick="showSuppDetailSheet('${s.id}')" style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--b1);cursor:pointer;-webkit-tap-highlight-color:transparent;">
+      <div style="font-size:24px;width:30px;text-align:center;flex-shrink:0;">${s.icon}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:600;">${s.name}</div>
+        <div style="font-size:11px;color:var(--t3);margin-top:2px;">${s.dose} · ${s.timingLabel}</div>
+        <div style="font-size:11px;color:var(--t2);margin-top:3px;line-height:1.4;">${s.coachNote.slice(0,90)}${s.coachNote.length>90?'…':''}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
+        ${inStack
+          ?'<span style="font-size:10px;font-weight:600;color:var(--grn);">✓ In stack</span>'
+          :'<span style="font-size:10px;color:var(--t3);">Not in stack</span>'}
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+    </div>`;
+  }).join('');
+
+  const bg=document.createElement('div');bg.className='sheet-bg';
+  bg.innerHTML=`<div class="sheet" style="max-height:92vh;overflow-y:auto;">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Coach Recommendations</div>
+    <div style="font-size:12px;color:var(--t3);margin-bottom:12px;">Tap any supplement to see full timing guide, evidence rating, and add it to your stack.</div>
+    ${rows}
+    <button class="btn btn-ghost btn-full" style="margin-top:16px;" onclick="closeSheets()">Close</button>
+  </div>`;
+  bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
+  document.body.appendChild(bg);
+}
+
+// Full supplement browser sheet — all supplements, toggleable list
+function showSuppBrowserSheet(){
+  const categories=[
+    {key:'performance',label:'Performance'},
+    {key:'health',label:'Health & Foundations'},
+    {key:'recovery',label:'Recovery'},
+  ];
+  const sections=categories.map(cat=>{
+    const items=SUPP_DB.filter(s=>s.category===cat.key);
+    const rows=items.map(s=>{
+      const inStack=isInStack(s.id);
+      const recDot=s.rec
+        ?'<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;background:rgba(232,255,71,.12);color:var(--acc);">Rec</span>'
+        :'<span style="font-size:9px;padding:2px 6px;border-radius:10px;background:var(--s3);color:var(--t3);">—</span>';
+      return`<div onclick="showSuppDetailSheet('${s.id}')" style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--b1);cursor:pointer;-webkit-tap-highlight-color:transparent;">
+        <div style="font-size:24px;width:32px;text-align:center;flex-shrink:0;">${s.icon}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
+            <span style="font-size:14px;font-weight:600;">${s.name}</span>
+            ${recDot}
+          </div>
+          <div style="font-size:11px;color:var(--t3);margin-top:2px;">${s.dose} · ${s.timingLabel}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+          ${inStack?'<span style="font-size:10px;font-weight:600;color:var(--grn);">In stack</span>':''}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>`;
+    }).join('');
+    return`<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin:16px 0 4px;">${cat.label}</div>${rows}`;
+  }).join('');
+
+  const bg=document.createElement('div');bg.className='sheet-bg';
+  bg.innerHTML=`<div class="sheet" style="max-height:92vh;overflow-y:auto;">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">All Supplements</div>
+    <div style="font-size:12px;color:var(--t3);margin-bottom:4px;">Tap any supplement to learn more and add or remove it from your stack.</div>
+    ${sections}
+    <button class="btn btn-ghost btn-full" style="margin-top:16px;" onclick="closeSheets()">Done</button>
+  </div>`;
+  bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
+  document.body.appendChild(bg);
+}
+
 // ─── MUSCLE GROUP WEEKLY VOLUME ───────────────────────────────────────────────
 // Volume target band (sets): scientific hypertrophy range per muscle group per week
 const MUSCLE_SET_TARGETS={
@@ -6105,6 +6381,54 @@ function renderCoach(){
       +'</div>';
   }
 
+  // ── Supplement Log ──
+  const activeStack=getActiveStack();
+  const takenToday=getTodaySuppLog();
+  const suppCompletion=getSuppCompletionToday();
+  const todayStr=todayKey();
+  const hadStrengthToday=ws.strengthSessions.some(s=>s.date&&s.date.startsWith(todayStr));
+
+  // ── Section 1: My Stack checklist
+  const stackRows=activeStack.length>0
+    ?activeStack.map(s=>{
+      const done=takenToday.includes(s.id);
+      const isWhey=s.id==='whey';
+      const wheyNote=isWhey&&!hadStrengthToday?'<span style="font-size:10px;color:var(--t3);margin-left:6px;">optional today</span>':'';
+      return`<div class="supp-row" onclick="toggleSuppTaken('${s.id}')">
+        <div class="supp-check${done?' done':''}"></div>
+        <div class="supp-info">
+          <div class="supp-name">${s.icon} ${s.name}${wheyNote}</div>
+          <span class="supp-timing-badge" style="background:${s.timingColor};color:${s.timingTextColor};">${s.timingLabel}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="supp-dose">${s.dose}</span>
+          <button onclick="event.stopPropagation();showSuppDetailSheet('${s.id}')" style="background:none;border:none;color:var(--t3);cursor:pointer;padding:4px;font-size:14px;line-height:1;">ⓘ</button>
+        </div>
+      </div>`;
+    }).join('')
+    :'<div style="font-size:13px;color:var(--t3);padding:6px 0 10px;">No supplements in your stack yet.</div>';
+
+  const allDone=suppCompletion.allTaken;
+  const statusMsg=activeStack.length>0
+    ?(allDone
+      ?'<span style="color:var(--grn);font-weight:600;font-size:12px;">✓ All taken</span>'
+      :`<span style="color:var(--t3);font-size:12px;">${suppCompletion.taken}/${suppCompletion.total} taken</span>`)
+    :'';
+
+  const suppHTML=
+    '<div class="coach-section">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">'
+    +'<div class="coach-section-title" style="margin-bottom:0;">💊 Supplements</div>'
+    +statusMsg
+    +'</div>'
+    +stackRows
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;">'
+    +'<button onclick="showSuppRecsSheet()" style="padding:10px;border-radius:12px;background:rgba(232,255,71,.08);border:1px solid rgba(232,255,71,.2);color:var(--acc);font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;">Recommendations</button>'
+    +'<button onclick="showSuppBrowserSheet()" style="padding:10px;border-radius:12px;background:var(--s2);border:1px solid var(--b2);color:var(--t2);font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;">Browse all</button>'
+    +'</div>'
+    +'</div>';
+
+
   // ── Data & Backup ──
   const backupHTML=
     '<div class="coach-section" style="margin-bottom:0;">'
@@ -6286,7 +6610,7 @@ function renderCoach(){
       +`</div>`;
   }
 
-  scroll.innerHTML=checkInHTML+weeklySummaryHTML+muscleVolHTML+correlationHTML+weekNutritionHTML+proteinHTML+hydrationHTML+bodyHTML+backupHTML;
+  scroll.innerHTML=checkInHTML+weeklySummaryHTML+muscleVolHTML+correlationHTML+weekNutritionHTML+proteinHTML+hydrationHTML+bodyHTML+suppHTML+backupHTML;
 }
 
 function quickAddProtein(g,name){
@@ -6492,7 +6816,7 @@ const GAINZ_KEYS = [
   'gainz_rest','gainz_global_rest','gainz_custom_ex','gainz_ex_overrides',
   'gainz_profile','gainz_onboard_done','gainz_log_unit','gainz_view_unit',
   'gainz_protein_goal','gainz_protein_log','gainz_food_goals','gainz_macro_profile',
-  'gainz_checkins','gainz_voice','gainz_vibrate','gainz_water','gainz_pwa_dismissed'
+  'gainz_checkins','gainz_voice','gainz_vibrate','gainz_water','gainz_pwa_dismissed','gainz_supps'
 ];
 
 async function exportGainzData(){
