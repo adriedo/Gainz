@@ -104,7 +104,7 @@ label{font-size:12px;color:var(--t2);display:block;margin-bottom:5px;}
 .cdot.missed{background:rgba(255,80,80,.12);color:rgba(255,80,80,.6);}
 .cdot.future{background:var(--s2);color:var(--t3);}
 .cdot-day{font-size:9px;color:var(--t3);font-weight:500;letter-spacing:.04em;}
-.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px;}
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:4px;}
 .stat-box{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:14px 10px;}
 .stat-n{font-family:Barlow Condensed,sans-serif;font-size:30px;font-weight:700;line-height:1;}
 .stat-n.a{color:var(--acc);}
@@ -705,42 +705,17 @@ input[type="date"]{color-scheme:dark;color:var(--t1);background:var(--s2);}
 <!-- HOME -->
 <div id="s-home" class="scr on">
   <div class="scroll">
-    <div class="greet bc">Let's<br><em>Get It.</em></div>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;">
+      <div class="greet bc" style="margin-bottom:0;">Let's<br><em>Get It.</em></div>
+      <button onclick="showSettingsSheet()" style="margin-top:6px;width:36px;height:36px;border-radius:50%;background:var(--s2);border:1px solid var(--b1);color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;touch-action:manipulation;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      </button>
+    </div>
     <div style="font-size:13px;color:var(--t2);margin-bottom:20px;" id="dateline"></div>
     <div id="consist-card"></div>
     <div class="stat-grid" id="home-stats"></div>
-    <div onclick="nav('edit',null)" style="display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:13px 14px;margin-bottom:12px;cursor:pointer;">
-      <div style="width:36px;height:36px;border-radius:10px;background:rgba(232,255,71,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--acc)" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-      </div>
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:14px;font-weight:600;">Edit Program</div>
-        <div style="font-size:11px;color:var(--t2);margin-top:2px;">Add or modify workout days &amp; exercises</div>
-      </div>
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-    </div>
-    <div onclick="nav('videos',null)" style="display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:13px 14px;margin-bottom:12px;cursor:pointer;">
-      <div style="width:36px;height:36px;border-radius:10px;background:rgba(71,180,255,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="#47b4ff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-      </div>
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:14px;font-weight:600;">Workout Videos</div>
-        <div style="font-size:11px;color:var(--t2);margin-top:2px;">Guided cardio &amp; strength videos</div>
-      </div>
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-    </div>
-    <div class="slbl">Strength Work</div>
-    <div id="day-grid"></div>
-    <div class="slbl" style="display:flex;align-items:center;justify-content:space-between;">
-      <span>Cardio</span>
-      <div style="display:flex;gap:5px;" id="log-unit-toggle">
-        <button onclick="setLogUnit('mi')" id="lu-mi" style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;cursor:pointer;font-family:DM Sans,sans-serif;">mi</button>
-        <button onclick="setLogUnit('km')" id="lu-km" style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;cursor:pointer;font-family:DM Sans,sans-serif;">km</button>
-      </div>
-    </div>
-    <div id="cardio-grid"></div>
   </div>
-  <div class="nav"><button class="nb on" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span>Log</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Food</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Cal</span></button></div>
+  <div class="nav"><button class="nb on" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="7" x2="2" y2="15" stroke-width="2.5"/><line x1="6" y1="5" x2="6" y2="17" stroke-width="2.5"/><line x1="6" y1="11" x2="16" y2="11" stroke-width="1.8"/><line x1="16" y1="5" x2="16" y2="17" stroke-width="2.5"/><line x1="20" y1="7" x2="20" y2="15" stroke-width="2.5"/></svg><span>Train</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="10" x2="14" y2="10" stroke-width="1.8"/><path d="M1 10 Q1 17 7.5 18.5 Q14 17 14 10" stroke-width="1.8"/><line x1="18.5" y1="4" x2="18.5" y2="20" stroke-width="1.8"/><line x1="16.5" y1="4" x2="16.5" y2="10" stroke-width="1.8"/><line x1="20.5" y1="4" x2="20.5" y2="10" stroke-width="1.8"/><path d="M16.5 10 Q16.5 12.5 18.5 13 Q20.5 12.5 20.5 10" stroke-width="1.8"/></svg><span>Nutrition</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Cal</span></button></div>
 </div>
 
 <!-- WORKOUT -->
@@ -772,11 +747,17 @@ input[type="date"]{color-scheme:dark;color:var(--t1);background:var(--s2);}
 <!-- HISTORY -->
 <div id="s-history" class="scr">
   <div style="padding:20px 16px 8px;flex-shrink:0;">
-    <div class="bc" style="font-size:34px;font-weight:800;text-transform:uppercase;">History</div>
-    <div style="font-size:13px;color:var(--t2);margin-top:2px;">Tap any session to review it</div>
+    <div class="bc" style="font-size:34px;font-weight:800;text-transform:uppercase;">Train</div>
+    <!-- Segment toggle -->
+    <div style="display:flex;gap:0;background:var(--s2);border-radius:12px;padding:3px;margin-top:12px;">
+      <button id="train-tab-program"  onclick="setTrainTab('program')"  style="flex:1;padding:7px 4px;border-radius:9px;font-size:11px;font-weight:600;border:none;cursor:pointer;font-family:DM Sans,sans-serif;transition:background .15s,color .15s;">Program</button>
+      <button id="train-tab-edit"     onclick="setTrainTab('edit')"     style="flex:1;padding:7px 4px;border-radius:9px;font-size:11px;font-weight:600;border:none;cursor:pointer;font-family:DM Sans,sans-serif;transition:background .15s,color .15s;">Edit</button>
+      <button id="train-tab-videos"   onclick="setTrainTab('videos')"   style="flex:1;padding:7px 4px;border-radius:9px;font-size:11px;font-weight:600;border:none;cursor:pointer;font-family:DM Sans,sans-serif;transition:background .15s,color .15s;">Videos</button>
+      <button id="train-tab-log"      onclick="setTrainTab('log')"      style="flex:1;padding:7px 4px;border-radius:9px;font-size:11px;font-weight:600;border:none;cursor:pointer;font-family:DM Sans,sans-serif;transition:background .15s,color .15s;">Session Log</button>
+    </div>
   </div>
-  <div class="scroll" id="hist-list"></div>
-  <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb on" onclick="nav('history',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span>Log</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Food</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Cal</span></button></div>
+  <div class="scroll" id="train-scroll"></div>
+  <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb on" onclick="nav('history',this)"><svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="7" x2="2" y2="15" stroke-width="2.5"/><line x1="6" y1="5" x2="6" y2="17" stroke-width="2.5"/><line x1="6" y1="11" x2="16" y2="11" stroke-width="1.8"/><line x1="16" y1="5" x2="16" y2="17" stroke-width="2.5"/><line x1="20" y1="7" x2="20" y2="15" stroke-width="2.5"/></svg><span>Train</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="10" x2="14" y2="10" stroke-width="1.8"/><path d="M1 10 Q1 17 7.5 18.5 Q14 17 14 10" stroke-width="1.8"/><line x1="18.5" y1="4" x2="18.5" y2="20" stroke-width="1.8"/><line x1="16.5" y1="4" x2="16.5" y2="10" stroke-width="1.8"/><line x1="20.5" y1="4" x2="20.5" y2="10" stroke-width="1.8"/><path d="M16.5 10 Q16.5 12.5 18.5 13 Q20.5 12.5 20.5 10" stroke-width="1.8"/></svg><span>Nutrition</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Cal</span></button></div>
 </div>
 
 <!-- CALENDAR -->
@@ -789,7 +770,7 @@ input[type="date"]{color-scheme:dark;color:var(--t1);background:var(--s2);}
     <button class="btn btn-acc btn-sm" onclick="showLogPastSheet()">+ Log past</button>
   </div>
   <div class="scroll" id="cal-scroll"></div>
-  <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span>Log</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Food</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb on" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Cal</span></button></div>
+  <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="7" x2="2" y2="15" stroke-width="2.5"/><line x1="6" y1="5" x2="6" y2="17" stroke-width="2.5"/><line x1="6" y1="11" x2="16" y2="11" stroke-width="1.8"/><line x1="16" y1="5" x2="16" y2="17" stroke-width="2.5"/><line x1="20" y1="7" x2="20" y2="15" stroke-width="2.5"/></svg><span>Train</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="10" x2="14" y2="10" stroke-width="1.8"/><path d="M1 10 Q1 17 7.5 18.5 Q14 17 14 10" stroke-width="1.8"/><line x1="18.5" y1="4" x2="18.5" y2="20" stroke-width="1.8"/><line x1="16.5" y1="4" x2="16.5" y2="10" stroke-width="1.8"/><line x1="20.5" y1="4" x2="20.5" y2="10" stroke-width="1.8"/><path d="M16.5 10 Q16.5 12.5 18.5 13 Q20.5 12.5 20.5 10" stroke-width="1.8"/></svg><span>Nutrition</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb on" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Cal</span></button></div>
 </div>
 
 <!-- PROGRESS -->
@@ -799,7 +780,7 @@ input[type="date"]{color-scheme:dark;color:var(--t1);background:var(--s2);}
     <div style="font-size:13px;color:var(--t2);margin-top:2px;">Volume, PRs &amp; trends</div>
   </div>
   <div class="scroll" id="prog-list"></div>
-  <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span>Log</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Food</span></button><button class="nb on" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Cal</span></button></div>
+  <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="7" x2="2" y2="15" stroke-width="2.5"/><line x1="6" y1="5" x2="6" y2="17" stroke-width="2.5"/><line x1="6" y1="11" x2="16" y2="11" stroke-width="1.8"/><line x1="16" y1="5" x2="16" y2="17" stroke-width="2.5"/><line x1="20" y1="7" x2="20" y2="15" stroke-width="2.5"/></svg><span>Train</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="10" x2="14" y2="10" stroke-width="1.8"/><path d="M1 10 Q1 17 7.5 18.5 Q14 17 14 10" stroke-width="1.8"/><line x1="18.5" y1="4" x2="18.5" y2="20" stroke-width="1.8"/><line x1="16.5" y1="4" x2="16.5" y2="10" stroke-width="1.8"/><line x1="20.5" y1="4" x2="20.5" y2="10" stroke-width="1.8"/><path d="M16.5 10 Q16.5 12.5 18.5 13 Q20.5 12.5 20.5 10" stroke-width="1.8"/></svg><span>Nutrition</span></button><button class="nb on" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Cal</span></button></div>
 </div>
 
 <!-- EDIT SCREEN -->
@@ -812,7 +793,7 @@ input[type="date"]{color-scheme:dark;color:var(--t1);background:var(--s2);}
     <button class="btn btn-acc btn-sm" onclick="showNewDaySheet()">+ New day</button>
   </div>
   <div class="scroll" id="edit-list"></div>
-  <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span>Log</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Food</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Cal</span></button></div>
+  <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="7" x2="2" y2="15" stroke-width="2.5"/><line x1="6" y1="5" x2="6" y2="17" stroke-width="2.5"/><line x1="6" y1="11" x2="16" y2="11" stroke-width="1.8"/><line x1="16" y1="5" x2="16" y2="17" stroke-width="2.5"/><line x1="20" y1="7" x2="20" y2="15" stroke-width="2.5"/></svg><span>Train</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="10" x2="14" y2="10" stroke-width="1.8"/><path d="M1 10 Q1 17 7.5 18.5 Q14 17 14 10" stroke-width="1.8"/><line x1="18.5" y1="4" x2="18.5" y2="20" stroke-width="1.8"/><line x1="16.5" y1="4" x2="16.5" y2="10" stroke-width="1.8"/><line x1="20.5" y1="4" x2="20.5" y2="10" stroke-width="1.8"/><path d="M16.5 10 Q16.5 12.5 18.5 13 Q20.5 12.5 20.5 10" stroke-width="1.8"/></svg><span>Nutrition</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Cal</span></button></div>
 </div>
 
 <!-- VIDEOS SCREEN -->
@@ -839,7 +820,7 @@ input[type="date"]{color-scheme:dark;color:var(--t1);background:var(--s2);}
     <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:#4a4a4a;margin:18px 0 10px;">Total Body</div>
     <div onclick="window.open('https://youtu.be/Jpxc0TUr9BI?si=4iArg2LGWk4I3W-_')" style="display:flex;align-items:center;gap:12px;background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;color:#f0f0f0;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#ffb347"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">Total Body Workout</div><div style="font-size:11px;color:#888;margin-top:3px;">Full body · guided</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
     </div>
-  <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span>Log</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Food</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Cal</span></button></div>
+  <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="7" x2="2" y2="15" stroke-width="2.5"/><line x1="6" y1="5" x2="6" y2="17" stroke-width="2.5"/><line x1="6" y1="11" x2="16" y2="11" stroke-width="1.8"/><line x1="16" y1="5" x2="16" y2="17" stroke-width="2.5"/><line x1="20" y1="7" x2="20" y2="15" stroke-width="2.5"/></svg><span>Train</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="10" x2="14" y2="10" stroke-width="1.8"/><path d="M1 10 Q1 17 7.5 18.5 Q14 17 14 10" stroke-width="1.8"/><line x1="18.5" y1="4" x2="18.5" y2="20" stroke-width="1.8"/><line x1="16.5" y1="4" x2="16.5" y2="10" stroke-width="1.8"/><line x1="20.5" y1="4" x2="20.5" y2="10" stroke-width="1.8"/><path d="M16.5 10 Q16.5 12.5 18.5 13 Q20.5 12.5 20.5 10" stroke-width="1.8"/></svg><span>Nutrition</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Cal</span></button></div>
 </div>
 
 
@@ -847,13 +828,13 @@ input[type="date"]{color-scheme:dark;color:var(--t1);background:var(--s2);}
 <div id="s-food" class="scr">
   <div style="padding:20px 16px 8px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
     <div>
-      <div class="bc" style="font-size:34px;font-weight:800;text-transform:uppercase;">Food</div>
+      <div class="bc" style="font-size:34px;font-weight:800;text-transform:uppercase;">Nutrition</div>
       <div style="font-size:13px;color:var(--t2);margin-top:2px;" id="food-dateline"></div>
     </div>
     <button onclick="showFoodGoalsSheet()" style="font-size:11px;font-weight:600;padding:6px 12px;border-radius:20px;background:var(--s2);border:1px solid var(--b2);color:var(--t2);cursor:pointer;font-family:'DM Sans',sans-serif;">Goals</button>
   </div>
   <div class="scroll" id="food-scroll"></div>
-  <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span>Log</span></button><button class="nb on" onclick="nav('food',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Food</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Cal</span></button></div>
+  <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="7" x2="2" y2="15" stroke-width="2.5"/><line x1="6" y1="5" x2="6" y2="17" stroke-width="2.5"/><line x1="6" y1="11" x2="16" y2="11" stroke-width="1.8"/><line x1="16" y1="5" x2="16" y2="17" stroke-width="2.5"/><line x1="20" y1="7" x2="20" y2="15" stroke-width="2.5"/></svg><span>Train</span></button><button class="nb on" onclick="nav('food',this)"><svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="10" x2="14" y2="10" stroke-width="1.8"/><path d="M1 10 Q1 17 7.5 18.5 Q14 17 14 10" stroke-width="1.8"/><line x1="18.5" y1="4" x2="18.5" y2="20" stroke-width="1.8"/><line x1="16.5" y1="4" x2="16.5" y2="10" stroke-width="1.8"/><line x1="20.5" y1="4" x2="20.5" y2="10" stroke-width="1.8"/><path d="M16.5 10 Q16.5 12.5 18.5 13 Q20.5 12.5 20.5 10" stroke-width="1.8"/></svg><span>Nutrition</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Cal</span></button></div>
 </div>
 
 <!-- BARCODE SCANNER OVERLAY -->
@@ -895,10 +876,10 @@ input[type="date"]{color-scheme:dark;color:var(--t1);background:var(--s2);}
 <div id="s-coach" class="scr">
   <div style="padding:20px 16px 8px;flex-shrink:0;">
     <div class="bc" style="font-size:34px;font-weight:800;text-transform:uppercase;">Coach</div>
-    <div style="font-size:13px;color:var(--t2);margin-top:2px;">Your weekly summary &amp; health tracking</div>
+    <div style="font-size:13px;color:var(--t2);margin-top:2px;">Your weekly coaching insights</div>
   </div>
   <div class="scroll" id="coach-scroll"></div>
-  <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span>Log</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span>Food</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb on" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Cal</span></button></div>
+  <div class="nav"><button class="nb" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="7" x2="2" y2="15" stroke-width="2.5"/><line x1="6" y1="5" x2="6" y2="17" stroke-width="2.5"/><line x1="6" y1="11" x2="16" y2="11" stroke-width="1.8"/><line x1="16" y1="5" x2="16" y2="17" stroke-width="2.5"/><line x1="20" y1="7" x2="20" y2="15" stroke-width="2.5"/></svg><span>Train</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="10" x2="14" y2="10" stroke-width="1.8"/><path d="M1 10 Q1 17 7.5 18.5 Q14 17 14 10" stroke-width="1.8"/><line x1="18.5" y1="4" x2="18.5" y2="20" stroke-width="1.8"/><line x1="16.5" y1="4" x2="16.5" y2="10" stroke-width="1.8"/><line x1="20.5" y1="4" x2="20.5" y2="10" stroke-width="1.8"/><path d="M16.5 10 Q16.5 12.5 18.5 13 Q20.5 12.5 20.5 10" stroke-width="1.8"/></svg><span>Nutrition</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb on" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Cal</span></button></div>
 </div>
 
 </div><!-- #app -->
@@ -1200,7 +1181,7 @@ let viewUnit=localStorage.getItem('gainz_view_unit')||'mi'; // 'mi' or 'km' — 
 
 const KM_PER_MI=1.60934;
 
-function setLogUnit(u){logUnit=u;localStorage.setItem('gainz_log_unit',u);renderHome();}
+function setLogUnit(u){logUnit=u;localStorage.setItem('gainz_log_unit',u);renderTrainProgram();}
 function setViewUnit(u){viewUnit=u;localStorage.setItem('gainz_view_unit',u);renderProgress();}
 
 // Convert a stored distance (tagged with its unit) to viewUnit for display
@@ -1638,15 +1619,16 @@ function nav(screen,btn){
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
   eid('s-'+screen).classList.add('on');
-  if(btn)btn.classList.add('on');
+  // Mark ALL nav buttons for this screen active (not just the clicked one)
+  document.querySelectorAll(`.nb[onclick*="'${screen}'"]`).forEach(b=>b.classList.add('on'));
   if(screen==='home')renderHome();
-  if(screen==='history')renderHistory();
+  if(screen==='history'){trainTab='program';renderTrain();}
   if(screen==='calendar')renderCalendar();
   if(screen==='progress'){renderProgress();setTimeout(()=>renderPhotoCard(),0);}
   if(screen==='edit')renderEdit();
   if(screen==='coach')renderCoach();
   if(screen==='food')renderFood();
-  if(screen==='videos'){} // static content, no render needed
+  if(screen==='videos'){}
 }
 
 // ─── CARDIO ──────────────────────────────────────────────────────────────────
@@ -1694,10 +1676,11 @@ function buildIntervalUI(id){
 }
 
 function buildConsistencyCard(){
-  // Week boundaries (Sun–Sat)
+  // Week boundaries (Mon–Sun)
   const now=new Date();
   const todayIdx=now.getDay(); // 0=Sun
-  const weekStart=new Date(now);weekStart.setDate(now.getDate()-todayIdx);weekStart.setHours(0,0,0,0);
+  const diffToMon=(todayIdx+6)%7; // days since last Monday
+  const weekStart=new Date(now);weekStart.setDate(now.getDate()-diffToMon);weekStart.setHours(0,0,0,0);
   const weekEnd=new Date(weekStart);weekEnd.setDate(weekStart.getDate()+6);weekEnd.setHours(23,59,59,999);
 
   // Unique active dates this week (strength + cardio)
@@ -1710,8 +1693,8 @@ function buildConsistencyCard(){
 
   const planned=Math.max(program.length,1);
   const done=activeDates.size;
-  // Days elapsed (0=just Sunday, 6=full week done)
-  const elapsed=todayIdx; // days before today
+  // Days elapsed since Monday (0=just Monday, 6=full week done)
+  const elapsed=diffToMon; // days since last Monday
   const missed=Math.max(0,elapsed-(done)); // past days with no session (rough — doesn't need to be day-matched)
 
   // Coach message
@@ -1723,13 +1706,13 @@ function buildConsistencyCard(){
   else if(done===planned-1){msg='One more to go';sub=`${done} of ${planned} planned days hit.`;scoreColor='var(--acc)';}
   else{msg=`${done} of ${planned} planned days`;sub=missed>1?`${missed} days missed so far this week.`:'Keep the momentum going.';scoreColor=done>0?'var(--acc)':'var(--t2)';}
 
-  // Day dots: S M T W T F S
-  const dayLabels=['S','M','T','W','T','F','S'];
+  // Day dots: M T W T F S S
+  const dayLabels=['M','T','W','T','F','S','S'];
   const dots=dayLabels.map((lbl,i)=>{
     const d=new Date(weekStart);d.setDate(weekStart.getDate()+i);
-    const isToday=i===todayIdx;
-    const isPast=i<todayIdx;
-    const isFuture=i>todayIdx;
+    const isToday=i===diffToMon;
+    const isPast=i<diffToMon;
+    const isFuture=i>diffToMon;
     const trained=activeDates.has(d.toDateString());
     let cls,inner;
     if(trained){cls='cdot done';inner=`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`;}
@@ -1756,49 +1739,13 @@ function renderHome(){
   eid('dateline').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
   // Consistency card
   const cc=eid('consist-card');if(cc)cc.innerHTML=buildConsistencyCard();
-  // Style active log unit button
-  ['mi','km'].forEach(u=>{
-    const b=eid('lu-'+u);
-    if(!b)return;
-    const active=u===logUnit;
-    b.style.background=active?'var(--acc)':'var(--s2)';
-    b.style.color=active?'#000':'var(--t2)';
-    b.style.border=active?'1px solid var(--acc)':'1px solid var(--b2)';
-  });
   const sessions=new Set(wkLog.map(l=>l.sessionId)).size;
-  const totalSets=wkLog.reduce((a,l)=>a+(l.sets?.length||0),0);
-  const prs=computePRs();
+  const {streak,workoutCount,foodDays}=buildActivityStats();
   eid('home-stats').innerHTML=`
     <div class="stat-box"><div class="stat-n a">${sessions}</div><div class="stat-lbl">Sessions</div></div>
-    <div class="stat-box"><div class="stat-n">${totalSets}</div><div class="stat-lbl">Sets</div></div>
-    <div class="stat-box"><div class="stat-n a">${Object.keys(prs).length}</div><div class="stat-lbl">PRs</div></div>`;
-  eid('day-grid').innerHTML=program.map(d=>`
-    <div class="day-card dc-${d.type}" onclick="launchWk('${d.id}')">
-      <div class="dc-head">
-        <div><div class="dc-title bc">${d.day} — ${d.name}</div><div class="dc-sub">${d.focus}</div></div>
-        <div class="arrow-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
-      </div>
-      <div class="dc-meta">
-        <span class="tag tag-${d.type}">${d.exercises.length} exercises</span><span class="tag tag-${d.type}">${d.exercises.reduce((a,n)=>{const e=findEx(n);return a+e.sets;},0)} sets</span>
-        <button class="pre-wk-pill" onclick="event.stopPropagation();showPeriWorkoutGuideSheet('pre')">🍌 Pre-workout</button>
-      </div>
-    </div>`).join('');
-  eid('cardio-grid').innerHTML=CARDIO_SESSIONS.map(c=>{
-    const last=getLastCardio(c.id);
-    const lastStr=last?`Last: ${last.mins?last.mins+' min':''} ${last.dist?(Math.round(parseFloat(last.dist)*100)/100)+' '+(last.distUnit||'mi'):''}`.trim():'No sessions yet';
-    const isHiit=c.style==='hiit';
-    const cardClass=c.type==='run'?'cc-run':'cc-bike';
-    return`<div class="cardio-card ${cardClass}">
-      <div class="cc-head"><div><div class="cc-title">${c.icon} ${c.label}</div><div class="cc-sub">${c.sub}</div></div><span class="cc-badge${isHiit?' hiit-badge':''}">${isHiit?'HIIT':'Zone 2'}</span></div>
-      ${isHiit?buildIntervalUI(c.id):''}
-      <div class="cc-inputs" style="margin-top:${isHiit?'10px':'0'}">
-        <div><label class="cc-lbl">Time (min)</label><input class="cc-input" type="number" inputmode="decimal" placeholder="0" id="cc-mins-${c.id}" min="0" step="1"></div>
-        <div><label class="cc-lbl">Distance (${logUnit})</label><input class="cc-input" type="number" inputmode="decimal" placeholder="0.0" id="cc-dist-${c.id}" min="0" step="0.1"></div>
-      </div>
-      <button class="cc-log-btn" onclick="logCardio('${c.id}')">Log session</button>
-      <div class="cc-last">${lastStr}</div>
-    </div>`;
-  }).join('');
+    <div class="stat-box"><div class="stat-n a">${streak}🔥</div><div class="stat-lbl">Active streak</div></div>
+    <div class="stat-box"><div class="stat-n a">${workoutCount}</div><div class="stat-lbl">Workouts logged</div></div>
+    <div class="stat-box"><div class="stat-n" style="color:#47b4ff;">${foodDays}</div><div class="stat-lbl">Days tracked food</div></div>`;
 }
 
 // ─── WORKOUT ─────────────────────────────────────────────────────────────────
@@ -2325,12 +2272,12 @@ function delSession(sid){
   const isCardio=typeof sid==='string'&&sid.includes('T')&&isNaN(Number(sid));
   if(isCardio){cardioLog=cardioLog.filter(c=>c.date!==sid);saveCardioLog();}
   else{wkLog=wkLog.filter(e=>String(e.sessionId)!==String(sid));saveLog();}
-  renderHistory();renderHome();renderCalendar();
+  renderTrain();renderHome();renderCalendar();
 }
 
 function clearHistory(){
   if(confirm('Delete ALL history? This cannot be undone.')){
-    wkLog=[];saveLog();cardioLog=[];saveCardioLog();renderHistory();renderHome();
+    wkLog=[];saveLog();cardioLog=[];saveCardioLog();renderTrain();renderHome();
   }
 }
 
@@ -2365,8 +2312,71 @@ function viewSession(sid){
   document.body.appendChild(bg);
 }
 
+let trainTab='program'; // 'program' | 'edit' | 'videos' | 'log'
+
+function setTrainTab(tab){
+  trainTab=tab;
+  renderTrain();
+}
+
+function renderTrain(){
+  const tabs=['program','edit','videos','log'];
+  tabs.forEach(t=>{
+    const b=eid('train-tab-'+t);
+    if(!b)return;
+    const active=t===trainTab;
+    b.style.background=active?'var(--s1)':'none';
+    b.style.color=active?'var(--t1)':'var(--t2)';
+  });
+  if(trainTab==='program') renderTrainProgram();
+  else if(trainTab==='edit') renderEdit();
+  else if(trainTab==='videos') renderTrainVideos();
+  else renderHistory();
+}
+
+function renderTrainProgram(){
+  const scroll=eid('train-scroll');if(!scroll)return;
+  const miActive=logUnit==='mi';
+  const unitToggle=`<div style="display:flex;gap:5px;">
+    <button onclick="setLogUnit('mi')" id="lu-mi" style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;cursor:pointer;font-family:DM Sans,sans-serif;background:${miActive?'var(--acc)':'var(--s2)'};color:${miActive?'#000':'var(--t2)'};border:1px solid ${miActive?'var(--acc)':'var(--b2)'};">mi</button>
+    <button onclick="setLogUnit('km')" id="lu-km" style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;cursor:pointer;font-family:DM Sans,sans-serif;background:${miActive?'var(--s2)':'var(--acc)'};color:${miActive?'var(--t2)':'#000'};border:1px solid ${miActive?'var(--b2)':'var(--acc)'};">km</button>
+  </div>`;
+  const dayCards=program.map(d=>`
+    <div class="day-card dc-${d.type}" onclick="launchWk('${d.id}')">
+      <div class="dc-head">
+        <div><div class="dc-title bc">${d.day} — ${d.name}</div><div class="dc-sub">${d.focus}</div></div>
+        <div class="arrow-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+      <div class="dc-meta">
+        <span class="tag tag-${d.type}">${d.exercises.length} exercises</span><span class="tag tag-${d.type}">${d.exercises.reduce((a,n)=>{const e=findEx(n);return a+e.sets;},0)} sets</span>
+        <button class="pre-wk-pill" onclick="event.stopPropagation();showPeriWorkoutGuideSheet('pre')">🍌 Pre-workout</button>
+      </div>
+    </div>`).join('');
+  const cardioCards=CARDIO_SESSIONS.map(c=>{
+    const last=getLastCardio(c.id);
+    const lastStr=last?`Last: ${last.mins?last.mins+' min':''} ${last.dist?(Math.round(parseFloat(last.dist)*100)/100)+' '+(last.distUnit||'mi'):''}`.trim():'No sessions yet';
+    const isHiit=c.style==='hiit';
+    const cardClass=c.type==='run'?'cc-run':'cc-bike';
+    return`<div class="cardio-card ${cardClass}">
+      <div class="cc-head"><div><div class="cc-title">${c.icon} ${c.label}</div><div class="cc-sub">${c.sub}</div></div><span class="cc-badge${isHiit?' hiit-badge':''}">${isHiit?'HIIT':'Zone 2'}</span></div>
+      ${isHiit?buildIntervalUI(c.id):''}
+      <div class="cc-inputs" style="margin-top:${isHiit?'10px':'0'}">
+        <div><label class="cc-lbl">Time (min)</label><input class="cc-input" type="number" inputmode="decimal" placeholder="0" id="cc-mins-${c.id}" min="0" step="1"></div>
+        <div><label class="cc-lbl">Distance (${logUnit})</label><input class="cc-input" type="number" inputmode="decimal" placeholder="0.0" id="cc-dist-${c.id}" min="0" step="0.1"></div>
+      </div>
+      <button class="cc-log-btn" onclick="logCardio('${c.id}')">Log session</button>
+      <div class="cc-last">${lastStr}</div>
+    </div>`;
+  }).join('');
+  scroll.innerHTML=`
+    <div class="slbl">Strength Work</div>
+    ${dayCards}
+    <div class="slbl" style="display:flex;align-items:center;justify-content:space-between;"><span>Cardio</span>${unitToggle}</div>
+    ${cardioCards}`;
+}
+
 function renderHistory(){
-  const list=eid('hist-list');
+  const list=eid('train-scroll');
   const sessions=getSessions();
   if(!sessions.length){list.innerHTML='<div class="empty">No sessions yet.<br>Launch a workout to start.</div>';return;}
   list.innerHTML=sessions.map(s=>{
@@ -2408,6 +2418,27 @@ function renderHistory(){
 let calYear=new Date().getFullYear(),calMonth=new Date().getMonth();
 const TYPE_COLORS={'push':'#ff6b6b','pull':'#47ff8a','legs':'#b47fff','cardio':'#47b4ff','full':'#ffb347'};
 
+function buildActivityStats(){
+  const sessions=getSessions();
+  const dateMap={};
+  sessions.forEach(s=>{const dk=new Date(s.date).toDateString();if(!dateMap[dk])dateMap[dk]=[];dateMap[dk].push(s);});
+  const foodDateMap={};
+  (proteinLog||[]).forEach(entry=>{
+    if(entry.items&&entry.items.length>0)foodDateMap[entry.date]=true;
+  });
+  const today=new Date();
+  let streak=0;let check=new Date(today);check.setHours(0,0,0,0);
+  while(true){
+    const dk=check.toDateString();
+    const isoKey=check.toISOString().split('T')[0];
+    const hasActivity=!!dateMap[dk]||!!foodDateMap[isoKey];
+    if(hasActivity){streak++;check.setDate(check.getDate()-1);}
+    else if(check.toDateString()===today.toDateString()){check.setDate(check.getDate()-1);}
+    else break;
+  }
+  return{streak,workoutCount:sessions.length,foodDays:Object.keys(foodDateMap).length};
+}
+
 function renderCalendar(){
   const scroll=eid('cal-scroll');if(!scroll)return;
   const sessions=getSessions();
@@ -2427,17 +2458,6 @@ function renderCalendar(){
   const firstDay=new Date(calYear,calMonth,1).getDay();
   const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
   const monthName=new Date(calYear,calMonth).toLocaleDateString('en-US',{month:'long',year:'numeric'});
-
-  // Streak: consecutive days with at least a workout OR food logged
-  let streak=0;let check=new Date(today);check.setHours(0,0,0,0);
-  while(true){
-    const dk=check.toDateString();
-    const isoKey=check.toISOString().split('T')[0];
-    const hasActivity=!!dateMap[dk]||!!foodDateMap[isoKey];
-    if(hasActivity){streak++;check.setDate(check.getDate()-1);}
-    else if(check.toDateString()===today.toDateString()){check.setDate(check.getDate()-1);}
-    else break;
-  }
 
   const weeklyVol=[];
   for(let w=7;w>=0;w--){
@@ -2490,7 +2510,6 @@ function renderCalendar(){
   const typesSeen=[...new Set(sessions.map(s=>s.isCardio?'cardio':program.find(p=>p.id===s.dayId)?.type||'full'))];
   const legend=typesSeen.filter(t=>TYPE_COLORS[t]).map(t=>`<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--t2)"><span style="width:8px;height:8px;border-radius:50%;background:${TYPE_COLORS[t]};display:inline-block"></span>${t}</span>`).join('');
 
-  const totalFoodDays=Object.keys(foodDateMap).length;
 
   scroll.innerHTML=`
     <div class="card">
@@ -2506,24 +2525,6 @@ function renderCalendar(){
       </div>
       <div style="font-size:11px;color:var(--t3);margin-bottom:8px;">Tap any day to view or add entries</div>
       <div class="cal-grid">${['S','M','T','W','T','F','S'].map(d=>`<div class="cal-dow">${d}</div>`).join('')}${daysCells}</div>
-    </div>
-    <div class="card">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div style="background:var(--s2);border-radius:12px;padding:12px;text-align:center;">
-          <div class="streak-n" style="font-size:36px;">${streak}🔥</div>
-          <div style="font-size:12px;color:var(--t2);margin-top:2px;">Active streak</div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <div style="background:var(--s2);border-radius:12px;padding:10px 12px;flex:1;">
-            <div style="font-size:22px;font-weight:800;font-family:Barlow Condensed,sans-serif;color:var(--acc);">${sessions.length}</div>
-            <div style="font-size:11px;color:var(--t2);">Workouts logged</div>
-          </div>
-          <div style="background:var(--s2);border-radius:12px;padding:10px 12px;flex:1;">
-            <div style="font-size:22px;font-weight:800;font-family:Barlow Condensed,sans-serif;color:#47b4ff;">${totalFoodDays}</div>
-            <div style="font-size:11px;color:var(--t2);">Days tracked food</div>
-          </div>
-        </div>
-      </div>
     </div>
     <div class="card"><div style="font-size:11px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">Weekly volume (lbs)</div>${weeklyVol.map(w=>`<div class="vol-bar-wrap"><div class="vol-day-lbl">${w.label}</div><div class="vol-bar-bg"><div class="vol-bar" style="width:${w.vol?Math.round(w.vol/maxVol*100):0}%"></div></div><div class="vol-n">${w.vol?w.vol.toLocaleString():''}</div></div>`).join('')}</div>`;
 }
@@ -3226,7 +3227,7 @@ function savePastSession(){
     });
     wkLog=[...entries,...wkLog];saveLog();
   }
-  closeSheets();renderCalendar();renderHistory();renderHome();
+  closeSheets();renderCalendar();renderTrain();renderHome();
 }
 
 // ─── PROGRESS ────────────────────────────────────────────────────────────────
@@ -4161,8 +4162,32 @@ function saveGlobalRestSheet(){
   if(activeWk) renderWk();
 }
 
+function renderTrainVideos(){
+  const scroll=eid('train-scroll');if(!scroll)return;
+  scroll.innerHTML=`
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--t3);margin:4px 0 10px;">Bike</div>
+    <div onclick="window.open('https://youtu.be/ZiGE3-L4vyg?si=Xbg7ekp3fLrpYKJT')" style="display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(71,180,255,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#47b4ff"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">30 Min Indoor Cycling HIIT</div><div style="font-size:11px;color:var(--t3);margin-top:3px;">GCN · 30 min</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    <div onclick="window.open('https://youtu.be/wBurKQX7h4Q?si=BFljWxeCrp56Yhud')" style="display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(71,180,255,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#47b4ff"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">60 Min Endurance Ride</div><div style="font-size:11px;color:var(--t3);margin-top:3px;">Cycling Weekly · 60 min</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    <div onclick="window.open('https://youtu.be/mv0H9iCz8Ms?si=9jinFpuFIcIQXYzB')" style="display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(71,180,255,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#47b4ff"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">45 Min Indoor Cycling</div><div style="font-size:11px;color:var(--t3);margin-top:3px;">Cycling · 45 min</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    <div onclick="window.open('https://youtu.be/AiDD_aqdnK0?si=bopx6rpPTcJ4tf3G')" style="display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(71,180,255,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#47b4ff"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">30 Min Cycling Intervals</div><div style="font-size:11px;color:var(--t3);margin-top:3px;">Cycling · 30 min</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    <div onclick="window.open('https://youtu.be/vDKnTjpccf4?si=wHTgDqxTZp_c_YQU')" style="display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(71,180,255,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#47b4ff"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">30 Min Treadmill Run – Guided</div><div style="font-size:11px;color:var(--t3);margin-top:3px;">Sydney Cummings · 30 min</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--t3);margin:18px 0 10px;">HIIT</div>
+    <div onclick="window.open('https://youtu.be/9BnVP3Eg_KQ?si=t7sSylaR4C1skS_x')" style="display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(255,71,71,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#ff4747"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">20 Min Full Body HIIT</div><div style="font-size:11px;color:var(--t3);margin-top:3px;">HIIT · 20 min</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    <div onclick="window.open('https://youtu.be/ZMO_XC9w7Lw?si=2bVsNCYFkHUU5bsH')" style="display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(255,71,71,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#ff4747"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">45 Min Indoor Cycling HIIT</div><div style="font-size:11px;color:var(--t3);margin-top:3px;">GCN Training · 45 min</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    <div onclick="window.open('https://youtu.be/7FZUR7O0Qz0?si=jafZTJ1BoNLnGSvl')" style="display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(255,71,71,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#ff4747"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">30 Min HIIT – No Equipment</div><div style="font-size:11px;color:var(--t3);margin-top:3px;">MadFit · 30 min</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--t3);margin:18px 0 10px;">Strength Training</div>
+    <div onclick="window.open('https://youtu.be/kPl66RocFDo?si=xKkGdVxRnIk75gZX')" style="display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(232,255,71,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#e8ff47"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">Strength Training Session</div><div style="font-size:11px;color:var(--t3);margin-top:3px;">Strength · 30 min</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--t3);margin:18px 0 10px;">Core</div>
+    <div onclick="window.open('https://youtu.be/3LlvMrjLar0?si=JISJsNNb1ZNO1zNC')" style="display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(71,255,138,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#47ff8a"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">Core Workout</div><div style="font-size:11px;color:var(--t3);margin-top:3px;">Core · guided</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--t3);margin:18px 0 10px;">Total Body</div>
+    <div onclick="window.open('https://youtu.be/Jpxc0TUr9BI?si=4iArg2LGWk4I3W-_')" style="display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(255,179,71,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#ffb347"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;line-height:1.3;">Total Body Workout</div><div style="font-size:11px;color:var(--t3);margin-top:3px;">Full body · guided</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>`;
+}
+
 function renderEdit(){
-  const list=eid('edit-list');
+  // Write to train-scroll when Train tab is active, else edit-list
+  const onTrainTab = eid('s-history')&&eid('s-history').classList.contains('on')&&trainTab==='edit';
+  const list = onTrainTab ? eid('train-scroll') : eid('edit-list');
+  if(!list) return;
   // Build summary of active global rests
   const hasGlobal=globalRestSettings.overall!==null||Object.keys(globalRestSettings.byMuscle||{}).length>0;
   const globalSummary=hasGlobal?[
@@ -4171,6 +4196,7 @@ function renderEdit(){
   ].filter(Boolean).join(' · '):'No global overrides set';
 
   list.innerHTML=`
+    ${onTrainTab?`<button class="btn btn-acc btn-full" style="margin-bottom:14px;" onclick="showNewDaySheet()">+ New day</button>`:''}
     <div style="background:var(--s1);border:1px solid var(--b1);border-radius:14px;margin-bottom:14px;padding:14px 16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
         <div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;text-transform:uppercase;">Global Rest Timers</div>
@@ -4241,7 +4267,7 @@ function setupEditButtons(){
 
 function onDragStart(e,dayId,idx){dragSrcDay=dayId;dragSrcIdx=idx;e.dataTransfer.effectAllowed='move';setTimeout(()=>e.target.classList.add('dragging'),0);}
 function onDragOver(e,dayId,idx){e.preventDefault();e.dataTransfer.dropEffect='move';document.querySelectorAll('.ex-edit-row').forEach(r=>r.classList.remove('drag-over'));if(!(dragSrcDay===dayId&&dragSrcIdx===idx))eid(`exrow_${dayId}_${idx}`)?.classList.add('drag-over');}
-function onDrop(e,dayId,idx){e.preventDefault();if(dragSrcDay!==dayId||dragSrcIdx===idx)return;const d=program.find(p=>p.id===dayId);if(!d)return;const arr=[...d.exercises];const [moved]=arr.splice(dragSrcIdx,1);arr.splice(idx,0,moved);d.exercises=arr;saveProg();renderEdit();renderHome();}
+function onDrop(e,dayId,idx){e.preventDefault();if(dragSrcDay!==dayId||dragSrcIdx===idx)return;const d=program.find(p=>p.id===dayId);if(!d)return;const arr=[...d.exercises];const [moved]=arr.splice(dragSrcIdx,1);arr.splice(idx,0,moved);d.exercises=arr;saveProg();renderEdit();renderTrainProgram();}
 function onDragEnd(e){e.target.classList.remove('dragging');document.querySelectorAll('.ex-edit-row').forEach(r=>r.classList.remove('drag-over'));}
 
 function setupTouchDrag(){
@@ -4249,13 +4275,13 @@ function setupTouchDrag(){
   document.querySelectorAll('.drag-handle').forEach(handle=>{
     handle.addEventListener('touchstart',e=>{e.stopPropagation();const row=handle.closest('.ex-edit-row');const m=row.id.match(/exrow_(.+)_(\d+)/);if(!m)return;touchDayId=m[1];touchIdx=parseInt(m[2]);const rect=row.getBoundingClientRect();touchOffY=e.touches[0].clientY-rect.top;touchClone=row.cloneNode(true);touchClone.style.cssText=`position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;opacity:.85;z-index:999;pointer-events:none;background:var(--s2);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.5);`;document.body.appendChild(touchClone);row.style.opacity='.3';},{passive:true});
     handle.addEventListener('touchmove',e=>{e.preventDefault();if(!touchClone)return;touchClone.style.top=(e.touches[0].clientY-touchOffY)+'px';const els=document.elementsFromPoint(e.touches[0].clientX,e.touches[0].clientY);const tr=els.find(el=>el.classList?.contains('ex-edit-row')&&el.id!==`exrow_${touchDayId}_${touchIdx}`);document.querySelectorAll('.ex-edit-row').forEach(r=>r.classList.remove('drag-over'));if(tr)tr.classList.add('drag-over');},{passive:false});
-    handle.addEventListener('touchend',e=>{if(!touchClone)return;const over=document.querySelector('.ex-edit-row.drag-over');if(over){const m=over.id.match(/exrow_(.+)_(\d+)/);if(m&&m[1]===touchDayId){const toIdx=parseInt(m[2]);const d=program.find(p=>p.id===touchDayId);if(d){const arr=[...d.exercises];const [moved]=arr.splice(touchIdx,1);arr.splice(toIdx,0,moved);d.exercises=arr;saveProg();}}}touchClone.remove();touchClone=null;document.querySelectorAll('.ex-edit-row').forEach(r=>{r.classList.remove('drag-over');r.style.opacity='';});renderEdit();renderHome();},{passive:true});
+    handle.addEventListener('touchend',e=>{if(!touchClone)return;const over=document.querySelector('.ex-edit-row.drag-over');if(over){const m=over.id.match(/exrow_(.+)_(\d+)/);if(m&&m[1]===touchDayId){const toIdx=parseInt(m[2]);const d=program.find(p=>p.id===touchDayId);if(d){const arr=[...d.exercises];const [moved]=arr.splice(touchIdx,1);arr.splice(toIdx,0,moved);d.exercises=arr;saveProg();}}}touchClone.remove();touchClone=null;document.querySelectorAll('.ex-edit-row').forEach(r=>{r.classList.remove('drag-over');r.style.opacity='';});renderEdit();renderTrainProgram();},{passive:true});
   });
 }
 
 function toggleEditDay(id){editExpandId=editExpandId===id?null:id;renderEdit();}
-function delDay(id,e){e.stopPropagation();if(confirm('Delete this workout day?')){program=program.filter(d=>d.id!==id);saveProg();renderEdit();renderHome();}}
-function removeEx(dayId,name){const d=program.find(p=>p.id===dayId);if(!d)return;d.exercises=d.exercises.filter(n=>n!==name);saveProg();renderEdit();renderHome();}
+function delDay(id,e){e.stopPropagation();if(confirm('Delete this workout day?')){program=program.filter(d=>d.id!==id);saveProg();renderEdit();renderTrainProgram();}}
+function removeEx(dayId,name){const d=program.find(p=>p.id===dayId);if(!d)return;d.exercises=d.exercises.filter(n=>n!==name);saveProg();renderEdit();renderTrainProgram();}
 
 // ─── FEATURE 2: Edit exercise — with Max reps option ─────────────────────────
 function editExSheet(dayId,name,idx){
@@ -4452,7 +4478,7 @@ function renderExPicks(){
   list.innerHTML=group.map(ex=>{const already=day?.exercises.includes(ex.name);return`<div class="ex-pick-row"><div style="flex:1"><div class="ex-pick-name">${ex.name}</div><div class="ex-pick-muscle">${ex.muscle} · ${ex.sets}×${ex.reps}</div></div>${already?'<span style="font-size:11px;color:var(--t3)">Added</span>':`<button class="add-ex-btn" onclick="addExToProgram('${ex.name.replace(/'/g,"\\'")}')">+ Add</button>`}</div>`;}).join('')||'<div style="font-size:13px;color:var(--t3);padding:12px 0">No exercises in this group.</div>';
 }
 
-function addExToProgram(name){const day=program.find(d=>d.id===addExToDay);if(!day)return;if(!day.exercises.includes(name))day.exercises.push(name);saveProg();renderExPicks();renderEdit();renderHome();}
+function addExToProgram(name){const day=program.find(d=>d.id===addExToDay);if(!day)return;if(!day.exercises.includes(name))day.exercises.push(name);saveProg();renderExPicks();renderEdit();renderTrainProgram();}
 function addCustomEx(){
   const name=(eid('custom-ex-name')?.value||'').trim();
   if(!name){alert('Please enter a name for the exercise.');return;}
@@ -4484,7 +4510,7 @@ function addCustomEx(){
     }
   }
   if(!day.exercises.includes(name))day.exercises.push(name);
-  saveProg();closeSheets();renderEdit();renderHome();
+  saveProg();closeSheets();renderEdit();renderTrainProgram();
 }
 
 function deleteCustomExercise(name){
@@ -4506,7 +4532,7 @@ function deleteCustomExercise(name){
   delete ov[name];
   localStorage.setItem('gainz_ex_overrides',JSON.stringify(ov));
   saveProg();
-  renderEdit();renderHome();
+  renderEdit();renderTrainProgram();
 }
 
 function showNewDaySheet(){
@@ -4530,7 +4556,7 @@ function createDay(){
   const id='day_'+Date.now();
   const num=program.length+1;
   program.push({id,day:'Day '+num,name,type,focus:focus||name,exercises:[]});
-  saveProg();closeSheets();renderEdit();renderHome();
+  saveProg();closeSheets();renderEdit();renderTrainProgram();
   editExpandId=id;renderEdit();
 }
 
@@ -4557,7 +4583,7 @@ function getWeekStartKey(){
   const now=new Date();
   const day=now.getDay();
   const start=new Date(now);
-  start.setDate(now.getDate()-day);
+  start.setDate(now.getDate()-((day+6)%7));
   return start.toISOString().split('T')[0];
 }
 
@@ -5086,12 +5112,46 @@ function getTodayWaterOz(dateKey){
   return(waterLog[key]||[]).reduce((a,e)=>a+(e.oz||0),0);
 }
 
+function buildHydrationHTML(){
+  const waterGoal=getWaterGoalOz();
+  const waterTotal=getTodayWaterOz();
+  const waterPct=Math.min(waterTotal/waterGoal,1);
+  const waterCirc=2*Math.PI*34;
+  const waterFilled=waterCirc*waterPct;
+  const waterTodayItems=waterLog[todayKey()]||[];
+  return '<div class="coach-section">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">'
+    +'<div class="coach-section-title" style="margin-bottom:0;">💧 Hydration</div>'
+    +'<button onclick="showWaterLogSheet()" style="font-size:12px;font-weight:600;padding:7px 14px;border-radius:10px;background:#378ADD;color:#fff;border:none;cursor:pointer;font-family:DM Sans,sans-serif;">+ Log</button>'
+    +'</div>'
+    +'<div class="hydration-arc-wrap">'
+    +'<div class="hydration-arc"><svg width="80" height="80" viewBox="0 0 80 80" style="transform:rotate(-90deg)">'
+    +'<circle class="h-track" cx="40" cy="40" r="34"/>'
+    +'<circle class="h-prog" cx="40" cy="40" r="34" stroke-dasharray="'+waterFilled.toFixed(1)+' '+waterCirc.toFixed(1)+'" stroke-dashoffset="0"/>'
+    +'</svg>'
+    +'<div class="hydration-inner"><div class="hydration-oz">'+waterTotal+'</div><div class="hydration-lbl">oz</div></div></div>'
+    +'<div style="flex:1;">'
+    +(waterTotal>=waterGoal
+      ?'<div style="font-size:14px;font-weight:600;color:#378ADD;">✓ Goal hit!</div><div style="font-size:12px;color:var(--t2);margin-top:4px;">Well hydrated today — great work.</div>'
+      :'<div style="font-size:14px;font-weight:600;">'+(waterGoal-waterTotal)+' oz to go</div><div style="font-size:12px;color:var(--t2);margin-top:4px;">Goal: '+waterGoal+' oz/day</div>')
+    +'<div class="water-quick-btns" style="margin-top:8px;">'
+    +'<button class="wq-btn" onclick="logWaterOz(8,\'8oz glass\')">+ 8oz</button>'
+    +'<button class="wq-btn" onclick="logWaterOz(12,\'12oz\')">+ 12oz</button>'
+    +'<button class="wq-btn" onclick="logWaterOz(16,\'16oz\')">+ 16oz</button>'
+    +'</div></div></div>'
+    +(waterTodayItems.length
+      ?'<div style="font-size:11px;color:var(--t3);margin-top:8px;">'+waterTodayItems.length+' entr'+(waterTodayItems.length===1?'y':'ies')+' today · <button onclick="showWaterLogSheet()" style="background:none;border:none;color:#378ADD;font-size:11px;cursor:pointer;font-family:DM Sans,sans-serif;padding:0;">View log →</button></div>'
+      :'')
+    +'</div>';
+}
+
 function logWaterOz(oz,label){
   const key=todayKey();
   if(!waterLog[key])waterLog[key]=[];
   waterLog[key].push({oz,label:label||oz+'oz',time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})});
   saveWaterLog();
-  renderCoach();
+  if(document.getElementById('s-food')&&document.getElementById('s-food').classList.contains('on'))renderFood();
+  else renderCoach();
 }
 
 function deleteWaterEntry(dateKey,idx){
@@ -5099,7 +5159,8 @@ function deleteWaterEntry(dateKey,idx){
   waterLog[dateKey].splice(idx,1);
   if(!waterLog[dateKey].length)delete waterLog[dateKey];
   saveWaterLog();
-  renderCoach();
+  if(document.getElementById('s-food')&&document.getElementById('s-food').classList.contains('on'))renderFood();
+  else renderCoach();
   // Re-render the open sheet in place so delete is instant
   const existingSheet=document.querySelector('.sheet-bg .sheet');
   if(existingSheet){
@@ -5218,21 +5279,24 @@ function addProtein(name,g){
   if(!entry){entry={date:today,items:[]};proteinLog.unshift(entry);}
   entry.items.push({name,g:parseInt(g)||0,time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})});
   saveProteinLog();
-  renderCoach();
+  if(document.getElementById('s-food')&&document.getElementById('s-food').classList.contains('on'))renderFood();
+  else renderCoach();
 }
 
 function deleteProteinItem(idx){
   const today=todayKey();
   const entry=proteinLog.find(e=>e.date===today);
   if(entry){entry.items.splice(idx,1);}
-  saveProteinLog();renderCoach();
+  saveProteinLog();
+  if(document.getElementById('s-food')&&document.getElementById('s-food').classList.contains('on'))renderFood();
+  else renderCoach();
 }
 
 // ─── WEEKLY SUMMARY ──────────────────────────────────────────────────────────
 function getWeekRange(){
   const now=new Date();
   const day=now.getDay(); // 0=Sun
-  const start=new Date(now); start.setDate(now.getDate()-day); start.setHours(0,0,0,0);
+  const start=new Date(now); start.setDate(now.getDate()-((day+6)%7)); start.setHours(0,0,0,0);
   const end=new Date(start); end.setDate(start.getDate()+6); end.setHours(23,59,59,999);
   return{start,end};
 }
@@ -5555,7 +5619,7 @@ function renderBodyProgress(){
 // Refreshes the Body tab and photo card from any context (progress screen or elsewhere)
 function refreshBodyTab(){
   const progEl=document.getElementById('s-progress');
-  const isProgActive=progEl?.classList.contains('active');
+  const isProgActive=progEl?.classList.contains('on');
   if(isProgActive&&progTab==='body'){
     // Progress → Body tab is visible: full re-render + repopulate photo card
     renderProgress();
@@ -6331,105 +6395,31 @@ function renderCoach(){
       +'</div>';
   }
 
-  // ── Hydration ──
-  const waterGoal=getWaterGoalOz();
-  const waterTotal=getTodayWaterOz();
-  const waterPct=Math.min(waterTotal/waterGoal,1);
-  const waterCirc=2*Math.PI*34;
-  const waterFilled=waterCirc*waterPct;
-  const waterTodayItems=waterLog[todayKey()]||[];
+  // ── Hydration moved to Nutrition (Food) tab ──
 
-  const hydrationHTML=
-    '<div class="coach-section">'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">'
-    +'<div class="coach-section-title" style="margin-bottom:0;">💧 Hydration</div>'
-    +'<button onclick="showWaterLogSheet()" style="font-size:12px;font-weight:600;padding:7px 14px;border-radius:10px;background:#378ADD;color:#fff;border:none;cursor:pointer;font-family:DM Sans,sans-serif;">+ Log</button>'
-    +'</div>'
-    +'<div class="hydration-arc-wrap">'
-    +'<div class="hydration-arc"><svg width="80" height="80" viewBox="0 0 80 80" style="transform:rotate(-90deg)">'
-    +'<circle class="h-track" cx="40" cy="40" r="34"/>'
-    +'<circle class="h-prog" cx="40" cy="40" r="34" stroke-dasharray="'+waterFilled.toFixed(1)+' '+waterCirc.toFixed(1)+'" stroke-dashoffset="0"/>'
-    +'</svg>'
-    +'<div class="hydration-inner"><div class="hydration-oz">'+waterTotal+'</div><div class="hydration-lbl">oz</div></div></div>'
-    +'<div style="flex:1;">'
-    +(waterTotal>=waterGoal
-      ?'<div style="font-size:14px;font-weight:600;color:#378ADD;">✓ Goal hit!</div><div style="font-size:12px;color:var(--t2);margin-top:4px;">Well hydrated today — great work.</div>'
-      :'<div style="font-size:14px;font-weight:600;">'+(waterGoal-waterTotal)+' oz to go</div><div style="font-size:12px;color:var(--t2);margin-top:4px;">Goal: '+waterGoal+' oz/day</div>')
-    +'<div class="water-quick-btns" style="margin-top:8px;">'
-    +'<button class="wq-btn" onclick="logWaterOz(8,\'8oz glass\')">+ 8oz</button>'
-    +'<button class="wq-btn" onclick="logWaterOz(12,\'12oz\')">+ 12oz</button>'
-    +'<button class="wq-btn" onclick="logWaterOz(16,\'16oz\')">+ 16oz</button>'
-    +'</div></div></div>'
-    +(waterTodayItems.length
-      ?'<div style="font-size:11px;color:var(--t3);margin-top:8px;">'+waterTodayItems.length+' entr'+(waterTodayItems.length===1?'y':'ies')+' today · <button onclick="showWaterLogSheet()" style="background:none;border:none;color:#378ADD;font-size:11px;cursor:pointer;font-family:DM Sans,sans-serif;padding:0;">View log →</button></div>'
-      :'')
-    +'</div>';
 
-  // ── Protein Tracker ──
-  const todayTotal=getTodayProteinTotal();
-  const pct=Math.min(todayTotal/proteinGoal,1);
-  const circ=2*Math.PI*36;
-  const items=getTodayProtein();
-
-  const proteinHTML=
-    '<div class="coach-section">'
-    +'<div class="coach-section-title">🥩 Protein Today'
-    +'<button onclick="showProteinGoalSheet()" style="margin-left:auto;font-size:11px;padding:4px 10px;border-radius:20px;background:var(--s2);border:1px solid var(--b2);color:var(--t2);cursor:pointer;font-family:DM Sans,sans-serif;">Goal: '+proteinGoal+'g</button>'
-    +'</div>'
-    +'<div class="protein-ring-wrap">'
-    +'<div class="protein-ring"><svg width="90" height="90" viewBox="0 0 90 90"><circle class="p-track" cx="45" cy="45" r="36"/><circle class="p-prog" cx="45" cy="45" r="36" stroke-dasharray="'+Math.round(pct*circ)+' '+circ+'" stroke-dashoffset="0"/></svg>'
-    +'<div class="protein-inner"><div class="protein-g">'+todayTotal+'g</div><div class="protein-lbl">of '+proteinGoal+'g</div></div></div>'
-    +'<div style="flex:1;">'
-    +(todayTotal>=proteinGoal
-      ?'<div style="font-size:14px;font-weight:600;color:var(--grn);">✓ Goal hit!</div><div style="font-size:12px;color:var(--t2);margin-top:4px;">Great job hitting your protein today.</div>'
-      :'<div style="font-size:14px;font-weight:600;">'+Math.max(proteinGoal-todayTotal,0)+'g to go</div><div style="font-size:12px;color:var(--t2);margin-top:4px;">'+(proteinGoal-todayTotal>0?'Keep going!':'')+'</div>')
-    +'<div class="protein-quick-btns" style="margin-top:10px;">'
-    +'<button class="pq-btn" onclick="showAddProteinSheet()">+ Log food</button>'
-    +'<button class="pq-btn" onclick="quickAddProtein(25,&quot;Chicken breast&quot;)">🍗 25g</button>'
-    +'<button class="pq-btn" onclick="quickAddProtein(20,&quot;Protein shake&quot;)">🥤 20g</button>'
-    +'<button class="pq-btn" onclick="quickAddProtein(30,&quot;Greek yogurt&quot;)">🥛 30g</button>'
-    +'</div></div></div>'
-    +(items.length
-      ?'<div style="margin-top:10px;">'+items.map((it,i)=>'<div class="protein-log-item"><div>'+it.name+'</div><div style="display:flex;align-items:center;gap:10px;"><span style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;color:var(--acc);">'+it.g+'g</span><span style="font-size:11px;color:var(--t3);">'+it.time+'</span><button onclick="deleteProteinItem('+i+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:2px 4px;">x</button></div></div>').join('')+'</div>'
-      :'<div style="font-size:12px;color:var(--t3);text-align:center;padding:8px 0;">No protein logged today yet</div>')
-    +'</div>';
-
-  // ── Body Metrics ──
-  const lastEntry=bodyMetrics[0];
-  const weightTrend=getBodyTrend('weight');
-  const trendStr=(t,unit,lowerBetter)=>!t?'—':t.latest+unit+(t.diff!==0?' <span style="color:'+(lowerBetter?(t.diff<0?'var(--grn)':'var(--red)'):(t.diff>0?'var(--grn)':'var(--red)'))+';">'+(t.diff>0?'+':'')+t.diff+unit+'</span>':'');
-
-  function bodyRow(label,field,unit,lb){
-    const t=getBodyTrend(field);
-    if(!t&&!(lastEntry&&lastEntry[field]>0))return'';
-    return'<div class="body-stat-row"><div class="body-stat-name">'+label+'</div><div class="body-stat-val">'+trendStr(t,unit,lb)+'</div></div>';
-  }
-
+  // ── Body Metrics (bridge card → Progress tab) ──
+  const _lastBody=bodyMetrics[0];
+  const _bwTrend=getBodyTrend('weight');
+  const _bfTrend=getBodyTrend('bodyFat');
+  const _bodyBridgeStats=_lastBody
+    ?('<span style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:800;">'+(_lastBody.weight||'—')+'<span style="font-size:12px;font-weight:500;color:var(--t3);"> lb</span></span>'
+      +(_bwTrend&&_bwTrend.diff!==0?' <span style="font-size:11px;color:'+(_bwTrend.diff<0?'var(--grn)':'var(--red)')+';">'+(_bwTrend.diff>0?'+':'')+_bwTrend.diff+' lb</span>':'')
+      +(_lastBody.bodyFat>0?' &nbsp;<span style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:800;">'+_lastBody.bodyFat+'<span style="font-size:12px;font-weight:500;color:var(--t3);">% fat</span></span>':'')
+      +(_bfTrend&&_bfTrend.diff!==0?' <span style="font-size:11px;color:'+(_bfTrend.diff<0?'var(--grn)':'var(--red)')+';">'+(_bfTrend.diff>0?'+':'')+_bfTrend.diff+'%</span>':''))
+    :'<span style="font-size:13px;color:var(--t3);">No entries yet</span>';
   const bodyHTML=
-    '<div class="coach-section">'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">'
-    +'<div class="coach-section-title" style="margin-bottom:0;">⚖️ Body Metrics</div>'
-    +'<button onclick="showBodyLogSheet()" style="font-size:12px;font-weight:600;padding:7px 14px;border-radius:10px;background:var(--acc);color:#000;border:none;cursor:pointer;font-family:DM Sans,sans-serif;">+ Log</button>'
-    +'</div>'
-    +(bodyMetrics.length>=2
-      ?'<div>'
-        +bodyRow('Weight','weight',' lb',false)
-        +bodyRow('Body Fat %','bodyFat','%',true)
-        +bodyRow('Muscle Mass','muscleMass',' lb',false)
-        +bodyRow('Fat-Free Mass','fatFreeMass',' lb',false)
-        +bodyRow('Visceral Fat','visceralFat','',true)
-        +bodyRow('Waist','waist',' in',true)
-        +bodyRow('Arms','arms',' in',false)
-        +(lastEntry&&lastEntry.bodyWater>0&&lastEntry.bodyWater<58?'<div style="font-size:12px;color:#EF9F27;margin-top:6px;">💧 Last weigh-in may be inaccurate — hydration was low ('+lastEntry.bodyWater+'%)</div>':'')
-        +'<div style="font-size:11px;color:var(--t3);margin-top:8px;">Last logged: '+new Date(bodyMetrics[0].date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})+'</div>'
-        +'</div>'
-      :(lastEntry
-        ?'<div>'
-          +'<div class="body-stat-row"><span class="body-stat-name">Weight</span><span class="body-stat-val">'+(lastEntry.weight||'—')+' lb</span></div>'
-          +((lastEntry.muscleMass>0)?'<div class="body-stat-row"><span class="body-stat-name">Muscle Mass</span><span class="body-stat-val">'+lastEntry.muscleMass+' lb</span></div>':'')
-          +'<div style="font-size:11px;color:var(--t3);margin-top:8px;">Log again to see trends</div>'
-          +'</div>'
-        :'<div style="font-size:13px;color:var(--t3);text-align:center;padding:16px 0;">No measurements yet.<br>Tap "+ Log" to start tracking.</div>'))
+    '<div class="coach-section" style="cursor:pointer;" onclick="progTab=\'body\';nav(\'progress\',document.querySelectorAll(\'.nb\')[3]);setTimeout(()=>renderPhotoCard(),0);">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
+    +'<div class="coach-section-title" style="margin-bottom:0;">⚖️ Body</div>'
+    +'<div style="display:flex;align-items:center;gap:8px;">'
+    +'<button onclick="event.stopPropagation();showBodyLogSheet()" style="font-size:12px;font-weight:600;padding:6px 12px;border-radius:10px;background:var(--acc);color:#000;border:none;cursor:pointer;font-family:DM Sans,sans-serif;">+ Log</button>'
+    +'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>'
+    +'</div></div>'
+    +'<div style="margin-bottom:6px;">'+_bodyBridgeStats+'</div>'
+    +(_lastBody
+      ?'<div style="font-size:11px;color:var(--t3);">Last logged: '+new Date(_lastBody.date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})+' · Tap for charts &amp; photos →</div>'
+      :'<div style="font-size:11px;color:var(--t3);">Tap to view body progress →</div>')
     +'</div>';
 
   // ── Check-In ──
@@ -6514,16 +6504,6 @@ function renderCoach(){
     +'<button onclick="showSuppRecsSheet()" style="padding:10px;border-radius:12px;background:rgba(232,255,71,.08);border:1px solid rgba(232,255,71,.2);color:var(--acc);font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;">Recommendations</button>'
     +'<button onclick="showSuppBrowserSheet()" style="padding:10px;border-radius:12px;background:var(--s2);border:1px solid var(--b2);color:var(--t2);font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;">Browse all</button>'
     +'</div>'
-    +'</div>';
-
-
-  // ── Data & Backup ──
-  const backupHTML=
-    '<div class="coach-section" style="margin-bottom:0;">'
-    +'<div class="coach-section-title">🔒 Data &amp; Backup</div>'
-    +'<div style="font-size:13px;color:var(--t2);margin-bottom:14px;line-height:1.5;">Clearing Safari cache will erase all your data. Export a backup regularly to keep your history safe.</div>'
-    +'<button class="btn btn-acc btn-full" style="margin-bottom:10px;" onclick="exportGainzData()">⬇ Export Backup</button>'
-    +'<button class="btn btn-ghost btn-full" onclick="showImportSheet()">⬆ Import / Restore</button>'
     +'</div>';
 
   // ── Weekly Nutrition ──
@@ -6698,11 +6678,73 @@ function renderCoach(){
       +`</div>`;
   }
 
-  scroll.innerHTML=checkInHTML+weeklySummaryHTML+muscleVolHTML+correlationHTML+weekNutritionHTML+proteinHTML+hydrationHTML+bodyHTML+suppHTML+backupHTML;
+  scroll.innerHTML=checkInHTML+weeklySummaryHTML+muscleVolHTML+correlationHTML+weekNutritionHTML+bodyHTML+suppHTML;
 }
 
 function quickAddProtein(g,name){
   addProtein(name,g);
+}
+
+function showQuickAddMacroSheet(macro){
+  const cfg={
+    protein:{
+      label:'Protein',unit:'g',color:'#47b4ff',
+      quick:[
+        {name:'Chicken breast',g:31},{name:'Ground beef (4oz)',g:28},{name:'Eggs (2)',g:12},
+        {name:'Greek yogurt',g:17},{name:'Protein shake',g:25},{name:'Salmon (4oz)',g:28},
+        {name:'Tuna (can)',g:25},{name:'Turkey breast',g:30},
+      ],
+      save:'submitQuickMacro("protein")',field:'protein',storeFn:'addProtein',
+    },
+    carbs:{
+      label:'Carbs',unit:'g',color:'#ffb347',
+      quick:[
+        {name:'White rice (1 cup)',g:45},{name:'Oats (1 cup dry)',g:54},{name:'Banana',g:27},
+        {name:'Sweet potato (med)',g:26},{name:'Bread (2 slices)',g:26},{name:'Pasta (1 cup)',g:40},
+        {name:'Apple',g:25},{name:'Sports drink',g:21},
+      ],
+      save:'submitQuickMacro("carbs")',
+    },
+    fat:{
+      label:'Fat',unit:'g',color:'#ff9147',
+      quick:[
+        {name:'Avocado (half)',g:15},{name:'Olive oil (1 tbsp)',g:14},{name:'Almonds (1oz)',g:14},
+        {name:'Peanut butter (2 tbsp)',g:16},{name:'Cheddar cheese (1oz)',g:9},{name:'Whole egg',g:5},
+        {name:'Salmon (4oz)',g:12},{name:'Walnuts (1oz)',g:18},
+      ],
+      save:'submitQuickMacro("fat")',
+    },
+  };
+  const c=cfg[macro];
+  if(!c)return;
+  const bg=document.createElement('div');bg.className='sheet-bg';
+  bg.innerHTML='<div class="sheet"><div class="sheet-handle"></div>'
+    +'<div class="sheet-title">Add '+c.label+'</div>'
+    +'<div class="field"><label>Food / meal</label><input type="text" id="qm-name" placeholder="e.g. '+c.quick[0].name+'"></div>'
+    +'<div class="field"><label>'+c.label+' (grams)</label><input type="number" id="qm-g" inputmode="numeric" placeholder="e.g. '+c.quick[0].g+'" min="1" max="500"></div>'
+    +'<button class="btn btn-acc btn-full" onclick="'+c.save+'" style="margin-bottom:14px;">Add</button>'
+    +'<div style="font-size:11px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;">Quick add</div>'
+    +c.quick.map(q=>'<div onclick="quickAddMacro(\''+macro+'\',\''+q.name+'\','+q.g+');closeSheets();" style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--b1);cursor:pointer;"><span style="font-size:14px;">'+q.name+'</span><span style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;color:'+c.color+';">'+q.g+'g</span></div>').join('')
+    +'<button class="btn btn-ghost btn-full" style="margin-top:12px;" onclick="closeSheets()">Cancel</button></div>';
+  bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
+  document.body.appendChild(bg);
+}
+
+function submitQuickMacro(macro){
+  const name=(eid('qm-name')?.value||'').trim()||'Food';
+  const g=parseFloat(eid('qm-g')?.value)||0;
+  if(!g){return;}
+  quickAddMacro(macro,name,g);
+  closeSheets();
+}
+
+function quickAddMacro(macro,name,g){
+  const item={name,meal:'Snack',cal:0,g:0,carbs:0,fat:0};
+  if(macro==='protein'){item.g=g;item.cal=Math.round(g*4);}
+  else if(macro==='carbs'){item.carbs=g;item.cal=Math.round(g*4);}
+  else if(macro==='fat'){item.fat=g;item.cal=Math.round(g*9);}
+  addFoodItem(item);
+  renderFood();
 }
 
 function showAddProteinSheet(){
@@ -6750,7 +6792,9 @@ function saveProteinGoal(){
   const g=parseInt(eid('pg-goal')?.value)||160;
   proteinGoal=Math.max(50,Math.min(400,g));
   localStorage.setItem('gainz_protein_goal',String(proteinGoal));
-  closeSheets();renderCoach();
+  closeSheets();
+  if(document.getElementById('s-food')&&document.getElementById('s-food').classList.contains('on'))renderFood();
+  else renderCoach();
 }
 
 function showBodyLogSheet(){
@@ -6906,6 +6950,33 @@ const GAINZ_KEYS = [
   'gainz_protein_goal','gainz_protein_log','gainz_food_goals','gainz_macro_profile',
   'gainz_checkins','gainz_voice','gainz_vibrate','gainz_water','gainz_pwa_dismissed','gainz_supps'
 ];
+
+function showSettingsSheet(){
+  const bg=document.createElement('div');bg.className='sheet-bg';
+  bg.innerHTML=`<div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Settings</div>
+
+    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:10px;">Data &amp; Backup</div>
+    <div style="font-size:13px;color:var(--t2);margin-bottom:14px;line-height:1.5;">Clearing Safari cache will erase all your data. Export a backup regularly to keep your history safe.</div>
+    <button class="btn btn-acc btn-full" style="margin-bottom:10px;" onclick="exportGainzData()">⬇ Export Backup</button>
+    <button class="btn btn-ghost btn-full" style="margin-bottom:24px;" onclick="closeSheets();showImportSheet()">⬆ Import / Restore</button>
+
+    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:10px;">About</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--b1);">
+      <span style="font-size:14px;font-weight:600;">GAINZ</span>
+      <span style="font-size:12px;color:var(--t3);">v1.0</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;">
+      <span style="font-size:13px;color:var(--t2);">All data stored locally on device</span>
+      <span style="font-size:11px;color:var(--t3);">No account needed</span>
+    </div>
+
+    <button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="closeSheets()">Close</button>
+  </div>`;
+  bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
+  document.body.appendChild(bg);
+}
 
 async function exportGainzData(){
   const snapshot={_version:1,_exported:new Date().toISOString(),data:{}};
@@ -9384,16 +9455,18 @@ function renderFood() {
   const calOver = t.calories > g.calories;
 
   // Macro bar helper
-  function macroBar(label, val, goal, color) {
+  function macroBar(label, val, goal, color, macro) {
     const pct = Math.min(val / Math.max(goal, 1), 1) * 100;
     const over = val > goal;
-    const rem = Math.max(0, Math.round(goal - val));
     const rightLabel = over
       ? '<span style="font-size:11px;color:var(--red);">+' + Math.round(val-goal) + 'g over</span>'
       : '<span style="font-size:11px;color:var(--t2);">' + Math.round(val) + '<span style="color:var(--t3);"> / ' + goal + 'g</span></span>';
+    const addBtn = isToday
+      ? '<button onclick="showQuickAddMacroSheet(\'' + macro + '\')" style="background:none;border:none;color:var(--t3);cursor:pointer;font-size:15px;font-weight:700;padding:0 6px 0 0;line-height:1;font-family:DM Sans,sans-serif;">+</button>'
+      : '';
     return '<div style="margin-bottom:10px;">'
       + '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">'
-      + '<span style="font-size:12px;font-weight:600;">' + label + '</span>'
+      + '<div style="display:flex;align-items:baseline;gap:0;">' + addBtn + '<span style="font-size:12px;font-weight:600;">' + label + '</span></div>'
       + rightLabel
       + '</div>'
       + '<div style="height:6px;background:var(--s3);border-radius:3px;overflow:hidden;">'
@@ -9444,9 +9517,9 @@ function renderFood() {
     + '<div style="height:100%;width:' + (calPct * 100).toFixed(1) + '%;background:' + (calOver ? 'var(--red)' : 'var(--acc)') + ';border-radius:4px;transition:width .4s;"></div>'
     + '</div>'
     // Macro bars with remaining shown
-    + macroBar('Protein', t.protein, g.protein, '#47b4ff')
-    + macroBar('Carbs', t.carbs, g.carbs, '#ffb347')
-    + macroBar('Fat', t.fat, g.fat, '#ff9147')
+    + macroBar('Protein', t.protein, g.protein, '#47b4ff', 'protein')
+    + macroBar('Carbs', t.carbs, g.carbs, '#ffb347', 'carbs')
+    + macroBar('Fat', t.fat, g.fat, '#ff9147', 'fat')
     + '</div>';
 
   // Action row (barcode scan removed)
@@ -9544,9 +9617,13 @@ function renderFood() {
       + '</div>'
     : '';
 
+  // Hydration card — only show for today (no historical hydration data by date)
+  const hydrationCardHTML = isToday ? buildHydrationHTML() : '';
+
   scroll.innerHTML = summaryCard + actions
     + mealOrder.map(m => mealSection(m)).join('')
-    + recentSection;
+    + recentSection
+    + hydrationCardHTML;
 
   // Wire delete buttons
   scroll.querySelectorAll('.food-del-btn').forEach(btn => {
