@@ -713,6 +713,9 @@ input[type="date"]{color-scheme:dark;color:var(--t1);background:var(--s2);}
     </div>
     <div style="font-size:13px;color:var(--t2);margin-bottom:20px;" id="dateline"></div>
     <div id="consist-card"></div>
+    <div id="ontrack-card"></div>
+    <div id="directives-card"></div>
+    <div id="today-cta"></div>
     <div class="stat-grid" id="home-stats"></div>
   </div>
   <div class="nav"><button class="nb on" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="7" x2="2" y2="15" stroke-width="2.5"/><line x1="6" y1="5" x2="6" y2="17" stroke-width="2.5"/><line x1="6" y1="11" x2="16" y2="11" stroke-width="1.8"/><line x1="16" y1="5" x2="16" y2="17" stroke-width="2.5"/><line x1="20" y1="7" x2="20" y2="15" stroke-width="2.5"/></svg><span>Train</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="10" x2="14" y2="10" stroke-width="1.8"/><path d="M1 10 Q1 17 7.5 18.5 Q14 17 14 10" stroke-width="1.8"/><line x1="18.5" y1="4" x2="18.5" y2="20" stroke-width="1.8"/><line x1="16.5" y1="4" x2="16.5" y2="10" stroke-width="1.8"/><line x1="20.5" y1="4" x2="20.5" y2="10" stroke-width="1.8"/><path d="M16.5 10 Q16.5 12.5 18.5 13 Q20.5 12.5 20.5 10" stroke-width="1.8"/></svg><span>Nutrition</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Cal</span></button></div>
@@ -1607,8 +1610,20 @@ function closeSheets(){document.querySelectorAll('.sheet-bg').forEach(el=>el.rem
 function findEx(name){
   const ovStr=localStorage.getItem('gainz_ex_overrides');
   const ov=ovStr?JSON.parse(ovStr):{};
-  if(ov[name])return{...(findExBase(name)||{name,muscle:'Custom',rest:90,search:name+' form'}),...ov[name]};
-  return findExBase(name)||{name,muscle:'Unknown',sets:3,reps:'10–12',rest:90,search:name+' form tutorial'};
+  let ex=ov[name]
+    ?{...(findExBase(name)||{name,muscle:'Custom',rest:90,search:name+' form'}),...ov[name]}
+    :findExBase(name)||{name,muscle:'Unknown',sets:3,reps:'10–12',rest:90,search:name+' form tutorial'};
+  // Apply weekly volume adjustment if active this week
+  try{
+    const volRaw=localStorage.getItem('gainz_vol_adj');
+    if(volRaw){
+      const vol=JSON.parse(volRaw);
+      if(vol.weekKey===getWeekStartKey()&&vol.setsAdj){
+        ex={...ex,sets:Math.max(1,(ex.sets||3)+vol.setsAdj)};
+      }
+    }
+  }catch(e){}
+  return ex;
 }
 function findExBase(name){
   for(const grp of Object.values(EXERCISE_LIBRARY)){const f=grp.find(e=>e.name===name);if(f)return f;}
@@ -1675,6 +1690,147 @@ function buildIntervalUI(id){
   </div>`;
 }
 
+function buildIdentityCard(){
+  const now=new Date();
+  const todayIdx=now.getDay();
+  const diffToMon=(todayIdx+6)%7;
+
+  // ── Gather 8 weeks of session data ─────────────────────────────────────────
+  const eightWeeksAgo=new Date(now);eightWeeksAgo.setDate(now.getDate()-56);eightWeeksAgo.setHours(0,0,0,0);
+  const allSessions=getSessions().filter(s=>!s.isCardio&&new Date(s.date)>=eightWeeksAgo);
+
+  // Group sessions by ISO week key (Mon-anchored)
+  function isoWeekKey(date){
+    const d=new Date(date);const day=d.getDay();
+    d.setDate(d.getDate()-((day+6)%7));d.setHours(0,0,0,0);
+    return d.toISOString().split('T')[0];
+  }
+
+  const byWeek={};
+  allSessions.forEach(s=>{
+    const wk=isoWeekKey(s.date);
+    if(!byWeek[wk])byWeek[wk]=new Set();
+    byWeek[wk].add(new Date(s.date).toDateString());
+  });
+
+  const weekKeys=Object.keys(byWeek).sort();
+  const weeksWithData=weekKeys.length;
+
+  // Not enough history — fall back to consistency card
+  if(weeksWithData<2)return buildConsistencyCard();
+
+  // ── This week strip (reuse existing dot logic) ──────────────────────────────
+  const weekStart=new Date(now);weekStart.setDate(now.getDate()-diffToMon);weekStart.setHours(0,0,0,0);
+  const weekEnd=new Date(weekStart);weekEnd.setDate(weekStart.getDate()+6);weekEnd.setHours(23,59,59,999);
+  const thisWeekSessions=getSessions().filter(s=>{const d=new Date(s.date);return d>=weekStart&&d<=weekEnd;});
+  const activeDates=new Set(thisWeekSessions.map(s=>new Date(s.date).toDateString()));
+  const doneThisWeek=activeDates.size;
+  const planned=Math.max(program.length,1);
+
+  const dayLabels=['M','T','W','T','F','S','S'];
+  const dots=dayLabels.map((lbl,i)=>{
+    const d=new Date(weekStart);d.setDate(weekStart.getDate()+i);
+    const isToday=i===diffToMon;
+    const isPast=i<diffToMon;
+    const trained=activeDates.has(d.toDateString());
+    let cls,inner;
+    if(trained){cls='cdot done';inner=`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`;}
+    else if(isToday){cls='cdot today-empty';inner=lbl;}
+    else if(isPast){cls='cdot missed';inner=`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(255,80,80,.6)" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;}
+    else{cls='cdot future';inner=lbl;}
+    return`<div class="cdot-wrap"><div class="${cls}">${inner}</div><div class="cdot-day">${lbl}</div></div>`;
+  }).join('');
+
+  // ── Pattern analysis ────────────────────────────────────────────────────────
+
+  // 1. Rolling avg sessions/week (exclude current partial week)
+  const completeWeekKeys=weekKeys.filter(k=>k!==isoWeekKey(now.toISOString()));
+  const totalSessionDays=completeWeekKeys.reduce((a,k)=>a+byWeek[k].size,0);
+  const avgPerWeek=completeWeekKeys.length>0
+    ?Math.round((totalSessionDays/completeWeekKeys.length)*10)/10
+    :doneThisWeek;
+  const avgRounded=Math.round(avgPerWeek);
+
+  // 2. Consistent day-of-week — which days appear in ≥75% of trained weeks
+  const dayCount=[0,0,0,0,0,0,0]; // Mon=0 … Sun=6
+  allSessions.forEach(s=>{
+    const d=new Date(s.date);
+    dayCount[(d.getDay()+6)%7]++;
+  });
+  const DAY_NAMES=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  const threshold=Math.max(2,Math.ceil(weeksWithData*0.65));
+  const consistentDays=dayCount.map((c,i)=>({day:DAY_NAMES[i],count:c,i})).filter(x=>x.count>=threshold);
+  // Pick most consistent single day
+  const topDay=consistentDays.sort((a,b)=>b.count-a.count)[0];
+
+  // 3. Consecutive weeks trained (going back from most recent)
+  const thisWeekKey=isoWeekKey(now.toISOString());
+  // Build all week keys from 8 weeks ago to now
+  function prevWeekKey(key,n){
+    const d=new Date(key+'T12:00:00');d.setDate(d.getDate()-(n*7));
+    return d.toISOString().split('T')[0];
+  }
+  let consecutiveWeeks=0;
+  // Start from last complete week; if current week has sessions count it too
+  const startOffset=byWeek[thisWeekKey]?0:1;
+  for(let i=startOffset;i<=8;i++){
+    const k=prevWeekKey(thisWeekKey,i);
+    if(byWeek[k])consecutiveWeeks++;
+    else break;
+  }
+  if(byWeek[thisWeekKey])consecutiveWeeks++; // include current week if active
+
+  // 4. Remaining days this week framing
+  const daysLeft=planned-doneThisWeek;
+  const daysElapsed=diffToMon;
+
+  // ── Compose identity statements ─────────────────────────────────────────────
+  let primary='',secondary='';
+
+  // Primary: strongest identity signal
+  if(consecutiveWeeks>=8){
+    primary=`You've trained every week for <em>2+ months</em>`;
+  } else if(consecutiveWeeks>=4){
+    primary=`You've trained every week for <em>${consecutiveWeeks} weeks</em>`;
+  } else if(avgRounded>=4){
+    primary=`You're a <em>${avgRounded}-day/week lifter</em>`;
+  } else if(avgRounded>=2){
+    primary=`You average <em>${avgPerWeek.toFixed(1)} sessions/week</em>`;
+  } else {
+    primary=`<em>${weeksWithData} weeks</em> of training logged`;
+  }
+
+  // Secondary: most specific behavioral pattern
+  if(topDay&&topDay.count>=3){
+    const neverMissed=topDay.count>=weeksWithData-1;
+    secondary=neverMissed
+      ?`You haven't missed a ${topDay.day} in ${topDay.count} weeks`
+      :`${topDay.day}s are your most consistent training day`;
+  } else if(doneThisWeek===0&&daysElapsed>1){
+    secondary=`Your pattern is ${avgRounded} days/week — ${Math.max(0,daysLeft)} day${daysLeft!==1?'s':''} left this week`;
+  } else if(doneThisWeek>=planned){
+    secondary=`Week complete — all ${planned} planned sessions done 🏆`;
+  } else if(daysLeft>0&&daysElapsed>=2){
+    secondary=`${doneThisWeek} done · ${daysLeft} to go — your pattern says you\'ll get ${daysLeft===1?'it':'them'}`;
+  } else if(consecutiveWeeks>=2){
+    secondary=`${consecutiveWeeks} weeks straight without missing a week`;
+  } else {
+    secondary=`${doneThisWeek} of ${planned} days this week`;
+  }
+
+  return`<div class="consist-card">
+    <div class="consist-top">
+      <span class="consist-label">Your Pattern</span>
+      <span class="consist-score">${doneThisWeek}/${planned} this week</span>
+    </div>
+    <div class="consist-dots">${dots}</div>
+    <div style="margin-top:10px;">
+      <div class="consist-msg" style="font-size:14px;">${primary}</div>
+      <div class="consist-sub" style="margin-top:3px;">${secondary}</div>
+    </div>
+  </div>`;
+}
+
 function buildConsistencyCard(){
   // Week boundaries (Mon–Sun)
   const now=new Date();
@@ -1735,10 +1891,604 @@ function buildConsistencyCard(){
   </div>`;
 }
 
+// ─── ON TRACK CARD ───────────────────────────────────────────────────────────
+
+function toggleOnTrackDetail(){
+  const det=eid('ontrack-detail');
+  const arr=eid('ontrack-arrow');
+  if(!det)return;
+  const open=det.style.display==='block';
+  det.style.display=open?'none':'block';
+  if(arr)arr.style.transform=open?'rotate(0deg)':'rotate(180deg)';
+}
+
+function buildOnTrackCard(){
+  const today=new Date();
+  const todayStr=today.toISOString().split('T')[0];
+
+  // ── 1. STRENGTH SIGNAL ─────────────────────────────────────────────────────
+  // Look at all exercises across the program over the last 4 weeks.
+  // Score = proportion of exercises trending up vs flat/down.
+  const fourWeeksAgo=new Date(today);fourWeeksAgo.setDate(today.getDate()-28);
+  let strengthUp=0,strengthFlat=0,strengthDown=0;
+  let hasStrengthData=false;
+
+  program.forEach(day=>{
+    day.exercises.forEach(name=>{
+      const sessions=getAllSessions(name).filter(s=>new Date(s.date)>=fourWeeksAgo);
+      if(sessions.length<2)return;
+      hasStrengthData=true;
+      const first=Math.max(...sessions[0].sets.map(s=>parseFloat(s.weight)||0));
+      const last=Math.max(...sessions[sessions.length-1].sets.map(s=>parseFloat(s.weight)||0));
+      if(last>first)strengthUp++;
+      else if(last<first)strengthDown++;
+      else strengthFlat++;
+    });
+  });
+
+  let strengthStatus='none';
+  if(hasStrengthData){
+    const total=strengthUp+strengthFlat+strengthDown;
+    const upPct=total?strengthUp/total:0;
+    const downPct=total?strengthDown/total:0;
+    if(upPct>=0.4)strengthStatus='green';
+    else if(downPct>=0.4)strengthStatus='red';
+    else strengthStatus='amber';
+  }
+
+  // ── 2. ADHERENCE SIGNAL ────────────────────────────────────────────────────
+  // Planned sessions = program.length per week × 4 weeks.
+  // Actual = unique strength sessions in last 28 days.
+  const allSessions=getSessions().filter(s=>!s.isCardio);
+  const recentSessions=allSessions.filter(s=>new Date(s.date)>=fourWeeksAgo);
+  const uniqueSessionDays=new Set(recentSessions.map(s=>new Date(s.date).toDateString())).size;
+  const plannedSessions=program.length*4;
+  const adherencePct=plannedSessions>0?uniqueSessionDays/plannedSessions:0;
+
+  let adherenceStatus='none';
+  if(recentSessions.length>0||uniqueSessionDays>0){
+    // Need at least 1 week of data (program.length sessions) to have a signal
+    if(uniqueSessionDays>=program.length){
+      if(adherencePct>=0.8)adherenceStatus='green';
+      else if(adherencePct>=0.6)adherenceStatus='amber';
+      else adherenceStatus='red';
+    }
+  }
+
+  // ── 3. NUTRITION SIGNAL ────────────────────────────────────────────────────
+  // Days in last 7 where protein hit ≥80% of goal
+  let nutritionGoodDays=0,nutritionTrackedDays=0;
+  for(let i=0;i<7;i++){
+    const d=new Date(today);d.setDate(today.getDate()-i);
+    const key=d.toISOString().split('T')[0];
+    const entry=proteinLog.find(e=>e.date===key);
+    if(!entry||!entry.items||!entry.items.length)continue;
+    nutritionTrackedDays++;
+    const total=entry.items.reduce((a,it)=>a+(parseInt(it.g)||0),0);
+    if(total>=proteinGoal*0.8)nutritionGoodDays++;
+  }
+
+  let nutritionStatus='none';
+  if(nutritionTrackedDays>=3){
+    if(nutritionGoodDays>=5)nutritionStatus='green';
+    else if(nutritionGoodDays>=3)nutritionStatus='amber';
+    else nutritionStatus='red';
+  }
+
+  // ── OVERALL STATUS ─────────────────────────────────────────────────────────
+  const statuses=[strengthStatus,adherenceStatus,nutritionStatus].filter(s=>s!=='none');
+  if(statuses.length===0)return''; // Not enough data yet — hide entirely
+
+  const overallStatus=statuses.includes('red')?'red':statuses.includes('amber')?'amber':'green';
+
+  // ── COACHING LINE ──────────────────────────────────────────────────────────
+  function coachLine(){
+    if(overallStatus==='green'){
+      if(strengthStatus==='green'&&adherenceStatus==='green'&&nutritionStatus==='green')
+        return'Strength up, showing up, eating right — keep pushing.';
+      if(strengthStatus==='green')return'Strength is moving. Stay consistent and this compounds fast.';
+      return'All signals green — you\'re doing the work.';
+    }
+    if(overallStatus==='red'){
+      if(adherenceStatus==='red'){
+        const missed=plannedSessions-uniqueSessionDays;
+        return`${missed} missed sessions in 4 weeks — consistency is the bottleneck right now.`;
+      }
+      if(nutritionStatus==='red')
+        return`Protein hit on only ${nutritionGoodDays} of ${nutritionTrackedDays} tracked days — that's limiting your results.`;
+      if(strengthStatus==='red')
+        return'Strength trending down on multiple lifts — consider a deload or check recovery.';
+      return'Multiple signals need attention — pick one and fix it this week.';
+    }
+    // Amber
+    if(adherenceStatus==='amber')
+      return`${Math.round(adherencePct*100)}% session rate — close to target. One more session a week changes this.`;
+    if(nutritionStatus==='amber')
+      return`Protein on target ${nutritionGoodDays} of ${nutritionTrackedDays} days — a little more consistency here unlocks more gains.`;
+    if(strengthStatus==='amber')
+      return'Strength holding steady — keep progressive overload and it\'ll move.';
+    return'Making progress — a few things to tighten up.';
+  }
+
+  // ── RENDER ─────────────────────────────────────────────────────────────────
+  const statusMeta={
+    green:{dot:'#4ade80',label:'On Track',bg:'rgba(74,222,128,.08)',border:'rgba(74,222,128,.2)'},
+    amber:{dot:'#E8FF47',label:'Check In',bg:'rgba(232,255,71,.06)',border:'rgba(232,255,71,.18)'},
+    red:  {dot:'#ff6b6b',label:'Off Track',bg:'rgba(255,107,107,.08)',border:'rgba(255,107,107,.2)'},
+  };
+  const sm=statusMeta[overallStatus];
+
+  function dimRow(label,status,detail){
+    if(status==='none')return'';
+    const col=status==='green'?'#4ade80':status==='red'?'#ff6b6b':'#E8FF47';
+    const icon=status==='green'?'✓':status==='red'?'✗':'~';
+    return`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--b1);">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:11px;font-weight:800;color:${col};width:14px;text-align:center;">${icon}</span>
+        <span style="font-size:12px;font-weight:600;color:var(--t1);">${label}</span>
+      </div>
+      <span style="font-size:11px;color:var(--t2);">${detail}</span>
+    </div>`;
+  }
+
+  const strengthDetail=strengthStatus==='none'?'':
+    strengthStatus==='green'?`${strengthUp} lift${strengthUp!==1?'s':''} up`:
+    strengthStatus==='red'?`${strengthDown} lift${strengthDown!==1?'s':''} declining`:
+    'Holding steady';
+
+  const adherenceDetail=adherenceStatus==='none'?'':
+    `${uniqueSessionDays}/${plannedSessions} sessions`;
+
+  const nutritionDetail=nutritionStatus==='none'?'':
+    `${nutritionGoodDays}/${nutritionTrackedDays} days on target`;
+
+  const detailRows=[
+    dimRow('Strength',strengthStatus,strengthDetail),
+    dimRow('Adherence',adherenceStatus,adherenceDetail),
+    dimRow('Nutrition',nutritionStatus,nutritionDetail),
+  ].filter(Boolean).join('');
+
+  return`<div class="card" style="margin-bottom:16px;background:${sm.bg};border-color:${sm.border};">
+    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleOnTrackDetail()">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:10px;height:10px;border-radius:50%;background:${sm.dot};box-shadow:0 0 6px ${sm.dot};flex-shrink:0;"></div>
+        <div>
+          <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:${sm.dot};">${sm.label}</div>
+          <div style="font-size:13px;color:var(--t1);margin-top:2px;line-height:1.4;">${coachLine()}</div>
+        </div>
+      </div>
+      <svg id="ontrack-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;margin-left:10px;color:var(--t3);transition:transform .2s;"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div id="ontrack-detail" style="display:none;margin-top:12px;border-top:1px solid var(--b1);padding-top:4px;">
+      ${detailRows}
+    </div>
+  </div>`;
+}
+
+// ─── DIRECTIVES ENGINE ───────────────────────────────────────────────────────
+
+// Returns a load multiplier (0.8–1.1) based on the last 2 weekly check-ins
+// and RPE trends. Used to scale recommended weights before showing directives.
+function computeLoadMultiplier(){
+  const now=new Date();
+  // Get keys for this week and last week (both Monday-anchored)
+  function weekKey(offsetWeeks){
+    const d=new Date(now);
+    const day=d.getDay();
+    d.setDate(d.getDate()-((day+6)%7)-(offsetWeeks*7));
+    return d.toISOString().split('T')[0];
+  }
+  const thisCI=checkIns[weekKey(0)]||null;
+  const lastCI=checkIns[weekKey(1)]||null;
+
+  let multiplier=1.0;
+  let reasons=[];
+
+  // Check-in signals — use this week if available, else last week
+  const ci=thisCI||lastCI;
+  if(ci){
+    const sleep=ci.sleep||3;
+    const energy=ci.energy||3;
+    const soreness=ci.soreness||3;
+
+    // Low sleep + high soreness → reduce volume signal: drop 10%
+    if(sleep<=2&&soreness<=2){
+      multiplier=Math.min(multiplier,0.9);
+      reasons.push('Low sleep & high soreness');
+    } else if(sleep<=2||energy<=2){
+      multiplier=Math.min(multiplier,0.95);
+      reasons.push(sleep<=2?'Low sleep quality':'Low energy');
+    }
+    // High energy + good sleep → confidence to push
+    if(sleep>=4&&energy>=4&&soreness>=3){
+      multiplier=Math.max(multiplier,1.05);
+      reasons.push('Feeling strong');
+    }
+  }
+
+  // Deload trigger 1: avgRPE ≥ 8.5 across all exercises for 2+ consecutive weeks
+  function getWeekAvgRpe(weekOffset){
+    const keyStart=new Date(now);
+    const day=keyStart.getDay();
+    keyStart.setDate(keyStart.getDate()-((day+6)%7)-(weekOffset*7));
+    keyStart.setHours(0,0,0,0);
+    const keyEnd=new Date(keyStart);keyEnd.setDate(keyStart.getDate()+6);keyEnd.setHours(23,59,59,999);
+    const entries=wkLog.filter(e=>{const d=new Date(e.date);return d>=keyStart&&d<=keyEnd;});
+    const rpes=entries.flatMap(e=>e.sets.filter(s=>s.rpe).map(s=>s.rpe));
+    return rpes.length?rpes.reduce((a,v)=>a+v,0)/rpes.length:null;
+  }
+  const rpeWeek0=getWeekAvgRpe(0);
+  const rpeWeek1=getWeekAvgRpe(1);
+  const highRpeTwoWeeks=(rpeWeek0!=null&&rpeWeek0>=8.5)&&(rpeWeek1!=null&&rpeWeek1>=8.5);
+
+  // Deload trigger 2: soreness ≤ 2 (i.e. very sore, scale 1=worst) two weeks running
+  const soreness0=thisCI?.soreness||null;
+  const soreness1=lastCI?.soreness||null;
+  const highSorenessTwoWeeks=(soreness0!=null&&soreness0<=2)&&(soreness1!=null&&soreness1<=2);
+
+  if(highRpeTwoWeeks||highSorenessTwoWeeks){
+    multiplier=0.8;
+    reasons=['Deload week — accumulated fatigue'];
+  }
+
+  // Layer in this week's check-in intensity adjustment (from applyPlanAdjustment)
+  // Only if not already deloading — deload takes priority
+  if(!highRpeTwoWeeks&&!highSorenessTwoWeeks){
+    try{
+      const raw=localStorage.getItem('gainz_plan_adj');
+      if(raw){
+        const padj=JSON.parse(raw);
+        if(padj.weekKey===getWeekStartKey()&&padj.intensityAdj){
+          multiplier=Math.max(0.8,Math.min(1.1,multiplier+padj.intensityAdj));
+          if(padj.intensityAdj<0&&!reasons.includes('Low energy')){
+            reasons.push('Low energy (check-in)');
+          }
+        }
+      }
+    }catch(e){}
+  }
+
+  return{multiplier,reasons,deload:highRpeTwoWeeks||highSorenessTwoWeeks,rpeWeek0,rpeWeek1};
+}
+
+// Returns the next program day to train based on last logged session.
+// Cycles through program order. Returns null if program is empty.
+function getNextProgramDay(){
+  if(!program.length)return null;
+  const sessions=getSessions().filter(s=>!s.isCardio);
+  if(!sessions.length)return program[0]; // Never trained — start at day 1
+  const lastDayId=sessions[0].dayId; // getSessions sorted newest first
+  const idx=program.findIndex(d=>d.id===lastDayId);
+  if(idx===-1)return program[0];
+  return program[(idx+1)%program.length];
+}
+
+function buildProgressionDirectivesCard(){
+  const nextDay=getNextProgramDay();
+  if(!nextDay)return'';
+
+  // Check if today already has a session for this day (already trained it)
+  const todayStr=new Date().toDateString();
+  const sessions=getSessions().filter(s=>!s.isCardio);
+  const alreadyDoneToday=sessions.some(s=>new Date(s.date).toDateString()===todayStr&&s.dayId===nextDay.id);
+
+  const {multiplier,reasons,deload,rpeWeek0}=computeLoadMultiplier();
+  const adjusted=Math.abs(multiplier-1.0)>0.01; // only show modifier badge if non-trivial
+
+  // Build per-exercise directives
+  const directives=nextDay.exercises.map(name=>{
+    const analysis=analyzeProgression(name);
+    if(!analysis||!analysis.last)return null; // no history — skip
+
+    const sg=analysis.suggestion;
+    if(!sg||sg.type==='firsttime')return null; // no actionable directive yet
+
+    // Apply load multiplier to recommended weight
+    const baseWeight=sg.weight??analysis.last.maxWeight;
+    const adjWeight=deload
+      ? Math.round((baseWeight*multiplier)/2.5)*2.5  // round to nearest 2.5
+      : baseWeight; // for non-deload, keep exact — multiplier shown as context only
+
+    const actionType=deload?'deload':sg.type;
+
+    return{name,baseWeight,adjWeight,reps:sg.reps||analysis.reps,actionType,sg,analysis};
+  }).filter(Boolean);
+
+  if(!directives.length){
+    // Has a next day but no history on any exercise yet
+    return`<div class="card" style="margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);">Up Next</span>
+        <span style="font-size:11px;font-weight:700;color:var(--acc);">${nextDay.name}</span>
+      </div>
+      <div style="font-size:13px;color:var(--t2);">Log your first session to unlock progression directives.</div>
+    </div>`;
+  }
+
+  // Modifier banner (deload or check-in adjustment)
+  let modifierBanner='';
+  if(deload){
+    modifierBanner=`<div style="display:flex;align-items:center;gap:6px;padding:8px 10px;background:rgba(255,71,71,.08);border:1px solid rgba(255,71,71,.2);border-radius:8px;margin-bottom:12px;">
+      <span style="font-size:14px;">⚠️</span>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#ff9999;text-transform:uppercase;letter-spacing:.06em;">Deload Week</div>
+        <div style="font-size:11px;color:var(--t2);">Accumulated fatigue detected — weights reduced 20%</div>
+      </div>
+    </div>`;
+  } else if(reasons.length&&adjusted){
+    const isBoost=multiplier>1;
+    const col=isBoost?'var(--acc)':'#ffb347';
+    const icon=isBoost?'⚡':'😴';
+    modifierBanner=`<div style="display:flex;align-items:center;gap:6px;padding:8px 10px;background:rgba(232,255,71,.06);border:1px solid rgba(232,255,71,.15);border-radius:8px;margin-bottom:12px;">
+      <span style="font-size:14px;">${icon}</span>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:${col};text-transform:uppercase;letter-spacing:.06em;">${reasons[0]}</div>
+        <div style="font-size:11px;color:var(--t2);">${isBoost?'Targets reflect readiness — push today':'Targets adjusted down — focus on movement quality'}</div>
+      </div>
+    </div>`;
+  }
+
+  // Action badge styling
+  function badgeStyle(type){
+    if(type==='increase')return'background:rgba(71,255,138,.12);color:var(--grn);';
+    if(type==='deload')return'background:rgba(255,71,71,.12);color:#ff9999;';
+    if(type==='consolidate')return'background:rgba(232,255,71,.10);color:var(--acc);';
+    if(type==='progress')return'background:rgba(71,180,255,.10);color:#47b4ff;';
+    return'background:var(--s3);color:var(--t2);';
+  }
+  function badgeLabel(type,sg,baseW,adjW){
+    if(type==='increase')return`↑ +${adjW-sg.analysis?.last?.maxWeight||'?'}lb`;
+    if(type==='deload')return`↓ ${Math.round((1-multiplier)*100)}% off`;
+    if(type==='consolidate')return'→ Hold';
+    if(type==='progress')return'→ Push reps';
+    return'→ Maintain';
+  }
+
+  const rows=directives.map(d=>{
+    const weightStr=d.adjWeight>0?`${d.adjWeight}lb × ${d.reps} reps`:`${d.reps} reps`;
+    const badge=badgeLabel(d.actionType,d,d.baseWeight,d.adjWeight);
+    const bs=badgeStyle(d.actionType);
+    // Truncate long names
+    const shortName=d.name.length>22?d.name.replace(/Smith Machine /g,'SM ').replace(/Cable /g,'').replace(/Dumbbell /g,'DB '):d.name;
+    return`<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--b1);">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${shortName}</div>
+        <div style="font-size:11px;color:var(--t3);margin-top:1px;">${weightStr}</div>
+      </div>
+      <span style="flex-shrink:0;margin-left:10px;font-size:10px;font-weight:700;padding:3px 7px;border-radius:5px;letter-spacing:.04em;text-transform:uppercase;${bs}">${badge}</span>
+    </div>`;
+  }).join('');
+
+  const doneStyle=alreadyDoneToday?'opacity:.55;':'';
+  const doneLabel=alreadyDoneToday?'<span style="font-size:10px;color:var(--grn);font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-left:6px;">✓ Done today</span>':'';
+
+  return`<div class="card" style="margin-bottom:16px;${doneStyle}" onclick="nav('history',null);setTrainTab('program');" role="button" tabindex="0">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);">Today's Directives</span>
+        ${doneLabel}
+      </div>
+      <span style="font-size:12px;font-weight:700;color:var(--acc);letter-spacing:.03em;">${nextDay.name}</span>
+    </div>
+    ${modifierBanner}
+    <div>${rows}</div>
+    <div style="margin-top:10px;text-align:right;font-size:11px;color:var(--t3);">Tap to open ${nextDay.name} →</div>
+  </div>`;
+}
+
+// ─── TODAY'S PLAN CTA ────────────────────────────────────────────────────────
+
+// Assembles all local data into a structured plan object.
+// This is pure JS — no API call. Claude narrates it, JS computes it.
+function buildTodayPlanData(){
+  const nextDay=getNextProgramDay();
+  const {multiplier,reasons,deload}=computeLoadMultiplier();
+  const ci=getThisWeekCheckIn();
+
+  // ── TRAIN ──────────────────────────────────────────────────────────────────
+  const trainData=nextDay?{
+    dayId:nextDay.id,
+    dayName:nextDay.name,
+    focus:nextDay.focus||'',
+    exercises:nextDay.exercises.map(name=>{
+      const analysis=analyzeProgression(name);
+      const tgt=getTarget(name);
+      const ex=findEx(name);
+      const lastSets=getLastSets(name);
+      const lastWeight=lastSets.length?Math.max(...lastSets.map(s=>parseFloat(s.weight)||0)):0;
+      const lastReps=lastSets.length?Math.max(...lastSets.map(s=>parseInt(s.reps)||0)):0;
+      const adjWeight=tgt.weight?Math.round((tgt.weight*multiplier)/2.5)*2.5:0;
+      const sg=analysis.suggestion;
+      return{
+        name,
+        sets:ex.sets,
+        weight:adjWeight||tgt.weight||0,
+        reps:tgt.reps||ex.reps||10,
+        lastWeight,lastReps,
+        action:sg?sg.type:'maintain',
+        hasHistory:!!lastSets.length,
+      };
+    }),
+    loadMultiplier:multiplier,
+    loadReasons:reasons,
+    deload,
+  }:null;
+
+  // ── EAT ────────────────────────────────────────────────────────────────────
+  const proteinEaten=getTodayProteinTotal();
+  const proteinRemaining=Math.max(0,proteinGoal-proteinEaten);
+  const calEaten=Math.round(getDayTotals(todayKey()).calories);
+  const calGoal=foodGoals.calories||2000;
+  const calRemaining=Math.max(0,calGoal-calEaten);
+  const eatData={proteinEaten,proteinRemaining,proteinGoal,calEaten,calGoal,calRemaining};
+
+  // ── RECOVER ────────────────────────────────────────────────────────────────
+  const allSessions=getSessions().filter(s=>!s.isCardio);
+  const lastSession=allSessions[0]||null;
+  const daysSinceLast=lastSession
+    ?Math.floor((Date.now()-new Date(lastSession.date))/(1000*60*60*24))
+    :null;
+  const sleep=ci?.sleep||null;
+  const soreness=ci?.soreness||null;
+  const energy=ci?.energy||null;
+  const recoverData={daysSinceLast,sleep,soreness,energy,deload};
+
+  return{trainData,eatData,recoverData,ci};
+}
+
+async function showTodayPlanSheet(){
+  const plan=buildTodayPlanData();
+  const bg=document.createElement('div');bg.className='sheet-bg';
+
+  // ── Build exercise rows HTML ──
+  function exRows(exercises){
+    return exercises.map(e=>{
+      const wStr=e.weight>0?`${e.weight}lb × ${e.reps}`:`${e.reps} reps`;
+      const note=e.hasHistory
+        ?(e.action==='increase'?`↑ from ${e.lastWeight}lb last session`
+          :e.action==='deload'?'Deload — reduced load'
+          :e.action==='consolidate'?`Hold — build ${e.lastReps} reps solid`
+          :`Last: ${e.lastWeight}lb × ${e.lastReps}`)
+        :'First time — start light, nail form';
+      const noteCol=e.action==='increase'?'var(--grn)':e.action==='deload'?'var(--red)':'var(--t3)';
+      const shortName=e.name.replace(/Smith Machine /g,'SM ').replace(/\(Machine\)/g,'').trim();
+      return`<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:var(--s2);border-radius:8px;margin-bottom:4px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;color:var(--t1);font-weight:500;">${shortName}</div>
+          <div style="font-size:10px;color:${noteCol};margin-top:1px;">${note}</div>
+        </div>
+        <div style="font-size:12px;font-weight:700;color:var(--acc);flex-shrink:0;margin-left:10px;">${wStr}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Modifier badge ──
+  const td=plan.trainData;
+  const modBadge=td&&td.loadReasons.length&&Math.abs(td.loadMultiplier-1)>0.01
+    ?`<div style="display:inline-flex;align-items:center;gap:5px;background:rgba(232,255,71,.07);border:1px solid rgba(232,255,71,.18);border-radius:6px;padding:5px 9px;margin-bottom:14px;">
+        <span style="font-size:11px;font-weight:600;color:var(--acc);">${td.deload?'⚠️ Deload week':td.loadReasons[0]}</span>
+      </div>`
+    :'';
+
+  // ── Train section static HTML ──
+  const trainHTML=td
+    ?`<div style="margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid var(--b1);">
+          <div style="width:22px;height:22px;border-radius:6px;background:rgba(232,255,71,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--acc)" stroke-width="2.5"><line x1="2" y1="12" x2="22" y2="12"/><line x1="6" y1="7" x2="6" y2="17"/><line x1="18" y1="7" x2="18" y2="17"/></svg>
+          </div>
+          <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);">Train — ${td.dayName}</span>
+        </div>
+        <div id="tdp-train-text" style="font-size:13px;color:var(--t2);line-height:1.5;margin-bottom:10px;min-height:18px;"></div>
+        ${exRows(td.exercises)}
+        <button onclick="closeSheets();launchWk('${td.dayId}');" style="width:100%;margin-top:10px;padding:13px;background:var(--acc);border-radius:10px;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;color:#000;text-transform:uppercase;letter-spacing:.04em;touch-action:manipulation;">Start ${td.dayName} →</button>
+      </div>`
+    :`<div style="margin-bottom:16px;font-size:13px;color:var(--t3);">No program set up yet — add a workout day in Train → Edit.</div>`;
+
+  // ── Eat section static HTML ──
+  const ed=plan.eatData;
+  const eatHTML=`<div style="margin-bottom:16px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid var(--b1);">
+      <div style="width:22px;height:22px;border-radius:6px;background:rgba(71,180,255,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#47b4ff" stroke-width="2.5"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+      </div>
+      <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);">Eat</span>
+    </div>
+    <div id="tdp-eat-text" style="font-size:13px;color:var(--t2);line-height:1.5;margin-bottom:10px;min-height:18px;"></div>
+    <div style="display:flex;flex-direction:column;gap:4px;">
+      <div style="display:flex;justify-content:space-between;padding:7px 10px;background:var(--s2);border-radius:8px;">
+        <span style="font-size:12px;color:var(--t2);">Protein eaten</span>
+        <span style="font-size:12px;font-weight:600;color:#47b4ff;">${ed.proteinEaten}g / ${ed.proteinGoal}g</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:7px 10px;background:var(--s2);border-radius:8px;">
+        <span style="font-size:12px;color:var(--t2);">Protein remaining</span>
+        <span style="font-size:12px;font-weight:600;color:${ed.proteinRemaining===0?'var(--grn)':'var(--acc)'};">${ed.proteinRemaining}g</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:7px 10px;background:var(--s2);border-radius:8px;">
+        <span style="font-size:12px;color:var(--t2);">Calories remaining</span>
+        <span style="font-size:12px;font-weight:600;color:var(--t1);">${ed.calRemaining} kcal</span>
+      </div>
+    </div>
+  </div>`;
+
+  // ── Recover section static HTML ──
+  const rd=plan.recoverData;
+  const recoverHTML=`<div style="margin-bottom:4px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid var(--b1);">
+      <div style="width:22px;height:22px;border-radius:6px;background:rgba(74,222,128,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);">Recover</span>
+    </div>
+    <div id="tdp-recover-text" style="font-size:13px;color:var(--t2);line-height:1.5;min-height:18px;"></div>
+  </div>`;
+
+  bg.innerHTML=`<div class="sheet" style="max-height:88vh;display:flex;flex-direction:column;">
+    <div class="sheet-handle"></div>
+    <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 18px 32px;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;text-transform:uppercase;color:var(--t1);letter-spacing:.02em;margin-bottom:2px;">Today's Plan</div>
+      <div style="font-size:12px;color:var(--t3);margin-bottom:14px;">${new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})} · AI-generated from your data</div>
+      ${modBadge}
+      ${trainHTML}
+      ${eatHTML}
+      ${recoverHTML}
+    </div>
+  </div>`;
+
+  bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
+  document.body.appendChild(bg);
+
+  // ── Stream AI coaching lines into the three text slots ──
+  const trainCtx=td?`Next session: ${td.dayName} (${td.focus}).
+Exercises: ${td.exercises.map(e=>e.weight>0?`${e.name} — ${e.weight}lb × ${e.reps}, action: ${e.action}`:`${e.name} — ${e.reps} reps, first time`).join('; ')}.
+Load multiplier: ${td.loadMultiplier.toFixed(2)}× (${td.loadReasons.join(', ')||'normal'}).`:'No workout scheduled.';
+
+  const eatCtx=`Protein: ${ed.proteinEaten}g eaten of ${ed.proteinGoal}g goal (${ed.proteinRemaining}g remaining). Calories: ${ed.calEaten} eaten of ${ed.calGoal} goal (${ed.calRemaining} remaining).`;
+
+  const recoverCtx=`Days since last session: ${rd.daysSinceLast!==null?rd.daysSinceLast:'unknown'}.${rd.sleep?` Sleep quality: ${rd.sleep}/5.`:''}${rd.soreness?` Soreness: ${rd.soreness}/5 (5=none).`:''}${rd.energy?` Energy: ${rd.energy}/5.`:''}${rd.deload?' Deload week active.':''}`;
+
+  const systemPrompt=`You are a concise, direct fitness coach writing 1–2 sentence coaching lines for a mobile app's "Today's Plan" sheet. Write in plain English, no markdown, no bullet points. Be specific using the data provided. Sound like a knowledgeable human coach — direct, encouraging, action-oriented. Never say "I" or "you should". Just state the plan.`;
+
+  const userMsg=`Write exactly 3 coaching lines separated by the delimiter "|||". Each must be under 30 words.
+Line 1 — TRAIN: ${trainCtx}
+Line 2 — EAT: ${eatCtx}
+Line 3 — RECOVER: ${recoverCtx}
+Format: [train line]|||[eat line]|||[recover line]`;
+
+  try{
+    const raw=await callClaude(systemPrompt,userMsg,300);
+    const parts=raw.split('|||').map(s=>s.trim());
+    const slots=['tdp-train-text','tdp-eat-text','tdp-recover-text'];
+    slots.forEach((id,i)=>{
+      const el=eid(id);
+      if(el&&parts[i])el.textContent=parts[i];
+    });
+  }catch(e){
+    // Fallback: generate lines locally without AI
+    const trainFallback=td?`${td.dayName} day. ${td.exercises.filter(x=>x.hasHistory&&x.action==='increase').length} lifts ready to increase — follow the targets above.`:'Rest day or no program set.';
+    const eatFallback=ed.proteinRemaining>0?`${ed.proteinRemaining}g protein left to hit your goal today. ${ed.calRemaining} kcal remaining.`:'Protein goal hit for today.';
+    const recoverFallback=rd.daysSinceLast===0?'Trained today already — make sure to get adequate sleep and nutrition.':rd.daysSinceLast===1?'One day since last session — you\'re recovered and ready.':'Fresh — no recent sessions. Get after it.';
+    const fallbacks=[trainFallback,eatFallback,recoverFallback];
+    ['tdp-train-text','tdp-eat-text','tdp-recover-text'].forEach((id,i)=>{
+      const el=eid(id);if(el)el.textContent=fallbacks[i];
+    });
+  }
+}
+
 function renderHome(){
   eid('dateline').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
-  // Consistency card
-  const cc=eid('consist-card');if(cc)cc.innerHTML=buildConsistencyCard();
+  // Consistency / Identity card
+  const cc=eid('consist-card');if(cc)cc.innerHTML=buildIdentityCard();
+  // On Track card
+  const ot=eid('ontrack-card');if(ot)ot.innerHTML=buildOnTrackCard();
+  // Directives card
+  const dc=eid('directives-card');if(dc)dc.innerHTML=buildProgressionDirectivesCard();
+  // Today CTA button
+  const tc=eid('today-cta');
+  if(tc)tc.innerHTML=`<button onclick="showTodayPlanSheet()" style="width:100%;padding:15px;background:var(--acc);border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;touch-action:manipulation;">
+    <span style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;color:#000;text-transform:uppercase;letter-spacing:.04em;">What should I do today?</span>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" style="opacity:.6;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+  </button>`;
   const sessions=new Set(wkLog.map(l=>l.sessionId)).size;
   const {streak,workoutCount,foodDays}=buildActivityStats();
   eid('home-stats').innerHTML=`
@@ -4644,6 +5394,112 @@ function ciRate(field,val){
   });
 }
 
+// ─── PLAN ADJUSTMENT ENGINE ──────────────────────────────────────────────────
+
+// Computes what adjustments should be made based on check-in data.
+// Returns an adjustment object — does NOT apply anything yet.
+function computePlanAdjustment(ci){
+  const weekKey=getWeekStartKey();
+  const adj={weekKey,soreness:ci.soreness,energy:ci.energy,volumeAdj:0,intensityAdj:0,calAdj:0,reasons:[],appliedAt:new Date().toISOString()};
+
+  // Volume: soreness ≤ 2 → drop 1 set per exercise this week
+  if(ci.soreness<=2){
+    adj.volumeAdj=-1;
+    adj.reasons.push({icon:'📉',text:'Volume reduced — 1 set dropped per exercise',sub:'Soreness flagged high this week'});
+  }
+
+  // Intensity: energy ≤ 2 → 5% weight reduction (surfaced via computeLoadMultiplier)
+  if(ci.energy<=2){
+    adj.intensityAdj=-0.05;
+    adj.reasons.push({icon:'⚡',text:'Targets reduced 5% — low energy flagged',sub:'Weights scaled down to match your readiness'});
+  }
+
+  // Calorie: only if weight is rising faster than goal pace AND goal isn't muscle_gain/strength
+  const mp=loadMacroProfile();
+  const goal=mp?.goal||'general';
+  if(goal!=='muscle_gain'&&goal!=='strength'){
+    const weightEntries=bodyMetrics.filter(e=>e.weight>0).sort((a,b)=>b.date.localeCompare(a.date));
+    if(weightEntries.length>=2){
+      const latest=weightEntries[0].weight;
+      const prev=weightEntries[Math.min(weightEntries.length-1,3)].weight; // vs up to 4 entries ago
+      const days=Math.max(1,(new Date(weightEntries[0].date)-new Date(weightEntries[Math.min(weightEntries.length-1,3)].date))/(1000*60*60*24));
+      const weeklyGain=(latest-prev)/days*7; // lbs/week
+      // Fat loss goal: any gain > 0.5 lb/week is too fast
+      // General: gain > 1 lb/week warrants a nudge
+      const threshold=goal==='fat_loss'?0.5:1.0;
+      if(weeklyGain>threshold){
+        adj.calAdj=-100;
+        adj.reasons.push({icon:'🥗',text:'Calories adjusted −100 kcal',sub:`Weight trending +${weeklyGain.toFixed(1)} lb/wk — carbs trimmed slightly`});
+      }
+    }
+  }
+
+  if(!adj.reasons.length){
+    adj.reasons.push({icon:'✓',text:'No adjustments needed',sub:'All signals look good — train as planned'});
+  }
+
+  return adj;
+}
+
+// Persists the adjustment and applies side effects (calorie tweak).
+function applyPlanAdjustment(adj){
+  // Store full adjustment record
+  localStorage.setItem('gainz_plan_adj',JSON.stringify(adj));
+
+  // Volume adj: stored in gainz_vol_adj — read by findEx() this week
+  if(adj.volumeAdj!==0){
+    localStorage.setItem('gainz_vol_adj',JSON.stringify({weekKey:adj.weekKey,setsAdj:adj.volumeAdj}));
+  } else {
+    localStorage.removeItem('gainz_vol_adj');
+  }
+
+  // Calorie adj: apply directly to foodGoals if non-zero
+  if(adj.calAdj!==0&&!_goalsOverridden){
+    foodGoals={
+      ...foodGoals,
+      calories:Math.max(1200,Math.round(foodGoals.calories+adj.calAdj)),
+      carbs:Math.max(50,Math.round((foodGoals.carbs||200)+(adj.calAdj/4))), // 4 kcal/g carb
+    };
+    saveFoodGoals(false);
+    syncProteinGoal();
+  }
+}
+
+// Reads stored adjustment for the current week. Returns null if stale/absent.
+function getThisWeekPlanAdj(){
+  try{
+    const raw=localStorage.getItem('gainz_plan_adj');
+    if(!raw)return null;
+    const adj=JSON.parse(raw);
+    if(adj.weekKey!==getWeekStartKey())return null;
+    return adj;
+  }catch(e){return null;}
+}
+
+// Builds the "Plan adjusted" summary card for Coach tab.
+function buildPlanAdjCard(){
+  const adj=getThisWeekPlanAdj();
+  if(!adj)return'';
+  const allGood=adj.reasons.length===1&&adj.reasons[0].icon==='✓';
+  const borderCol=allGood?'rgba(74,222,128,.2)':'rgba(232,255,71,.2)';
+  const bgCol=allGood?'rgba(74,222,128,.06)':'rgba(232,255,71,.05)';
+  const rows=adj.reasons.map(r=>`
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--b1);">
+      <span style="font-size:16px;flex-shrink:0;margin-top:1px;">${r.icon}</span>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--t1);">${r.text}</div>
+        <div style="font-size:11px;color:var(--t3);margin-top:2px;">${r.sub}</div>
+      </div>
+    </div>`).join('');
+  return`<div class="card" style="margin-bottom:14px;background:${bgCol};border-color:${borderCol};">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);">Plan Adjusted This Week</span>
+      <span style="font-size:10px;color:var(--t3);">${new Date(adj.appliedAt).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</span>
+    </div>
+    ${rows}
+  </div>`;
+}
+
 function submitCheckIn(){
   const r=window._ciRatings||{};
   if(!r.sleep||!r.energy||!r.soreness||!r.nutrition){
@@ -4654,7 +5510,11 @@ function submitCheckIn(){
     return;
   }
   const note=(document.getElementById('ci-note')?.value||'').trim();
-  saveThisWeekCheckIn({sleep:r.sleep,energy:r.energy,soreness:r.soreness,nutrition:r.nutrition,note});
+  const ciData={sleep:r.sleep,energy:r.energy,soreness:r.soreness,nutrition:r.nutrition,note};
+  saveThisWeekCheckIn(ciData);
+  // Compute and apply plan adjustments based on this check-in
+  const adj=computePlanAdjustment(ciData);
+  applyPlanAdjustment(adj);
   closeSheets();
   renderCoach();
 }
@@ -6678,7 +7538,7 @@ function renderCoach(){
       +`</div>`;
   }
 
-  scroll.innerHTML=checkInHTML+weeklySummaryHTML+muscleVolHTML+correlationHTML+weekNutritionHTML+bodyHTML+suppHTML;
+  scroll.innerHTML=buildPlanAdjCard()+checkInHTML+weeklySummaryHTML+muscleVolHTML+correlationHTML+weekNutritionHTML+bodyHTML+suppHTML;
 }
 
 function quickAddProtein(g,name){
