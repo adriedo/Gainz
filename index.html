@@ -720,6 +720,7 @@ input[type="date"]{color-scheme:dark;color:var(--t1);background:var(--s2);}
     <div id="directives-card"></div>
     <div id="today-cta"></div>
     <div class="stat-grid" id="home-stats"></div>
+    <div id="home-status-strip" style="margin-top:10px;"></div>
   </div>
   <div class="nav"><button class="nb on" onclick="nav('home',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9M5 10v9h4v-5h6v5h4V10"/></svg><span>Home</span></button><button class="nb" onclick="nav('history',this)"><svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="7" x2="2" y2="15" stroke-width="2.5"/><line x1="6" y1="5" x2="6" y2="17" stroke-width="2.5"/><line x1="6" y1="11" x2="16" y2="11" stroke-width="1.8"/><line x1="16" y1="5" x2="16" y2="17" stroke-width="2.5"/><line x1="20" y1="7" x2="20" y2="15" stroke-width="2.5"/></svg><span>Train</span></button><button class="nb" onclick="nav('food',this)"><svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="10" x2="14" y2="10" stroke-width="1.8"/><path d="M1 10 Q1 17 7.5 18.5 Q14 17 14 10" stroke-width="1.8"/><line x1="18.5" y1="4" x2="18.5" y2="20" stroke-width="1.8"/><line x1="16.5" y1="4" x2="16.5" y2="10" stroke-width="1.8"/><line x1="20.5" y1="4" x2="20.5" y2="10" stroke-width="1.8"/><path d="M16.5 10 Q16.5 12.5 18.5 13 Q20.5 12.5 20.5 10" stroke-width="1.8"/></svg><span>Nutrition</span></button><button class="nb" onclick="nav('progress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Progress</span></button><button class="nb" onclick="nav('coach',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Coach</span></button><button class="nb" onclick="nav('calendar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Cal</span></button></div>
 </div>
@@ -2540,12 +2541,47 @@ function renderHome(){
   const ot=eid('ontrack-card');if(ot)ot.innerHTML=buildOnTrackCard();
   // Directives card — hidden for now; function preserved for potential reuse inside Today sheet
   // const dc=eid('directives-card');if(dc)dc.innerHTML=buildProgressionDirectivesCard();
-  // Today CTA button
+  // Today CTA — 3-state: post-workout / start workout / no program
   const tc=eid('today-cta');
-  if(tc)tc.innerHTML=`<button onclick="showTodayPlanSheet()" style="width:100%;padding:15px;background:var(--acc);border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;touch-action:manipulation;">
-    <span style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;color:#000;text-transform:uppercase;letter-spacing:.04em;">What should I do today?</span>
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" style="opacity:.6;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-  </button>`;
+  if(tc){
+    const _todayStr=new Date().toDateString();
+    const _strengthSessions=getSessions().filter(s=>!s.isCardio);
+    const _trainedToday=_strengthSessions.some(s=>new Date(s.date).toDateString()===_todayStr);
+    const _nextDay=getNextProgramDay();
+    let _ctaHtml;
+    if(_trainedToday){
+      // State 1: post-workout — close the loop to nutrition
+      const _lastS=_strengthSessions[0];
+      const _doneDayName=(_lastS&&program.find(d=>d.id===_lastS.dayId)?.name)||'Workout';
+      _ctaHtml=`<div style="background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.18);border-radius:12px;padding:14px 16px;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#4ade80;">${_doneDayName} done</span>
+        </div>
+        <div style="font-size:13px;color:var(--t2);margin-bottom:11px;line-height:1.4;">Lock in your gains — log your post-workout meal.</div>
+        <button onclick="nav('food',null)" style="width:100%;padding:11px;background:#4ade80;border-radius:10px;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;color:#000;text-transform:uppercase;letter-spacing:.04em;touch-action:manipulation;">Log post-workout meal →</button>
+      </div>`;
+    } else if(_nextDay){
+      // State 2: workout due — direct launch
+      _ctaHtml=`<div style="margin-bottom:16px;">
+        <button onclick="launchWk('${_nextDay.id}')" style="width:100%;padding:16px 18px;background:var(--acc);border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;touch-action:manipulation;">
+          <div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:rgba(0,0,0,.5);margin-bottom:2px;">Today</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:#000;">Start ${_nextDay.name}</div>
+          </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" style="opacity:.55;flex-shrink:0;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+        <button onclick="showTodayPlanSheet()" style="width:100%;padding:9px;background:transparent;border:none;cursor:pointer;font-size:12px;color:var(--t3);margin-top:4px;touch-action:manipulation;text-align:center;">See full plan (eat + recover) →</button>
+      </div>`;
+    } else {
+      // State 3: no program set up
+      _ctaHtml=`<button onclick="showTodayPlanSheet()" style="width:100%;padding:15px;background:var(--acc);border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;touch-action:manipulation;">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;color:#000;text-transform:uppercase;letter-spacing:.04em;">What should I do today?</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" style="opacity:.6;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>`;
+    }
+    tc.innerHTML=_ctaHtml;
+  }
   const sessions=new Set(wkLog.map(l=>l.sessionId)).size;
   // Streak stat box varies by status:
   //   active  → normal green number + 🔥
@@ -2596,6 +2632,38 @@ function renderHome(){
     <div class="stat-box"><div class="stat-n" style="color:${_wkColor};">${_doneWk}<span style="font-size:14px;font-weight:500;color:var(--t3);">/${_planWk}</span></div><div class="stat-lbl">This week</div></div>
     <div class="stat-box"><div class="stat-n" style="color:${_pColor};font-size:22px;">${_pToday}<span style="font-size:11px;font-weight:500;color:var(--t3);">/${_pGoal}g</span></div><div class="stat-lbl">Protein today</div></div>
     <div class="stat-box"><div class="stat-n" style="color:${_weighColor};font-size:${_weighLbl.length>5?'18px':'30px'};">${_weighLbl}</div><div class="stat-lbl">Last weigh-in</div></div>`;
+  // Status strip — water / protein / supplements
+  const _strip=eid('home-status-strip');
+  if(_strip){
+    const _sRow=(icon,label,value,pct,color,dest)=>{
+      const fill=Math.min(Math.max(pct,0),1);
+      const done=fill>=1;
+      const barClr=done?'var(--grn)':color;
+      const valClr=done?'var(--grn)':fill>=0.8?'var(--acc)':color;
+      return`<button onclick="nav('${dest}',null)" style="width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:10px 12px 0;cursor:pointer;touch-action:manipulation;text-align:left;display:block;margin-bottom:6px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;">
+          <span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);">${icon} ${label}</span>
+          <span style="font-size:12px;font-weight:600;color:${valClr};">${value}</span>
+        </div>
+        <div style="height:3px;background:var(--b1);border-radius:2px;margin-bottom:10px;overflow:hidden;">
+          <div style="height:100%;width:${Math.round(fill*100)}%;background:${barClr};border-radius:2px;"></div>
+        </div>
+      </button>`;
+    };
+    const _wOz=getTodayWaterOz();const _wGoal=getWaterGoalOz();
+    const _wPct=_wGoal>0?_wOz/_wGoal:0;
+    const _wVal=_wPct>=1?`${_wOz}oz ✓`:`${_wOz} / ${_wGoal}oz`;
+    const _pr=getTodayProteinTotal();const _prGoal=proteinGoal||160;
+    const _prPct=_prGoal>0?_pr/_prGoal:0;
+    const _prVal=_prPct>=1?`${_pr}g ✓`:`${_pr} / ${_prGoal}g`;
+    const _sc=getSuppCompletionToday();
+    const _scPct=_sc.total>0?_sc.taken/_sc.total:0;
+    const _scVal=_sc.total===0?'Set up stack →':_sc.allTaken?`All ${_sc.total} done ✓`:`${_sc.taken} / ${_sc.total} taken`;
+    _strip.innerHTML=
+      _sRow('💧','Water',_wVal,_wPct,'#47b4ff','food')+
+      _sRow('🥩','Protein',_prVal,_prPct,'#47b4ff','food')+
+      _sRow('💊','Supplements',_scVal,_scPct,'var(--acc)','coach');
+  }
 }
 
 // ─── WORKOUT ─────────────────────────────────────────────────────────────────
