@@ -2632,38 +2632,40 @@ function renderHome(){
     <div class="stat-box"><div class="stat-n" style="color:${_wkColor};">${_doneWk}<span style="font-size:14px;font-weight:500;color:var(--t3);">/${_planWk}</span></div><div class="stat-lbl">This week</div></div>
     <div class="stat-box"><div class="stat-n" style="color:${_pColor};font-size:22px;">${_pToday}<span style="font-size:11px;font-weight:500;color:var(--t3);">/${_pGoal}g</span></div><div class="stat-lbl">Protein today</div></div>
     <div class="stat-box"><div class="stat-n" style="color:${_weighColor};font-size:${_weighLbl.length>5?'18px':'30px'};">${_weighLbl}</div><div class="stat-lbl">Last weigh-in</div></div>`;
-  // Status strip — water / protein / supplements
+  renderHomeStrip();
+}
+
+function renderHomeStrip(){
   const _strip=eid('home-status-strip');
-  if(_strip){
-    const _sRow=(icon,label,value,pct,color,dest)=>{
-      const fill=Math.min(Math.max(pct,0),1);
-      const done=fill>=1;
-      const barClr=done?'var(--grn)':color;
-      const valClr=done?'var(--grn)':fill>=0.8?'var(--acc)':color;
-      return`<button onclick="nav('${dest}',null)" style="width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:10px 12px 0;cursor:pointer;touch-action:manipulation;text-align:left;display:block;margin-bottom:6px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;">
-          <span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);">${icon} ${label}</span>
-          <span style="font-size:12px;font-weight:600;color:${valClr};">${value}</span>
-        </div>
-        <div style="height:3px;background:var(--b1);border-radius:2px;margin-bottom:10px;overflow:hidden;">
-          <div style="height:100%;width:${Math.round(fill*100)}%;background:${barClr};border-radius:2px;"></div>
-        </div>
-      </button>`;
-    };
-    const _wOz=getTodayWaterOz();const _wGoal=getWaterGoalOz();
-    const _wPct=_wGoal>0?_wOz/_wGoal:0;
-    const _wVal=_wPct>=1?`${_wOz}oz ✓`:`${_wOz} / ${_wGoal}oz`;
-    const _pr=getTodayProteinTotal();const _prGoal=proteinGoal||160;
-    const _prPct=_prGoal>0?_pr/_prGoal:0;
-    const _prVal=_prPct>=1?`${_pr}g ✓`:`${_pr} / ${_prGoal}g`;
-    const _sc=getSuppCompletionToday();
-    const _scPct=_sc.total>0?_sc.taken/_sc.total:0;
-    const _scVal=_sc.total===0?'Set up stack →':_sc.allTaken?`All ${_sc.total} done ✓`:`${_sc.taken} / ${_sc.total} taken`;
-    _strip.innerHTML=
-      _sRow('💧','Water',_wVal,_wPct,'#47b4ff','food')+
-      _sRow('🥩','Protein',_prVal,_prPct,'#47b4ff','food')+
-      _sRow('💊','Supplements',_scVal,_scPct,'var(--acc)','coach');
-  }
+  if(!_strip)return;
+  const _sRow=(icon,label,value,pct,color,onclick)=>{
+    const fill=Math.min(Math.max(pct,0),1);
+    const done=fill>=1;
+    const barClr=done?'var(--grn)':color;
+    const valClr=done?'var(--grn)':fill>=0.8?'var(--acc)':color;
+    return`<button onclick="${onclick}" style="width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:10px 12px 0;cursor:pointer;touch-action:manipulation;text-align:left;display:block;margin-bottom:6px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;">
+        <span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);">${icon} ${label}</span>
+        <span style="font-size:12px;font-weight:600;color:${valClr};">${value}</span>
+      </div>
+      <div style="height:3px;background:var(--b1);border-radius:2px;margin-bottom:10px;overflow:hidden;">
+        <div style="height:100%;width:${Math.round(fill*100)}%;background:${barClr};border-radius:2px;"></div>
+      </div>
+    </button>`;
+  };
+  const _wOz=getTodayWaterOz();const _wGoal=getWaterGoalOz();
+  const _wPct=_wGoal>0?_wOz/_wGoal:0;
+  const _wVal=_wPct>=1?`${_wOz}oz ✓`:`${_wOz} / ${_wGoal}oz`;
+  const _pr=getTodayProteinTotal();const _prGoal=proteinGoal||160;
+  const _prPct=_prGoal>0?_pr/_prGoal:0;
+  const _prVal=_prPct>=1?`${_pr}g ✓`:`${_pr} / ${_prGoal}g`;
+  const _sc=getSuppCompletionToday();
+  const _scPct=_sc.total>0?_sc.taken/_sc.total:0;
+  const _scVal=_sc.total===0?'Set up stack →':_sc.allTaken?`All ${_sc.total} done ✓`:`${_sc.taken} / ${_sc.total} taken`;
+  _strip.innerHTML=
+    _sRow('💧','Water',_wVal,_wPct,'#47b4ff',"showWaterLogSheet()")+
+    _sRow('🥩','Protein',_prVal,_prPct,'#47b4ff',"showAddProteinSheet()")+
+    _sRow('💊','Supplements',_scVal,_scPct,'var(--acc)',"showSuppCheckSheet()");
 }
 
 // ─── WORKOUT ─────────────────────────────────────────────────────────────────
@@ -6222,6 +6224,7 @@ function logWaterOz(oz,label){
   saveWaterLog();
   if(document.getElementById('s-food')&&document.getElementById('s-food').classList.contains('on'))renderFood();
   else renderCoach();
+  renderHomeStrip();
 }
 
 function deleteWaterEntry(dateKey,idx){
@@ -6351,6 +6354,7 @@ function addProtein(name,g){
   saveProteinLog();
   if(document.getElementById('s-food')&&document.getElementById('s-food').classList.contains('on'))renderFood();
   else renderCoach();
+  renderHomeStrip();
 }
 
 function deleteProteinItem(idx){
@@ -7154,6 +7158,71 @@ function toggleSuppTaken(id){
   else suppData.log[key].push(id);
   saveSuppData();
   renderCoach();
+}
+
+// Home-screen supplement checklist sheet
+function showSuppCheckSheet(){
+  const bg=document.createElement('div');bg.className='sheet-bg';
+  function buildRows(){
+    const stack=getActiveStack();
+    const taken=getTodaySuppLog();
+    if(!stack.length)return'<div style="font-size:13px;color:var(--t3);padding:8px 0 12px;">No supplements in your stack yet.<br>Add some in Coach → Supplements.</div>';
+    return stack.map(s=>{
+      const done=taken.includes(s.id);
+      return`<div class="supp-row" onclick="toggleSuppHome('${s.id}')">
+        <div class="supp-check${done?' done':''}"></div>
+        <div style="flex:1;min-width:0;">
+          <div class="supp-name">${s.icon} ${s.name}</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:1px;">${s.dose} · ${s.timingLabel}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  function buildStatus(){
+    const sc=getSuppCompletionToday();
+    if(!sc.total)return'';
+    return sc.allTaken
+      ?'<span style="font-size:12px;font-weight:600;color:var(--grn);">✓ All done</span>'
+      :`<span style="font-size:12px;color:var(--t3);">${sc.taken} / ${sc.total} taken</span>`;
+  }
+  bg.innerHTML=`<div class="sheet">
+    <div class="sheet-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div class="sheet-title" style="margin-bottom:0;">💊 Supplements</div>
+      <div id="supp-home-status">${buildStatus()}</div>
+    </div>
+    <div id="supp-home-rows">${buildRows()}</div>
+    <button class="btn btn-ghost btn-full" style="margin-top:14px;" onclick="closeSheets()">Done</button>
+  </div>`;
+  bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
+  document.body.appendChild(bg);
+}
+
+function toggleSuppHome(id){
+  const key=todayKey();
+  if(!suppData.log[key])suppData.log[key]=[];
+  const idx=suppData.log[key].indexOf(id);
+  if(idx>=0)suppData.log[key].splice(idx,1);
+  else suppData.log[key].push(id);
+  saveSuppData();
+  // Refresh sheet in-place
+  const stack=getActiveStack();const taken=getTodaySuppLog();const sc=getSuppCompletionToday();
+  const rowsEl=eid('supp-home-rows');
+  if(rowsEl)rowsEl.innerHTML=stack.map(s=>{
+    const done=taken.includes(s.id);
+    return`<div class="supp-row" onclick="toggleSuppHome('${s.id}')">
+      <div class="supp-check${done?' done':''}"></div>
+      <div style="flex:1;min-width:0;">
+        <div class="supp-name">${s.icon} ${s.name}</div>
+        <div style="font-size:11px;color:var(--t3);margin-top:1px;">${s.dose} · ${s.timingLabel}</div>
+      </div>
+    </div>`;
+  }).join('');
+  const statusEl=eid('supp-home-status');
+  if(statusEl)statusEl.innerHTML=sc.allTaken
+    ?'<span style="font-size:12px;font-weight:600;color:var(--grn);">✓ All done</span>'
+    :`<span style="font-size:12px;color:var(--t3);">${sc.taken} / ${sc.total} taken</span>`;
+  renderHomeStrip();
 }
 
 function suppAddToStack(id){
