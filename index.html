@@ -159,6 +159,9 @@ label{font-size:12px;color:var(--t2);display:block;margin-bottom:5px;}
 .si-w{width:100%;padding:5px 4px;background:var(--s3);border:1px solid var(--b2);border-radius:7px;color:var(--t1);font-size:16px;font-weight:600;text-align:center;-webkit-appearance:none;font-family:DM Sans,sans-serif;}
 .si-r{width:100%;padding:5px 4px;background:var(--s3);border:1px solid var(--b2);border-radius:7px;color:var(--t1);font-size:16px;font-weight:600;text-align:center;-webkit-appearance:none;font-family:DM Sans,sans-serif;}
 .si-w:focus,.si-r:focus{outline:none;border-color:var(--acc);}
+.w-stepper{display:flex;align-items:center;gap:2px;}
+.w-stepper .si-w{flex:1;min-width:0;}
+.w-step-btn{width:26px;height:32px;flex-shrink:0;background:var(--s3);border:1px solid var(--b2);border-radius:6px;color:var(--t2);font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;padding:0;line-height:1;}
 .chk{width:36px;height:36px;border-radius:50%;border:2px solid var(--b2);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--t3);flex-shrink:0;}
 .chk.done{background:var(--grn);border-color:var(--grn);color:#000;}
 .target-banner{display:flex;align-items:center;gap:6px;padding:8px 10px;border-radius:8px;margin-bottom:10px;font-size:12px;font-weight:500;}
@@ -2425,8 +2428,11 @@ async function showTodayPlanSheet(){
 
   bg.innerHTML=`<div class="sheet" style="max-height:88vh;display:flex;flex-direction:column;">
     <div class="sheet-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 18px 8px;flex-shrink:0;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;text-transform:uppercase;color:var(--t1);letter-spacing:.02em;">Today's Plan</div>
+      <button onclick="this.closest('.sheet-bg').remove();" style="background:var(--s2);border:none;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;color:var(--t2);touch-action:manipulation;flex-shrink:0;line-height:1;">×</button>
+    </div>
     <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 18px 32px;">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;text-transform:uppercase;color:var(--t1);letter-spacing:.02em;margin-bottom:2px;">Today's Plan</div>
       <div style="font-size:12px;color:var(--t3);margin-bottom:14px;">${new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})} · AI-generated from your data</div>
       ${modBadge}
       ${trainHTML}
@@ -2475,14 +2481,65 @@ Format: [train line]|||[eat line]|||[recover line]`;
   }
 }
 
+function buildStreakRecoveryCard(lastStreak){
+  const lang=localStorage.getItem('_lang')||'en';
+  let msg;
+  if(lastStreak>=14){
+    msg=lang==='es'
+      ?'La racha se cortó. Eso ya es datos, no deuda. Hoy volvés al trabajo y la semana sigue siendo tuya.'
+      :`The streak is gone. What's left is your training history — and that doesn't reset. You've logged ${lastStreak} sessions in your last run. That's the actual number.`;
+  } else if(lastStreak>=7){
+    msg=lang==='es'
+      ?'Hubo un día sin entreno. Así es el entrenamiento real — no lineal, no perfecto. Lo que importa es el patrón de semanas, no el de días.'
+      :"A missed day is a data point, not a verdict. Your body needed the gap or life got in the way — either one is real. The work you've already done is still in your system.";
+  } else {
+    msg=lang==='es'
+      ?'Sos alguien que entrena con consistencia. Un día fuera del plan no cambia eso. La próxima sesión ya está lista cuando vos estés.'
+      :"Streaks measure days, not adaptation. You're someone who trains consistently — one break doesn't rewrite that. Next session picks up where your fitness left off.";
+  }
+  return`<div class="consist-card" style="background:rgba(255,107,107,.06);border-color:rgba(255,107,107,.2);margin-bottom:10px;">
+    <div style="display:flex;align-items:flex-start;gap:12px;">
+      <div style="font-size:28px;line-height:1;flex-shrink:0;">🔥</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;color:var(--t2);line-height:1.5;">${msg}</div>
+        <button onclick="showTodayPlanSheet()" style="margin-top:10px;padding:8px 16px;background:var(--acc);border:none;border-radius:8px;font-size:13px;font-weight:700;color:#000;cursor:pointer;touch-action:manipulation;font-family:'Barlow Condensed',sans-serif;letter-spacing:.04em;text-transform:uppercase;">Get back on track →</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildStreakGraceCard(){
+  const lang=localStorage.getItem('_lang')||'en';
+  const msg=lang==='es'
+    ?'Ayer no entrenaste. Tu racha sigue viva porque un día no define lo que construiste. Hoy es el entrenamiento que importa.'
+    :"You missed yesterday. Your streak is still running — one gap in the data doesn't redefine the pattern. You train consistently. That's who you are.";
+  return`<div class="consist-card" style="background:rgba(232,255,71,.04);border-color:rgba(232,255,71,.2);margin-bottom:10px;">
+    <div style="display:flex;align-items:flex-start;gap:12px;">
+      <div style="font-size:28px;line-height:1;flex-shrink:0;">🔥</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;color:var(--t2);line-height:1.5;">${msg}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
 function renderHome(){
   eid('dateline').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
-  // Consistency / Identity card
-  const cc=eid('consist-card');if(cc)cc.innerHTML=buildIdentityCard();
+  // Get activity stats first — needed to conditionally render recovery card
+  const {streak,streakStatus,lastStreakLength,workoutCount,foodDays}=buildActivityStats();
+  // Consistency / Identity card — prepend recovery card when streak is broken
+  const cc=eid('consist-card');
+  if(cc){
+    const identityHtml=buildIdentityCard();
+    let prefixCard='';
+    if(streakStatus==='broken'&&lastStreakLength>0) prefixCard=buildStreakRecoveryCard(lastStreakLength);
+    else if(streakStatus==='grace') prefixCard=buildStreakGraceCard();
+    cc.innerHTML=prefixCard+identityHtml;
+  }
   // On Track card
   const ot=eid('ontrack-card');if(ot)ot.innerHTML=buildOnTrackCard();
-  // Directives card
-  const dc=eid('directives-card');if(dc)dc.innerHTML=buildProgressionDirectivesCard();
+  // Directives card — hidden for now; function preserved for potential reuse inside Today sheet
+  // const dc=eid('directives-card');if(dc)dc.innerHTML=buildProgressionDirectivesCard();
   // Today CTA button
   const tc=eid('today-cta');
   if(tc)tc.innerHTML=`<button onclick="showTodayPlanSheet()" style="width:100%;padding:15px;background:var(--acc);border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;touch-action:manipulation;">
@@ -2490,12 +2547,55 @@ function renderHome(){
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" style="opacity:.6;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
   </button>`;
   const sessions=new Set(wkLog.map(l=>l.sessionId)).size;
-  const {streak,workoutCount,foodDays}=buildActivityStats();
+  // Streak stat box varies by status:
+  //   active  → normal green number + 🔥
+  //   grace   → amber number + "Don't break it" label (1-day grace, streak preserved)
+  //   broken  → dash + "Streak reset" (recovery card above handles the CTA)
+  let streakBox;
+  if(streakStatus==='grace'){
+    streakBox=`<div class="stat-box" style="border-color:rgba(232,255,71,.35);">
+      <div class="stat-n a" style="color:var(--acc);">${streak}🔥</div>
+      <div class="stat-lbl" style="color:var(--acc);">Don't break it</div>
+    </div>`;
+  } else if(streakStatus==='broken'){
+    streakBox=`<div class="stat-box">
+      <div class="stat-n a" style="color:var(--t3);">—</div>
+      <div class="stat-lbl">Streak reset</div>
+    </div>`;
+  } else {
+    streakBox=`<div class="stat-box"><div class="stat-n a">${streak}🔥</div><div class="stat-lbl">Active streak</div></div>`;
+  }
+  // This week sessions vs program days
+  const _now=new Date();
+  const _diffMon=(_now.getDay()+6)%7;
+  const _wkStart=new Date(_now);_wkStart.setDate(_now.getDate()-_diffMon);_wkStart.setHours(0,0,0,0);
+  const _wkEnd=new Date(_wkStart);_wkEnd.setDate(_wkStart.getDate()+6);_wkEnd.setHours(23,59,59,999);
+  const _wkDates=new Set(getSessions().filter(s=>{const d=new Date(s.date);return d>=_wkStart&&d<=_wkEnd;}).map(s=>new Date(s.date).toDateString()));
+  const _doneWk=_wkDates.size;
+  const _planWk=Math.max(program.length,1);
+  const _wkColor=_doneWk>=_planWk?'var(--grn)':_doneWk>0?'var(--acc)':'var(--t2)';
+  // Protein today
+  const _pToday=getTodayProteinTotal();
+  const _pGoal=proteinGoal||160;
+  const _pColor=_pToday>=_pGoal?'var(--grn)':_pToday>=_pGoal*0.8?'var(--acc)':'#47b4ff';
+  // Last weigh-in
+  const _lastBody=bodyMetrics.find(e=>e.weight>0);
+  let _weighLbl,_weighColor='var(--t2)';
+  if(!_lastBody){
+    _weighLbl='—';
+  } else {
+    const _eDate=new Date(_lastBody.date+'T00:00:00');
+    const _todayMs=new Date();_todayMs.setHours(0,0,0,0);
+    const _diffDays=Math.round((_todayMs-_eDate)/(864e5));
+    if(_diffDays===0){_weighLbl='Today';_weighColor='var(--grn)';}
+    else if(_diffDays===1){_weighLbl='Yesterday';_weighColor='var(--acc)';}
+    else{_weighLbl=`${_diffDays}d ago`;_weighColor=_diffDays>7?'var(--red)':'var(--t2)';}
+  }
   eid('home-stats').innerHTML=`
-    <div class="stat-box"><div class="stat-n a">${sessions}</div><div class="stat-lbl">Sessions</div></div>
-    <div class="stat-box"><div class="stat-n a">${streak}🔥</div><div class="stat-lbl">Active streak</div></div>
-    <div class="stat-box"><div class="stat-n a">${workoutCount}</div><div class="stat-lbl">Workouts logged</div></div>
-    <div class="stat-box"><div class="stat-n" style="color:#47b4ff;">${foodDays}</div><div class="stat-lbl">Days tracked food</div></div>`;
+    ${streakBox}
+    <div class="stat-box"><div class="stat-n" style="color:${_wkColor};">${_doneWk}<span style="font-size:14px;font-weight:500;color:var(--t3);">/${_planWk}</span></div><div class="stat-lbl">This week</div></div>
+    <div class="stat-box"><div class="stat-n" style="color:${_pColor};font-size:22px;">${_pToday}<span style="font-size:11px;font-weight:500;color:var(--t3);">/${_pGoal}g</span></div><div class="stat-lbl">Protein today</div></div>
+    <div class="stat-box"><div class="stat-n" style="color:${_weighColor};font-size:${_weighLbl.length>5?'18px':'30px'};">${_weighLbl}</div><div class="stat-lbl">Last weigh-in</div></div>`;
 }
 
 // ─── WORKOUT ─────────────────────────────────────────────────────────────────
@@ -2596,7 +2696,7 @@ function renderWk(){
               }
             </div>
             <div class="set-actual">
-              ${ex.inputType!=='time'?`<input class="si-w" type="number" inputmode="decimal" placeholder="lbs" value="${s.weight}" id="w_${key}_${i}" onchange="updSet('${n}',${i},'weight',this.value)">`:'<div style="font-size:9px;color:var(--t3);text-align:center;padding:4px 0;">bodyweight</div>'}
+              ${ex.inputType!=='time'?`<div class="w-stepper"><button class="w-step-btn" onclick="adjWeight('${n}',${i},-2.5)" type="button">−</button><input class="si-w" type="number" inputmode="decimal" placeholder="lbs" value="${s.weight}" id="w_${key}_${i}" onchange="updSet('${n}',${i},'weight',this.value)"><button class="w-step-btn" onclick="adjWeight('${n}',${i},2.5)" type="button">+</button></div>`:'<div style="font-size:9px;color:var(--t3);text-align:center;padding:4px 0;">bodyweight</div>'}
               ${ex.inputType==='time'
                 ?`<input class="si-r" type="number" inputmode="numeric" placeholder="sec" value="${s.reps}" id="r_${key}_${i}" onchange="updSet('${n}',${i},'reps',this.value)" style="color:var(--blu);">`
                 :`<input class="si-r" type="number" inputmode="numeric" placeholder="${isMaxReps?'reps':'reps'}" value="${s.reps}" id="r_${key}_${i}" onchange="updSet('${n}',${i},'reps',this.value)">`
@@ -2620,6 +2720,16 @@ function renderWk(){
 
 function toggleEx(n){if(!activeWk)return;activeWk.expandedEx=activeWk.expandedEx===n?null:n;renderWk();setTimeout(()=>{const idx=activeWk.day.exercises.indexOf(n);eid('exc_'+idx)?.scrollIntoView({behavior:'smooth',block:'nearest'});},60);}
 function updSet(n,i,f,v){if(activeWk)activeWk.sets[n][i][f]=v;}
+function adjWeight(n,i,delta){
+  if(!activeWk)return;
+  const key=n.replace(/[^a-z0-9]/gi,'_');
+  const inp=eid('w_'+key+'_'+i);
+  const cur=parseFloat(inp?.value)||0;
+  // Round to nearest 0.5 to absorb any floating-point drift, then apply delta
+  const next=Math.max(0,Math.round((cur+delta)*10)/10);
+  activeWk.sets[n][i].weight=String(next);
+  if(inp)inp.value=next;
+}
 function doneSet(n,i){
   if(!activeWk)return;
   const key=n.replace(/[^a-z0-9]/gi,'_');
@@ -3176,17 +3286,49 @@ function buildActivityStats(){
   (proteinLog||[]).forEach(entry=>{
     if(entry.items&&entry.items.length>0)foodDateMap[entry.date]=true;
   });
-  const today=new Date();
-  let streak=0;let check=new Date(today);check.setHours(0,0,0,0);
-  while(true){
-    const dk=check.toDateString();
-    const isoKey=check.toISOString().split('T')[0];
-    const hasActivity=!!dateMap[dk]||!!foodDateMap[isoKey];
-    if(hasActivity){streak++;check.setDate(check.getDate()-1);}
-    else if(check.toDateString()===today.toDateString()){check.setDate(check.getDate()-1);}
-    else break;
+
+  function hasActivityOn(d){
+    const dk=d.toDateString();
+    const iso=d.toISOString().split('T')[0];
+    return !!dateMap[dk]||!!foodDateMap[iso];
   }
-  return{streak,workoutCount:sessions.length,foodDays:Object.keys(foodDateMap).length};
+  function shiftDay(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
+  function countBack(fromDay){
+    let c=0,d=new Date(fromDay);
+    while(hasActivityOn(d)){c++;d=shiftDay(d,-1);}
+    return c;
+  }
+
+  const todayD=new Date();todayD.setHours(0,0,0,0);
+  const ydayD=shiftDay(todayD,-1);
+  const twoDaysAgoD=shiftDay(todayD,-2);
+
+  // streakStatus: 'active' | 'grace' (missed exactly 1 day) | 'broken' (2+ days missed)
+  let streak=0,streakStatus='active',lastStreakLength=0;
+
+  if(hasActivityOn(todayD)||hasActivityOn(ydayD)){
+    // Active: today or yesterday logged — count consecutive days back
+    const base=hasActivityOn(todayD)?todayD:ydayD;
+    streak=countBack(base);
+    streakStatus='active';
+  } else if(hasActivityOn(twoDaysAgoD)){
+    // Grace period: missed exactly yesterday; last activity was 2 days ago
+    streak=countBack(twoDaysAgoD);
+    lastStreakLength=streak;
+    streakStatus='grace';
+  } else {
+    // Broken: 2+ days without any activity
+    streak=0;
+    streakStatus='broken';
+    // Walk back to find most recent active day so recovery card can cite the last streak
+    let d=shiftDay(twoDaysAgoD,-1);
+    for(let i=0;i<365;i++){
+      if(hasActivityOn(d)){lastStreakLength=countBack(d);break;}
+      d=shiftDay(d,-1);
+    }
+  }
+
+  return{streak,streakStatus,lastStreakLength,workoutCount:sessions.length,foodDays:Object.keys(foodDateMap).length};
 }
 
 function renderCalendar(){
@@ -8253,12 +8395,63 @@ function finishOnboarding() {
   // Keep protein goal in sync with TDEE calculation (supersedes the old bw × 0.85 approach)
   syncProteinGoal();
 
-  // Hide onboarding, show app
+  // Show payoff screen before routing to home — gives the user a moment to see
+  // what was built (program name, calorie/protein targets) rather than a silent redirect.
+  showOnboardingPayoff(program, tdee);
+}
+
+function showOnboardingPayoff(prog, tdee) {
+  // Fill progress bar to 100%
+  const bar = document.getElementById('ob-bar');
+  if (bar) bar.style.width = '100%';
+
+  // Hide back button, retarget next button
+  const backBtn = document.getElementById('ob-back');
+  const nextBtn = document.getElementById('ob-next');
+  if (backBtn) backBtn.style.display = 'none';
+  if (nextBtn) {
+    nextBtn.textContent = "Let's go →";
+    nextBtn.onclick = launchFromOnboarding;
+    nextBtn.style.display = '';
+  }
+
+  const programNames = (prog || []).map(d => d.name).join(' / ') || 'Custom Program';
+  const dayCount = (prog || []).length;
+  const calories = tdee ? tdee.calories : '—';
+  const protein  = tdee ? tdee.protein  : '—';
+
+  const scroll = document.getElementById('ob-scroll');
+  if (!scroll) return;
+  scroll.innerHTML = `<div class="onboard-step active" style="text-align:center;padding-bottom:8px;">
+    <div class="onboard-q bc" style="margin-bottom:20px;">Here's what<br><em>you built.</em></div>
+    <div style="background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:20px;margin-bottom:12px;text-align:left;">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:8px;">Your Program</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:var(--acc);line-height:1.2;">${programNames}</div>
+      <div style="font-size:13px;color:var(--t2);margin-top:6px;">${dayCount} training days · built for your goal</div>
+    </div>
+    <div style="background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:20px;margin-bottom:20px;text-align:left;">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:14px;">Daily Targets</div>
+      <div style="display:flex;gap:12px;">
+        <div style="flex:1;background:var(--s2);border-radius:12px;padding:14px;text-align:center;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;color:var(--acc);line-height:1;">${calories}</div>
+          <div style="font-size:11px;color:var(--t2);margin-top:4px;text-transform:uppercase;letter-spacing:.06em;">calories</div>
+        </div>
+        <div style="flex:1;background:var(--s2);border-radius:12px;padding:14px;text-align:center;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;color:var(--grn);line-height:1;">${protein}g</div>
+          <div style="font-size:11px;color:var(--t2);margin-top:4px;text-transform:uppercase;letter-spacing:.06em;">protein</div>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:16px;font-weight:600;color:var(--t1);">Your first session is ready.</div>
+  </div>`;
+  scroll.scrollTop = 0;
+}
+
+function launchFromOnboarding() {
   const ob = document.getElementById('onboarding');
   if (ob) ob.style.display = 'none';
   const app = document.getElementById('app');
   if (app) app.style.display = '';
-
   renderHome();
 }
 
