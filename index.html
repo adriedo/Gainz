@@ -2563,14 +2563,29 @@ function renderHome(){
       </div>`;
     } else if(_nextDay){
       // State 2: workout due — direct launch
+      // Coaching prime: top lift with last performance and today's target
+      const {multiplier:_mul}=computeLoadMultiplier();
+      const _primeName=_nextDay.exercises[0];
+      const _lastSets=getLastSets(_primeName);
+      const _lastWt=_lastSets.length?Math.max(..._lastSets.map(s=>parseFloat(s.weight)||0)):0;
+      const _lastRps=_lastSets.length?Math.max(..._lastSets.map(s=>parseInt(s.reps)||0)):0;
+      const _tgt=getTarget(_primeName);
+      const _tgtWt=_tgt.weight?Math.round((_tgt.weight*_mul)/2.5)*2.5:0;
+      const _shortName=_primeName.replace(/Smith Machine /g,'SM ').replace(/\(Machine\)/g,'').trim();
+      const _primeLine=(_lastWt>0&&_tgtWt>0)?`<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--s1);border:1px solid var(--b1);border-top:none;border-radius:0 0 10px 10px;margin-top:-2px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--acc)" stroke-width="2.5" style="flex-shrink:0;"><line x1="2" y1="12" x2="22" y2="12"/><line x1="6" y1="7" x2="6" y2="17"/><line x1="18" y1="7" x2="18" y2="17"/></svg>
+          <span style="font-size:12px;color:var(--t2);">${_shortName} — last <span style="color:var(--t1);font-weight:600;">${_lastWt}lb × ${_lastRps}</span> &nbsp;·&nbsp; target <span style="color:var(--acc);font-weight:700;">${_tgtWt}lb</span> today</span>
+        </div>`:'';
+      const _btnRadius=_primeLine?'12px 12px 0 0':'12px';
       _ctaHtml=`<div style="margin-bottom:16px;">
-        <button onclick="launchWk('${_nextDay.id}')" style="width:100%;padding:16px 18px;background:var(--acc);border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;touch-action:manipulation;">
+        <button onclick="launchWk('${_nextDay.id}')" style="width:100%;padding:16px 18px;background:var(--acc);border-radius:${_btnRadius};border:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;touch-action:manipulation;">
           <div>
             <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:rgba(0,0,0,.5);margin-bottom:2px;">Today</div>
             <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:#000;">Start ${_nextDay.name}</div>
           </div>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" style="opacity:.55;flex-shrink:0;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </button>
+        ${_primeLine}
         <button onclick="showTodayPlanSheet()" style="width:100%;padding:9px;background:transparent;border:none;cursor:pointer;font-size:12px;color:var(--t3);margin-top:4px;touch-action:manipulation;text-align:center;">See full plan (eat + recover) →</button>
       </div>`;
     } else {
@@ -2601,19 +2616,6 @@ function renderHome(){
   } else {
     streakBox=`<div class="stat-box"><div class="stat-n a">${streak}🔥</div><div class="stat-lbl">Active streak</div></div>`;
   }
-  // This week sessions vs program days
-  const _now=new Date();
-  const _diffMon=(_now.getDay()+6)%7;
-  const _wkStart=new Date(_now);_wkStart.setDate(_now.getDate()-_diffMon);_wkStart.setHours(0,0,0,0);
-  const _wkEnd=new Date(_wkStart);_wkEnd.setDate(_wkStart.getDate()+6);_wkEnd.setHours(23,59,59,999);
-  const _wkDates=new Set(getSessions().filter(s=>{const d=new Date(s.date);return d>=_wkStart&&d<=_wkEnd;}).map(s=>new Date(s.date).toDateString()));
-  const _doneWk=_wkDates.size;
-  const _planWk=Math.max(program.length,1);
-  const _wkColor=_doneWk>=_planWk?'var(--grn)':_doneWk>0?'var(--acc)':'var(--t2)';
-  // Protein today
-  const _pToday=getTodayProteinTotal();
-  const _pGoal=proteinGoal||160;
-  const _pColor=_pToday>=_pGoal?'var(--grn)':_pToday>=_pGoal*0.8?'var(--acc)':'#47b4ff';
   // Last weigh-in
   const _lastBody=bodyMetrics.find(e=>e.weight>0);
   let _weighLbl,_weighColor='var(--t2)';
@@ -2629,8 +2631,6 @@ function renderHome(){
   }
   eid('home-stats').innerHTML=`
     ${streakBox}
-    <div class="stat-box"><div class="stat-n" style="color:${_wkColor};">${_doneWk}<span style="font-size:14px;font-weight:500;color:var(--t3);">/${_planWk}</span></div><div class="stat-lbl">This week</div></div>
-    <div class="stat-box"><div class="stat-n" style="color:${_pColor};font-size:22px;">${_pToday}<span style="font-size:11px;font-weight:500;color:var(--t3);">/${_pGoal}g</span></div><div class="stat-lbl">Protein today</div></div>
     <div class="stat-box"><div class="stat-n" style="color:${_weighColor};font-size:${_weighLbl.length>5?'18px':'30px'};">${_weighLbl}</div><div class="stat-lbl">Last weigh-in</div></div>`;
   renderHomeStrip();
 }
