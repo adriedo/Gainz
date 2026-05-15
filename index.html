@@ -10461,7 +10461,7 @@ function showManualFoodSheet(prefill) {
   bg.innerHTML = '<div class="sheet">'
     + '<div class="sheet-handle"></div>'
     + '<div class="sheet-title">Log Food</div>'
-    + '<div class="field"><label>Food name</label><input type="text" id="mf-name" placeholder="e.g. Chicken breast 200g" value="' + (f.name||'') + '"></div>'
+    + '<div class="field"><label>Food name</label><input type="text" id="mf-name" placeholder="e.g. Chicken breast 200g" value="' + (f.name||'') + '"><div id="mf-name-err" style="display:none;font-size:11px;color:var(--red);margin-top:4px;">Enter a food name to log</div></div>'
     + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
     + '<div class="field"><label>Calories</label><input type="number" id="mf-cal" inputmode="numeric" placeholder="kcal" value="' + (f.cal||'') + '"></div>'
     + '<div class="field"><label>Protein (g)</label><input type="number" id="mf-p" inputmode="decimal" placeholder="g" value="' + (f.g||'') + '"></div>'
@@ -10478,7 +10478,13 @@ function showManualFoodSheet(prefill) {
 
 function submitManualFood() {
   const name = document.getElementById('mf-name')?.value?.trim();
-  if(!name) { alert('Enter a food name.'); return; }
+  if(!name) {
+    const inp = document.getElementById('mf-name');
+    const err = document.getElementById('mf-name-err');
+    if(inp){inp.style.borderColor='rgba(255,107,107,.6)';inp.style.background='rgba(255,107,107,.04)';setTimeout(()=>{inp.style.borderColor='';inp.style.background='';},2500);}
+    if(err){err.style.display='block';setTimeout(()=>{err.style.display='none';},2500);}
+    return;
+  }
   addFoodItem({
     name,
     meal:  document.getElementById('mf-meal')?.value || 'Other',
@@ -10733,24 +10739,66 @@ function renderFood() {
   const calLeft = Math.max(g.calories - t.calories, 0);
   const calOver = t.calories > g.calories;
 
-  // Macro bar helper
-  function macroBar(label, val, goal, color, macro) {
-    const pct = Math.min(val / Math.max(goal, 1), 1) * 100;
-    const over = val > goal;
-    const rightLabel = over
-      ? '<span style="font-size:11px;color:var(--red);">+' + Math.round(val-goal) + 'g over</span>'
-      : '<span style="font-size:11px;color:var(--t2);">' + Math.round(val) + '<span style="color:var(--t3);"> / ' + goal + 'g</span></span>';
-    const addBtn = isToday
-      ? '<button onclick="showQuickAddMacroSheet(\'' + macro + '\')" style="background:none;border:none;color:var(--t3);cursor:pointer;font-size:15px;font-weight:700;padding:0 6px 0 0;line-height:1;font-family:DM Sans,sans-serif;">+</button>'
+  // Protein-hero macro section with contextual pacing signal
+  function buildMacroSection() {
+    const pPct = Math.min(t.protein / Math.max(g.protein,1), 1) * 100;
+    const pOver = t.protein > g.protein;
+    const pLeft = Math.max(g.protein - t.protein, 0);
+    const cPct = Math.min(t.carbs / Math.max(g.carbs,1), 1) * 100;
+    const fPct = Math.min(t.fat / Math.max(g.fat,1), 1) * 100;
+    const cOver = t.carbs > g.carbs;
+    const fOver = t.fat > g.fat;
+
+    let paceHtml = '';
+    if(isToday) {
+      if(pOver || pLeft <= 5) {
+        paceHtml = '<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:9px;margin-top:8px;background:rgba(71,255,138,.08);border:1px solid rgba(71,255,138,.2);color:#47ff8a;font-size:12px;font-weight:600;">&#10003; Protein goal hit!</div>';
+      } else {
+        const hr = new Date().getHours();
+        const mealsLeft = hr < 9 ? 4 : hr < 12 ? 3 : hr < 16 ? 2 : hr < 20 ? 1 : 0;
+        const expected = g.protein * Math.min(hr / 21, 1);
+        const perMeal = mealsLeft > 0 ? Math.round(pLeft / mealsLeft) : 0;
+        if(mealsLeft === 0 && pLeft > 20) {
+          paceHtml = '<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 10px;border-radius:9px;margin-top:8px;background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.2);color:#ff6b6b;font-size:12px;font-weight:600;"><span style="flex-shrink:0;">!</span><span>' + Math.round(pLeft) + 'g short — protein will be a miss today<span style="display:block;font-size:10px;font-weight:400;opacity:.75;margin-top:1px;">High-protein snack can still recover 30–40g</span></span></div>';
+        } else if(t.protein >= expected * 0.85) {
+          paceHtml = '<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 10px;border-radius:9px;margin-top:8px;background:rgba(71,255,138,.08);border:1px solid rgba(71,255,138,.2);color:#47ff8a;font-size:12px;font-weight:600;"><span style="flex-shrink:0;">&#10003;</span><span>On pace — ' + Math.round(pLeft) + 'g remaining' + (mealsLeft>0?' across '+mealsLeft+' meal'+(mealsLeft===1?'':'s'):'') + '<span style="display:block;font-size:10px;font-weight:400;opacity:.75;margin-top:1px;">' + (mealsLeft>0?'~'+perMeal+'g per meal to hit your goal':'') + '</span></span></div>';
+        } else {
+          paceHtml = '<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 10px;border-radius:9px;margin-top:8px;background:rgba(255,179,71,.08);border:1px solid rgba(255,179,71,.2);color:#ffb347;font-size:12px;font-weight:600;"><span style="flex-shrink:0;">&#9888;</span><span>' + Math.round(pLeft) + 'g short — behind pace' + (mealsLeft>0?'<span style="display:block;font-size:10px;font-weight:400;opacity:.75;margin-top:1px;">Target ~'+perMeal+'g per remaining meal</span>':'') + '</span></div>';
+        }
+      }
+    }
+
+    const addBtn = macro => isToday
+      ? '<button onclick="showQuickAddMacroSheet(\''+macro+'\')" style="background:none;border:none;color:var(--t3);cursor:pointer;font-size:15px;font-weight:700;padding:0 6px 0 0;line-height:1;font-family:DM Sans,sans-serif;touch-action:manipulation;">+</button>'
       : '';
-    return '<div style="margin-bottom:10px;">'
-      + '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">'
-      + '<div style="display:flex;align-items:baseline;gap:0;">' + addBtn + '<span style="font-size:12px;font-weight:600;">' + label + '</span></div>'
-      + rightLabel
+
+    return '<div style="background:var(--s2);border:1px solid rgba(71,180,255,.18);border-radius:12px;padding:10px 12px;margin-bottom:8px;">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;">'
+      + '<div style="display:flex;align-items:center;">' + addBtn('protein') + '<span style="font-size:13px;font-weight:700;color:#47b4ff;">Protein</span></div>'
+      + '<span style="font-family:Barlow Condensed,sans-serif;font-size:20px;font-weight:700;color:' + (pOver?'var(--red)':'#47b4ff') + ';">' + Math.round(t.protein) + 'g<span style="font-family:DM Sans,sans-serif;font-size:12px;font-weight:400;color:var(--t3);"> / ' + g.protein + 'g</span></span>'
       + '</div>'
-      + '<div style="height:6px;background:var(--s3);border-radius:3px;overflow:hidden;">'
-      + '<div style="height:100%;width:' + pct.toFixed(1) + '%;background:' + (over?'var(--red)':color) + ';border-radius:3px;transition:width .4s;"></div>'
+      + '<div style="height:8px;background:rgba(71,180,255,.12);border-radius:4px;overflow:hidden;">'
+      + '<div style="height:100%;width:' + pPct.toFixed(1) + '%;background:' + (pOver?'var(--red)':'#47b4ff') + ';border-radius:4px;transition:width .4s;"></div>'
       + '</div>'
+      + paceHtml
+      + '</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">'
+      + '<div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:8px 10px;">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">'
+      + '<div style="display:flex;align-items:center;">' + addBtn('carbs') + '<span style="font-size:11px;font-weight:600;color:var(--t2);">Carbs</span></div>'
+      + '<span style="font-size:12px;font-weight:700;color:' + (cOver?'var(--red)':'var(--t1)') + ';">' + Math.round(t.carbs) + '<span style="font-size:10px;color:var(--t3);font-weight:400;">g / ' + g.carbs + '</span></span>'
+      + '</div>'
+      + '<div style="height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;">'
+      + '<div style="height:100%;width:' + cPct.toFixed(1) + '%;background:' + (cOver?'var(--red)':'#ffb347') + ';border-radius:2px;transition:width .4s;"></div>'
+      + '</div></div>'
+      + '<div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:8px 10px;">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">'
+      + '<div style="display:flex;align-items:center;">' + addBtn('fat') + '<span style="font-size:11px;font-weight:600;color:var(--t2);">Fat</span></div>'
+      + '<span style="font-size:12px;font-weight:700;color:' + (fOver?'var(--red)':'var(--t1)') + ';">' + Math.round(t.fat) + '<span style="font-size:10px;color:var(--t3);font-weight:400;">g / ' + g.fat + '</span></span>'
+      + '</div>'
+      + '<div style="height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;">'
+      + '<div style="height:100%;width:' + fPct.toFixed(1) + '%;background:' + (fOver?'var(--red)':'#ff9147') + ';border-radius:2px;transition:width .4s;"></div>'
+      + '</div></div>'
       + '</div>';
   }
 
@@ -10795,10 +10843,8 @@ function renderFood() {
     + '<div style="height:8px;background:var(--s3);border-radius:4px;overflow:hidden;margin-bottom:14px;">'
     + '<div style="height:100%;width:' + (calPct * 100).toFixed(1) + '%;background:' + (calOver ? 'var(--red)' : 'var(--acc)') + ';border-radius:4px;transition:width .4s;"></div>'
     + '</div>'
-    // Macro bars with remaining shown
-    + macroBar('Protein', t.protein, g.protein, '#47b4ff', 'protein')
-    + macroBar('Carbs', t.carbs, g.carbs, '#ffb347', 'carbs')
-    + macroBar('Fat', t.fat, g.fat, '#ff9147', 'fat')
+    // Macro section — protein hero + secondary carbs/fat
+    + buildMacroSection()
     + '</div>';
 
   // Action row (barcode scan removed)
