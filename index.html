@@ -2563,30 +2563,15 @@ function renderHome(){
       </div>`;
     } else if(_nextDay){
       // State 2: workout due — direct launch
-      // Coaching prime: top lift with last performance and today's target
-      const {multiplier:_mul}=computeLoadMultiplier();
-      const _primeName=_nextDay.exercises[0];
-      const _lastSets=getLastSets(_primeName);
-      const _lastWt=_lastSets.length?Math.max(..._lastSets.map(s=>parseFloat(s.weight)||0)):0;
-      const _lastRps=_lastSets.length?Math.max(..._lastSets.map(s=>parseInt(s.reps)||0)):0;
-      const _tgt=getTarget(_primeName);
-      const _tgtWt=_tgt.weight?Math.round((_tgt.weight*_mul)/2.5)*2.5:0;
-      const _shortName=_primeName.replace(/Smith Machine /g,'SM ').replace(/\(Machine\)/g,'').trim();
-      const _primeLine=(_lastWt>0&&_tgtWt>0)?`<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--s1);border:1px solid var(--b1);border-top:none;border-radius:0 0 10px 10px;margin-top:-2px;">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--acc)" stroke-width="2.5" style="flex-shrink:0;"><line x1="2" y1="12" x2="22" y2="12"/><line x1="6" y1="7" x2="6" y2="17"/><line x1="18" y1="7" x2="18" y2="17"/></svg>
-          <span style="font-size:12px;color:var(--t2);">${_shortName} — last <span style="color:var(--t1);font-weight:600;">${_lastWt}lb × ${_lastRps}</span> &nbsp;·&nbsp; target <span style="color:var(--acc);font-weight:700;">${_tgtWt}lb</span> today</span>
-        </div>`:'';
-      const _btnRadius=_primeLine?'12px 12px 0 0':'12px';
       _ctaHtml=`<div style="margin-bottom:16px;">
-        <button onclick="launchWk('${_nextDay.id}')" style="width:100%;padding:16px 18px;background:var(--acc);border-radius:${_btnRadius};border:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;touch-action:manipulation;">
+        <button onclick="launchWk('${_nextDay.id}')" style="width:100%;padding:16px 18px;background:var(--acc);border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;touch-action:manipulation;">
           <div>
             <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:rgba(0,0,0,.5);margin-bottom:2px;">Today</div>
             <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:#000;">Start ${_nextDay.name}</div>
           </div>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" style="opacity:.55;flex-shrink:0;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </button>
-        ${_primeLine}
-        <button onclick="showTodayPlanSheet()" style="width:100%;padding:9px;background:transparent;border:none;cursor:pointer;font-size:12px;color:var(--t3);margin-top:4px;touch-action:manipulation;text-align:center;">See full plan (eat + recover) →</button>
+        <button onclick="showTodayPlanSheet()" style="width:100%;padding:9px;background:transparent;border:none;cursor:pointer;font-size:12px;color:var(--t3);margin-top:4px;touch-action:manipulation;text-align:center;">Full plan →</button>
       </div>`;
     } else {
       // State 3: no program set up
@@ -3271,7 +3256,32 @@ function renderTrainProgram(){
     <button onclick="setLogUnit('mi')" id="lu-mi" style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;cursor:pointer;font-family:DM Sans,sans-serif;background:${miActive?'var(--acc)':'var(--s2)'};color:${miActive?'#000':'var(--t2)'};border:1px solid ${miActive?'var(--acc)':'var(--b2)'};">mi</button>
     <button onclick="setLogUnit('km')" id="lu-km" style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;cursor:pointer;font-family:DM Sans,sans-serif;background:${miActive?'var(--s2)':'var(--acc)'};color:${miActive?'var(--t2)':'#000'};border:1px solid ${miActive?'var(--b2)':'var(--acc)'};">km</button>
   </div>`;
-  const dayCards=program.map(d=>`
+  const dayCards=program.map(d=>{
+    const top3=d.exercises.slice(0,3);
+    const extraCount=d.exercises.length-3;
+    const targetRows=top3.map(name=>{
+      const ls=getLastSets(name);
+      const lastW=ls.length?Math.max(...ls.map(s=>parseFloat(s.weight)||0)):0;
+      const tgt=getTarget(name);
+      const tgtW=parseFloat(tgt.weight)||0;
+      if(!lastW&&!tgtW)return'';
+      const delta=tgtW-lastW;
+      const dc=delta>0?'var(--acc)':delta<0?'#ff6b6b':'var(--t3)';
+      const dStr=delta>0?`+${delta}`:delta<0?`${delta}`:'=';
+      return`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--b1);">
+        <span style="flex:1;font-size:12px;font-weight:500;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${name}</span>
+        <span style="font-size:11px;color:var(--t3);flex-shrink:0;">${lastW>0?lastW+' lb':'—'}</span>
+        <span style="font-size:10px;color:var(--t3);flex-shrink:0;">→</span>
+        <span style="font-size:12px;font-weight:700;color:var(--t1);flex-shrink:0;">${tgtW>0?tgtW+' lb':'—'}</span>
+        <span style="font-size:10px;font-weight:700;min-width:26px;text-align:right;flex-shrink:0;color:${dc};">${dStr}</span>
+      </div>`;
+    }).filter(Boolean).join('');
+    const targetsHtml=targetRows?`<div style="border-top:1px solid var(--b1);padding:10px 14px 12px;">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-bottom:8px;">Today's Targets</div>
+      ${targetRows}
+      ${extraCount>0?`<div style="font-size:11px;color:var(--t3);margin-top:8px;text-align:center;">+ ${extraCount} more exercise${extraCount!==1?'s':''}</div>`:''}
+    </div>`:'';
+    return`
     <div class="day-card dc-${d.type}" onclick="launchWk('${d.id}')">
       <div class="dc-head">
         <div><div class="dc-title bc">${d.day} — ${d.name}</div><div class="dc-sub">${d.focus}</div></div>
@@ -3281,7 +3291,9 @@ function renderTrainProgram(){
         <span class="tag tag-${d.type}">${d.exercises.length} exercises</span><span class="tag tag-${d.type}">${d.exercises.reduce((a,n)=>{const e=findEx(n);return a+e.sets;},0)} sets</span>
         <button class="pre-wk-pill" onclick="event.stopPropagation();showPeriWorkoutGuideSheet('pre')">🍌 Pre-workout</button>
       </div>
-    </div>`).join('');
+      ${targetsHtml}
+    </div>`;
+  }).join('');
   const cardioCards=CARDIO_SESSIONS.map(c=>{
     const last=getLastCardio(c.id);
     const lastStr=last?`Last: ${last.mins?last.mins+' min':''} ${last.dist?(Math.round(parseFloat(last.dist)*100)/100)+' '+(last.distUnit||'mi'):''}`.trim():'No sessions yet';
@@ -3309,6 +3321,9 @@ function renderHistory(){
   const list=eid('train-scroll');
   const sessions=getSessions();
   if(!sessions.length){list.innerHTML='<div class="empty">No sessions yet.<br>Launch a workout to start.</div>';return;}
+  // Pre-compute per-dayId session lists (newest-first) for volume delta
+  const _sByDay={};
+  sessions.filter(s=>!s.isCardio).forEach(s=>{if(!_sByDay[s.dayId])_sByDay[s.dayId]=[];_sByDay[s.dayId].push(s);});
   list.innerHTML=sessions.map(s=>{
     const d=new Date(s.date);
     const ds=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
@@ -3326,9 +3341,22 @@ function renderHistory(){
     const tot=s.entries.reduce((a,e)=>a+e.sets.length,0);
     const vol=Math.round(s.entries.reduce((a,e)=>a+e.sets.reduce((b,x)=>(b+(parseFloat(x.weight)||0)*(parseInt(x.reps)||0)),0),0));
     const tc=program.find(p=>p.id===s.dayId)?.type||'full';
+    const _dayArr=_sByDay[s.dayId]||[];
+    const _dayIdx=_dayArr.findIndex(ds=>ds.sid===s.sid);
+    const _prior=_dayIdx>=0&&_dayIdx<_dayArr.length-1?_dayArr[_dayIdx+1]:null;
+    let _deltaHtml='';
+    if(_prior){
+      const _pVol=Math.round(_prior.entries.reduce((a,e)=>a+e.sets.reduce((b,x)=>(b+(parseFloat(x.weight)||0)*(parseInt(x.reps)||0)),0),0));
+      if(_pVol>0){
+        const _pct=Math.round((vol-_pVol)/_pVol*100);
+        if(_pct>0)_deltaHtml=`<span style="display:inline-flex;align-items:center;font-size:10px;font-weight:700;background:rgba(232,255,71,.1);color:var(--acc);border-radius:20px;padding:2px 7px;margin-top:5px;">↑ ${_pct}% vs last ${s.dayName}</span>`;
+        else if(_pct<0)_deltaHtml=`<span style="display:inline-flex;align-items:center;font-size:10px;font-weight:700;background:rgba(255,107,107,.1);color:#ff6b6b;border-radius:20px;padding:2px 7px;margin-top:5px;">↓ ${Math.abs(_pct)}% vs last ${s.dayName}</span>`;
+        else _deltaHtml=`<span style="display:inline-flex;align-items:center;font-size:10px;font-weight:700;background:rgba(255,255,255,.05);color:var(--t3);border-radius:20px;padding:2px 7px;margin-top:5px;">= same as last ${s.dayName}</span>`;
+      }
+    }
     return`<div class="hist-row" id="hr_${s.sid}"><div class="del-reveal"><span>Delete</span></div>
       <div class="hist-card" id="hc_${s.sid}" onclick="viewSession('${s.sid}')">
-        <div style="flex:1"><div class="bc" style="font-size:18px;font-weight:700;text-transform:uppercase;color:${typeColor(tc)}">${s.dayName}</div><div style="font-size:12px;color:var(--t2);margin-top:3px">${s.entries.length} exercises · ${tot} sets · ${ds}</div><div style="font-size:11px;color:var(--t3);margin-top:3px">${vol.toLocaleString()} lb total volume</div></div>
+        <div style="flex:1"><div class="bc" style="font-size:18px;font-weight:700;text-transform:uppercase;color:${typeColor(tc)}">${s.dayName}</div><div style="font-size:12px;color:var(--t2);margin-top:3px">${s.entries.length} exercises · ${tot} sets · ${ds}</div><div style="font-size:11px;color:var(--t3);margin-top:3px">${vol.toLocaleString()} lb total volume</div>${_deltaHtml}</div>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3);flex-shrink:0;margin-top:2px"><path d="M9 18l6-6-6-6"/></svg>
       </div></div>`;
   }).join('')+`<button class="btn btn-danger btn-full" style="margin-top:6px" onclick="clearHistory()">Clear all history</button>`;
