@@ -2751,7 +2751,7 @@ function renderWk(){
               }
             </div>
             <div class="set-actual">
-              ${ex.inputType!=='time'?`<div class="w-stepper"><button class="w-step-btn" onclick="adjWeight('${n}',${i},-2.5)" type="button">−</button><input class="si-w" type="number" inputmode="decimal" placeholder="lbs" value="${s.weight}" id="w_${key}_${i}" onchange="updSet('${n}',${i},'weight',this.value)"><button class="w-step-btn" onclick="adjWeight('${n}',${i},2.5)" type="button">+</button></div>`:'<div style="font-size:9px;color:var(--t3);text-align:center;padding:4px 0;">bodyweight</div>'}
+              ${ex.inputType!=='time'?`<input class="si-w" type="number" inputmode="decimal" placeholder="lbs" value="${s.weight}" id="w_${key}_${i}" onchange="updSet('${n}',${i},'weight',this.value)">`:'<div style="font-size:9px;color:var(--t3);text-align:center;padding:4px 0;">bodyweight</div>'}
               ${ex.inputType==='time'
                 ?`<input class="si-r" type="number" inputmode="numeric" placeholder="sec" value="${s.reps}" id="r_${key}_${i}" onchange="updSet('${n}',${i},'reps',this.value)" style="color:var(--blu);">`
                 :`<input class="si-r" type="number" inputmode="numeric" placeholder="${isMaxReps?'reps':'reps'}" value="${s.reps}" id="r_${key}_${i}" onchange="updSet('${n}',${i},'reps',this.value)">`
