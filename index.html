@@ -1657,6 +1657,8 @@ const CARDIO_SESSIONS=[
   {id:'bike-conv',type:'bike',style:'conversational',label:'Conversational Bike',sub:'Zone 2 · steady state',color:'#ffb347',icon:'🚴'},
   {id:'bike-hiit',type:'bike',style:'hiit',label:'HIIT Bike',sub:'Intervals · high effort',color:'#ff4747',icon:'⚡'},
 ];
+let customCardio=JSON.parse(localStorage.getItem('gainz_custom_cardio')||'[]');
+function saveCustomCardio(){localStorage.setItem('gainz_custom_cardio',JSON.stringify(customCardio));}
 const hiitIntervals={
   'run-hiit':[{work:40,rest:20},{work:40,rest:20},{work:40,rest:20}],
   'bike-hiit':[{work:40,rest:20},{work:40,rest:20},{work:40,rest:20}],
@@ -1665,19 +1667,61 @@ function addInterval(id){hiitIntervals[id].push({work:40,rest:20});renderHome();
 function removeInterval(id,idx){if(hiitIntervals[id].length<=1)return;hiitIntervals[id].splice(idx,1);renderHome();}
 function updateInterval(id,idx,field,val){hiitIntervals[id][idx][field]=Math.max(5,parseInt(val)||30);}
 function logCardio(id){
-  const c=CARDIO_SESSIONS.find(s=>s.id===id);
+  const c=[...CARDIO_SESSIONS,...customCardio].find(s=>s.id===id);
+  if(!c)return;
   const mins=parseFloat(eid('cc-mins-'+id)?.value)||0;
   const dist=parseFloat(eid('cc-dist-'+id)?.value)||0;
+  if(!mins&&!dist){
+    const errEl=eid('cc-err-'+id);
+    if(errEl){errEl.style.display='block';setTimeout(()=>errEl.style.display='none',2500);}
+    [eid('cc-mins-'+id),eid('cc-dist-'+id)].forEach(el=>{if(el){el.style.borderColor='rgba(255,107,107,.6)';setTimeout(()=>{el.style.borderColor='';},2500);}});
+    return;
+  }
   const isHiit=c.style==='hiit';
   const intervals=isHiit?[...(hiitIntervals[id]||[])]:null;
-  if(!mins&&!dist){alert('Enter time or distance first.');return;}
-  cardioLog.unshift({id,type:c.type,style:c.style,label:c.label,mins,dist,distUnit:logUnit,intervals,date:new Date().toISOString()});
+  cardioLog.unshift({id,type:c.type||'custom',style:c.style,label:c.label,mins,dist,distUnit:logUnit,intervals,date:new Date().toISOString()});
   saveCardioLog();
   const mi=eid('cc-mins-'+id),di=eid('cc-dist-'+id);
   if(mi)mi.value='';if(di)di.value='';
   renderHome();
+  renderTrainProgram();
 }
 function getLastCardio(id){return cardioLog.find(l=>l.id===id);}
+function delCustomCardio(id){
+  customCardio=customCardio.filter(c=>c.id!==id);
+  saveCustomCardio();
+  renderTrainProgram();
+}
+let _newCardioStyle='conversational';
+function showAddCardioSheet(){
+  _newCardioStyle='conversational';
+  const bg=document.createElement('div');bg.className='sheet-bg';
+  const styleBtn=(style,label)=>`<button id="ncb-${style}" onclick="(function(){_newCardioStyle='${style}';document.getElementById('ncb-conversational').style.background=_newCardioStyle==='conversational'?'var(--acc)':'var(--s2)';document.getElementById('ncb-conversational').style.color=_newCardioStyle==='conversational'?'#000':'var(--t2)';document.getElementById('ncb-hiit').style.background=_newCardioStyle==='hiit'?'var(--acc)':'var(--s2)';document.getElementById('ncb-hiit').style.color=_newCardioStyle==='hiit'?'#000':'var(--t2)';})()" style="flex:1;padding:9px;border-radius:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:DM Sans,sans-serif;background:${style==='conversational'?'var(--acc)':'var(--s2)'};color:${style==='conversational'?'#000':'var(--t2)'};touch-action:manipulation;">${label}</button>`;
+  bg.innerHTML=`<div class="sheet" style="padding-bottom:env(safe-area-inset-bottom);">
+    <div class="sheet-handle"></div>
+    <div style="padding:4px 20px 20px;">
+      <div style="font-family:Barlow Condensed,sans-serif;font-size:26px;font-weight:800;text-transform:uppercase;color:var(--t1);margin-bottom:16px;">Add Activity</div>
+      <label style="font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom:6px;">Activity name</label>
+      <input id="new-cardio-name" type="text" class="form-input" placeholder="e.g. Rowing, Stair Climber, Walk" style="width:100%;margin-bottom:16px;">
+      <label style="font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom:6px;">Type</label>
+      <div style="display:flex;gap:8px;background:var(--s2);border-radius:10px;padding:3px;">
+        ${styleBtn('conversational','Zone 2')}
+        ${styleBtn('hiit','HIIT')}
+      </div>
+      <button onclick="(function(){
+        const name=document.getElementById('new-cardio-name').value.trim();
+        if(!name)return;
+        const id='custom-'+Date.now();
+        customCardio.push({id,label:name,sub:_newCardioStyle==='hiit'?'HIIT · high effort':'Zone 2 · steady state',style:_newCardioStyle,type:'custom',icon:'🏃',color:'#47b4ff'});
+        saveCustomCardio();
+        document.querySelector('.sheet-bg').remove();
+        renderTrainProgram();
+      })()" class="btn btn-acc btn-full" style="margin-top:20px;">Save</button>
+    </div>
+  </div>`;
+  bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
+  document.body.appendChild(bg);
+}
 function buildIntervalUI(id){
   const intervals=hiitIntervals[id]||[];
   const total=intervals.reduce((a,i)=>a+i.work+i.rest,0);
@@ -3228,10 +3272,15 @@ function viewSession(sid){
 }
 
 let trainTab='program'; // 'program' | 'edit' | 'videos' | 'log'
+let trainProgramMode='strength'; // 'strength' | 'cardio'
 
 function setTrainTab(tab){
   trainTab=tab;
   renderTrain();
+}
+function setTrainProgramMode(mode){
+  trainProgramMode=mode;
+  renderTrainProgram();
 }
 
 function renderTrain(){
@@ -3294,27 +3343,39 @@ function renderTrainProgram(){
       ${targetsHtml}
     </div>`;
   }).join('');
-  const cardioCards=CARDIO_SESSIONS.map(c=>{
+  const modeToggle=`<div style="display:flex;gap:6px;margin-bottom:14px;">
+    <button onclick="setTrainProgramMode('strength')" style="padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid ${trainProgramMode==='strength'?'rgba(232,255,71,.4)':'var(--b2)'};background:${trainProgramMode==='strength'?'var(--s2)':'none'};color:${trainProgramMode==='strength'?'var(--acc)':'var(--t2)'};cursor:pointer;font-family:DM Sans,sans-serif;touch-action:manipulation;">Strength</button>
+    <button onclick="setTrainProgramMode('cardio')" style="padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid ${trainProgramMode==='cardio'?'rgba(71,180,255,.4)':'var(--b2)'};background:${trainProgramMode==='cardio'?'var(--s2)':'none'};color:${trainProgramMode==='cardio'?'var(--cardio)':'var(--t2)'};cursor:pointer;font-family:DM Sans,sans-serif;touch-action:manipulation;">Cardio</button>
+  </div>`;
+
+  if(trainProgramMode==='strength'){
+    scroll.innerHTML=modeToggle+`<div class="slbl">Strength Work</div>${dayCards}`;
+    return;
+  }
+
+  // ── CARDIO VIEW ────────────────────────────────────────────────────────────
+  const buildCardioCard=(c,isCustom=false)=>{
     const last=getLastCardio(c.id);
     const lastStr=last?`Last: ${last.mins?last.mins+' min':''} ${last.dist?(Math.round(parseFloat(last.dist)*100)/100)+' '+(last.distUnit||'mi'):''}`.trim():'No sessions yet';
     const isHiit=c.style==='hiit';
     const cardClass=c.type==='run'?'cc-run':'cc-bike';
+    const delBtn=isCustom?`<button onclick="event.stopPropagation();delCustomCardio('${c.id}')" style="background:none;border:none;color:var(--t3);font-size:18px;cursor:pointer;padding:0;line-height:1;touch-action:manipulation;">×</button>`:'';
     return`<div class="cardio-card ${cardClass}">
-      <div class="cc-head"><div><div class="cc-title">${c.icon} ${c.label}</div><div class="cc-sub">${c.sub}</div></div><span class="cc-badge${isHiit?' hiit-badge':''}">${isHiit?'HIIT':'Zone 2'}</span></div>
+      <div class="cc-head"><div><div class="cc-title">${c.icon||'🏃'} ${c.label}</div><div class="cc-sub">${c.sub||''}</div></div><div style="display:flex;align-items:center;gap:8px;"><span class="cc-badge${isHiit?' hiit-badge':''}">${isHiit?'HIIT':'Zone 2'}</span>${delBtn}</div></div>
       ${isHiit?buildIntervalUI(c.id):''}
       <div class="cc-inputs" style="margin-top:${isHiit?'10px':'0'}">
         <div><label class="cc-lbl">Time (min)</label><input class="cc-input" type="number" inputmode="decimal" placeholder="0" id="cc-mins-${c.id}" min="0" step="1"></div>
         <div><label class="cc-lbl">Distance (${logUnit})</label><input class="cc-input" type="number" inputmode="decimal" placeholder="0.0" id="cc-dist-${c.id}" min="0" step="0.1"></div>
       </div>
       <button class="cc-log-btn" onclick="logCardio('${c.id}')">Log session</button>
+      <div id="cc-err-${c.id}" style="display:none;font-size:11px;color:#ff6b6b;text-align:center;padding:0 0 6px;">Enter time or distance to log</div>
       <div class="cc-last">${lastStr}</div>
     </div>`;
-  }).join('');
-  scroll.innerHTML=`
-    <div class="slbl">Strength Work</div>
-    ${dayCards}
-    <div class="slbl" style="display:flex;align-items:center;justify-content:space-between;"><span>Cardio</span>${unitToggle}</div>
-    ${cardioCards}`;
+  };
+  const builtInCards=CARDIO_SESSIONS.map(c=>buildCardioCard(c,false)).join('');
+  const customCards=customCardio.map(c=>buildCardioCard(c,true)).join('');
+  const addBtn=`<button onclick="showAddCardioSheet()" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;background:none;border:1px dashed var(--b2);border-radius:16px;color:var(--t3);font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;touch-action:manipulation;margin-bottom:10px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add activity</button>`;
+  scroll.innerHTML=modeToggle+`<div class="slbl" style="display:flex;align-items:center;justify-content:space-between;"><span>Cardio</span>${unitToggle}</div>${builtInCards}${customCards}${addBtn}`;
 }
 
 function renderHistory(){
@@ -8115,7 +8176,7 @@ const GAINZ_KEYS = [
   'gainz_rest','gainz_global_rest','gainz_custom_ex','gainz_ex_overrides',
   'gainz_profile','gainz_onboard_done','gainz_log_unit','gainz_view_unit',
   'gainz_protein_goal','gainz_protein_log','gainz_food_goals','gainz_macro_profile',
-  'gainz_checkins','gainz_voice','gainz_vibrate','gainz_water','gainz_pwa_dismissed','gainz_supps'
+  'gainz_checkins','gainz_voice','gainz_vibrate','gainz_water','gainz_pwa_dismissed','gainz_supps','gainz_custom_cardio'
 ];
 
 function showSettingsSheet(){
