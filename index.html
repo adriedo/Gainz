@@ -1178,6 +1178,18 @@ const IMPORTED_LOG = [
 
 let program = JSON.parse(localStorage.getItem('gainz_prog')||'null')||JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
 let wkLog=JSON.parse(localStorage.getItem('gainz_log')||'[]');
+// One-time migration: remove duplicate "Triceps Dips" (keep "Tricep Dips")
+(function fixDuplicateDips(){
+  let changed=false;
+  program.forEach(day=>{
+    const idx=day.exercises.indexOf('Triceps Dips');
+    if(idx!==-1&&day.exercises.includes('Tricep Dips')){
+      day.exercises.splice(idx,1);
+      changed=true;
+    }
+  });
+  if(changed)localStorage.setItem('gainz_prog',JSON.stringify(program));
+})();
 
 let cardioLog=JSON.parse(localStorage.getItem('gainz_cardio')||'[]');
 // Load and register persisted custom exercises into EXERCISE_LIBRARY
@@ -1652,7 +1664,24 @@ function getTarget(name){
 }
 
 // ─── Equipment inventory helpers ─────────────────────────────────────────────
-const EQ_DEFAULT={dumbbells:[5,10,15,20,25],plates:{'2.5':2,'5':2,'10':2,'15':2,'25':2,'35':2,'45':4},barWeight:15};
+const EQ_DEFAULT={dumbbells:[5,10,15,20,25],plates:{'2.5':2,'5':2,'10':2,'15':2,'25':2,'35':2,'45':4},barWeight:15,machines:['smith_machine','cables']};
+const EQ_MACHINES=[
+  {key:'smith_machine',label:'Smith Machine'},
+  {key:'cables',label:'Cable System'},
+  {key:'barbell',label:'Barbell'},
+  {key:'pull_up_bar',label:'Pull-up Bar'},
+  {key:'dip_station',label:'Dip Station'},
+  {key:'flat_bench',label:'Flat Bench'},
+  {key:'incline_bench',label:'Incline Bench'},
+  {key:'leg_press',label:'Leg Press'},
+  {key:'leg_curl',label:'Leg Curl Machine'},
+  {key:'resistance_bands',label:'Resistance Bands'},
+  {key:'ab_wheel',label:'Ab Wheel'},
+  {key:'kettlebells',label:'Kettlebells'},
+  {key:'treadmill',label:'Treadmill'},
+  {key:'stationary_bike',label:'Stationary Bike'},
+  {key:'rowing_machine',label:'Rowing Machine'},
+];
 function loadEquipment(){
   try{const r=localStorage.getItem('gainz_equipment');return r?Object.assign({},EQ_DEFAULT,JSON.parse(r)):Object.assign({},EQ_DEFAULT);}
   catch(e){return Object.assign({},EQ_DEFAULT);}
@@ -2332,15 +2361,17 @@ function buildProgressionDirectivesCard(){
     const sg=analysis.suggestion;
     if(!sg||sg.type==='firsttime')return null; // no actionable directive yet
 
-    // Apply load multiplier to recommended weight
-    const baseWeight=sg.weight??analysis.last.maxWeight;
+    // Apply load multiplier to recommended weight, then snap to available equipment
+    const rawWeight=sg.weight??analysis.last.maxWeight;
+    const tgt=getTarget(name);
+    const baseWeight=tgt.weight!==''?parseFloat(tgt.weight)||rawWeight:rawWeight;
     const adjWeight=deload
       ? Math.round((baseWeight*multiplier)/2.5)*2.5  // round to nearest 2.5
       : baseWeight; // for non-deload, keep exact — multiplier shown as context only
 
-    const actionType=deload?'deload':sg.type;
+    const actionType=deload?'deload':tgt.equipmentCapped?'capped':sg.type;
 
-    return{name,baseWeight,adjWeight,reps:sg.reps||analysis.reps,actionType,sg,analysis};
+    return{name,baseWeight,adjWeight,reps:sg.reps||analysis.reps,actionType,sg,analysis,equipmentCapped:tgt.equipmentCapped};
   }).filter(Boolean);
 
   if(!directives.length){
@@ -2383,13 +2414,15 @@ function buildProgressionDirectivesCard(){
     if(type==='deload')return'background:rgba(255,71,71,.12);color:#ff9999;';
     if(type==='consolidate')return'background:rgba(232,255,71,.10);color:var(--acc);';
     if(type==='progress')return'background:rgba(71,180,255,.10);color:#47b4ff;';
+    if(type==='capped')return'background:rgba(255,149,0,.12);color:var(--org);';
     return'background:var(--s3);color:var(--t2);';
   }
   function badgeLabel(type,sg,baseW,adjW){
-    if(type==='increase')return`↑ +${adjW-sg.analysis?.last?.maxWeight||'?'}lb`;
+    if(type==='increase')return`↑ +${adjW-(sg.analysis?.last?.maxWeight??baseW)||'?'}lb`;
     if(type==='deload')return`↓ ${Math.round((1-multiplier)*100)}% off`;
     if(type==='consolidate')return'→ Hold';
     if(type==='progress')return'→ Push reps';
+    if(type==='capped')return'⚠ DB max';
     return'→ Maintain';
   }
 
@@ -3077,6 +3110,31 @@ function finishWorkout(){
   const total=entries.reduce((a,e)=>a+e.sets.length,0);
   const mins=Math.floor(wkSecs/60);
 
+  // ── RPE summary ────────────────────────────────────────────────────────────
+  const rpeSets=entries.flatMap(e=>e.sets.filter(s=>s.done&&s.rpe));
+  const avgRpe=rpeSets.length?(rpeSets.reduce((a,s)=>a+Number(s.rpe),0)/rpeSets.length).toFixed(1):null;
+  const rpeColor=avgRpe>=8.5?'#ff6b6b':avgRpe>=7?'var(--acc)':'var(--grn)';
+  const rpeNote=avgRpe>=8.5?'High — consider load next session':avgRpe<=6.5?'Well under — room to push':'Working range';
+
+  // ── PRs ────────────────────────────────────────────────────────────────────
+  const sessionId=activeWk.sessionId;
+  const prList=[];
+  entries.forEach(e=>{
+    const curMax=Math.max(0,...e.sets.map(s=>parseFloat(s.weight)||0));
+    if(!curMax)return;
+    const histMax=Math.max(0,...wkLog
+      .filter(h=>h.exercise===e.exercise&&h.sessionId!==sessionId)
+      .flatMap(h=>h.sets.map(s=>parseFloat(s.weight)||0)));
+    if(curMax>histMax&&histMax>0)prList.push({name:e.exercise,weight:curMax,prev:histMax});
+  });
+
+  // ── Volume vs last same-day session ────────────────────────────────────────
+  const curVol=Math.round(entries.reduce((a,e)=>a+e.sets.filter(s=>s.done).reduce((b,s)=>b+(parseFloat(s.weight)||0)*(parseInt(s.reps)||0),0),0));
+  const prevEntries=wkLog.filter(h=>h.dayId===day.id&&h.sessionId!==sessionId);
+  const prevSids=[...new Set(prevEntries.map(h=>h.sessionId))].sort((a,b)=>b-a);
+  const prevVol=prevSids.length?Math.round(prevEntries.filter(h=>h.sessionId===prevSids[0]).reduce((a,e)=>a+e.sets.reduce((b,s)=>b+(parseFloat(s.weight)||0)*(parseInt(s.reps)||0),0),0)):0;
+  const volDeltaPct=prevVol>0?Math.round(((curVol-prevVol)/prevVol)*100):null;
+
   // ── Planned vs. actual volume ───────────────────────────────────────────
   const plannedSets=day.exercises.reduce((a,n)=>a+(findEx(n)?.sets||3),0);
   const volPct=plannedSets>0?Math.min(Math.round((total/plannedSets)*100),100):100;
@@ -3096,6 +3154,24 @@ function finishWorkout(){
     </div>
   </div>`;
 
+  // ── PRs HTML ───────────────────────────────────────────────────────────────
+  const prHTML=prList.length?`
+    <div style="background:var(--s2);border-radius:14px;padding:14px 16px;margin-bottom:14px;width:100%;box-sizing:border-box;">
+      <div style="font-size:12px;font-weight:700;color:var(--grn);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;">🏆 New PRs</div>
+      ${prList.map(pr=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--b1);">
+        <span style="font-size:12px;font-weight:500;color:var(--t1);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${pr.name.replace(/Smith Machine /g,'').replace(/Cable /g,'')}</span>
+        <span style="font-size:13px;font-weight:700;color:var(--grn);flex-shrink:0;margin-left:8px;">${pr.weight}lb <span style="font-size:10px;color:var(--t3);font-weight:400;">was ${pr.prev}</span></span>
+      </div>`).join('')}
+    </div>`:'';
+
+  // ── Volume delta HTML ──────────────────────────────────────────────────────
+  const vdColor=volDeltaPct>0?'var(--grn)':volDeltaPct<0?'#ff6b6b':'var(--t3)';
+  const vdStr=volDeltaPct!==null?(volDeltaPct>0?`+${volDeltaPct}%`:volDeltaPct<0?`${volDeltaPct}%`:'='): '—';
+  const volDeltaHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;">
+    <span style="font-size:12px;color:var(--t3);">vs last ${day.name}</span>
+    <span style="font-size:13px;font-weight:700;color:${vdColor};">${vdStr} · ${curVol.toLocaleString()} lb total</span>
+  </div>`;
+
   eid('wk-hdr').style.display='none';eid('wk-footer').style.display='none';eid('wk-bar').style.width='100%';
   eid('wk-scroll').innerHTML=`<div class="finish-wrap fu">
     <div style="font-size:56px">🔥</div>
@@ -3104,9 +3180,23 @@ function finishWorkout(){
       <div class="finish-stat"><div class="fs-val">${mins}</div><div class="fs-lbl">Minutes</div></div>
       <div class="finish-stat"><div class="fs-val">${total}</div><div class="fs-lbl">Sets done</div></div>
       <div class="finish-stat"><div class="fs-val">${entries.length}</div><div class="fs-lbl">Exercises</div></div>
-      <div class="finish-stat"><div class="fs-val bc" style="font-size:22px">${day.name}</div><div class="fs-lbl">Day type</div></div>
+      <div class="finish-stat"><div class="fs-val" style="color:${avgRpe?rpeColor:'var(--t3)'};">${avgRpe||'—'}</div><div class="fs-lbl">Avg RPE${avgRpe?` · ${rpeNote}`:''}</div></div>
     </div>
-    ${volHTML}
+    ${prHTML}
+    <div style="background:var(--s2);border-radius:14px;padding:14px 16px;margin-bottom:14px;width:100%;box-sizing:border-box;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
+        <div style="font-size:12px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;">Volume completed</div>
+        <div style="font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:800;color:${volColor};">${volPct}%</div>
+      </div>
+      <div style="height:6px;background:var(--s3);border-radius:3px;overflow:hidden;margin-bottom:8px;">
+        <div style="height:100%;width:${volPct}%;background:${volColor};border-radius:3px;transition:width .6s ease;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t3);">
+        <span>${volLabel}</span>
+        <span>${total} / ${plannedSets} sets</span>
+      </div>
+      ${volDeltaHTML}
+    </div>
     <div class="pwn-card">
       <div class="pwn-title">💧 Post-Workout Meal</div>
       <div class="pwn-sub">Hit protein + carbs within 60 min to maximise recovery and muscle synthesis.</div>
@@ -3407,9 +3497,9 @@ function renderTrainProgram(){
     <button onclick="setLogUnit('km')" id="lu-km" style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;cursor:pointer;font-family:DM Sans,sans-serif;background:${miActive?'var(--s2)':'var(--acc)'};color:${miActive?'var(--t2)':'#000'};border:1px solid ${miActive?'var(--b2)':'var(--acc)'};">km</button>
   </div>`;
   const dayCards=program.map(d=>{
-    const top3=d.exercises.slice(0,3);
     const extraCount=d.exercises.length-3;
-    const targetRows=top3.map(name=>{
+    // Map all exercises but skip unweighted ones (bodyweight/core with no weight history)
+    const targetRows=d.exercises.map(name=>{
       const ls=getLastSets(name);
       const lastW=ls.length?Math.max(...ls.map(s=>parseFloat(s.weight)||0)):0;
       const tgt=getTarget(name);
@@ -3427,7 +3517,7 @@ function renderTrainProgram(){
         <span style="font-size:12px;font-weight:700;color:${tgtColor};flex-shrink:0;">${tgtW>0?tgtW+' lb':'—'}</span>
         <span style="font-size:10px;font-weight:700;min-width:26px;text-align:right;flex-shrink:0;color:${dc};">${dStr}</span>
       </div>`;
-    }).filter(Boolean).join('');
+    }).filter(Boolean).slice(0,3).join('');
     const targetsHtml=targetRows?`<div style="border-top:1px solid var(--b1);padding:10px 14px 12px;">
       <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-bottom:8px;">Today's Targets</div>
       ${targetRows}
@@ -3436,7 +3526,7 @@ function renderTrainProgram(){
     return`
     <div class="day-card dc-${d.type}" onclick="launchWk('${d.id}')">
       <div class="dc-head">
-        <div><div class="dc-title bc">${d.day} — ${d.name}</div><div class="dc-sub">${d.focus}</div></div>
+        <div><div class="dc-title bc">${d.day&&d.day!=='undefined'?d.day:'Day '+(program.indexOf(d)+1)} — ${d.name}</div><div class="dc-sub">${d.focus}</div></div>
         <div class="arrow-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
       </div>
       <div class="dc-meta">
@@ -5309,7 +5399,13 @@ function showEquipmentSheet(){
         }).join('')}
       </div>
 
-      <div style="font-size:11px;color:var(--t3);margin-bottom:16px;line-height:1.5;padding:10px 12px;background:rgba(255,193,7,.06);border:1px solid rgba(255,193,7,.2);border-radius:10px;">Cables recognized automatically — any weight achievable, no setup needed.</div>
+      <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:10px;">Machines &amp; Tools</div>
+      <div id="machine-chips" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;">
+        ${EQ_MACHINES.map(m=>{
+          const sel=(eq.machines||[]).includes(m.key);
+          return`<button onclick="toggleMachineChip(this)" data-key="${m.key}" style="border:2px solid ${sel?'var(--acc)':'var(--b1)'};background:${sel?'var(--acc)':'var(--s1)'};color:${sel?'#000':'var(--t2)'};border-radius:20px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;">${m.label}</button>`;
+        }).join('')}
+      </div>
       <div style="display:flex;gap:10px;">
         <button class="btn btn-ghost" style="flex:1;" onclick="document.getElementById('equipment-sheet').remove()">Cancel</button>
         <button class="btn btn-acc" style="flex:1;" onclick="saveEquipmentFromSheet()">Save</button>
@@ -5320,6 +5416,12 @@ function showEquipmentSheet(){
   document.body.appendChild(bg);
 }
 function toggleDbChip(btn,w){
+  const sel=btn.style.background.includes('var(--acc)');
+  btn.style.background=sel?'var(--s1)':'var(--acc)';
+  btn.style.color=sel?'var(--t2)':'#000';
+  btn.style.borderColor=sel?'var(--b1)':'var(--acc)';
+}
+function toggleMachineChip(btn){
   const sel=btn.style.background.includes('var(--acc)');
   btn.style.background=sel?'var(--s1)':'var(--acc)';
   btn.style.color=sel?'var(--t2)':'#000';
@@ -5345,7 +5447,9 @@ function saveEquipmentFromSheet(){
     if(count>0)plates[pw]=count;
   });
   const barWeight=parseFloat(document.getElementById('eq-bar-weight')?.value)||15;
-  saveEquipment({dumbbells,plates,barWeight});
+  const machines=[];
+  document.querySelectorAll('#machine-chips button').forEach(btn=>{if(btn.style.background.includes('var(--acc)'))machines.push(btn.dataset.key);});
+  saveEquipment({dumbbells,plates,barWeight,machines});
   document.getElementById('equipment-sheet')?.remove();
   renderEdit();
 }
@@ -5451,7 +5555,8 @@ function renderEdit(){
         <div style="font-size:11px;color:var(--t3);margin-bottom:2px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;">Dumbbells</div>
         <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:8px;">${dbSummary}</div>
         <div style="font-size:11px;color:var(--t3);margin-bottom:2px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;">Plates · Bar ${eq.barWeight||15}lb · Max ${maxBar}lb loaded</div>
-        <div style="font-size:12px;color:var(--t2);line-height:1.6;">${plateSummary}</div>
+        <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:8px;">${plateSummary}</div>
+        ${(()=>{const mKeys=eq.machines||[];const mLabels=mKeys.map(k=>(EQ_MACHINES.find(m=>m.key===k)||{label:k}).label);if(!mLabels.length)return'';return`<div style="font-size:11px;color:var(--t3);margin-bottom:2px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;">Machines &amp; Tools</div><div style="font-size:12px;color:var(--t2);line-height:1.6;">${mLabels.join(', ')}</div>`;})()}
       </div>`;
     })()}
     <div style="background:var(--s1);border:1px solid var(--b1);border-radius:14px;margin-bottom:14px;padding:14px 16px;">
@@ -8378,7 +8483,7 @@ function showPastBodyLogSheet(dateStr, onSaved){
 // DATA EXPORT / IMPORT
 // ═══════════════════════════════════════════════════════════════════════════════
 const GAINZ_KEYS = [
-  'gainz_prog','gainz_log','gainz_cardio','gainz_food','gainz_body',
+  'gainz_prog','gainz_log','gainz_cardio','gainz_body',
   'gainz_rest','gainz_global_rest','gainz_custom_ex','gainz_ex_overrides',
   'gainz_profile','gainz_onboard_done','gainz_log_unit','gainz_view_unit',
   'gainz_protein_goal','gainz_protein_log','gainz_food_goals','gainz_macro_profile',
