@@ -911,6 +911,11 @@ input[type="date"]{color-scheme:dark;color:var(--t1);background:var(--s2);}
 // ─── EXERCISE LIBRARY ────────────────────────────────────────────────────────
 const EXERCISE_LIBRARY = {
   chest:[
+    {name:'Bench Press',muscle:'Chest',sets:4,reps:'8–12',rest:120,search:'barbell bench press form tutorial'},
+    {name:'Incline Bench',muscle:'Upper Chest',sets:3,reps:'8–12',rest:90,search:'incline bench press form'},
+    {name:'Incline Bench Press',muscle:'Upper Chest',sets:3,reps:'8–12',rest:90,search:'incline bench press form'},
+    {name:'Incline DB Press',muscle:'Upper Chest',sets:3,reps:'10–12',rest:90,search:'incline dumbbell press form'},
+    {name:'DB Bench Press',muscle:'Chest',sets:3,reps:'10–12',rest:90,search:'dumbbell bench press form'},
     {name:'Smith Machine Bench Press',muscle:'Chest',sets:4,reps:'8–10',rest:120,search:'smith machine bench press form'},
     {name:'Smith Machine Incline Press',muscle:'Upper Chest',sets:3,reps:'10–12',rest:90,search:'smith machine incline press form'},
     {name:'Smith Machine Close-Grip Bench',muscle:'Triceps/Chest',sets:3,reps:'10–12',rest:90,search:'close grip bench press smith machine'},
@@ -920,6 +925,12 @@ const EXERCISE_LIBRARY = {
     {name:'Dips',muscle:'Chest/Triceps',sets:3,reps:'10–12',rest:90,search:'dips exercise form'},
   ],
   shoulders:[
+    {name:'Overhead Press',muscle:'Shoulders',sets:3,reps:'8–12',rest:90,search:'barbell overhead press form'},
+    {name:'OHP',muscle:'Shoulders',sets:3,reps:'8–12',rest:90,search:'overhead press barbell form'},
+    {name:'Barbell OHP',muscle:'Shoulders',sets:3,reps:'8–12',rest:90,search:'barbell overhead press form'},
+    {name:'DB Shoulder Press',muscle:'Shoulders',sets:3,reps:'10–12',rest:75,search:'dumbbell shoulder press form'},
+    {name:'Lateral Raise',muscle:'Side Delts',sets:4,reps:'12–15',rest:60,search:'lateral raise dumbbell form'},
+    {name:'Face Pull',muscle:'Rear Delts',sets:3,reps:'15',rest:60,search:'face pull cable form'},
     {name:'Smith Machine Overhead Press',muscle:'Shoulders',sets:3,reps:'10–12',rest:90,search:'smith machine overhead press form'},
     {name:'Lateral Raises',muscle:'Side Delts',sets:4,reps:'12–15',rest:60,search:'lateral raise dumbbell form'},
     {name:'Face Pulls',muscle:'Rear Delts',sets:3,reps:'15',rest:60,search:'face pull cable form'},
@@ -928,6 +939,12 @@ const EXERCISE_LIBRARY = {
     {name:'Arnold Press',muscle:'Shoulders',sets:3,reps:'10–12',rest:75,search:'arnold press dumbbell form'},
   ],
   back:[
+    {name:'Barbell Row',muscle:'Back',sets:4,reps:'8–12',rest:90,search:'barbell bent over row form'},
+    {name:'Bent Over Row',muscle:'Back',sets:4,reps:'8–12',rest:90,search:'bent over barbell row form'},
+    {name:'Lat Pulldown',muscle:'Lats',sets:4,reps:'10–12',rest:90,search:'lat pulldown form tutorial'},
+    {name:'Cable Row',muscle:'Mid Back',sets:3,reps:'10–12',rest:75,search:'cable row form tutorial'},
+    {name:'Pull-Up',muscle:'Lats',sets:4,reps:'Max',rest:120,search:'pull up form tutorial'},
+    {name:'Chin-Up',muscle:'Lats/Biceps',sets:4,reps:'Max',rest:120,search:'chin up form tutorial'},
     {name:'Cable Lat Pulldown',muscle:'Lats',sets:4,reps:'10–12',rest:90,search:'lat pulldown cable form'},
     {name:'Smith Machine Bent-Over Row',muscle:'Mid Back',sets:4,reps:'10–12',rest:90,search:'bent over row smith machine form'},
     {name:'Single Arm DB Row',muscle:'Lats/Mid Back',sets:3,reps:'12',rest:75,search:'single arm dumbbell row form'},
@@ -936,10 +953,13 @@ const EXERCISE_LIBRARY = {
     {name:'Pull-Ups',muscle:'Lats',sets:4,reps:'Max',rest:120,search:'pull up form tutorial'},
   ],
   arms:[
+    {name:'Bicep Curl',muscle:'Biceps',sets:3,reps:'10–12',rest:60,search:'barbell bicep curl form'},
+    {name:'Barbell Curl',muscle:'Biceps',sets:3,reps:'10–12',rest:60,search:'barbell curl form'},
+    {name:'Hammer Curl',muscle:'Brachialis',sets:3,reps:'12',rest:60,search:'hammer curl form'},
+    {name:'Tricep Pushdown',muscle:'Triceps',sets:3,reps:'12–15',rest:60,search:'tricep pushdown cable form'},
     {name:'Dumbbell Curl',muscle:'Biceps',sets:3,reps:'12',rest:60,search:'dumbbell bicep curl form'},
     {name:'Hammer Curls',muscle:'Brachialis',sets:3,reps:'12',rest:60,search:'hammer curl form'},
     {name:'Cable Curl 21s',muscle:'Biceps',sets:2,reps:'21',rest:75,search:'21s bicep curl form'},
-    {name:'Barbell Curl',muscle:'Biceps',sets:3,reps:'10–12',rest:60,search:'barbell curl form'},
     {name:'Preacher Curl',muscle:'Biceps',sets:3,reps:'10–12',rest:60,search:'preacher curl form'},
     {name:'Tricep Pushdowns',muscle:'Triceps',sets:3,reps:'12–15',rest:60,search:'tricep pushdown cable form'},
     {name:'Overhead Tricep Extension',muscle:'Triceps',sets:2,reps:'12',rest:60,search:'overhead tricep extension dumbbell'},
@@ -947,6 +967,13 @@ const EXERCISE_LIBRARY = {
     {name:'Tricep Dips',muscle:'Triceps',sets:3,reps:'10–12',rest:75,search:'tricep dips bench form'},
   ],
   legs:[
+    {name:'Squat',muscle:'Quads/Glutes',sets:4,reps:'6–10',rest:150,search:'barbell squat form tutorial'},
+    {name:'Barbell Squat',muscle:'Quads/Glutes',sets:4,reps:'6–10',rest:150,search:'barbell squat form tutorial'},
+    {name:'Romanian Deadlift',muscle:'Hamstrings',sets:4,reps:'8–12',rest:90,search:'romanian deadlift form tutorial'},
+    {name:'RDL',muscle:'Hamstrings',sets:4,reps:'8–12',rest:90,search:'romanian deadlift form tutorial'},
+    {name:'Deadlift',muscle:'Hamstrings/Back',sets:4,reps:'5–8',rest:180,search:'barbell deadlift form tutorial'},
+    {name:'Leg Press',muscle:'Quads/Glutes',sets:4,reps:'10–15',rest:90,search:'leg press machine form'},
+    {name:'Leg Curl',muscle:'Hamstrings',sets:3,reps:'10–15',rest:60,search:'leg curl machine form'},
     {name:'Smith Machine Squat',muscle:'Quads/Glutes',sets:4,reps:'10–12',rest:120,search:'smith machine squat form'},
     {name:'Smith Machine Romanian Deadlift',muscle:'Hamstrings',sets:4,reps:'10–12',rest:90,search:'romanian deadlift smith machine form'},
     {name:'Smith Machine Hip Thrust',muscle:'Glutes',sets:4,reps:'12',rest:90,search:'hip thrust smith machine form'},
@@ -1597,15 +1624,89 @@ function getTarget(name){
   const analysis=analyzeProgression(name);
   const sessions=getAllSessions(name);
   if(!sessions.length){
-    return{weight:'',reps:analysis.reps||10,hit:false,analysis};
+    return{weight:'',reps:analysis.reps||10,hit:false,equipmentCapped:false,analysis};
+  }
+  let weight=analysis.weight||'';
+  let equipmentCapped=false;
+  if(weight){
+    const eqType=getExerciseEquipmentType(name);
+    const eq=loadEquipment();
+    if(eqType==='dumbbell'){
+      const snapped=snapToDbWeight(parseFloat(weight),eq.dumbbells||[]);
+      weight=snapped.weight;
+      equipmentCapped=snapped.capped;
+    }else if(eqType==='barbell'){
+      const achievable=getAchievableBarWeights(eq.barWeight||15,eq.plates||{});
+      const snapped=snapToBarWeight(parseFloat(weight),achievable);
+      weight=snapped.weight;
+      equipmentCapped=snapped.capped;
+    }
   }
   return{
-    weight:analysis.weight||'',
+    weight,
     reps:analysis.reps,
     hit:analysis.action==='increase_weight',
+    equipmentCapped,
     analysis,
   };
 }
+
+// ─── Equipment inventory helpers ─────────────────────────────────────────────
+const EQ_DEFAULT={dumbbells:[5,10,15,20,25],plates:{'2.5':2,'5':2,'10':2,'15':2,'25':2,'35':2,'45':4},barWeight:15};
+function loadEquipment(){
+  try{const r=localStorage.getItem('gainz_equipment');return r?Object.assign({},EQ_DEFAULT,JSON.parse(r)):Object.assign({},EQ_DEFAULT);}
+  catch(e){return Object.assign({},EQ_DEFAULT);}
+}
+function saveEquipment(eq){localStorage.setItem('gainz_equipment',JSON.stringify(eq));}
+
+const DB_EXERCISE_NAMES=['lateral raise','bicep curl','bicep curls','db curl','dumbbell curl','hammer curl','hammer curls','arnold press','db shoulder press','dumbbell shoulder press','db bench press','dumbbell bench press','incline db press','incline dumbbell press','db fly','dumbbell fly','db row','dumbbell row','db lunge','dumbbell lunge','db squat','dumbbell squat','db rdl','dumbbell rdl','dumbbell romanian deadlift','goblet squat'];
+const CABLE_EXERCISE_NAMES=['tricep pushdown','cable pushdown','face pull','cable row','cable fly','cable curl','cable pull','cable lateral','cable crossover'];
+const BW_EXERCISE_NAMES=['pull-up','pull up','pullup','chin-up','chin up','chinup','push-up','push up','pushup','dip','dips','bodyweight squat','air squat'];
+const MACHINE_EXERCISE_NAMES=['leg curl','leg extension','leg press','chest press machine','shoulder press machine','seated row machine','hack squat','smith machine'];
+
+function getExerciseEquipmentType(name){
+  const n=name.toLowerCase();
+  if(BW_EXERCISE_NAMES.some(k=>n.includes(k)))return'bodyweight';
+  if(CABLE_EXERCISE_NAMES.some(k=>n.includes(k)))return'cable';
+  if(MACHINE_EXERCISE_NAMES.some(k=>n.includes(k)))return'machine';
+  if(DB_EXERCISE_NAMES.some(k=>n.includes(k)))return'dumbbell';
+  return'barbell';
+}
+
+function snapToDbWeight(weight,dumbbells){
+  const avail=(dumbbells||[]).map(Number).filter(Boolean).sort((a,b)=>a-b);
+  if(!avail.length)return{weight,capped:false};
+  const max=avail[avail.length-1];
+  if(weight>max)return{weight:max,capped:true};
+  let snapped=avail[0];
+  for(const w of avail){if(w<=weight)snapped=w;}
+  return{weight:snapped,capped:false};
+}
+
+function getAchievableBarWeights(barWeight,plates){
+  // plates = { "2.5": 2, "5": 2, ... } — total count, so per-side = Math.floor(count/2)
+  const perSideTotals=new Set([0]);
+  for(const[plateStr,count] of Object.entries(plates||{})){
+    const pw=parseFloat(plateStr);
+    const perSideCount=Math.floor((count||0)/2);
+    if(!pw||!perSideCount)continue;
+    const existing=[...perSideTotals];
+    for(const base of existing){
+      for(let c=1;c<=perSideCount;c++)perSideTotals.add(+(base+pw*c).toFixed(1));
+    }
+  }
+  return [...perSideTotals].map(t=>+(barWeight+2*t).toFixed(1)).sort((a,b)=>a-b);
+}
+
+function snapToBarWeight(weight,achievable){
+  if(!achievable||!achievable.length)return{weight,capped:false};
+  const max=achievable[achievable.length-1];
+  if(weight>max)return{weight:max,capped:true};
+  const avail=achievable.filter(w=>w<=weight);
+  if(!avail.length)return{weight:achievable[0],capped:false};
+  return{weight:avail[avail.length-1],capped:false};
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 function computePRs(){const b={};wkLog.forEach(e=>{const m=Math.max(...e.sets.map(s=>parseFloat(s.weight)||0));if(m>0&&(!b[e.exercise]||m>b[e.exercise]))b[e.exercise]=m;});return b;}
 function typeColor(t){return`var(--${t||'full'})`;}
@@ -3315,13 +3416,15 @@ function renderTrainProgram(){
       const tgtW=parseFloat(tgt.weight)||0;
       if(!lastW&&!tgtW)return'';
       const delta=tgtW-lastW;
-      const dc=delta>0?'var(--acc)':delta<0?'#ff6b6b':'var(--t3)';
-      const dStr=delta>0?`+${delta}`:delta<0?`${delta}`:'=';
+      const capped=tgt.equipmentCapped;
+      const dc=capped?'var(--org)':delta>0?'var(--acc)':delta<0?'#ff6b6b':'var(--t3)';
+      const dStr=capped?'max':delta>0?`+${delta}`:delta<0?`${delta}`:'=';
+      const tgtColor=capped?'var(--org)':'var(--t1)';
       return`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--b1);">
         <span style="flex:1;font-size:12px;font-weight:500;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${name}</span>
         <span style="font-size:11px;color:var(--t3);flex-shrink:0;">${lastW>0?lastW+' lb':'—'}</span>
         <span style="font-size:10px;color:var(--t3);flex-shrink:0;">→</span>
-        <span style="font-size:12px;font-weight:700;color:var(--t1);flex-shrink:0;">${tgtW>0?tgtW+' lb':'—'}</span>
+        <span style="font-size:12px;font-weight:700;color:${tgtColor};flex-shrink:0;">${tgtW>0?tgtW+' lb':'—'}</span>
         <span style="font-size:10px;font-weight:700;min-width:26px;text-align:right;flex-shrink:0;color:${dc};">${dStr}</span>
       </div>`;
     }).filter(Boolean).join('');
@@ -5163,6 +5266,90 @@ function clearAllRestOverrides(){
   showGlobalRestSheet();
 }
 
+function showEquipmentSheet(){
+  const eq=loadEquipment();
+  const ALL_DB=[5,10,15,20,25,30,35,40,45,50,55,60,70,80,90,100];
+  const ALL_PLATES=['2.5','5','10','15','25','35','45'];
+  const plates=eq.plates||{};
+  const bg=document.createElement('div');bg.className='sheet-bg';bg.id='equipment-sheet';
+  bg.innerHTML=`<div class="sheet" style="max-height:90vh;overflow-y:auto;">
+    <div class="sheet-title">Equipment Inventory</div>
+    <div style="padding:0 16px 20px;">
+
+      <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:10px;">Dumbbells</div>
+      <div style="font-size:12px;color:var(--t3);margin-bottom:12px;line-height:1.5;">Select the weights you have. Suggestions cap at your heaviest pair.</div>
+      <div id="db-chips" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px;">
+        ${ALL_DB.map(w=>{
+          const sel=(eq.dumbbells||[]).includes(w);
+          return`<button onclick="toggleDbChip(this,${w})" data-w="${w}" style="border:2px solid ${sel?'var(--acc)':'var(--b1)'};background:${sel?'var(--acc)':'var(--s1)'};color:${sel?'#000':'var(--t2)'};border-radius:8px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;">${w}</button>`;
+        }).join('')}
+      </div>
+
+      <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:6px;">Plates (Smith Machine / Barbell)</div>
+      <div style="font-size:12px;color:var(--t3);margin-bottom:4px;line-height:1.5;">Enter total plate count (e.g. 4 × 45lb = enter 4).</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <span style="font-size:12px;color:var(--t3);">Bar weight:</span>
+        <input type="number" id="eq-bar-weight" value="${eq.barWeight||15}" min="0" max="100" step="1"
+          style="width:60px;padding:6px 8px;text-align:center;font-size:14px;font-weight:600;background:var(--s2);border:1px solid var(--b2);border-radius:9px;color:var(--acc);">
+        <span style="font-size:12px;color:var(--t3);">lb</span>
+      </div>
+      <div style="border:1px solid var(--b1);border-radius:12px;overflow:hidden;margin-bottom:20px;">
+        ${ALL_PLATES.map((pw,i)=>{
+          const count=(plates[pw]||0);
+          const pid='plate-count-'+pw.replace('.','_');
+          const isLast=i===ALL_PLATES.length-1;
+          return`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;${isLast?'':'border-bottom:1px solid var(--b1);'}">
+            <span style="font-size:14px;font-weight:600;color:var(--t1);">${pw} lb</span>
+            <div style="display:flex;align-items:center;gap:14px;">
+              <button onclick="adjustPlateCount('${pw}',-2)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--b2);background:var(--s2);color:var(--t1);font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;">−</button>
+              <span id="${pid}" style="font-size:15px;font-weight:700;min-width:18px;text-align:center;color:${count>0?'var(--acc)':'var(--t3)'};">${count}</span>
+              <button onclick="adjustPlateCount('${pw}',2)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--b2);background:var(--s2);color:var(--t1);font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+
+      <div style="font-size:11px;color:var(--t3);margin-bottom:16px;line-height:1.5;padding:10px 12px;background:rgba(255,193,7,.06);border:1px solid rgba(255,193,7,.2);border-radius:10px;">Cables recognized automatically — any weight achievable, no setup needed.</div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-ghost" style="flex:1;" onclick="document.getElementById('equipment-sheet').remove()">Cancel</button>
+        <button class="btn btn-acc" style="flex:1;" onclick="saveEquipmentFromSheet()">Save</button>
+      </div>
+    </div>
+  </div>`;
+  bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
+  document.body.appendChild(bg);
+}
+function toggleDbChip(btn,w){
+  const sel=btn.style.background.includes('var(--acc)');
+  btn.style.background=sel?'var(--s1)':'var(--acc)';
+  btn.style.color=sel?'var(--t2)':'#000';
+  btn.style.borderColor=sel?'var(--b1)':'var(--acc)';
+}
+function adjustPlateCount(pw,delta){
+  const pid='plate-count-'+pw.replace('.','_');
+  const el=document.getElementById(pid);
+  if(!el)return;
+  const next=Math.max(0,parseInt(el.textContent||'0')+delta);
+  el.textContent=next;
+  el.style.color=next>0?'var(--acc)':'var(--t3)';
+}
+function saveEquipmentFromSheet(){
+  const chips=document.querySelectorAll('#db-chips button');
+  const dumbbells=[];
+  chips.forEach(btn=>{if(btn.style.background.includes('var(--acc)'))dumbbells.push(Number(btn.dataset.w));});
+  dumbbells.sort((a,b)=>a-b);
+  const plates={};
+  ['2.5','5','10','15','25','35','45'].forEach(pw=>{
+    const el=document.getElementById('plate-count-'+pw.replace('.','_'));
+    const count=el?parseInt(el.textContent||'0'):0;
+    if(count>0)plates[pw]=count;
+  });
+  const barWeight=parseFloat(document.getElementById('eq-bar-weight')?.value)||15;
+  saveEquipment({dumbbells,plates,barWeight});
+  document.getElementById('equipment-sheet')?.remove();
+  renderEdit();
+}
+
 function showGlobalRestSheet(){
   const bg=document.createElement('div');bg.className='sheet-bg';bg.id='global-rest-sheet';
   const rows=MUSCLE_GROUPS_FOR_REST.map(g=>{
@@ -5248,6 +5435,25 @@ function renderEdit(){
 
   list.innerHTML=`
     ${onTrainTab?`<button class="btn btn-acc btn-full" style="margin-bottom:14px;" onclick="showNewDaySheet()">+ New day</button>`:''}
+    ${(()=>{
+      const eq=loadEquipment();
+      const dbs=eq.dumbbells||[];
+      const dbSummary=dbs.length?dbs.map(w=>w+'lb').join(', '):'Not set';
+      const plateEntries=Object.entries(eq.plates||{}).filter(([,c])=>c>0).sort((a,b)=>parseFloat(b[0])-parseFloat(a[0]));
+      const plateSummary=plateEntries.length?plateEntries.map(([w,c])=>`${c}×${w}lb`).join(', '):'Not set';
+      const achievable=getAchievableBarWeights(eq.barWeight||15,eq.plates||{});
+      const maxBar=achievable.length?achievable[achievable.length-1]:0;
+      return`<div style="background:var(--s1);border:1px solid var(--b1);border-radius:14px;margin-bottom:14px;padding:14px 16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;text-transform:uppercase;">Equipment</div>
+          <button class="mini-btn" onclick="showEquipmentSheet()">Edit</button>
+        </div>
+        <div style="font-size:11px;color:var(--t3);margin-bottom:2px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;">Dumbbells</div>
+        <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:8px;">${dbSummary}</div>
+        <div style="font-size:11px;color:var(--t3);margin-bottom:2px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;">Plates · Bar ${eq.barWeight||15}lb · Max ${maxBar}lb loaded</div>
+        <div style="font-size:12px;color:var(--t2);line-height:1.6;">${plateSummary}</div>
+      </div>`;
+    })()}
     <div style="background:var(--s1);border:1px solid var(--b1);border-radius:14px;margin-bottom:14px;padding:14px 16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
         <div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;text-transform:uppercase;">Global Rest Timers</div>
@@ -8176,7 +8382,8 @@ const GAINZ_KEYS = [
   'gainz_rest','gainz_global_rest','gainz_custom_ex','gainz_ex_overrides',
   'gainz_profile','gainz_onboard_done','gainz_log_unit','gainz_view_unit',
   'gainz_protein_goal','gainz_protein_log','gainz_food_goals','gainz_macro_profile',
-  'gainz_checkins','gainz_voice','gainz_vibrate','gainz_water','gainz_pwa_dismissed','gainz_supps','gainz_custom_cardio'
+  'gainz_checkins','gainz_voice','gainz_vibrate','gainz_water','gainz_pwa_dismissed','gainz_supps','gainz_custom_cardio',
+  'gainz_equipment'
 ];
 
 function showSettingsSheet(){
