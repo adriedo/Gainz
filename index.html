@@ -8508,6 +8508,17 @@ function showSettingsSheet(){
     <button class="btn btn-acc btn-full" style="margin-bottom:10px;" onclick="exportGainzData()">⬇ Export Backup</button>
     <button class="btn btn-ghost btn-full" style="margin-bottom:24px;" onclick="closeSheets();showImportSheet()">⬆ Import / Restore</button>
 
+    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:10px;">Claude AI</div>
+    <div style="font-size:13px;color:var(--t2);margin-bottom:10px;line-height:1.5;">Required for AI food search and smart coaching. Get a key at <span style="color:var(--acc);">console.anthropic.com</span></div>
+    <div style="display:flex;gap:8px;margin-bottom:6px;">
+      <input type="password" id="settings-api-key" placeholder="sk-ant-…"
+        value="${localStorage.getItem('gainz_api_key')||''}"
+        style="flex:1;font-size:13px;letter-spacing:.05em;"
+        autocomplete="off" autocorrect="off" spellcheck="false">
+      <button class="btn btn-acc btn-sm" onclick="(()=>{const v=document.getElementById('settings-api-key')?.value?.trim();if(v){localStorage.setItem('gainz_api_key',v);showToast('API key saved ✓');}else{localStorage.removeItem('gainz_api_key');showToast('Key cleared');}})()">Save</button>
+    </div>
+    <div style="font-size:11px;color:var(--t3);margin-bottom:24px;">Stored locally on device. Never sent anywhere except Anthropic's API.</div>
+
     <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:10px;">About</div>
     <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--b1);">
       <span style="font-size:14px;font-weight:600;">GAINZ</span>
@@ -10200,31 +10211,38 @@ const LOCAL_FOODS = [
   {name:'Dark Chocolate (70%)',serving:28,servingUnit:'1oz',cal:170,protein:2,carbs:13,fat:12,source:'local'},
 ];
 
+function _localFoodToResult(f) {
+  const factor = 100 / (f.serving || 100);
+  return {
+    name: f.name, brand: '',
+    serving: f.serving, servingUnit: f.servingUnit,
+    cal: f.cal, g: f.protein, carbs: f.carbs, fat: f.fat,
+    per100: { cal: f.cal * factor, protein: f.protein * factor, carbs: f.carbs * factor, fat: f.fat * factor },
+    source: 'local',
+  };
+}
+
 function searchLocalFoods(query) {
   if(!query || query.length < 2) return [];
   const q = query.toLowerCase().trim();
-  const words = q.split(/\s+/);
-  const matches = LOCAL_FOODS.filter(f => {
+  const words = q.split(/\s+/).filter(w => w.length > 1);
+
+  // Pass 1: all words must match (exact)
+  const exact = LOCAL_FOODS.filter(f => {
     const name = f.name.toLowerCase();
     return words.every(w => name.includes(w));
   });
-  return matches.map(f => ({
-    name: f.name,
-    brand: '',
-    serving: f.serving,
-    servingUnit: f.servingUnit,
-    cal: f.cal,
-    g: f.protein,
-    carbs: f.carbs,
-    fat: f.fat,
-    per100: {
-      cal:     (f.cal / f.serving) * 100,
-      protein: (f.protein / f.serving) * 100,
-      carbs:   (f.carbs / f.serving) * 100,
-      fat:     (f.fat / f.serving) * 100,
-    },
-    source: 'local',
-  }));
+  if(exact.length) return exact.map(_localFoodToResult);
+
+  // Pass 2: fuzzy — score by fraction of query words found + query-in-name substring
+  const scored = LOCAL_FOODS.map(f => {
+    const name = f.name.toLowerCase();
+    const wordScore = words.filter(w => name.includes(w)).length / words.length;
+    const substringBonus = name.includes(q) ? 0.5 : 0;
+    return { f, score: wordScore + substringBonus };
+  }).filter(({score}) => score > 0).sort((a, b) => b.score - a.score);
+
+  return scored.slice(0, 5).map(({f}) => _localFoodToResult(f));
 }
 
 // Safari-safe timeout: use Promise.race instead of AbortController
@@ -10254,20 +10272,23 @@ async function checkNetwork() {
 }
 
 async function callClaude(systemPrompt, userMessage, maxTokens) {
+  const apiKey = localStorage.getItem('gainz_api_key') || '';
+  if(!apiKey) throw new Error('No API key — add your Anthropic key in Settings → Claude AI');
   const res = await fetchWithTimeout('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'x-api-key': apiKey,
       'anthropic-version': '2023-06-01',
       'anthropic-dangerous-direct-browser-access': 'true',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-5',
+      model: 'claude-sonnet-4-5-20251001',
       max_tokens: maxTokens || 800,
       system: systemPrompt,
       messages: [{role: 'user', content: userMessage}]
     })
-  }, 15000); // 15 second timeout
+  }, 15000);
   if(!res.ok) {
     const errText = await res.text().catch(() => '');
     throw new Error('HTTP ' + res.status + ': ' + errText.slice(0, 100));
@@ -10280,9 +10301,9 @@ async function callClaude(systemPrompt, userMessage, maxTokens) {
 async function searchWithAI(query) {
   try {
     const text = await callClaude(
-      'You are a comprehensive nutrition database covering ALL foods: grocery store products, restaurant items, fast food, whole foods, supplements, international foods, and anything in between. Given a food query, return ONLY a valid JSON array of up to 8 matching foods. Each item must have these exact fields: {"name":"Exact Product Name","brand":"Brand Name or empty string","serving":100,"servingUnit":"1 cup / 1 bar / 100g etc","cal":200,"protein":20,"carbs":10,"fat":8}. Use accurate real-world nutrition label values. Return ONLY the JSON array, no markdown, no explanation.',
+      'You are a comprehensive nutrition database. Given a food query, return ONLY a valid JSON array of up to 8 matching foods. Cover everything: whole/fresh foods (raw chicken tenderloin, beef, fish, vegetables, fruit), cooked preparations, restaurant dishes, packaged products, supplements, and international foods. For generic fresh/whole foods, use USDA standard values per 100g serving. Each item must have exactly these fields: {"name":"Descriptive Name (raw/cooked/preparation)","brand":"Brand or empty string","serving":100,"servingUnit":"100g or 1 piece / 1 cup etc","cal":200,"protein":20,"carbs":10,"fat":8}. Return multiple preparations if relevant (e.g. raw vs cooked). Return ONLY the JSON array, no markdown, no explanation.',
       query,
-      900
+      1000
     );
     const clean = text.replace(/```json?|```/g,'').trim();
     const items = JSON.parse(clean);
@@ -10579,16 +10600,19 @@ async function scanImageForFood(file) {
       const base64 = e.target.result.split(',')[1];
       const mimeType = file.type || 'image/jpeg';
       try {
+        const _scanApiKey = localStorage.getItem('gainz_api_key') || '';
+        if(!_scanApiKey) throw new Error('No API key');
         // Send image to Claude Vision — ask it to identify barcode AND product
         const res = await fetchWithTimeout('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'x-api-key': _scanApiKey,
             'anthropic-version': '2023-06-01',
             'anthropic-dangerous-direct-browser-access': 'true',
           },
           body: JSON.stringify({
-            model: 'claude-sonnet-4-5',
+            model: 'claude-sonnet-4-5-20251001',
             max_tokens: 500,
             messages: [{
               role: 'user',
@@ -10723,6 +10747,9 @@ function switchServingUnit(g, unit, chipEl) {
     _confirmFoodData.serving = g;
     _confirmFoodData.servingUnit = unit;
   }
+  // Clear custom amount if chips are used
+  const customEl = document.getElementById('fc-custom-amount');
+  if(customEl) customEl.value = '';
   const lbl = document.getElementById('fc-serving-label');
   if(lbl) lbl.textContent = 'Servings (1 = ' + unit + ')';
   document.querySelectorAll('.fc-unit-chip').forEach(c => {
@@ -10733,6 +10760,37 @@ function switchServingUnit(g, unit, chipEl) {
   });
   const servEl = document.getElementById('fc-servings');
   updateFoodServingDisplay(servEl ? servEl.value : 1);
+}
+
+function updateCustomAmount() {
+  const amountEl = document.getElementById('fc-custom-amount');
+  const unitEl   = document.getElementById('fc-custom-unit');
+  if(!amountEl || !unitEl) return;
+  const amount = parseFloat(amountEl.value);
+  if(!amount || isNaN(amount) || amount <= 0) return;
+  const unit = unitEl.value;
+  let grams = unit === 'oz' ? amount * 28.35
+            : unit === 'lb' ? amount * 453.6
+            : amount; // g or ml
+  grams = Math.round(grams * 10) / 10;
+  _activeServingG = grams;
+  _activeServingUnit = amount + unit;
+  if(_confirmFoodData) {
+    _confirmFoodData.serving = grams;
+    _confirmFoodData.servingUnit = amount + unit;
+  }
+  // Deactivate chips
+  document.querySelectorAll('.fc-unit-chip').forEach(c => {
+    c.style.borderColor = 'var(--b2)';
+    c.style.background  = 'var(--s2)';
+    c.style.color       = 'var(--t2)';
+  });
+  // Set servings to 1 — custom amount IS the total
+  const servEl = document.getElementById('fc-servings');
+  if(servEl) servEl.value = 1;
+  const lbl = document.getElementById('fc-serving-label');
+  if(lbl) lbl.textContent = 'Amount: ' + amount + ' ' + unit + ' ≈ ' + Math.round(grams) + 'g';
+  updateFoodServingDisplay(1);
 }
 
 function showAddFoodConfirmSheet(food) {
@@ -10787,7 +10845,21 @@ function showAddFoodConfirmSheet(food) {
             + '</div>';
         })()
     + '</div>'
-    + '<div class="field" style="margin-bottom:6px;">'
+    + '<div style="margin-top:10px;padding:10px 12px;background:var(--s2);border:1px solid var(--b1);border-radius:12px;">'
+    +   '<div style="font-size:11px;color:var(--t3);margin-bottom:7px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Custom amount</div>'
+    +   '<div style="display:flex;gap:8px;align-items:center;">'
+    +     '<input type="number" id="fc-custom-amount" placeholder="e.g. 200" min="0" step="any" inputmode="decimal"'
+    +       ' style="flex:1;text-align:center;font-size:18px;font-weight:700;" oninput="updateCustomAmount()">'
+    +     '<select id="fc-custom-unit" onchange="updateCustomAmount()"'
+    +       ' style="flex-shrink:0;padding:8px 12px;border-radius:10px;background:var(--s1);border:1px solid var(--b2);color:var(--t1);font-size:14px;font-weight:600;">'
+    +       '<option value="g">g</option>'
+    +       '<option value="oz">oz</option>'
+    +       '<option value="ml">ml</option>'
+    +       '<option value="lb">lb</option>'
+    +     '</select>'
+    +   '</div>'
+    + '</div>'
+    + '<div class="field" style="margin-bottom:6px;margin-top:12px;">'
     +   '<label>Meal</label>'
     +   '<select id="fc-meal"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option><option>Pre-workout</option><option>Post-workout</option></select>'
     + '</div>'
