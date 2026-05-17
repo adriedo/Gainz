@@ -2422,7 +2422,7 @@ function buildProgressionDirectivesCard(){
     if(type==='deload')return`↓ ${Math.round((1-multiplier)*100)}% off`;
     if(type==='consolidate')return'→ Hold';
     if(type==='progress')return'→ Push reps';
-    if(type==='capped')return'⚠ DB max';
+    if(type==='capped')return'⚠ at limit';
     return'→ Maintain';
   }
 
@@ -2432,10 +2432,12 @@ function buildProgressionDirectivesCard(){
     const bs=badgeStyle(d.actionType);
     // Truncate long names
     const shortName=d.name.length>22?d.name.replace(/Smith Machine /g,'SM ').replace(/Cable /g,'').replace(/Dumbbell /g,'DB '):d.name;
+    const cappedNote=d.actionType==='capped'?`<div style="font-size:10px;color:var(--org);margin-top:2px;">Equipment ceiling — update in Train → Edit</div>`:'';
     return`<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--b1);">
       <div style="flex:1;min-width:0;">
         <div style="font-size:13px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${shortName}</div>
         <div style="font-size:11px;color:var(--t3);margin-top:1px;">${weightStr}</div>
+        ${cappedNote}
       </div>
       <span style="flex-shrink:0;margin-left:10px;font-size:10px;font-weight:700;padding:3px 7px;border-radius:5px;letter-spacing:.04em;text-transform:uppercase;${bs}">${badge}</span>
     </div>`;
@@ -3499,6 +3501,7 @@ function renderTrainProgram(){
   const dayCards=program.map(d=>{
     const extraCount=d.exercises.length-3;
     // Map all exercises but skip unweighted ones (bodyweight/core with no weight history)
+    let dayHasCapped=false;
     const targetRows=d.exercises.map(name=>{
       const ls=getLastSets(name);
       const lastW=ls.length?Math.max(...ls.map(s=>parseFloat(s.weight)||0)):0;
@@ -3507,8 +3510,9 @@ function renderTrainProgram(){
       if(!lastW&&!tgtW)return'';
       const delta=tgtW-lastW;
       const capped=tgt.equipmentCapped;
+      if(capped)dayHasCapped=true;
       const dc=capped?'var(--org)':delta>0?'var(--acc)':delta<0?'#ff6b6b':'var(--t3)';
-      const dStr=capped?'max':delta>0?`+${delta}`:delta<0?`${delta}`:'=';
+      const dStr=capped?'⚠ cap':delta>0?`+${delta}`:delta<0?`${delta}`:'=';
       const tgtColor=capped?'var(--org)':'var(--t1)';
       return`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--b1);">
         <span style="flex:1;font-size:12px;font-weight:500;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${name}</span>
@@ -3518,10 +3522,12 @@ function renderTrainProgram(){
         <span style="font-size:10px;font-weight:700;min-width:26px;text-align:right;flex-shrink:0;color:${dc};">${dStr}</span>
       </div>`;
     }).filter(Boolean).slice(0,3).join('');
+    const cappedFooter=dayHasCapped?`<div style="font-size:10px;color:var(--org);margin-top:6px;">⚠ Equipment limit on some exercises — update in Edit</div>`:'';
     const targetsHtml=targetRows?`<div style="border-top:1px solid var(--b1);padding:10px 14px 12px;">
       <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-bottom:8px;">Today's Targets</div>
       ${targetRows}
       ${extraCount>0?`<div style="font-size:11px;color:var(--t3);margin-top:8px;text-align:center;">+ ${extraCount} more exercise${extraCount!==1?'s':''}</div>`:''}
+      ${cappedFooter}
     </div>`:'';
     return`
     <div class="day-card dc-${d.type}" onclick="launchWk('${d.id}')">
@@ -10077,6 +10083,48 @@ function deleteFoodItem(idx, dateKey) {
   renderFood();
 }
 
+function getLastLoggedDay(beforeDate) {
+  return proteinLog
+    .filter(e => e.date < beforeDate && e.items && e.items.length > 0)
+    .sort((a, b) => b.date.localeCompare(a.date))[0] || null;
+}
+
+function copyFoodFromDay(sourceDate, targetDate) {
+  const sourceEntry = proteinLog.find(e => e.date === sourceDate);
+  if(!sourceEntry || !sourceEntry.items.length) return;
+  let targetEntry = proteinLog.find(e => e.date === targetDate);
+  if(!targetEntry) { targetEntry = {date: targetDate, items: []}; proteinLog.unshift(targetEntry); }
+  const now = new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+  targetEntry.items.push(...sourceEntry.items.map(item => ({...item, time: now})));
+  proteinLog.sort((a, b) => b.date.localeCompare(a.date));
+  saveProteinLog();
+  renderFood();
+}
+
+// ─── MY FOODS ─────────────────────────────────────────────────────────────────
+function getMyFoods() {
+  try { return JSON.parse(localStorage.getItem('gainz_my_foods') || '[]'); } catch(e) { return []; }
+}
+function _myFoodKey(food) { return (food.name + '|' + (food.brand||'')).toLowerCase(); }
+function isMyFood(food) { return getMyFoods().some(f => _myFoodKey(f) === _myFoodKey(food)); }
+function saveMyFood(food) {
+  const foods = getMyFoods();
+  if(foods.some(f => _myFoodKey(f) === _myFoodKey(food))) return;
+  foods.unshift({...food, savedAt: Date.now()});
+  localStorage.setItem('gainz_my_foods', JSON.stringify(foods));
+}
+function removeMyFood(food) {
+  const key = _myFoodKey(food);
+  localStorage.setItem('gainz_my_foods', JSON.stringify(getMyFoods().filter(f => _myFoodKey(f) !== key)));
+}
+function toggleMyFoodFromSheet() {
+  const f = _confirmFoodData;
+  if(!f) return;
+  if(isMyFood(f)) removeMyFood(f); else saveMyFood(f);
+  const btn = document.getElementById('fc-save-btn');
+  if(btn) { const saved = isMyFood(f); btn.textContent = saved ? '♥' : '♡'; btn.style.color = saved ? '#ff4d6d' : 'var(--t3)'; }
+}
+
 // ─── RECENT FOODS ─────────────────────────────────────────────────────────────
 function getRecentFoods() {
   const seen = new Set();
@@ -10665,9 +10713,32 @@ function showFoodLoadingSheet(msg) {
 
 // ─── ADD FOOD CONFIRM SHEET ───────────────────────────────────────────────────
 let _confirmFoodData = null;
+let _activeServingG = 100;
+let _activeServingUnit = '100g';
+
+function switchServingUnit(g, unit, chipEl) {
+  _activeServingG = g;
+  _activeServingUnit = unit;
+  if(_confirmFoodData) {
+    _confirmFoodData.serving = g;
+    _confirmFoodData.servingUnit = unit;
+  }
+  const lbl = document.getElementById('fc-serving-label');
+  if(lbl) lbl.textContent = 'Servings (1 = ' + unit + ')';
+  document.querySelectorAll('.fc-unit-chip').forEach(c => {
+    const active = c === chipEl;
+    c.style.borderColor = active ? 'var(--acc)' : 'var(--b2)';
+    c.style.background  = active ? 'rgba(232,255,71,.15)' : 'var(--s2)';
+    c.style.color       = active ? 'var(--acc)' : 'var(--t2)';
+  });
+  const servEl = document.getElementById('fc-servings');
+  updateFoodServingDisplay(servEl ? servEl.value : 1);
+}
 
 function showAddFoodConfirmSheet(food) {
   _confirmFoodData = food;
+  _activeServingG   = food.serving || 100;
+  _activeServingUnit = food.servingUnit || '100g';
   const bg = document.createElement('div'); bg.className='sheet-bg'; bg.id='add-food-sheet';
 
   const sourceTag = food.source === 'ai'
@@ -10676,11 +10747,15 @@ function showAddFoodConfirmSheet(food) {
     ? ' <span style="font-size:10px;background:rgba(71,180,255,.15);color:#47b4ff;padding:2px 6px;border-radius:20px;font-weight:600;vertical-align:middle;">USDA</span>'
     : '';
 
+  const savedNow = isMyFood(food);
   bg.innerHTML = '<div class="sheet">'
     + '<div class="sheet-handle"></div>'
-    + '<div style="margin-bottom:14px;">'
-    +   '<div style="font-size:17px;font-weight:600;line-height:1.3;">' + food.name + sourceTag + '</div>'
-    +   (food.brand ? '<div style="font-size:12px;color:var(--t2);margin-top:2px;">' + food.brand + '</div>' : '')
+    + '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;">'
+    +   '<div style="flex:1;min-width:0;padding-right:8px;">'
+    +     '<div style="font-size:17px;font-weight:600;line-height:1.3;">' + food.name + sourceTag + '</div>'
+    +     (food.brand ? '<div style="font-size:12px;color:var(--t2);margin-top:2px;">' + food.brand + '</div>' : '')
+    +   '</div>'
+    +   '<button id="fc-save-btn" onclick="toggleMyFoodFromSheet()" style="background:none;border:none;font-size:22px;cursor:pointer;color:' + (savedNow?'#ff4d6d':'var(--t3)') + ';padding:0;flex-shrink:0;" title="Save to My Foods">' + (savedNow?'♥':'♡') + '</button>'
     + '</div>'
     + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;">'
     +   '<div class="metric-box" style="padding:10px;text-align:center;"><div class="metric-val a" id="fc-cal" style="font-size:22px;">' + food.cal + '</div><div class="metric-lbl">kcal</div></div>'
@@ -10689,12 +10764,28 @@ function showAddFoodConfirmSheet(food) {
     +   '<div class="metric-box" style="padding:10px;text-align:center;"><div class="metric-val" id="fc-f" style="font-size:22px;color:#ff9147;">' + food.fat + 'g</div><div class="metric-lbl">fat</div></div>'
     + '</div>'
     + '<div class="field">'
-    +   '<label>Servings (1 = ' + (food.servingUnit||'1 serving') + ')</label>'
+    +   '<label id="fc-serving-label">Servings (1 = ' + (food.servingUnit||'1 serving') + ')</label>'
     +   '<div style="display:flex;align-items:center;gap:10px;">'
     +     '<button onclick="adjServings(-0.5)" style="width:40px;height:40px;border-radius:50%;background:var(--s2);border:1px solid var(--b2);color:var(--t1);font-size:20px;cursor:pointer;flex-shrink:0;">−</button>'
     +     '<input type="number" id="fc-servings" value="1" min="0.25" step="0.25" inputmode="decimal" style="flex:1;text-align:center;font-size:22px;font-weight:700;" oninput="updateFoodServingDisplay(this.value)">'
     +     '<button onclick="adjServings(0.5)" style="width:40px;height:40px;border-radius:50%;background:var(--s2);border:1px solid var(--b2);color:var(--t1);font-size:20px;cursor:pointer;flex-shrink:0;">+</button>'
     +   '</div>'
+    +   (() => {
+          const nativeG = food.serving || 100;
+          const nativeU = food.servingUnit || '100g';
+          const chips = [{g: nativeG, u: nativeU}];
+          if(Math.round(nativeG) !== 100) chips.push({g: 100, u: '100g'});
+          if(Math.round(nativeG) !== 28)  chips.push({g: 28,  u: '1 oz'});
+          const chipStyle = (active) =>
+            'fc-unit-chip" style="font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid ' +
+            (active ? 'var(--acc);background:rgba(232,255,71,.15);color:var(--acc)' : 'var(--b2);background:var(--s2);color:var(--t2)') +
+            ';cursor:pointer;white-space:nowrap;"';
+          return '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">'
+            + chips.map((c,i) =>
+                '<button class="' + chipStyle(i===0) + ' onclick="switchServingUnit(' + c.g + ',\'' + c.u.replace(/'/g,"\\'") + '\',this)">' + c.u + '</button>'
+              ).join('')
+            + '</div>';
+        })()
     + '</div>'
     + '<div class="field" style="margin-bottom:6px;">'
     +   '<label>Meal</label>'
@@ -10766,6 +10857,91 @@ function confirmAddFood() {
   renderFood();
 }
 
+// ─── EDIT LOGGED FOOD ─────────────────────────────────────────────────────────
+let _editFoodIdx = null;
+let _editFoodDate = null;
+
+function updateFoodItem(idx, dateKey, changes) {
+  const entry = proteinLog.find(e => e.date === dateKey);
+  if(!entry || !entry.items[idx]) return;
+  entry.items[idx] = { ...entry.items[idx], ...changes };
+  saveProteinLog();
+  renderFood();
+}
+
+function showEditFoodSheet(idx, dateKey) {
+  const entry = proteinLog.find(e => e.date === dateKey);
+  if(!entry || !entry.items[idx]) return;
+  const item = entry.items[idx];
+
+  const servings = item.servings || 1;
+  const serving  = item.serving  || 100;
+  const factor   = servings * serving / 100;
+  const per100   = {
+    cal:     factor > 0 ? (item.cal   || 0) / factor : 0,
+    protein: factor > 0 ? (item.g     || 0) / factor : 0,
+    carbs:   factor > 0 ? (item.carbs || 0) / factor : 0,
+    fat:     factor > 0 ? (item.fat   || 0) / factor : 0,
+  };
+
+  _confirmFoodData = { ...item, g: item.g, per100 };
+  _editFoodIdx  = idx;
+  _editFoodDate = dateKey;
+
+  const bg = document.createElement('div'); bg.className='sheet-bg'; bg.id='edit-food-sheet';
+  bg.innerHTML = '<div class="sheet">'
+    + '<div class="sheet-handle"></div>'
+    + '<div style="margin-bottom:14px;">'
+    +   '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:4px;">Edit entry</div>'
+    +   '<div style="font-size:17px;font-weight:600;line-height:1.3;">' + item.name + '</div>'
+    +   (item.brand ? '<div style="font-size:12px;color:var(--t2);margin-top:2px;">' + item.brand + '</div>' : '')
+    + '</div>'
+    + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;">'
+    +   '<div class="metric-box" style="padding:10px;text-align:center;"><div class="metric-val a" id="fc-cal" style="font-size:22px;">' + item.cal + '</div><div class="metric-lbl">kcal</div></div>'
+    +   '<div class="metric-box" style="padding:10px;text-align:center;"><div class="metric-val" id="fc-p" style="font-size:22px;color:#47b4ff;">' + item.g + 'g</div><div class="metric-lbl">protein</div></div>'
+    +   '<div class="metric-box" style="padding:10px;text-align:center;"><div class="metric-val" id="fc-c" style="font-size:22px;color:#ffb347;">' + item.carbs + 'g</div><div class="metric-lbl">carbs</div></div>'
+    +   '<div class="metric-box" style="padding:10px;text-align:center;"><div class="metric-val" id="fc-f" style="font-size:22px;color:#ff9147;">' + item.fat + 'g</div><div class="metric-lbl">fat</div></div>'
+    + '</div>'
+    + '<div class="field">'
+    +   '<label>Servings (1 = ' + (item.servingUnit || '1 serving') + ')</label>'
+    +   '<div style="display:flex;align-items:center;gap:10px;">'
+    +     '<button onclick="adjServings(-0.5)" style="width:40px;height:40px;border-radius:50%;background:var(--s2);border:1px solid var(--b2);color:var(--t1);font-size:20px;cursor:pointer;flex-shrink:0;">−</button>'
+    +     '<input type="number" id="fc-servings" value="' + servings + '" min="0.25" step="0.25" inputmode="decimal" style="flex:1;text-align:center;font-size:22px;font-weight:700;" oninput="updateFoodServingDisplay(this.value)">'
+    +     '<button onclick="adjServings(0.5)" style="width:40px;height:40px;border-radius:50%;background:var(--s2);border:1px solid var(--b2);color:var(--t1);font-size:20px;cursor:pointer;flex-shrink:0;">+</button>'
+    +   '</div>'
+    + '</div>'
+    + '<div class="field" style="margin-bottom:6px;">'
+    +   '<label>Meal</label>'
+    +   '<select id="fc-meal"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option><option>Pre-workout</option><option>Post-workout</option></select>'
+    + '</div>'
+    + '<button class="btn btn-acc btn-full" style="margin-top:10px;" onclick="confirmEditFood()">Save changes</button>'
+    + '<button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="closeSheets()">Cancel</button>'
+    + '</div>';
+  bg.addEventListener('click', e => { if(e.target===bg) bg.remove(); });
+  document.body.appendChild(bg);
+
+  const mealEl = document.getElementById('fc-meal');
+  if(mealEl && item.meal) mealEl.value = item.meal;
+}
+
+function confirmEditFood() {
+  const servings = parseFloat(document.getElementById('fc-servings')?.value) || 1;
+  const meal     = document.getElementById('fc-meal')?.value || 'Dinner';
+  const f = _confirmFoodData;
+  if(!f || _editFoodIdx === null) return;
+  const factor = servings * (f.serving || 100) / 100;
+  const p = f.per100 || {};
+  updateFoodItem(_editFoodIdx, _editFoodDate, {
+    meal,
+    servings,
+    cal:   Math.round((p.cal     || 0) * factor),
+    g:     Math.round((p.protein || 0) * factor * 10) / 10,
+    carbs: Math.round((p.carbs   || 0) * factor * 10) / 10,
+    fat:   Math.round((p.fat     || 0) * factor * 10) / 10,
+  });
+  closeSheets();
+}
+
 // ─── MANUAL FOOD ENTRY ────────────────────────────────────────────────────────
 function showManualFoodSheet(prefill) {
   const f = prefill || {};
@@ -10809,6 +10985,70 @@ function submitManualFood() {
 }
 
 // ─── FOOD SEARCH SHEET ────────────────────────────────────────────────────────
+let _liveSearchVer = 0;
+
+function _buildQuickFoodRow(f, attrKey, idx) {
+  return '<div class="food-search-result" data-' + attrKey + '="' + idx + '">'
+    + '<div style="flex:1;min-width:0;padding-right:8px;">'
+    +   '<div style="font-size:14px;font-weight:500;line-height:1.3;">' + f.name + '</div>'
+    +   '<div style="font-size:11px;color:var(--t2);margin-top:2px;">'
+    +     (f.brand ? '<strong>' + f.brand + '</strong> · ' : '')
+    +     (f.servingUnit || (f.serving ? f.serving + 'g' : ''))
+    +   '</div>'
+    + '</div>'
+    + '<div style="text-align:right;flex-shrink:0;">'
+    +   '<div style="font-family:Barlow Condensed,sans-serif;font-size:20px;font-weight:700;color:var(--acc);">' + (f.cal||'—') + '</div>'
+    +   '<div style="font-size:9px;color:var(--t3);">kcal</div>'
+    +   '<div style="font-size:10px;margin-top:2px;color:#47b4ff;">' + (f.g||0) + 'g P</div>'
+    + '</div>'
+    + '</div>';
+}
+
+const _sectionHdr = (label) =>
+  '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:6px;margin-top:10px;">' + label + '</div>';
+
+function _showRecentInSearchResults(el) {
+  if(!el) return;
+  const myFoods = getMyFoods().slice(0, 6);
+  const recent  = getRecentFoods().slice(0, 5);
+
+  if(!myFoods.length && !recent.length) {
+    el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--t3);">Type a food, brand, or product name</div>';
+    return;
+  }
+
+  let html = '';
+  if(myFoods.length) {
+    html += _sectionHdr('My Foods');
+    html += myFoods.map((f, i) => _buildQuickFoodRow(f, 'mfi', i)).join('');
+  }
+  if(recent.length) {
+    html += _sectionHdr('Recently logged');
+    html += recent.map((f, i) => _buildQuickFoodRow(f, 'rsi', i)).join('');
+  }
+  el.innerHTML = html;
+
+  window._mySearchFoods    = myFoods;
+  window._recentSearchFoods = recent;
+
+  el.querySelectorAll('.food-search-result[data-mfi]').forEach(row => {
+    row.addEventListener('click', () => {
+      const f = window._mySearchFoods[parseInt(row.dataset.mfi)];
+      if(!f) return;
+      f.per100 = f.per100 || {cal: f.cal, protein: f.g, carbs: f.carbs, fat: f.fat};
+      closeSheets(); showAddFoodConfirmSheet(f);
+    });
+  });
+  el.querySelectorAll('.food-search-result[data-rsi]').forEach(row => {
+    row.addEventListener('click', () => {
+      const f = window._recentSearchFoods[parseInt(row.dataset.rsi)];
+      if(!f) return;
+      f.per100 = f.per100 || {cal: f.cal, protein: f.g, carbs: f.carbs, fat: f.fat};
+      closeSheets(); showAddFoodConfirmSheet(f);
+    });
+  });
+}
+
 function showFoodSearchSheet(prefillQuery) {
   const bg = document.createElement('div'); bg.className='sheet-bg';
   bg.innerHTML = '<div class="sheet" style="max-height:94dvh;">'
@@ -10819,7 +11059,7 @@ function showFoodSearchSheet(prefillQuery) {
     +   '<button class="btn btn-acc btn-sm" style="flex-shrink:0;min-width:60px;" onclick="runFoodSearch()">Search</button>'
     + '</div>'
     + '<div style="font-size:11px;color:var(--t3);margin-bottom:8px;">Open Food Facts · USDA · AI — 3M+ products</div>'
-    + '<div id="food-search-results"><div style="padding:20px;text-align:center;color:var(--t3);">Type a food, brand, or product name</div></div>'
+    + '<div id="food-search-results"></div>'
     + '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--b1);">'
     +   '<button class="btn btn-ghost btn-full btn-sm" onclick="closeSheets();showManualFoodSheet()">+ Log manually instead</button>'
     + '</div>'
@@ -10828,10 +11068,36 @@ function showFoodSearchSheet(prefillQuery) {
   document.body.appendChild(bg);
 
   const inp = document.getElementById('food-search-input');
+  const resultsEl = document.getElementById('food-search-results');
+
+  // Show recent foods immediately before the user types anything
+  _showRecentInSearchResults(resultsEl);
+
   if(inp) {
     if(prefillQuery) { inp.value = prefillQuery; setTimeout(() => runFoodSearch(), 100); }
     else setTimeout(() => inp.focus(), 150);
     inp.addEventListener('keydown', e => { if(e.key==='Enter') runFoodSearch(); });
+
+    // Live search: local results instantly, full search debounced
+    let _debounce = null;
+    inp.addEventListener('input', () => {
+      clearTimeout(_debounce);
+      const q = inp.value.trim();
+      if(!q) { _showRecentInSearchResults(resultsEl); return; }
+
+      // Instant local results so the list isn't empty while APIs load
+      const localR = searchLocalFoods(q);
+      if(localR.length) renderSearchResults(localR, q, resultsEl, true);
+      else resultsEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t2);font-size:13px;">Searching…</div>';
+
+      _debounce = setTimeout(() => {
+        const ver = ++_liveSearchVer;
+        searchFood(q).then(foods => {
+          if(ver !== _liveSearchVer) return; // stale — newer search is running
+          renderSearchResults(foods, q, resultsEl, false);
+        });
+      }, 450);
+    });
   }
 }
 
@@ -10839,6 +11105,7 @@ async function runFoodSearch() {
   const q = (document.getElementById('food-search-input')?.value || '').trim();
   if(!q) return;
   const resultsEl = document.getElementById('food-search-results');
+  const ver = ++_liveSearchVer;
 
   // Show local results immediately while APIs load
   const localResults = searchLocalFoods(q);
@@ -10856,6 +11123,7 @@ async function runFoodSearch() {
   }
 
   const foods = await searchFood(q);
+  if(ver !== _liveSearchVer) return; // a newer search has already taken over
 
   if(!resultsEl) return;
   if(!foods.length) {
@@ -10869,31 +11137,6 @@ async function runFoodSearch() {
       + '</div>';
     return;
   }
-
-  const sourceBadge = {
-    off:   '<span style="font-size:9px;background:rgba(71,255,138,.15);color:var(--grn);padding:1px 5px;border-radius:3px;margin-left:4px;">OFF</span>',
-    usda:  '<span style="font-size:9px;background:rgba(71,180,255,.15);color:#47b4ff;padding:1px 5px;border-radius:3px;margin-left:4px;">USDA</span>',
-    ai:    '<span style="font-size:9px;background:rgba(232,255,71,.15);color:var(--acc);padding:1px 5px;border-radius:3px;margin-left:4px;">AI</span>',
-    local: '',
-  };
-
-  resultsEl.innerHTML = '<div style="font-size:11px;color:var(--t3);margin-bottom:8px;">' + foods.length + ' results for "' + q + '"</div>'
-    + foods.map((f, i) => (
-      '<div class="food-search-result" data-fi="' + i + '">'
-      + '<div style="flex:1;min-width:0;padding-right:8px;">'
-      +   '<div style="font-size:14px;font-weight:500;line-height:1.3;">' + f.name + (sourceBadge[f.source]||'') + '</div>'
-      +   '<div style="font-size:11px;color:var(--t2);margin-top:2px;">'
-      +     (f.brand ? '<strong>' + f.brand + '</strong> · ' : '')
-      +     (f.servingUnit || '')
-      +   '</div>'
-      + '</div>'
-      + '<div style="text-align:right;flex-shrink:0;">'
-      +   '<div style="font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:700;color:var(--acc);">' + (f.cal||'—') + '</div>'
-      +   '<div style="font-size:9px;color:var(--t3);">kcal</div>'
-      +   '<div style="font-size:10px;color:#47b4ff;margin-top:1px;">' + (f.g||0) + 'g P</div>'
-      + '</div>'
-      + '</div>'
-    )).join('');
 
   renderSearchResults(foods, q, resultsEl, false);
 }
@@ -10916,32 +11159,59 @@ function renderSearchResults(foods, q, resultsEl, isPartial) {
     local: '',
   };
 
-  resultsEl.innerHTML = '<div style="font-size:11px;color:var(--t3);margin-bottom:8px;">'
+  // My Foods matches (shown above API results)
+  const ql = q.toLowerCase();
+  const myMatches = getMyFoods().filter(f =>
+    f.name.toLowerCase().includes(ql) || (f.brand||'').toLowerCase().includes(ql)
+  ).slice(0, 3);
+  window._mySearchFoods = myMatches;
+  const myFoodsSection = myMatches.length
+    ? _sectionHdr('My Foods')
+      + myMatches.map((f, i) => _buildQuickFoodRow(f, 'mfi', i)).join('')
+    : '';
+
+  resultsEl.innerHTML = myFoodsSection
+    + '<div style="font-size:11px;color:var(--t3);margin-bottom:8px;' + (myMatches.length ? 'margin-top:10px;' : '') + '">'
     + foods.length + ' results' + (isPartial ? ' — loading more…' : '')
     + (_networkAvailable===false ? ' · <span style="color:var(--org);">📡 local only</span>' : '')
     + '</div>'
-    + foods.map((f, i) => (
-      '<div class="food-search-result" data-fi="' + i + '">'
+    + foods.map((f, i) => {
+      const pEff = f.cal > 0 ? Math.round((f.g / f.cal) * 100) : 0;
+      const effBadge = pEff >= 15
+        ? '<span style="font-size:9px;font-weight:700;background:rgba(71,255,138,.12);color:var(--grn);padding:1px 6px;border-radius:3px;margin-left:5px;vertical-align:middle;">⚡ ' + pEff + 'g/100kcal</span>'
+        : pEff >= 8
+        ? '<span style="font-size:9px;font-weight:600;background:rgba(232,255,71,.07);color:var(--acc);padding:1px 6px;border-radius:3px;margin-left:5px;vertical-align:middle;">' + pEff + 'g/100kcal</span>'
+        : '';
+      return '<div class="food-search-result" data-fi="' + i + '">'
       + '<div style="flex:1;min-width:0;padding-right:8px;">'
       +   '<div style="font-size:14px;font-weight:500;line-height:1.3;">' + f.name + (sourceBadge[f.source]||'') + '</div>'
       +   '<div style="font-size:11px;color:var(--t2);margin-top:2px;">'
       +     (f.brand ? '<strong>' + f.brand + '</strong> · ' : '')
       +     (f.servingUnit || '')
+      +     effBadge
       +   '</div>'
       + '</div>'
       + '<div style="text-align:right;flex-shrink:0;">'
-      +   '<div style="font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:700;color:var(--acc);">' + (f.cal||'—') + '</div>'
+      +   '<div style="font-family:Barlow Condensed,sans-serif;font-size:20px;font-weight:700;color:var(--acc);">' + (f.cal||'—') + '</div>'
       +   '<div style="font-size:9px;color:var(--t3);">kcal</div>'
-      +   '<div style="font-size:10px;color:#47b4ff;margin-top:1px;">' + (f.g||0) + 'g P</div>'
+      +   '<div style="font-size:10px;margin-top:2px;white-space:nowrap;">' + (f.g||0) + 'g <span style="color:#47b4ff;">P</span> · ' + (f.carbs||0) + 'g <span style="color:#ffb347;">C</span> · ' + (f.fat||0) + 'g <span style="color:#ff9147;">F</span></div>'
       + '</div>'
-      + '</div>'
-    )).join('');
+      + '</div>';
+    }).join('');
 
   window._searchFoods = foods;
-  resultsEl.querySelectorAll('.food-search-result').forEach(el => {
+  resultsEl.querySelectorAll('.food-search-result[data-fi]').forEach(el => {
     el.addEventListener('click', () => {
       const f = window._searchFoods[parseInt(el.dataset.fi)];
       if(f) { closeSheets(); showAddFoodConfirmSheet(f); }
+    });
+  });
+  resultsEl.querySelectorAll('.food-search-result[data-mfi]').forEach(el => {
+    el.addEventListener('click', () => {
+      const f = (window._mySearchFoods||[])[parseInt(el.dataset.mfi)];
+      if(!f) return;
+      f.per100 = f.per100 || {cal: f.cal, protein: f.g, carbs: f.carbs, fat: f.fat};
+      closeSheets(); showAddFoodConfirmSheet(f);
     });
   });
 }
@@ -11200,7 +11470,7 @@ function renderFood() {
       // Items
       + (entries.length
         ? entries.map(({item, idx}) => (
-          '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--b1);">'
+          '<div class="food-log-row" data-eidx="' + idx + '" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--b1);cursor:pointer;">'
           + '<div style="flex:1;min-width:0;margin-right:10px;">'
           +   '<div style="font-size:14px;font-weight:500;line-height:1.3;">' + item.name + '</div>'
           +   '<div style="font-size:11px;color:var(--t2);margin-top:2px;">'
@@ -11254,10 +11524,30 @@ function renderFood() {
       + '</div>'
     : '';
 
+  // Copy-from-previous-day banner — shown when the viewed day has no food logged
+  const lastLogged = getLastLoggedDay(foodViewDate);
+  let copyBanner = '';
+  if(items.length === 0 && lastLogged) {
+    const srcDate = new Date(lastLogged.date + 'T12:00:00');
+    const today2  = new Date(foodViewDate + 'T12:00:00');
+    const diffDays = Math.round((today2 - srcDate) / 86400000);
+    const srcLabel = diffDays === 1 ? 'yesterday'
+      : srcDate.toLocaleDateString('en-US', {weekday:'long'});
+    const srcItemCount = lastLogged.items.length;
+    const srcCal = lastLogged.items.reduce((a, it) => a + (parseInt(it.cal)||0), 0);
+    copyBanner = '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;background:var(--s2);border:1px solid var(--b1);border-radius:14px;margin-bottom:10px;">'
+      + '<div style="flex:1;min-width:0;">'
+      +   '<div style="font-size:12px;font-weight:700;color:var(--t1);">Copy from ' + srcLabel + '</div>'
+      +   '<div style="font-size:11px;color:var(--t3);margin-top:2px;">' + srcItemCount + ' item' + (srcItemCount !== 1 ? 's' : '') + ' · ' + srcCal + ' kcal</div>'
+      + '</div>'
+      + '<button onclick="copyFoodFromDay(\'' + lastLogged.date + '\',\'' + foodViewDate + '\')" style="flex-shrink:0;padding:8px 14px;background:var(--acc);color:#000;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation;">Copy day</button>'
+      + '</div>';
+  }
+
   // Hydration card — only show for today (no historical hydration data by date)
   const hydrationCardHTML = isToday ? buildHydrationHTML() : '';
 
-  scroll.innerHTML = summaryCard + actions
+  scroll.innerHTML = summaryCard + actions + copyBanner
     + mealOrder.map(m => mealSection(m)).join('')
     + recentSection
     + hydrationCardHTML;
@@ -11267,6 +11557,13 @@ function renderFood() {
     btn.addEventListener('click', e => {
       e.stopPropagation();
       deleteFoodItem(parseInt(btn.dataset.didx), foodViewDate);
+    });
+  });
+
+  // Wire food log rows — tap to edit
+  scroll.querySelectorAll('.food-log-row').forEach(row => {
+    row.addEventListener('click', () => {
+      showEditFoodSheet(parseInt(row.dataset.eidx), foodViewDate);
     });
   });
 
