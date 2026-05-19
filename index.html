@@ -1882,7 +1882,7 @@ function buildIdentityCard(){
   function isoWeekKey(date){
     const d=new Date(date);const day=d.getDay();
     d.setDate(d.getDate()-((day+6)%7));d.setHours(0,0,0,0);
-    return d.toISOString().split('T')[0];
+    return d.toLocaleDateString('en-CA');
   }
 
   const byWeek={};
@@ -1947,7 +1947,7 @@ function buildIdentityCard(){
   // Build all week keys from 8 weeks ago to now
   function prevWeekKey(key,n){
     const d=new Date(key+'T12:00:00');d.setDate(d.getDate()-(n*7));
-    return d.toISOString().split('T')[0];
+    return d.toLocaleDateString('en-CA');
   }
   let consecutiveWeeks=0;
   // Start from last complete week; if current week has sessions count it too
@@ -2083,7 +2083,7 @@ function toggleOnTrackDetail(){
 
 function buildOnTrackCard(){
   const today=new Date();
-  const todayStr=today.toISOString().split('T')[0];
+  const todayStr=today.toLocaleDateString('en-CA');
 
   // ── 1. STRENGTH SIGNAL ─────────────────────────────────────────────────────
   // Look at all exercises across the program over the last 4 weeks.
@@ -2139,7 +2139,7 @@ function buildOnTrackCard(){
   let nutritionGoodDays=0,nutritionTrackedDays=0;
   for(let i=0;i<7;i++){
     const d=new Date(today);d.setDate(today.getDate()-i);
-    const key=d.toISOString().split('T')[0];
+    const key=d.toLocaleDateString('en-CA');
     const entry=proteinLog.find(e=>e.date===key);
     if(!entry||!entry.items||!entry.items.length)continue;
     nutritionTrackedDays++;
@@ -2255,7 +2255,7 @@ function computeLoadMultiplier(){
     const d=new Date(now);
     const day=d.getDay();
     d.setDate(d.getDate()-((day+6)%7)-(offsetWeeks*7));
-    return d.toISOString().split('T')[0];
+    return d.toLocaleDateString('en-CA');
   }
   const thisCI=checkIns[weekKey(0)]||null;
   const lastCI=checkIns[weekKey(1)]||null;
@@ -3447,7 +3447,10 @@ function viewSession(sid){
     <div class="sheet-handle"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
       <div class="bc" style="font-size:26px;font-weight:800;text-transform:uppercase;color:${typeColor(tc)}">${s.dayName}</div>
-      <button class="discard-btn" data-delsid style="width:auto;padding:6px 12px;margin:0;font-size:12px">Delete</button>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button data-editsid style="font-size:12px;font-weight:600;color:var(--acc);background:rgba(232,255,71,.1);border:1px solid rgba(232,255,71,.25);border-radius:8px;padding:6px 12px;cursor:pointer;">✏ Edit</button>
+        <button class="discard-btn" data-delsid style="width:auto;padding:6px 12px;margin:0;font-size:12px">Delete</button>
+      </div>
     </div>
     <div style="font-size:13px;color:var(--t2);margin-bottom:14px">${ds}</div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
@@ -3459,9 +3462,112 @@ function viewSession(sid){
     ${s.entries.map(e=>`<div class="sess-ex-block"><div class="sess-ex-name">${e.exercise}</div>${e.sets.map((st,i)=>`<div class="sess-set-row"><div class="sess-set-n">${i+1}</div><div class="sess-set-data">${st.weight?`<b>${st.weight}</b> lb × <b>${st.reps}</b> reps`:`<b>${st.reps}</b> reps`}</div>${st.rpe?`<div class="rpe-badge ${rpeColorClass(st.rpe)}" style="margin-left:auto;">RPE ${st.rpe}</div>`:''}</div>`).join('')}</div>`).join('')}
     <button class="btn btn-ghost btn-full" style="margin-top:14px" data-close="1">Close</button>
   </div>`;
+  bg.querySelector('[data-editsid]')?.addEventListener('click',()=>{bg.remove();editSession(sid);});
   bg.querySelector('[data-delsid]')?.addEventListener('click',()=>{bg.remove();delSession(sid);});
   bg.querySelector('[data-close]')?.addEventListener('click',()=>bg.remove());
   bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
+  document.body.appendChild(bg);
+}
+
+function editSession(sid){
+  // Fetch live session (entries are references into wkLog)
+  const s = getSessions().find(x=>String(x.sid)===String(sid));
+  if(!s || s.isCardio) return;
+  const d = new Date(s.date);
+  const ds = d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+
+  // Build editable HTML for all exercises + sets
+  function buildEditorHtml(){
+    return s.entries.map((e,ei)=>{
+      const setsHtml = e.sets.map((st,si)=>`
+        <div style="display:flex;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid var(--b1);">
+          <span style="font-size:12px;color:var(--t3);width:18px;text-align:center;flex-shrink:0;">${si+1}</span>
+          <input type="number" inputmode="decimal" placeholder="lbs" value="${st.weight||''}"
+            data-ei="${ei}" data-si="${si}" data-field="weight"
+            style="width:72px;font-size:20px;font-weight:800;text-align:center;font-family:'Barlow Condensed',sans-serif;background:var(--s2);border:1px solid var(--b2);border-radius:8px;color:var(--t1);padding:6px 4px;">
+          <span style="font-size:13px;color:var(--t3);">×</span>
+          <input type="number" inputmode="numeric" placeholder="reps" value="${st.reps||''}"
+            data-ei="${ei}" data-si="${si}" data-field="reps"
+            style="width:62px;font-size:20px;font-weight:800;text-align:center;font-family:'Barlow Condensed',sans-serif;background:var(--s2);border:1px solid var(--b2);border-radius:8px;color:var(--t1);padding:6px 4px;">
+          <button data-del-set data-ei="${ei}" data-si="${si}"
+            style="width:30px;height:30px;flex-shrink:0;background:rgba(255,71,71,.08);border:1px solid rgba(255,71,71,.18);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-left:auto;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ff4747" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>`).join('');
+      return `<div style="margin-bottom:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
+          <div style="font-size:13px;font-weight:700;color:var(--t1);">${e.exercise}</div>
+          <button data-add-set data-ei="${ei}"
+            style="font-size:11px;font-weight:700;color:var(--acc);background:rgba(232,255,71,.1);border:1px solid rgba(232,255,71,.2);border-radius:6px;padding:4px 10px;cursor:pointer;">+ Set</button>
+        </div>
+        <div data-sets-ei="${ei}">${setsHtml}</div>
+      </div>`;
+    }).join('');
+  }
+
+  const bg = document.createElement('div'); bg.className='sheet-bg';
+  bg.innerHTML = `<div class="sheet" style="max-height:92dvh;overflow-y:auto;">
+    <div class="sheet-handle"></div>
+    <div style="margin-bottom:4px;">
+      <div class="bc" style="font-size:24px;font-weight:800;text-transform:uppercase;">Edit: ${s.dayName}</div>
+      <div style="font-size:13px;color:var(--t2);margin-top:2px;">${ds}</div>
+    </div>
+    <div style="font-size:11px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin:14px 0 8px;">Exercises &amp; Sets</div>
+    <div id="ses-edit-body">${buildEditorHtml()}</div>
+    <button id="ses-save-btn" class="btn btn-acc btn-full" style="margin-top:8px;">Save Changes</button>
+    <button id="ses-cancel-btn" class="btn btn-ghost btn-full" style="margin-top:8px;">Cancel</button>
+  </div>`;
+
+  // Flush current inputs into the live entry objects
+  function syncToData(){
+    bg.querySelectorAll('input[data-field]').forEach(inp=>{
+      const ei=parseInt(inp.dataset.ei), si=parseInt(inp.dataset.si), field=inp.dataset.field;
+      if(!s.entries[ei]?.sets[si]) return;
+      s.entries[ei].sets[si][field] = field==='reps' ? (parseInt(inp.value)||0) : (parseFloat(inp.value)||0);
+    });
+  }
+
+  function rerender(){
+    syncToData();
+    bg.querySelector('#ses-edit-body').innerHTML = buildEditorHtml();
+    wireEditor();
+  }
+
+  function wireEditor(){
+    // Add set — copies last set's weight as default
+    bg.querySelectorAll('[data-add-set]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        syncToData();
+        const ei=parseInt(btn.dataset.ei);
+        const last = s.entries[ei].sets[s.entries[ei].sets.length-1]||{};
+        s.entries[ei].sets.push({weight:last.weight||0, reps:last.reps||0, rpe:null});
+        rerender();
+      });
+    });
+    // Delete set
+    bg.querySelectorAll('[data-del-set]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const ei=parseInt(btn.dataset.ei), si=parseInt(btn.dataset.si);
+        if(s.entries[ei].sets.length<=1){showToast('Need at least 1 set');return;}
+        syncToData();
+        s.entries[ei].sets.splice(si,1);
+        rerender();
+      });
+    });
+  }
+
+  bg.querySelector('#ses-save-btn').addEventListener('click',()=>{
+    syncToData();
+    saveLog(); // entries are references into wkLog — already mutated
+    showToast('Session saved ✓');
+    bg.remove();
+    renderCalendar();
+    if(eid('s-history')?.classList.contains('on')) renderHistory();
+    renderHome();
+  });
+  bg.querySelector('#ses-cancel-btn').addEventListener('click',()=>bg.remove());
+  bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
+  wireEditor();
   document.body.appendChild(bg);
 }
 
@@ -3648,7 +3754,7 @@ function buildActivityStats(){
 
   function hasActivityOn(d){
     const dk=d.toDateString();
-    const iso=d.toISOString().split('T')[0];
+    const iso=d.toLocaleDateString('en-CA');
     return !!dateMap[dk]||!!foodDateMap[iso];
   }
   function shiftDay(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
@@ -3802,6 +3908,9 @@ function showDayDetailSheet(dateStr){
         const sets = s.entries.reduce((a,e)=>a+e.sets.length,0);
         const vol = Math.round(s.entries.reduce((a,e)=>a+e.sets.reduce((b,x)=>(b+(parseFloat(x.weight)||0)*(parseInt(x.reps)||0)),0),0));
         const timeStr = new Date(s.date).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+        const editBtn = s.isCardio ? '' : `<button data-edit-sid="${s.sid}" style="width:34px;height:34px;flex-shrink:0;background:rgba(232,255,71,.08);border:1px solid rgba(232,255,71,.2);border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Edit session">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--acc)" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>`;
         return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
           <div data-view-sid="${s.sid}" style="flex:1;display:flex;align-items:center;justify-content:space-between;background:var(--s3);border-radius:10px;padding:11px 13px;cursor:pointer;">
             <div>
@@ -3810,6 +3919,7 @@ function showDayDetailSheet(dateStr){
             </div>
             <div style="font-size:11px;color:var(--t3);">${timeStr} ›</div>
           </div>
+          ${editBtn}
           <button data-del-sid="${s.sid}" style="width:34px;height:34px;flex-shrink:0;background:rgba(255,71,71,.1);border:1px solid rgba(255,71,71,.2);border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff4747" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
           </button>
@@ -3929,6 +4039,14 @@ function showDayDetailSheet(dateStr){
           deleteFoodItem(idx, dateStr);
           rerenderDayDetail();
         });
+      });
+    });
+    // Edit workout session
+    sheet.querySelectorAll('[data-edit-sid]').forEach(btn=>{
+      btn.addEventListener('click', e=>{
+        e.stopPropagation();
+        document.getElementById('day-detail-bg')?.remove();
+        editSession(btn.dataset.editSid);
       });
     });
     // Add workout
@@ -4325,7 +4443,7 @@ function viewDaySessions(dk){
       <div style="font-size:12px;color:var(--t2);margin-top:4px;">${s.entries.length} exercises · ${tot} sets · ${vol>0?vol.toLocaleString()+' lb vol':'cardio'}</div>
     </div>`;
   }).join('');
-  const pastDate=new Date(daySessions[0].date).toISOString().split('T')[0];
+  const pastDate=new Date(daySessions[0].date).toLocaleDateString('en-CA');
   bg.innerHTML=`<div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-title">${ds}</div>
@@ -4354,7 +4472,7 @@ function viewDaySessions(dk){
 
 function showLogPastSheet(prefillDate){
   const today=new Date();
-  const todayStr=today.toISOString().split('T')[0];
+  const todayStr=today.toLocaleDateString('en-CA');
   const dateVal=prefillDate||todayStr;
   const bg=document.createElement('div');bg.className='sheet-bg';bg.id='log-past-sheet';
   bg.innerHTML=`<div class="sheet">
@@ -5953,7 +6071,7 @@ function getWeekStartKey(){
   const day=now.getDay();
   const start=new Date(now);
   start.setDate(now.getDate()-((day+6)%7));
-  return start.toISOString().split('T')[0];
+  return start.toLocaleDateString('en-CA');
 }
 
 function getThisWeekCheckIn(){return checkIns[getWeekStartKey()]||null;}
@@ -6741,7 +6859,7 @@ function showWaterLogSheet(){
   document.body.appendChild(bg);
 }
 
-function todayKey(){return new Date().toISOString().split('T')[0];}
+function todayKey(){return new Date().toLocaleDateString('en-CA');}
 
 function getTodayProtein(){
   const today=todayKey();
@@ -7422,7 +7540,7 @@ function buildWeekNutrition(){
   const todayStr=todayKey();
   for(let i=0;i<7;i++){
     const d=new Date(start);d.setDate(d.getDate()+i);
-    const key=d.toISOString().split('T')[0];
+    const key=d.toLocaleDateString('en-CA');
     const totals=getDayTotals(key);
     const hasData=getTodayFoodItems(key).length>0;
     days.push({
@@ -11915,7 +12033,7 @@ function shiftFoodDate(dir) {
   const d = new Date(foodViewDate + 'T12:00:00');
   d.setDate(d.getDate() + dir);
   if(d > new Date()) return;
-  foodViewDate = d.toISOString().split('T')[0];
+  foodViewDate = d.toLocaleDateString('en-CA');
   renderFood();
 }
 
