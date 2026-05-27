@@ -10206,7 +10206,7 @@ function getDayTotals(dateKey) {
 }
 
 function addFoodItem(item, dateKey) {
-  const dk = dateKey || todayKey();
+  const dk = dateKey || foodViewDate || todayKey();
   let entry = proteinLog.find(e => e.date === dk);
   if(!entry){ entry = {date:dk, items:[]}; proteinLog.unshift(entry); }
   entry.items.push({
