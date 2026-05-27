@@ -11386,7 +11386,13 @@ function showManualFoodSheet(prefill) {
   bg.innerHTML = '<div class="sheet">'
     + '<div class="sheet-handle"></div>'
     + '<div class="sheet-title">Log Food</div>'
-    + '<div class="field"><label>Food name</label><input type="text" id="mf-name" placeholder="e.g. Chicken breast 200g" value="' + (f.name||'') + '"><div id="mf-name-err" style="display:none;font-size:11px;color:var(--red);margin-top:4px;">Enter a food name to log</div></div>'
+    + '<div class="field"><label>Food name</label><input type="text" id="mf-name" placeholder="e.g. Heritage Flakes" value="' + (f.name||'') + '"><div id="mf-name-err" style="display:none;font-size:11px;color:var(--red);margin-top:4px;">Enter a food name to log</div></div>'
+    + '<div class="field">'
+    +   '<label style="display:flex;align-items:baseline;justify-content:space-between;">'
+    +     '<span>Weight (g) <span style="font-size:10px;color:var(--t3);font-weight:400;">optional — enables scaling next time</span></span>'
+    +   '</label>'
+    +   '<input type="number" id="mf-weight" inputmode="decimal" placeholder="e.g. 40" value="' + (f._manualWeight||'') + '" style="max-width:120px;">'
+    + '</div>'
     + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
     + '<div class="field"><label>Calories</label><input type="number" id="mf-cal" inputmode="numeric" placeholder="kcal" value="' + (f.cal||'') + '"></div>'
     + '<div class="field"><label>Protein (g)</label><input type="number" id="mf-p" inputmode="decimal" placeholder="g" value="' + (f.g||'') + '"></div>'
@@ -11410,13 +11416,34 @@ function submitManualFood() {
     if(err){err.style.display='block';setTimeout(()=>{err.style.display='none';},2500);}
     return;
   }
+  const cal    = parseInt(document.getElementById('mf-cal')?.value)||0;
+  const g      = parseFloat(document.getElementById('mf-p')?.value)||0;
+  const carbs  = parseFloat(document.getElementById('mf-c')?.value)||0;
+  const fat    = parseFloat(document.getElementById('mf-f')?.value)||0;
+  const weight = parseFloat(document.getElementById('mf-weight')?.value)||0;
   addFoodItem({
     name,
-    meal:  document.getElementById('mf-meal')?.value || 'Other',
-    cal:   parseInt(document.getElementById('mf-cal')?.value)||0,
-    g:     parseFloat(document.getElementById('mf-p')?.value)||0,
-    carbs: parseFloat(document.getElementById('mf-c')?.value)||0,
-    fat:   parseFloat(document.getElementById('mf-f')?.value)||0,
+    meal: document.getElementById('mf-meal')?.value || 'Other',
+    cal, g, carbs, fat,
+  });
+  // Auto-save to My Foods — store per-100g if weight was given so macros scale next time
+  const hasWeight = weight > 0;
+  const factor100 = hasWeight ? (100 / weight) : 1;
+  saveMyFood({
+    name, brand: '', source: 'manual',
+    _manualWeight: hasWeight ? weight : 0,   // remembered for pre-fill
+    serving:     hasWeight ? weight : 1,
+    servingUnit: hasWeight ? (weight + 'g') : '1 serving',
+    cal:   hasWeight ? Math.round(cal   * factor100) : cal,
+    g:     hasWeight ? Math.round(g     * factor100 * 10) / 10 : g,
+    carbs: hasWeight ? Math.round(carbs * factor100 * 10) / 10 : carbs,
+    fat:   hasWeight ? Math.round(fat   * factor100 * 10) / 10 : fat,
+    per100: {
+      cal:     Math.round(cal   * factor100),
+      protein: Math.round(g     * factor100 * 10) / 10,
+      carbs:   Math.round(carbs * factor100 * 10) / 10,
+      fat:     Math.round(fat   * factor100 * 10) / 10,
+    },
   });
   closeSheets(); renderFood();
 }
@@ -11745,8 +11772,14 @@ function renderFood() {
   if(!scroll) return;
 
   const isToday = foodViewDate === todayKey();
+  const _fvd = new Date(foodViewDate + 'T12:00:00');
+  const _maxFuture = new Date(); _maxFuture.setDate(_maxFuture.getDate() + 14);
+  const atFutureCap = _fvd >= _maxFuture;
+  const isFuture = _fvd > new Date();
   const displayDate = isToday ? 'Today'
-    : new Date(foodViewDate + 'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+    : isFuture
+      ? _fvd.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'}) + ' · Planned'
+      : _fvd.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
   if(dl) dl.textContent = displayDate;
 
   const items = getTodayFoodItems(foodViewDate);
@@ -11838,7 +11871,7 @@ function renderFood() {
     +   '<div style="font-size:13px;font-weight:600;color:var(--t2);">' + displayDate + '</div>'
     +   '<div style="margin-top:3px;">' + sourceTag + '</div>'
     + '</div>'
-    + '<button onclick="shiftFoodDate(1)" style="width:32px;height:32px;border-radius:50%;background:var(--s2);border:none;color:var(--t1);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;touch-action:manipulation;' + (isToday ? 'opacity:.25;' : '') + '" ' + (isToday ? 'disabled' : '') + '>&#8250;</button>'
+    + '<button onclick="shiftFoodDate(1)" style="width:32px;height:32px;border-radius:50%;background:var(--s2);border:none;color:var(--t1);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;touch-action:manipulation;' + (atFutureCap ? 'opacity:.25;' : '') + '" ' + (atFutureCap ? 'disabled' : '') + '>&#8250;</button>'
     + '</div>'
     // Calorie triple — Goal  −  Eaten  =  Remaining
     + '<div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:0;margin-bottom:12px;">'
@@ -12032,7 +12065,9 @@ let _addingForMeal = 'Dinner';
 function shiftFoodDate(dir) {
   const d = new Date(foodViewDate + 'T12:00:00');
   d.setDate(d.getDate() + dir);
-  if(d > new Date()) return;
+  // Allow up to 14 days in the future (meal prep window)
+  const maxFuture = new Date(); maxFuture.setDate(maxFuture.getDate() + 14);
+  if(d > maxFuture) return;
   foodViewDate = d.toLocaleDateString('en-CA');
   renderFood();
 }
