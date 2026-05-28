@@ -8614,7 +8614,7 @@ const GAINZ_KEYS = [
   'gainz_protein_goal','gainz_protein_log','gainz_food_goals','gainz_macro_profile',
   'gainz_checkins','gainz_voice','gainz_vibrate','gainz_water','gainz_pwa_dismissed','gainz_supps','gainz_custom_cardio',
   'gainz_equipment',
-  'gainz_api_key','gainz_usda_key'
+  'gainz_api_key','gainz_usda_key','gainz_my_foods'
 ];
 
 function showSettingsSheet(){
@@ -11290,6 +11290,13 @@ function confirmAddFood() {
     carbs: Math.round((p.carbs||f.carbs||0)*factor*10)/10,
     fat:   Math.round((p.fat||f.fat||0)*factor*10)/10,
   });
+  // Auto-save to My Foods on every confirm so it's always available to search
+  saveMyFood({
+    name: f.name, brand: f.brand||'', source: f.source||'search',
+    serving: f.serving, servingUnit: f.servingUnit,
+    cal: f.cal, g: f.g, carbs: f.carbs, fat: f.fat,
+    per100: p.cal != null ? p : {cal: f.cal, protein: f.g, carbs: f.carbs, fat: f.fat},
+  });
   closeSheets();
   renderFood();
 }
@@ -12095,6 +12102,52 @@ function shiftFoodDate(dir) {
     });
   });
   obs.observe(document.body, {childList: true, subtree: true});
+})();
+
+// ── One-time migration: seed My Foods from full log history ──────────────────
+(function _migrateHistoryToMyFoods(){
+  if(localStorage.getItem('gainz_myfood_migrated')) return; // already ran
+  try {
+    const log = JSON.parse(localStorage.getItem('gainz_protein_log') || '[]');
+    if(!log.length) { localStorage.setItem('gainz_myfood_migrated','1'); return; }
+
+    // Collect most-recent entry per food name (case-insensitive key, preserve original)
+    const byName = {};
+    [...log].sort((a,b) => a.date.localeCompare(b.date)) // oldest first so newest wins
+      .forEach(day => {
+        (day.items || []).forEach(item => {
+          if(!item.name) return;
+          const key = item.name.trim().toLowerCase();
+          byName[key] = item; // latest date overwrites older
+        });
+      });
+
+    const existing = JSON.parse(localStorage.getItem('gainz_my_foods') || '[]');
+    const existingKeys = new Set(existing.map(f => (f.name+'|'+(f.brand||'')).toLowerCase()));
+
+    const toAdd = Object.values(byName)
+      .filter(item => !existingKeys.has((item.name+'|'+(item.brand||'')).toLowerCase()))
+      .map(item => ({
+        name: item.name.trim(),
+        brand: item.brand || '',
+        source: 'history',
+        serving: item.serving || 1,
+        servingUnit: item.servingUnit || '1 serving',
+        cal:   item.cal   || 0,
+        g:     item.g     || 0,
+        carbs: item.carbs || 0,
+        fat:   item.fat   || 0,
+        per100: item.per100 || {cal: item.cal||0, protein: item.g||0, carbs: item.carbs||0, fat: item.fat||0},
+        savedAt: Date.now(),
+      }));
+
+    if(toAdd.length) {
+      const merged = [...toAdd, ...existing];
+      localStorage.setItem('gainz_my_foods', JSON.stringify(merged));
+      console.log('[Gainz] Migrated', toAdd.length, 'foods to My Foods from history.');
+    }
+    localStorage.setItem('gainz_myfood_migrated', '1');
+  } catch(e) { console.warn('[Gainz] My Foods migration failed:', e); }
 })();
 
 checkOnboarding();
