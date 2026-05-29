@@ -9,7 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Gainz">
 <meta name="application-name" content="Gainz">
-<meta name="color-scheme" content="dark">
+<meta name="color-scheme" content="dark light">
 <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Gainz%22%2C%22short_name%22%3A%22Gainz%22%2C%22description%22%3A%22Your%20personal%20workout%20tracker%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230a0a0a%22%2C%22theme_color%22%3A%22%230a0a0a%22%2C%22orientation%22%3A%22portrait%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%2520viewBox%3D'0%25200%2520512%2520512'%253E%253Crect%2520width%3D'512'%2520height%3D'512'%2520rx%3D'112'%2520fill%3D'%25230a0a0a'%2F%253E%253Ctext%2520x%3D'256'%2520y%3D'340'%2520text-anchor%3D'middle'%2520font-size%3D'280'%2520fill%3D'%2523e8ff47'%253E%25F0%259F%2592%25AA%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20512%20512'%3E%3Crect%20width%3D'512'%20height%3D'512'%20rx%3D'112'%20fill%3D'%230a0a0a'%2F%3E%3Ctext%20x%3D'256'%20y%3D'360'%20text-anchor%3D'middle'%20font-size%3D'300'%20fill%3D'%23e8ff47'%3E%F0%9F%92%AA%3C%2Ftext%3E%3C%2Fsvg%3E">
 <title>Gainz</title>
@@ -46,7 +46,22 @@
   --st:env(safe-area-inset-top,0px);
   color-scheme:dark;
 }
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;color-scheme:dark;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;}
+[data-theme="light"]{
+  --bg:#f2f2f7;--s1:#ffffff;--s2:#f0f0f5;--s3:#e5e5ea;
+  --b1:rgba(0,0,0,0.07);--b2:rgba(0,0,0,0.13);--b3:rgba(0,0,0,0.22);
+  --t1:#111111;--t2:#636366;--t3:#b0b0b5;
+  --acc:#6b8a00;--red:#d43030;--grn:#1a8a45;--blu:#1a72cc;--org:#c05800;
+  color-scheme:light;
+}
+[data-theme="light"] .sheet-bg{background:rgba(0,0,0,.45);}
+[data-theme="light"] .rpe-sheet{background:rgba(0,0,0,.55);}
+[data-theme="light"] select option{background:#fff;color:#111;}
+[data-theme="light"] input[type="date"]{color-scheme:light;}
+[data-theme="light"] .btn-acc{background:#e8ff47;color:#000;}
+[data-theme="light"] .arrow-circle{background:#e8ff47;}
+[data-theme="light"] .prog-bar{background:#e8ff47;}
+[data-theme="light"] .cdot.done{background:#e8ff47;color:#000;}
 html{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--bg);}body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--bg);font-family:DM Sans,sans-serif;color:var(--t1);overscroll-behavior:none;-webkit-text-size-adjust:100%;}
 .bc{font-family:Barlow Condensed,sans-serif;}
 #app{display:flex;flex-direction:column;height:100vh;height:100dvh;max-width:430px;margin:0 auto;padding-top:var(--st);}
@@ -679,7 +694,7 @@ label{font-size:12px;color:var(--t2);display:block;margin-bottom:5px;}
 .past-set-row{display:grid;grid-template-columns:22px 1fr 1fr;gap:6px;align-items:center;margin-bottom:6px;}
 .past-set-n{font-size:11px;color:var(--t3);}
 /* Past log date input styling */
-input[type="date"]{color-scheme:dark;color:var(--t1);background:var(--s2);}
+input[type="date"]{color-scheme:inherit;color:var(--t1);background:var(--s2);}
 </style>
 </head>
 <body>
@@ -8614,14 +8629,38 @@ const GAINZ_KEYS = [
   'gainz_protein_goal','gainz_protein_log','gainz_food_goals','gainz_macro_profile',
   'gainz_checkins','gainz_voice','gainz_vibrate','gainz_water','gainz_pwa_dismissed','gainz_supps','gainz_custom_cardio',
   'gainz_equipment',
-  'gainz_api_key','gainz_usda_key','gainz_my_foods'
+  'gainz_api_key','gainz_usda_key','gainz_my_foods','gainz_theme'
 ];
+
+function applyTheme(theme){
+  document.documentElement.dataset.theme = (theme === 'light') ? 'light' : 'dark';
+}
+function setTheme(theme){
+  localStorage.setItem('gainz_theme', theme);
+  applyTheme(theme);
+  // Refresh toggle pill styles if the settings sheet is open
+  const d = document.getElementById('theme-pill-dark');
+  const l = document.getElementById('theme-pill-light');
+  const isLight = theme === 'light';
+  if(d){ d.style.background = isLight ? 'var(--s2)' : 'var(--acc)'; d.style.color = isLight ? 'var(--t2)' : '#000'; d.style.border = isLight ? '1px solid var(--b2)' : '1px solid transparent'; }
+  if(l){ l.style.background = isLight ? 'var(--acc)' : 'var(--s2)'; l.style.color = isLight ? '#000' : 'var(--t2)'; l.style.border = isLight ? '1px solid transparent' : '1px solid var(--b2)'; }
+  showToast(isLight ? '☀️ Light mode' : '🌑 Dark mode');
+}
 
 function showSettingsSheet(){
   const bg=document.createElement('div');bg.className='sheet-bg';
+  const curTheme = localStorage.getItem('gainz_theme') || 'dark';
+  const isDark = curTheme !== 'light';
+  const pillBase = 'flex:1;padding:9px 0;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;transition:background .2s;';
   bg.innerHTML=`<div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-title">Settings</div>
+
+    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:10px;">Appearance</div>
+    <div style="display:flex;gap:8px;margin-bottom:24px;background:var(--s2);border-radius:12px;padding:4px;">
+      <button id="theme-pill-dark" onclick="setTheme('dark')" style="${pillBase}background:${isDark?'var(--acc)':'transparent'};color:${isDark?'#000':'var(--t2)'};border:${isDark?'1px solid transparent':'1px solid transparent'};">🌑 Dark</button>
+      <button id="theme-pill-light" onclick="setTheme('light')" style="${pillBase}background:${!isDark?'var(--acc)':'transparent'};color:${!isDark?'#000':'var(--t2)'};border:${!isDark?'1px solid transparent':'1px solid transparent'};">☀️ Light</button>
+    </div>
 
     <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:10px;">Data &amp; Backup</div>
     <div style="font-size:13px;color:var(--t2);margin-bottom:14px;line-height:1.5;">Clearing Safari cache will erase all your data. Export a backup regularly to keep your history safe.</div>
@@ -8702,9 +8741,13 @@ async function exportGainzData(){
 }
 
 function showToast(msg){
+  const light = document.documentElement.dataset.theme === 'light';
   const t=document.createElement('div');
   t.textContent=msg;
-  t.style.cssText='position:fixed;bottom:calc(100px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:#1a1a1a;border:1px solid rgba(232,255,71,.4);color:#e8ff47;padding:10px 20px;border-radius:30px;font-size:13px;font-weight:600;z-index:9999;pointer-events:none;transition:opacity .3s;white-space:nowrap;';
+  t.style.cssText='position:fixed;bottom:calc(100px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:30px;font-size:13px;font-weight:600;z-index:9999;pointer-events:none;transition:opacity .3s;white-space:nowrap;'
+    + (light
+      ? 'background:#fff;border:1px solid rgba(107,138,0,.35);color:#6b8a00;box-shadow:0 2px 12px rgba(0,0,0,.12);'
+      : 'background:#1a1a1a;border:1px solid rgba(232,255,71,.4);color:#e8ff47;');
   document.body.appendChild(t);
   setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),350);},2200);
 }
@@ -12103,6 +12146,9 @@ function shiftFoodDate(dir) {
   });
   obs.observe(document.body, {childList: true, subtree: true});
 })();
+
+// Apply saved theme before first paint
+applyTheme(localStorage.getItem('gainz_theme') || 'dark');
 
 // ── One-time migration: seed My Foods from full log history ──────────────────
 (function _migrateHistoryToMyFoods(){
