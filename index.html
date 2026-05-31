@@ -1489,6 +1489,42 @@ function getAllSessions(name){
     .sort((a,b)=>new Date(a.date)-new Date(b.date));
 }
 
+// Compute the next actually-loadable weight given the exercise's equipment type.
+// direction: 'up' = next achievable above current; 'down' = next achievable below.
+function getNextAchievableWeight(name, currentWeight, direction){
+  const eqType = getExerciseEquipmentType(name);
+  const eq = loadEquipment();
+  const fallbackInc = currentWeight >= 100 ? 5 : 2.5;
+  const fallback = direction === 'up'
+    ? currentWeight + fallbackInc
+    : Math.max(0, currentWeight - fallbackInc);
+
+  if(eqType === 'dumbbell'){
+    const avail = (eq.dumbbells||[]).map(Number).filter(Boolean).sort((a,b)=>a-b);
+    if(!avail.length) return fallback;
+    if(direction === 'up'){
+      const next = avail.find(w => w > currentWeight);
+      return next != null ? next : currentWeight; // capped — can't go higher
+    } else {
+      const lower = avail.filter(w => w < currentWeight);
+      return lower.length ? lower[lower.length-1] : currentWeight;
+    }
+  }
+  if(eqType === 'barbell'){
+    const achievable = getAchievableBarWeights(eq.barWeight||15, eq.plates||{});
+    if(!achievable.length) return fallback;
+    if(direction === 'up'){
+      const next = achievable.find(w => w > currentWeight);
+      return next != null ? next : currentWeight;
+    } else {
+      const lower = achievable.filter(w => w < currentWeight);
+      return lower.length ? lower[lower.length-1] : currentWeight;
+    }
+  }
+  // cable / machine / bodyweight — use sensible defaults
+  return fallback;
+}
+
 function analyzeProgression(name){
   const sessions=getAllSessions(name);
   const ex=findEx(name);
@@ -1497,7 +1533,6 @@ function analyzeProgression(name){
   const isTime=ex.inputType==='time';
 
   if(!sessions.length){
-    // No history — no suggested weight, just the rep target from program
     return{
       weight: 0,
       reps: t?.targetReps||10,
@@ -1509,142 +1544,208 @@ function analyzeProgression(name){
     };
   }
 
-  // Build per-session summary: best set (highest weight × reps)
-  const history=sessions.map(s=>({
-    date: new Date(s.date),
-    sets: s.sets,
-    maxWeight: Math.max(...s.sets.map(x=>parseFloat(x.weight)||0)),
-    maxReps: Math.max(...s.sets.map(x=>parseInt(x.reps)||0)),
-    avgReps: s.sets.length?s.sets.reduce((a,x)=>a+(parseInt(x.reps)||0),0)/s.sets.length:0,
-    totalVol: s.sets.reduce((a,x)=>a+(parseFloat(x.weight)||0)*(parseInt(x.reps)||0),0),
-    completedSets: s.sets.filter(x=>x.done).length,
-    totalSets: s.sets.length,
-    avgRpe: (()=>{const rpes=s.sets.filter(x=>x.rpe).map(x=>x.rpe);return rpes.length?rpes.reduce((a,v)=>a+v,0)/rpes.length:null;})(),
-  }));
+  // Per-session summary — now tracks MIN reps across sets (the all-sets question)
+  const history=sessions.map(s=>{
+    const reps    = s.sets.map(x=>parseInt(x.reps)||0);
+    const weights = s.sets.map(x=>parseFloat(x.weight)||0);
+    const rpes    = s.sets.filter(x=>x.rpe).map(x=>x.rpe);
+    return {
+      date: new Date(s.date),
+      sets: s.sets,
+      maxWeight: Math.max(...weights),
+      maxReps:   Math.max(...reps),
+      minReps:   reps.length ? Math.min(...reps) : 0,
+      avgReps:   reps.length ? reps.reduce((a,v)=>a+v,0)/reps.length : 0,
+      totalVol:  s.sets.reduce((a,x)=>a+(parseFloat(x.weight)||0)*(parseInt(x.reps)||0),0),
+      completedSets: s.sets.filter(x=>x.done).length,
+      totalSets: s.sets.length,
+      avgRpe:    rpes.length ? rpes.reduce((a,v)=>a+v,0)/rpes.length : null,
+    };
+  });
 
-  const last=history[history.length-1];
-  const prev=history.length>1?history[history.length-2]:null;
+  const last     = history[history.length-1];
+  const prev     = history.length>1 ? history[history.length-2] : null;
+  const prevPrev = history.length>2 ? history[history.length-3] : null;
 
-  // Target rep range from EX_TARGETS or exercise
-  const targetReps=t?.targetReps||parseInt(ex.reps)||10;
-  const topRep=t?.reps||ex.reps||'10';
-  // Parse upper bound of rep range e.g. "8–10" → 10
-  const repRangeHigh=parseInt(String(topRep).split(/[–\-]/)[1])||targetReps;
-  const repRangeLow=parseInt(String(topRep).split(/[–\-]/)[0])||Math.max(targetReps-2,1);
+  // Target rep range
+  const targetReps   = t?.targetReps || parseInt(ex.reps) || 10;
+  const topRep       = t?.reps || ex.reps || '10';
+  const repRangeHigh = parseInt(String(topRep).split(/[–\-]/)[1]) || targetReps;
+  const repRangeLow  = parseInt(String(topRep).split(/[–\-]/)[0]) || Math.max(targetReps-2,1);
 
-  // Consecutive sessions where top-of-range reps were hit at last weight
+  // "Near top" = within 1 rep of high, floored at low. (8–10 range → 9+ counts)
+  const nearTopThreshold = Math.max(repRangeLow, repRangeHigh - 1);
+
+  // STREAK — sessions hitting near-top reps across ALL sets at the same weight
   let streak=0;
-  for(let i=history.length-1;i>=0;i--){
-    if(history[i].maxWeight===last.maxWeight && history[i].maxReps>=repRangeHigh){
-      streak++;
-    } else break;
+  for(let i=history.length-1; i>=0; i--){
+    if(history[i].maxWeight===last.maxWeight && history[i].minReps>=nearTopThreshold) streak++;
+    else break;
   }
 
-  // Plateau: sessions at same weight without rep improvement
+  // PLATEAU — consecutive sessions at same weight
   let plateauCount=0;
-  for(let i=history.length-1;i>=0;i--){
+  for(let i=history.length-1; i>=0; i--){
     if(history[i].maxWeight===last.maxWeight) plateauCount++;
     else break;
   }
 
   // Weight trend over last 4 sessions
-  const recent=history.slice(-4);
-  const weightTrend=recent.length>1
-    ?recent[recent.length-1].maxWeight-recent[0].maxWeight
-    :0;
+  const recent      = history.slice(-4);
+  const weightTrend = recent.length>1 ? recent[recent.length-1].maxWeight - recent[0].maxWeight : 0;
 
-  // Determine suggestion
-  let suggestion=null;
-  let confidence='low';
-  let action='maintain';
+  // RPE single-session signals
+  const lastRpe = last.avgRpe;
+  const rpeHigh = lastRpe!==null && lastRpe>=9;
+  const rpeLow  = lastRpe!==null && lastRpe<=7;
 
-  // RPE override: if last session avg RPE ≥9, hold weight regardless of reps
-  const lastRpe=last.avgRpe;
-  const rpeHigh=lastRpe!==null&&lastRpe>=9;
-  const rpeLow=lastRpe!==null&&lastRpe<=7;
+  // ── REGRESSION: minReps dropped 2+ vs previous session at same weight ─────
+  const isRegressing = prev
+    && prev.maxWeight === last.maxWeight
+    && prev.minReps - last.minReps >= 2;
+
+  // ── RPE CREEP: 3 sessions at same weight with monotonically rising RPE ────
+  let rpeCreeping = false;
+  if(last.avgRpe!=null && prev?.avgRpe!=null && prevPrev?.avgRpe!=null
+     && last.maxWeight===prev.maxWeight && prev.maxWeight===prevPrev.maxWeight
+     && last.avgRpe>prev.avgRpe && prev.avgRpe>prevPrev.avgRpe
+     && last.avgRpe - prevPrev.avgRpe >= 1){
+    rpeCreeping = true;
+  }
+
+  // ── DELOAD-READY: long progression streak without a backoff ───────────────
+  let sessionsSinceDeload = history.length;
+  for(let i=history.length-1; i>=1; i--){
+    // A "deload" is a weight drop of ≥10% vs the prior session
+    if(history[i].maxWeight>0 && history[i].maxWeight < history[i-1].maxWeight*0.9){
+      sessionsSinceDeload = history.length - 1 - i;
+      break;
+    }
+  }
+  const deloadAnchorIdx = Math.max(0, history.length - 1 - sessionsSinceDeload);
+  const weeksSinceDeload = (last.date - history[deloadAnchorIdx].date) / (1000*60*60*24*7);
+  const isDeloadReady = weeksSinceDeload >= 6 && sessionsSinceDeload >= 8 && !rpeCreeping && !isRegressing;
+
+  // ── DECISION TREE — priority order ────────────────────────────────────────
+  let suggestion=null, confidence='low', action='maintain';
 
   if(isMax||isTime){
-    // Max reps or timed: track reps trend, suggest weight increase if reps growing
-    const repTrend=recent.length>1?last.maxReps-recent[0].maxReps:0;
+    const repTrend = recent.length>1 ? last.maxReps - recent[0].maxReps : 0;
     if(repTrend>0){
-      suggestion={type:'good',msg:`Reps trending up +${repTrend} — keep the weight and push for more`};
-      confidence='medium';action='progress_reps';
+      suggestion = {type:'good', msg:`Reps trending up +${repTrend} — keep the weight and push for more`};
+      confidence='medium'; action='progress_reps';
     } else {
-      suggestion={type:'maintain',msg:`Maintain current effort — focus on form`};
+      suggestion = {type:'maintain', msg:`Maintain current effort — focus on form`};
     }
-  } else if(rpeHigh&&last.maxReps>=repRangeHigh){
-    // Would normally increase weight, but RPE was very high — consolidate instead
-    suggestion={
-      type:'consolidate',
-      weight:last.maxWeight,
-      reps:repRangeHigh,
-      msg:`Hit ${last.maxReps} reps but RPE was ${lastRpe!==null?lastRpe.toFixed(1):'?'} — hold the weight and build capacity first`,
-      detail:`RPE ${lastRpe!==null?lastRpe.toFixed(1):'?'} last session: match ${last.maxWeight}lb × ${repRangeHigh} reps before adding load`,
+  }
+  // 1. REGRESSION — highest priority; back off immediately
+  else if(isRegressing){
+    const dropTo = getNextAchievableWeight(name, last.maxWeight, 'down');
+    suggestion = {
+      type:'regress', weight: dropTo, reps: repRangeHigh,
+      msg: `Reps dropped from ${prev.minReps} to ${last.minReps} at ${last.maxWeight}lb — back off to ${dropTo}lb and rebuild`,
+      detail: `Drop weight, hit ${repRangeHigh}+ reps clean across all sets, then climb back`,
     };
-    confidence='high';action='consolidate';
-  } else if(streak>=2 && last.maxReps>=repRangeHigh){
-    // Hit top of range 2+ sessions in a row → increase weight
-    const inc=last.maxWeight>=100?5:last.maxWeight>=50?2.5:2.5;
-    const rpeNote=rpeLow?` (RPE ${lastRpe!==null?lastRpe.toFixed(1):'?'} — felt easy, confident to progress)`:'';
-    suggestion={
-      type:'increase',
-      weight:last.maxWeight+inc,
-      reps:repRangeLow,
-      msg:`You've hit ${last.maxReps} reps at ${last.maxWeight}lb for ${streak} sessions — ready to increase${rpeNote}`,
-      detail:`Try ${last.maxWeight+inc}lb × ${repRangeLow} reps today`,
+    confidence='high'; action='regress';
+  }
+  // 2. RPE CREEP — fatigue accumulating; hold and recover
+  else if(rpeCreeping){
+    suggestion = {
+      type:'fatigue', weight: last.maxWeight, reps: repRangeHigh,
+      msg: `RPE climbing over last 3 sessions — hold ${last.maxWeight}lb and prioritize recovery`,
+      detail: `Avg RPE: ${prevPrev.avgRpe.toFixed(1)} → ${prev.avgRpe.toFixed(1)} → ${last.avgRpe.toFixed(1)}`,
     };
-    confidence='high';action='increase_weight';
-  } else if(last.maxReps>=repRangeHigh){
-    // Hit top once — aim to consolidate
-    suggestion={
-      type:'consolidate',
-      weight:last.maxWeight,
-      reps:repRangeHigh,
-      msg:`Hit ${last.maxReps} reps last time — aim to match or beat it today`,
-      detail:`Target: ${last.maxWeight}lb × ${repRangeHigh} reps`,
+    confidence='high'; action='consolidate';
+  }
+  // 3. PLANNED DELOAD — preempt burnout after long progression
+  else if(isDeloadReady){
+    const target85 = Math.round(last.maxWeight * 0.85);
+    const deloadW  = getNextAchievableWeight(name, target85+1, 'down') || target85;
+    suggestion = {
+      type:'deload_planned', weight: deloadW, reps: repRangeHigh,
+      msg: `${Math.round(weeksSinceDeload)} weeks of progression — take a deload at ${deloadW}lb to recover and rebound`,
+      detail: `Drop one working set, focus on bar speed and clean reps`,
     };
-    confidence='medium';action='consolidate';
-  } else if(last.maxReps<repRangeLow && plateauCount>=3){
-    // Stuck below range for 3+ sessions → possible form issue or weight too heavy
-    suggestion={
-      type:'deload',
-      weight:Math.max(last.maxWeight-5,0),
-      reps:repRangeHigh,
-      msg:`Stuck below target for ${plateauCount} sessions — consider dropping to ${Math.max(last.maxWeight-5,0)}lb to build reps`,
-      detail:`Focus on form, hit ${repRangeHigh}+ reps, then rebuild`,
+    confidence='medium'; action='deload_planned';
+  }
+  // 4. RPE HIGH + at top across all sets → consolidate (no progression)
+  else if(rpeHigh && last.minReps >= nearTopThreshold){
+    suggestion = {
+      type:'consolidate', weight: last.maxWeight, reps: repRangeHigh,
+      msg: `Hit reps but RPE was ${lastRpe.toFixed(1)} — hold the weight and build capacity first`,
+      detail: `RPE ${lastRpe.toFixed(1)} last session: match ${last.maxWeight}lb × ${repRangeHigh} reps before adding load`,
     };
-    confidence='medium';action='deload';
-  } else if(last.maxReps>=repRangeLow){
-    // Within range — keep going
-    suggestion={
-      type:'progress',
-      weight:last.maxWeight,
-      reps:repRangeHigh,
-      msg:`Within target range — push for ${repRangeHigh} reps today`,
-      detail:`Current: ${last.maxWeight}lb × ${last.maxReps} reps → Target: ×${repRangeHigh}`,
+    confidence='high'; action='consolidate';
+  }
+  // 5. STREAK — near-top reps across ALL sets for 2+ sessions → increase
+  else if(streak >= 2 && last.minReps >= nearTopThreshold){
+    const nextW = getNextAchievableWeight(name, last.maxWeight, 'up');
+    const capped = nextW === last.maxWeight; // can't go higher with this equipment
+    if(capped){
+      // Equipment-capped: shift to rep-based progression instead
+      suggestion = {
+        type:'rep_progress', weight: last.maxWeight, reps: repRangeHigh + 2,
+        msg: `Equipment maxed at ${last.maxWeight}lb — push reps higher (${repRangeHigh + 2}+) for overload`,
+        detail: `Add reps until you're 2+ above target, then drop set count slightly`,
+      };
+      confidence='high'; action='progress_reps';
+    } else {
+      const rpeNote = rpeLow ? ` (RPE ${lastRpe.toFixed(1)} — felt easy, confident to progress)` : '';
+      suggestion = {
+        type:'increase', weight: nextW, reps: repRangeLow,
+        msg: `Hit ${last.minReps}+ reps across all sets at ${last.maxWeight}lb for ${streak} sessions — ready for ${nextW}lb${rpeNote}`,
+        detail: `Try ${nextW}lb × ${repRangeLow} reps today`,
+      };
+      confidence='high'; action='increase_weight';
+    }
+  }
+  // 6. Hit top across all sets once → consolidate one more session
+  else if(last.minReps >= nearTopThreshold){
+    suggestion = {
+      type:'consolidate', weight: last.maxWeight, reps: repRangeHigh,
+      msg: `Hit ${last.minReps}+ reps across all sets last time — match or beat it to lock it in`,
+      detail: `Target: ${last.maxWeight}lb × ${repRangeHigh} reps`,
     };
-    confidence='medium';action='progress_reps';
-  } else {
-    suggestion={
-      type:'maintain',
-      weight:last.maxWeight,
-      reps:targetReps,
-      msg:`Keep working at ${last.maxWeight}lb — focus on hitting ${repRangeLow}+ reps`,
+    confidence='medium'; action='consolidate';
+  }
+  // 7. Reactive deload — stuck below low range for 3+ sessions
+  else if(last.maxReps < repRangeLow && plateauCount >= 3){
+    const dropTo = getNextAchievableWeight(name, last.maxWeight, 'down');
+    suggestion = {
+      type:'deload', weight: dropTo, reps: repRangeHigh,
+      msg: `Stuck below target for ${plateauCount} sessions — drop to ${dropTo}lb to rebuild`,
+      detail: `Focus on form, hit ${repRangeHigh}+ reps, then climb back`,
+    };
+    confidence='medium'; action='deload';
+  }
+  // 8. Within range — push for the top
+  else if(last.maxReps >= repRangeLow){
+    suggestion = {
+      type:'progress', weight: last.maxWeight, reps: repRangeHigh,
+      msg: `Within target range — push for ${repRangeHigh}+ reps across all sets today`,
+      detail: `Last: ${last.maxWeight}lb × ${last.minReps}–${last.maxReps} reps → Target: ${repRangeHigh}`,
+    };
+    confidence='medium'; action='progress_reps';
+  }
+  // 9. Otherwise — maintain weight, build reps
+  else {
+    suggestion = {
+      type:'maintain', weight: last.maxWeight, reps: targetReps,
+      msg: `Keep working at ${last.maxWeight}lb — focus on hitting ${repRangeLow}+ reps`,
     };
   }
 
   return{
-    weight: suggestion?.weight??last.maxWeight,
-    reps: targetReps,
+    weight: suggestion?.weight ?? last.maxWeight,
+    reps:   suggestion?.reps   ?? targetReps,
     suggestion,
     confidence,
     action,
     trend: weightTrend>0?'up':weightTrend<0?'down':'flat',
     streak,
     plateauWeeks: Math.floor(plateauCount/2),
-    history,
-    last,
-    lastRpe,
+    history, last, lastRpe,
+    isRegressing, rpeCreeping, sessionsSinceDeload, weeksSinceDeload,
   };
 }
 
@@ -2788,6 +2889,7 @@ function renderHome(){
     streakBox=`<div class="stat-box" style="border-color:rgba(232,255,71,.35);">
       <div class="stat-n a" style="color:var(--acc);">${streak}🔥</div>
       <div class="stat-lbl" style="color:var(--acc);">Don't break it</div>
+      <div style="font-size:9px;color:var(--t3);margin-top:2px;">workout or food</div>
     </div>`;
   } else if(streakStatus==='broken'){
     streakBox=`<div class="stat-box">
@@ -2795,7 +2897,7 @@ function renderHome(){
       <div class="stat-lbl">Streak reset</div>
     </div>`;
   } else {
-    streakBox=`<div class="stat-box"><div class="stat-n a">${streak}🔥</div><div class="stat-lbl">Active streak</div></div>`;
+    streakBox=`<div class="stat-box"><div class="stat-n a">${streak}🔥</div><div class="stat-lbl">Day streak</div><div style="font-size:9px;color:var(--t3);margin-top:2px;">workout or food</div></div>`;
   }
   // Last weigh-in
   const _lastBody=bodyMetrics.find(e=>e.weight>0);
