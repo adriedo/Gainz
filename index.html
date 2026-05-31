@@ -1528,15 +1528,15 @@ function getNextAchievableWeight(name, currentWeight, direction){
 function analyzeProgression(name){
   const sessions=getAllSessions(name);
   const ex=findEx(name);
-  const t=EX_TARGETS[name];
+  const exCfg=EX_TARGETS[name];
   const isMax=ex.reps==='Max'||ex.reps==='max';
   const isTime=ex.inputType==='time';
 
   if(!sessions.length){
     return{
       weight: 0,
-      reps: t?.targetReps||10,
-      suggestion: {type:'firsttime',msg:'First time doing this exercise — start light and focus on form'},
+      reps: exCfg?.targetReps||10,
+      suggestion: {type:'firsttime',msg:t('engine.firsttime')},
       confidence: 'none',
       trend: null,
       streak: 0,
@@ -1568,8 +1568,8 @@ function analyzeProgression(name){
   const prevPrev = history.length>2 ? history[history.length-3] : null;
 
   // Target rep range
-  const targetReps   = t?.targetReps || parseInt(ex.reps) || 10;
-  const topRep       = t?.reps || ex.reps || '10';
+  const targetReps   = exCfg?.targetReps || parseInt(ex.reps) || 10;
+  const topRep       = exCfg?.reps || ex.reps || '10';
   const repRangeHigh = parseInt(String(topRep).split(/[–\-]/)[1]) || targetReps;
   const repRangeLow  = parseInt(String(topRep).split(/[–\-]/)[0]) || Math.max(targetReps-2,1);
 
@@ -1632,10 +1632,10 @@ function analyzeProgression(name){
   if(isMax||isTime){
     const repTrend = recent.length>1 ? last.maxReps - recent[0].maxReps : 0;
     if(repTrend>0){
-      suggestion = {type:'good', msg:`Reps trending up +${repTrend} — keep the weight and push for more`};
+      suggestion = {type:'good', msg: t('engine.maxRepsUp', {n: repTrend})};
       confidence='medium'; action='progress_reps';
     } else {
-      suggestion = {type:'maintain', msg:`Maintain current effort — focus on form`};
+      suggestion = {type:'maintain', msg: t('engine.maxRepsHold')};
     }
   }
   // 1. REGRESSION — highest priority; back off immediately
@@ -1643,8 +1643,8 @@ function analyzeProgression(name){
     const dropTo = getNextAchievableWeight(name, last.maxWeight, 'down');
     suggestion = {
       type:'regress', weight: dropTo, reps: repRangeHigh,
-      msg: `Reps dropped from ${prev.minReps} to ${last.minReps} at ${last.maxWeight}lb — back off to ${dropTo}lb and rebuild`,
-      detail: `Drop weight, hit ${repRangeHigh}+ reps clean across all sets, then climb back`,
+      msg: t('engine.regress.msg', {prev: prev.minReps, last: last.minReps, weight: last.maxWeight, dropTo}),
+      detail: t('engine.regress.detail', {high: repRangeHigh}),
     };
     confidence='high'; action='regress';
   }
@@ -1652,8 +1652,8 @@ function analyzeProgression(name){
   else if(rpeCreeping){
     suggestion = {
       type:'fatigue', weight: last.maxWeight, reps: repRangeHigh,
-      msg: `RPE climbing over last 3 sessions — hold ${last.maxWeight}lb and prioritize recovery`,
-      detail: `Avg RPE: ${prevPrev.avgRpe.toFixed(1)} → ${prev.avgRpe.toFixed(1)} → ${last.avgRpe.toFixed(1)}`,
+      msg: t('engine.fatigue.msg', {weight: last.maxWeight}),
+      detail: t('engine.fatigue.detail', {a: prevPrev.avgRpe.toFixed(1), b: prev.avgRpe.toFixed(1), c: last.avgRpe.toFixed(1)}),
     };
     confidence='high'; action='consolidate';
   }
@@ -1663,8 +1663,8 @@ function analyzeProgression(name){
     const deloadW  = getNextAchievableWeight(name, target85+1, 'down') || target85;
     suggestion = {
       type:'deload_planned', weight: deloadW, reps: repRangeHigh,
-      msg: `${Math.round(weeksSinceDeload)} weeks of progression — take a deload at ${deloadW}lb to recover and rebound`,
-      detail: `Drop one working set, focus on bar speed and clean reps`,
+      msg: t('engine.deload.msg', {weeks: Math.round(weeksSinceDeload), weight: deloadW}),
+      detail: t('engine.deload.detail'),
     };
     confidence='medium'; action='deload_planned';
   }
@@ -1672,8 +1672,8 @@ function analyzeProgression(name){
   else if(rpeHigh && last.minReps >= nearTopThreshold){
     suggestion = {
       type:'consolidate', weight: last.maxWeight, reps: repRangeHigh,
-      msg: `Hit reps but RPE was ${lastRpe.toFixed(1)} — hold the weight and build capacity first`,
-      detail: `RPE ${lastRpe.toFixed(1)} last session: match ${last.maxWeight}lb × ${repRangeHigh} reps before adding load`,
+      msg: t('engine.consolidateRpe.msg', {rpe: lastRpe.toFixed(1)}),
+      detail: t('engine.consolidateRpe.detail', {rpe: lastRpe.toFixed(1), weight: last.maxWeight, high: repRangeHigh}),
     };
     confidence='high'; action='consolidate';
   }
@@ -1685,16 +1685,16 @@ function analyzeProgression(name){
       // Equipment-capped: shift to rep-based progression instead
       suggestion = {
         type:'rep_progress', weight: last.maxWeight, reps: repRangeHigh + 2,
-        msg: `Equipment maxed at ${last.maxWeight}lb — push reps higher (${repRangeHigh + 2}+) for overload`,
-        detail: `Add reps until you're 2+ above target, then drop set count slightly`,
+        msg: t('engine.capped.msg', {weight: last.maxWeight, target: repRangeHigh + 2}),
+        detail: t('engine.capped.detail'),
       };
       confidence='high'; action='progress_reps';
     } else {
-      const rpeNote = rpeLow ? ` (RPE ${lastRpe.toFixed(1)} — felt easy, confident to progress)` : '';
+      const rpeNote = rpeLow ? t('engine.increase.rpeNote', {rpe: lastRpe.toFixed(1)}) : '';
       suggestion = {
         type:'increase', weight: nextW, reps: repRangeLow,
-        msg: `Hit ${last.minReps}+ reps across all sets at ${last.maxWeight}lb for ${streak} sessions — ready for ${nextW}lb${rpeNote}`,
-        detail: `Try ${nextW}lb × ${repRangeLow} reps today`,
+        msg: t('engine.increase.msg', {reps: last.minReps, weight: last.maxWeight, streak, next: nextW, rpeNote}),
+        detail: t('engine.increase.detail', {next: nextW, low: repRangeLow}),
       };
       confidence='high'; action='increase_weight';
     }
@@ -1703,8 +1703,8 @@ function analyzeProgression(name){
   else if(last.minReps >= nearTopThreshold){
     suggestion = {
       type:'consolidate', weight: last.maxWeight, reps: repRangeHigh,
-      msg: `Hit ${last.minReps}+ reps across all sets last time — match or beat it to lock it in`,
-      detail: `Target: ${last.maxWeight}lb × ${repRangeHigh} reps`,
+      msg: t('engine.consolidate.msg', {reps: last.minReps}),
+      detail: t('engine.consolidate.detail', {weight: last.maxWeight, high: repRangeHigh}),
     };
     confidence='medium'; action='consolidate';
   }
@@ -1713,8 +1713,8 @@ function analyzeProgression(name){
     const dropTo = getNextAchievableWeight(name, last.maxWeight, 'down');
     suggestion = {
       type:'deload', weight: dropTo, reps: repRangeHigh,
-      msg: `Stuck below target for ${plateauCount} sessions — drop to ${dropTo}lb to rebuild`,
-      detail: `Focus on form, hit ${repRangeHigh}+ reps, then climb back`,
+      msg: t('engine.deloadStuck.msg', {n: plateauCount, dropTo}),
+      detail: t('engine.deloadStuck.detail', {high: repRangeHigh}),
     };
     confidence='medium'; action='deload';
   }
@@ -1722,8 +1722,8 @@ function analyzeProgression(name){
   else if(last.maxReps >= repRangeLow){
     suggestion = {
       type:'progress', weight: last.maxWeight, reps: repRangeHigh,
-      msg: `Within target range — push for ${repRangeHigh}+ reps across all sets today`,
-      detail: `Last: ${last.maxWeight}lb × ${last.minReps}–${last.maxReps} reps → Target: ${repRangeHigh}`,
+      msg: t('engine.progress.msg', {high: repRangeHigh}),
+      detail: t('engine.progress.detail', {weight: last.maxWeight, min: last.minReps, max: last.maxReps, high: repRangeHigh}),
     };
     confidence='medium'; action='progress_reps';
   }
@@ -1731,7 +1731,7 @@ function analyzeProgression(name){
   else {
     suggestion = {
       type:'maintain', weight: last.maxWeight, reps: targetReps,
-      msg: `Keep working at ${last.maxWeight}lb — focus on hitting ${repRangeLow}+ reps`,
+      msg: t('engine.maintain.msg', {weight: last.maxWeight, low: repRangeLow}),
     };
   }
 
@@ -2888,16 +2888,16 @@ function renderHome(){
   if(streakStatus==='grace'){
     streakBox=`<div class="stat-box" style="border-color:rgba(232,255,71,.35);">
       <div class="stat-n a" style="color:var(--acc);">${streak}🔥</div>
-      <div class="stat-lbl" style="color:var(--acc);">Don't break it</div>
-      <div style="font-size:9px;color:var(--t3);margin-top:2px;">workout or food</div>
+      <div class="stat-lbl" style="color:var(--acc);">${t('home.dontBreakIt')}</div>
+      <div style="font-size:9px;color:var(--t3);margin-top:2px;">${t('home.streakSub')}</div>
     </div>`;
   } else if(streakStatus==='broken'){
     streakBox=`<div class="stat-box">
       <div class="stat-n a" style="color:var(--t3);">—</div>
-      <div class="stat-lbl">Streak reset</div>
+      <div class="stat-lbl">${t('home.streakReset')}</div>
     </div>`;
   } else {
-    streakBox=`<div class="stat-box"><div class="stat-n a">${streak}🔥</div><div class="stat-lbl">Day streak</div><div style="font-size:9px;color:var(--t3);margin-top:2px;">workout or food</div></div>`;
+    streakBox=`<div class="stat-box"><div class="stat-n a">${streak}🔥</div><div class="stat-lbl">${t('home.dayStreak')}</div><div style="font-size:9px;color:var(--t3);margin-top:2px;">${t('home.streakSub')}</div></div>`;
   }
   // Last weigh-in
   const _lastBody=bodyMetrics.find(e=>e.weight>0);
@@ -2908,13 +2908,13 @@ function renderHome(){
     const _eDate=new Date(_lastBody.date+'T00:00:00');
     const _todayMs=new Date();_todayMs.setHours(0,0,0,0);
     const _diffDays=Math.round((_todayMs-_eDate)/(864e5));
-    if(_diffDays===0){_weighLbl='Today';_weighColor='var(--grn)';}
-    else if(_diffDays===1){_weighLbl='Yesterday';_weighColor='var(--acc)';}
-    else{_weighLbl=`${_diffDays}d ago`;_weighColor=_diffDays>7?'var(--red)':'var(--t2)';}
+    if(_diffDays===0){_weighLbl=t('home.today');_weighColor='var(--grn)';}
+    else if(_diffDays===1){_weighLbl=t('home.yesterday');_weighColor='var(--acc)';}
+    else{_weighLbl=`${_diffDays}${t('home.daysAgo')}`;_weighColor=_diffDays>7?'var(--red)':'var(--t2)';}
   }
   eid('home-stats').innerHTML=`
     ${streakBox}
-    <div class="stat-box"><div class="stat-n" style="color:${_weighColor};font-size:${_weighLbl.length>5?'18px':'30px'};">${_weighLbl}</div><div class="stat-lbl">Last weigh-in</div></div>`;
+    <div class="stat-box"><div class="stat-n" style="color:${_weighColor};font-size:${_weighLbl.length>5?'18px':'30px'};">${_weighLbl}</div><div class="stat-lbl">${t('home.lastWeighIn')}</div></div>`;
   renderHomeStrip();
 }
 
@@ -3234,7 +3234,7 @@ function finishWorkout(){
   const rpeSets=entries.flatMap(e=>e.sets.filter(s=>s.done&&s.rpe));
   const avgRpe=rpeSets.length?(rpeSets.reduce((a,s)=>a+Number(s.rpe),0)/rpeSets.length).toFixed(1):null;
   const rpeColor=avgRpe>=8.5?'#ff6b6b':avgRpe>=7?'var(--acc)':'var(--grn)';
-  const rpeNote=avgRpe>=8.5?'High — consider load next session':avgRpe<=6.5?'Well under — room to push':'Working range';
+  const rpeNote=avgRpe>=8.5?t('finish.rpeHigh'):avgRpe<=6.5?t('finish.rpeLow'):t('finish.rpeMid');
 
   // ── PRs ────────────────────────────────────────────────────────────────────
   const sessionId=activeWk.sessionId;
@@ -3259,10 +3259,10 @@ function finishWorkout(){
   const plannedSets=day.exercises.reduce((a,n)=>a+(findEx(n)?.sets||3),0);
   const volPct=plannedSets>0?Math.min(Math.round((total/plannedSets)*100),100):100;
   const volColor=volPct>=100?'var(--grn)':volPct>=75?'var(--acc)':'var(--red)';
-  const volLabel=volPct>=100?'Full session ✓':volPct>=75?'Solid effort':'Partial session';
+  const volLabel=volPct>=100?t('finish.volFull'):volPct>=75?t('finish.volSolid'):t('finish.volPartial');
   const volHTML=`<div style="background:var(--s2);border-radius:14px;padding:14px 16px;margin-bottom:14px;">
     <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
-      <div style="font-size:12px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;">Volume completed</div>
+      <div style="font-size:12px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;">${t('finish.volCompleted')}</div>
       <div style="font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:800;color:${volColor};">${volPct}%</div>
     </div>
     <div style="height:6px;background:var(--s3);border-radius:3px;overflow:hidden;margin-bottom:8px;">
@@ -3277,10 +3277,10 @@ function finishWorkout(){
   // ── PRs HTML ───────────────────────────────────────────────────────────────
   const prHTML=prList.length?`
     <div style="background:var(--s2);border-radius:14px;padding:14px 16px;margin-bottom:14px;width:100%;box-sizing:border-box;">
-      <div style="font-size:12px;font-weight:700;color:var(--grn);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;">🏆 New PRs</div>
+      <div style="font-size:12px;font-weight:700;color:var(--grn);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;">${t('finish.newPRs')}</div>
       ${prList.map(pr=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--b1);">
         <span style="font-size:12px;font-weight:500;color:var(--t1);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${pr.name.replace(/Smith Machine /g,'').replace(/Cable /g,'')}</span>
-        <span style="font-size:13px;font-weight:700;color:var(--grn);flex-shrink:0;margin-left:8px;">${pr.weight}lb <span style="font-size:10px;color:var(--t3);font-weight:400;">was ${pr.prev}</span></span>
+        <span style="font-size:13px;font-weight:700;color:var(--grn);flex-shrink:0;margin-left:8px;">${pr.weight}lb <span style="font-size:10px;color:var(--t3);font-weight:400;">${t('finish.was',{prev:pr.prev})}</span></span>
       </div>`).join('')}
     </div>`:'';
 
@@ -3288,24 +3288,24 @@ function finishWorkout(){
   const vdColor=volDeltaPct>0?'var(--grn)':volDeltaPct<0?'#ff6b6b':'var(--t3)';
   const vdStr=volDeltaPct!==null?(volDeltaPct>0?`+${volDeltaPct}%`:volDeltaPct<0?`${volDeltaPct}%`:'='): '—';
   const volDeltaHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;">
-    <span style="font-size:12px;color:var(--t3);">vs last ${day.name}</span>
-    <span style="font-size:13px;font-weight:700;color:${vdColor};">${vdStr} · ${curVol.toLocaleString()} lb total</span>
+    <span style="font-size:12px;color:var(--t3);">${t('finish.vsLast',{day:day.name})}</span>
+    <span style="font-size:13px;font-weight:700;color:${vdColor};">${vdStr} · ${curVol.toLocaleString()} ${t('finish.lbTotal')}</span>
   </div>`;
 
   eid('wk-hdr').style.display='none';eid('wk-footer').style.display='none';eid('wk-bar').style.width='100%';
   eid('wk-scroll').innerHTML=`<div class="finish-wrap fu">
     <div style="font-size:56px">🔥</div>
-    <div class="finish-ttl bc">Session<br><em>Complete</em></div>
+    <div class="finish-ttl bc">${t('finish.session')}<br><em>${t('finish.complete')}</em></div>
     <div class="finish-grid">
-      <div class="finish-stat"><div class="fs-val">${mins}</div><div class="fs-lbl">Minutes</div></div>
-      <div class="finish-stat"><div class="fs-val">${total}</div><div class="fs-lbl">Sets done</div></div>
-      <div class="finish-stat"><div class="fs-val">${entries.length}</div><div class="fs-lbl">Exercises</div></div>
-      <div class="finish-stat"><div class="fs-val" style="color:${avgRpe?rpeColor:'var(--t3)'};">${avgRpe||'—'}</div><div class="fs-lbl">Avg RPE${avgRpe?` · ${rpeNote}`:''}</div></div>
+      <div class="finish-stat"><div class="fs-val">${mins}</div><div class="fs-lbl">${t('finish.minutes')}</div></div>
+      <div class="finish-stat"><div class="fs-val">${total}</div><div class="fs-lbl">${t('finish.setsDone')}</div></div>
+      <div class="finish-stat"><div class="fs-val">${entries.length}</div><div class="fs-lbl">${t('finish.exercises')}</div></div>
+      <div class="finish-stat"><div class="fs-val" style="color:${avgRpe?rpeColor:'var(--t3)'};">${avgRpe||'—'}</div><div class="fs-lbl">${t('finish.avgRPE')}${avgRpe?` · ${rpeNote}`:''}</div></div>
     </div>
     ${prHTML}
     <div style="background:var(--s2);border-radius:14px;padding:14px 16px;margin-bottom:14px;width:100%;box-sizing:border-box;">
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
-        <div style="font-size:12px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;">Volume completed</div>
+        <div style="font-size:12px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;">${t('finish.volCompleted')}</div>
         <div style="font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:800;color:${volColor};">${volPct}%</div>
       </div>
       <div style="height:6px;background:var(--s3);border-radius:3px;overflow:hidden;margin-bottom:8px;">
@@ -3313,18 +3313,18 @@ function finishWorkout(){
       </div>
       <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t3);">
         <span>${volLabel}</span>
-        <span>${total} / ${plannedSets} sets</span>
+        <span>${total} / ${plannedSets} ${t('finish.sets').toLowerCase()}</span>
       </div>
       ${volDeltaHTML}
     </div>
     <div class="pwn-card">
-      <div class="pwn-title">💧 Post-Workout Meal</div>
-      <div class="pwn-sub">Hit protein + carbs within 60 min to maximise recovery and muscle synthesis.</div>
+      <div class="pwn-title">${t('finish.postWorkoutMeal')}</div>
+      <div class="pwn-sub">${t('finish.postWorkoutSub')}</div>
       <div class="pwn-btns">
-        <button class="pwn-log" onclick="goHomeAndLogPostWorkout()">Log it now</button>
-        <button class="pwn-skip" onclick="showPeriWorkoutGuideSheet('post')">What should I eat?</button>
+        <button class="pwn-log" onclick="goHomeAndLogPostWorkout()">${t('finish.logItNow')}</button>
+        <button class="pwn-skip" onclick="showPeriWorkoutGuideSheet('post')">${t('finish.whatToEat')}</button>
       </div>
-      <button onclick="goHome()" style="margin-top:10px;width:100%;padding:10px;border-radius:11px;background:none;border:1px solid var(--b1);color:var(--t3);font-size:12px;font-weight:500;cursor:pointer;font-family:DM Sans,sans-serif;">Back to home</button>
+      <button onclick="goHome()" style="margin-top:10px;width:100%;padding:10px;border-radius:11px;background:none;border:1px solid var(--b1);color:var(--t3);font-size:12px;font-weight:500;cursor:pointer;font-family:DM Sans,sans-serif;">${t('finish.backToHome')}</button>
     </div>
   </div>`;
 }
@@ -3702,12 +3702,13 @@ function setTrainProgramMode(mode){
 
 function renderTrain(){
   const tabs=['program','edit','videos','log'];
-  tabs.forEach(t=>{
-    const b=eid('train-tab-'+t);
+  tabs.forEach(tab=>{
+    const b=eid('train-tab-'+tab);
     if(!b)return;
-    const active=t===trainTab;
+    const active=tab===trainTab;
     b.style.background=active?'var(--s1)':'none';
     b.style.color=active?'var(--t1)':'var(--t2)';
+    b.textContent = t('train.tab.'+tab);
   });
   if(trainTab==='program') renderTrainProgram();
   else if(trainTab==='edit') renderEdit();
@@ -3746,33 +3747,33 @@ function renderTrainProgram(){
         <span style="font-size:10px;font-weight:700;min-width:26px;text-align:right;flex-shrink:0;color:${dc};">${dStr}</span>
       </div>`;
     }).filter(Boolean).slice(0,3).join('');
-    const cappedFooter=dayHasCapped?`<div style="font-size:10px;color:var(--org);margin-top:6px;">⚠ Equipment limit on some exercises — update in Edit</div>`:'';
+    const cappedFooter=dayHasCapped?`<div style="font-size:10px;color:var(--org);margin-top:6px;">${t('train.equipmentCap')}</div>`:'';
     const targetsHtml=targetRows?`<div style="border-top:1px solid var(--b1);padding:10px 14px 12px;">
-      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-bottom:8px;">Today's Targets</div>
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-bottom:8px;">${t('train.todaysTargets')}</div>
       ${targetRows}
-      ${extraCount>0?`<div style="font-size:11px;color:var(--t3);margin-top:8px;text-align:center;">+ ${extraCount} more exercise${extraCount!==1?'s':''}</div>`:''}
+      ${extraCount>0?`<div style="font-size:11px;color:var(--t3);margin-top:8px;text-align:center;">${t('train.moreExercises',{n:extraCount})}</div>`:''}
       ${cappedFooter}
     </div>`:'';
     return`
     <div class="day-card dc-${d.type}" onclick="launchWk('${d.id}')">
       <div class="dc-head">
-        <div><div class="dc-title bc">${d.day&&d.day!=='undefined'?d.day:'Day '+(program.indexOf(d)+1)} — ${d.name}</div><div class="dc-sub">${d.focus}</div></div>
+        <div><div class="dc-title bc">${d.day&&d.day!=='undefined'?d.day:t('train.day')+' '+(program.indexOf(d)+1)} — ${d.name}</div><div class="dc-sub">${d.focus}</div></div>
         <div class="arrow-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
       </div>
       <div class="dc-meta">
-        <span class="tag tag-${d.type}">${d.exercises.length} exercises</span><span class="tag tag-${d.type}">${d.exercises.reduce((a,n)=>{const e=findEx(n);return a+e.sets;},0)} sets</span>
-        <button class="pre-wk-pill" onclick="event.stopPropagation();showPeriWorkoutGuideSheet('pre')">🍌 Pre-workout</button>
+        <span class="tag tag-${d.type}">${d.exercises.length} ${t('train.exercises')}</span><span class="tag tag-${d.type}">${d.exercises.reduce((a,n)=>{const e=findEx(n);return a+e.sets;},0)} ${t('train.sets')}</span>
+        <button class="pre-wk-pill" onclick="event.stopPropagation();showPeriWorkoutGuideSheet('pre')">${t('train.preWorkout')}</button>
       </div>
       ${targetsHtml}
     </div>`;
   }).join('');
   const modeToggle=`<div style="display:flex;gap:6px;margin-bottom:14px;">
-    <button onclick="setTrainProgramMode('strength')" style="padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid ${trainProgramMode==='strength'?'rgba(232,255,71,.4)':'var(--b2)'};background:${trainProgramMode==='strength'?'var(--s2)':'none'};color:${trainProgramMode==='strength'?'var(--acc)':'var(--t2)'};cursor:pointer;font-family:DM Sans,sans-serif;touch-action:manipulation;">Strength</button>
-    <button onclick="setTrainProgramMode('cardio')" style="padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid ${trainProgramMode==='cardio'?'rgba(71,180,255,.4)':'var(--b2)'};background:${trainProgramMode==='cardio'?'var(--s2)':'none'};color:${trainProgramMode==='cardio'?'var(--cardio)':'var(--t2)'};cursor:pointer;font-family:DM Sans,sans-serif;touch-action:manipulation;">Cardio</button>
+    <button onclick="setTrainProgramMode('strength')" style="padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid ${trainProgramMode==='strength'?'rgba(232,255,71,.4)':'var(--b2)'};background:${trainProgramMode==='strength'?'var(--s2)':'none'};color:${trainProgramMode==='strength'?'var(--acc)':'var(--t2)'};cursor:pointer;font-family:DM Sans,sans-serif;touch-action:manipulation;">${t('train.strength')}</button>
+    <button onclick="setTrainProgramMode('cardio')" style="padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid ${trainProgramMode==='cardio'?'rgba(71,180,255,.4)':'var(--b2)'};background:${trainProgramMode==='cardio'?'var(--s2)':'none'};color:${trainProgramMode==='cardio'?'var(--cardio)':'var(--t2)'};cursor:pointer;font-family:DM Sans,sans-serif;touch-action:manipulation;">${t('train.cardio')}</button>
   </div>`;
 
   if(trainProgramMode==='strength'){
-    scroll.innerHTML=modeToggle+`<div class="slbl">Strength Work</div>${dayCards}`;
+    scroll.innerHTML=modeToggle+`<div class="slbl">${t('train.strengthWork')}</div>${dayCards}`;
     return;
   }
 
@@ -4017,7 +4018,7 @@ function showDayDetailSheet(dateStr){
     const daySessions = sessions.filter(s => new Date(s.date).toDateString() === dk);
     let workoutHtml = '';
     if(daySessions.length === 0){
-      workoutHtml = '<div style="font-size:13px;color:var(--t3);padding:4px 0 2px;">No workout logged this day.</div>';
+      workoutHtml = '<div style="font-size:13px;color:var(--t3);padding:4px 0 2px;">'+t('cal.noWorkout')+'</div>';
     } else {
       workoutHtml = daySessions.map(s=>{
         const tc = s.isCardio?'cardio':program.find(p=>p.id===s.dayId)?.type||'full';
@@ -4025,14 +4026,14 @@ function showDayDetailSheet(dateStr){
         const sets = s.entries.reduce((a,e)=>a+e.sets.length,0);
         const vol = Math.round(s.entries.reduce((a,e)=>a+e.sets.reduce((b,x)=>(b+(parseFloat(x.weight)||0)*(parseInt(x.reps)||0)),0),0));
         const timeStr = new Date(s.date).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-        const editBtn = s.isCardio ? '' : `<button data-edit-sid="${s.sid}" style="width:34px;height:34px;flex-shrink:0;background:rgba(232,255,71,.08);border:1px solid rgba(232,255,71,.2);border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Edit session">
+        const editBtn = s.isCardio ? '' : `<button data-edit-sid="${s.sid}" style="width:34px;height:34px;flex-shrink:0;background:rgba(232,255,71,.08);border:1px solid rgba(232,255,71,.2);border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="${t('common.edit')}">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--acc)" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </button>`;
         return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
           <div data-view-sid="${s.sid}" style="flex:1;display:flex;align-items:center;justify-content:space-between;background:var(--s3);border-radius:10px;padding:11px 13px;cursor:pointer;">
             <div>
               <div class="bc" style="font-size:16px;font-weight:700;text-transform:uppercase;color:${col};">${s.dayName}</div>
-              <div style="font-size:11px;color:var(--t2);margin-top:2px;">${s.entries.length} exercises · ${sets} sets${vol>0?' · '+vol.toLocaleString()+' lb vol':''}</div>
+              <div style="font-size:11px;color:var(--t2);margin-top:2px;">${s.entries.length} ${t('train.exercises')} · ${sets} ${t('train.sets')}${vol>0?' · '+vol.toLocaleString()+' lb vol':''}</div>
             </div>
             <div style="font-size:11px;color:var(--t3);">${timeStr} ›</div>
           </div>
@@ -4049,14 +4050,14 @@ function showDayDetailSheet(dateStr){
     const g = foodGoals;
     let foodHtml = '';
     if(foodItems.length === 0){
-      foodHtml = '<div style="font-size:13px;color:var(--t3);padding:4px 0 2px;">No food logged this day.</div>';
+      foodHtml = '<div style="font-size:13px;color:var(--t3);padding:4px 0 2px;">'+t('cal.noFood')+'</div>';
     } else {
-      const t = getDayTotals(dateStr);
-      const calPct = Math.min(t.calories / Math.max(g.calories,1) * 100, 100).toFixed(1);
-      const calColor = t.calories > g.calories ? 'var(--red)' : 'var(--acc)';
+      const totals = getDayTotals(dateStr);
+      const calPct = Math.min(totals.calories / Math.max(g.calories,1) * 100, 100).toFixed(1);
+      const calColor = totals.calories > g.calories ? 'var(--red)' : 'var(--acc)';
       const mealOrder = ['Breakfast','Lunch','Dinner','Snack','Pre-workout','Post-workout','Other'];
+      const mealKey = {Breakfast:'food.breakfast', Lunch:'food.lunch', Dinner:'food.dinner', Snack:'food.snack', 'Pre-workout':'food.preWorkout', 'Post-workout':'food.postWorkout'};
       const byMeal = {};
-      // Track global index for deletion
       foodItems.forEach((item, globalIdx)=>{
         const m = item.meal || 'Other';
         if(!byMeal[m]) byMeal[m]=[];
@@ -4069,15 +4070,16 @@ function showDayDetailSheet(dateStr){
           <div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--b1);">
             <div style="flex:1;min-width:0;">
               <div style="font-size:13px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.name}</div>
-              <div style="font-size:11px;color:var(--t3);margin-top:1px;">${item.cal?Math.round(item.cal)+' kcal':''}${item.g?' · '+item.g+'g protein':''}</div>
+              <div style="font-size:11px;color:var(--t3);margin-top:1px;">${item.cal?Math.round(item.cal)+' kcal':''}${item.g?' · '+item.g+'g '+t('food.protein').toLowerCase():''}</div>
             </div>
             <button data-del-food="${globalIdx}" style="width:28px;height:28px;flex-shrink:0;background:rgba(255,71,71,.08);border:1px solid rgba(255,71,71,.18);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ff4747" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
             </button>
           </div>`).join('');
+        const mealLabel = mealKey[m] ? t(mealKey[m]) : m;
         return `<div style="margin-bottom:10px;">
           <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
-            <span style="font-size:12px;font-weight:700;color:var(--t1);">${m}</span>
+            <span style="font-size:12px;font-weight:700;color:var(--t1);">${mealLabel}</span>
             <span style="font-size:11px;color:var(--t3);">${Math.round(mCal)} kcal</span>
           </div>${itemRows}</div>`;
       }).join('');
@@ -4087,15 +4089,15 @@ function showDayDetailSheet(dateStr){
           <div style="height:100%;width:${calPct}%;background:${calColor};border-radius:3px;"></div>
         </div>
         <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t2);">
-          <span>${Math.round(t.calories)} / ${g.calories} kcal</span>
-          <span style="color:${calColor};">${t.calories > g.calories ? '+'+Math.round(t.calories-g.calories)+' over' : Math.round(g.calories-t.calories)+' remaining'}</span>
+          <span>${Math.round(totals.calories)} / ${g.calories} kcal</span>
+          <span style="color:${calColor};">${totals.calories > g.calories ? '+'+Math.round(totals.calories-g.calories)+' '+t('cal.over') : Math.round(g.calories-totals.calories)+' '+t('cal.remaining')}</span>
         </div>
       </div>
       <div class="cal-day-macro-row" style="margin-bottom:12px;">
-        <div class="cal-macro-chip"><div class="cmv" style="color:#47b4ff;">${Math.round(t.protein)}g</div><div class="cml">Protein</div></div>
-        <div class="cal-macro-chip"><div class="cmv" style="color:#ffb347;">${Math.round(t.carbs)}g</div><div class="cml">Carbs</div></div>
-        <div class="cal-macro-chip"><div class="cmv" style="color:#ff9147;">${Math.round(t.fat)}g</div><div class="cml">Fat</div></div>
-        <div class="cal-macro-chip"><div class="cmv" style="color:var(--acc);">${foodItems.length}</div><div class="cml">Items</div></div>
+        <div class="cal-macro-chip"><div class="cmv" style="color:#47b4ff;">${Math.round(totals.protein)}g</div><div class="cml">${t('food.protein')}</div></div>
+        <div class="cal-macro-chip"><div class="cmv" style="color:#ffb347;">${Math.round(totals.carbs)}g</div><div class="cml">${t('food.carbs')}</div></div>
+        <div class="cal-macro-chip"><div class="cmv" style="color:#ff9147;">${Math.round(totals.fat)}g</div><div class="cml">${t('food.fat')}</div></div>
+        <div class="cal-macro-chip"><div class="cmv" style="color:var(--acc);">${foodItems.length}</div><div class="cml">${t('cal.items')}</div></div>
       </div>
       ${mealRows}`;
     }
@@ -4105,15 +4107,15 @@ function showDayDetailSheet(dateStr){
 
   function buildBodyContent(dateStr){
     const entry=bodyMetrics.find(e=>e.date===dateStr);
-    if(!entry) return '<div style="font-size:13px;color:var(--t3);padding:4px 0 2px;">No body metrics logged this day.</div>';
+    if(!entry) return '<div style="font-size:13px;color:var(--t3);padding:4px 0 2px;">'+t('cal.noBody')+'</div>';
     const pairs=[
-      ['Weight',entry.weight,'lb'],['BMI',entry.bmi,''],['Body Fat',entry.bodyFat,'%'],
-      ['Skeletal Muscle',entry.skeletalMusclePct,'%'],['Fat-Free Mass',entry.fatFreeMass,'lb'],
-      ['Subcutaneous Fat',entry.subcutFat,'%'],['Visceral Fat',entry.visceralFat,''],
-      ['Body Water',entry.bodyWater,'%'],['Muscle Mass',entry.muscleMass,'lb'],
-      ['Bone Mass',entry.boneMass,'lb'],['Protein',entry.proteinPct,'%'],
-      ['BMR',entry.bmr,'kcal'],['Metabolic Age',entry.metabolicAge,''],
-      ['Waist',entry.waist,'in'],['Hips',entry.hips,'in'],['Chest',entry.chest,'in'],['Arms',entry.arms,'in'],
+      [t('body.weight'),entry.weight,'lb'],[t('body.bmi'),entry.bmi,''],[t('body.bodyFat'),entry.bodyFat,'%'],
+      [t('body.skeletalMuscle'),entry.skeletalMusclePct,'%'],[t('body.fatFreeMass'),entry.fatFreeMass,'lb'],
+      [t('body.subcutFat'),entry.subcutFat,'%'],[t('body.visceralFat'),entry.visceralFat,''],
+      [t('body.bodyWater'),entry.bodyWater,'%'],[t('body.muscleMass'),entry.muscleMass,'lb'],
+      [t('body.boneMass'),entry.boneMass,'lb'],[t('food.protein'),entry.proteinPct,'%'],
+      [t('body.bmr'),entry.bmr,'kcal'],[t('body.metabolicAge'),entry.metabolicAge,''],
+      [t('body.waist'),entry.waist,'in'],[t('body.hips'),entry.hips,'in'],[t('body.chest'),entry.chest,'in'],[t('body.arms'),entry.arms,'in'],
     ].filter(([,v])=>v>0);
     const rows=pairs.map(([l,v,u])=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:0.5px solid var(--b1);font-size:13px;">
       <span style="color:var(--t2);">${l}</span>
@@ -4205,30 +4207,30 @@ function showDayDetailSheet(dateStr){
   bg.innerHTML = `<div class="sheet" style="max-height:92dvh;overflow-y:auto;">
     <div class="sheet-handle"></div>
     <div style="margin-bottom:16px;">
-      <div class="bc" style="font-size:26px;font-weight:800;text-transform:uppercase;line-height:1;">${isToday?'Today':dt.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'})}</div>
-      <div style="font-size:12px;color:var(--t2);margin-top:2px;">${dt.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div>
+      <div class="bc" style="font-size:26px;font-weight:800;text-transform:uppercase;line-height:1;">${isToday?t('home.today'):dt.toLocaleDateString((localStorage.getItem('gainz_lang')==='es'?'es-ES':'en-US'),{weekday:'long',month:'short',day:'numeric'})}</div>
+      <div style="font-size:12px;color:var(--t2);margin-top:2px;">${dt.toLocaleDateString((localStorage.getItem('gainz_lang')==='es'?'es-ES':'en-US'),{month:'long',day:'numeric',year:'numeric'})}</div>
     </div>
 
     <div class="cal-day-section">
       <div class="cal-day-section-hdr">
-        <span class="cal-day-section-title">💪 Workout</span>
-        <button data-add-workout style="font-size:12px;font-weight:600;color:var(--acc);background:rgba(232,255,71,.1);border:none;border-radius:8px;padding:5px 10px;cursor:pointer;">+ Add</button>
+        <span class="cal-day-section-title">${t('cal.workout')}</span>
+        <button data-add-workout style="font-size:12px;font-weight:600;color:var(--acc);background:rgba(232,255,71,.1);border:none;border-radius:8px;padding:5px 10px;cursor:pointer;">${t('cal.add')}</button>
       </div>
       <div id="dds-workout-body">${workoutHtml}</div>
     </div>
 
     <div class="cal-day-section">
       <div class="cal-day-section-hdr">
-        <span class="cal-day-section-title">🥗 Nutrition</span>
-        <button data-add-food style="font-size:12px;font-weight:600;color:#47b4ff;background:rgba(71,180,255,.1);border:none;border-radius:8px;padding:5px 10px;cursor:pointer;">+ Add</button>
+        <span class="cal-day-section-title">${t('cal.nutrition')}</span>
+        <button data-add-food style="font-size:12px;font-weight:600;color:#47b4ff;background:rgba(71,180,255,.1);border:none;border-radius:8px;padding:5px 10px;cursor:pointer;">${t('cal.add')}</button>
       </div>
       <div id="dds-food-body">${foodHtml}</div>
     </div>
 
     <div class="cal-day-section">
       <div class="cal-day-section-hdr">
-        <span class="cal-day-section-title">⚖️ Body Metrics</span>
-        <button data-add-body style="font-size:12px;font-weight:600;color:#1D9E75;background:rgba(29,158,117,.1);border:none;border-radius:8px;padding:5px 10px;cursor:pointer;">+ Add</button>
+        <span class="cal-day-section-title">${t('cal.bodyMetrics')}</span>
+        <button data-add-body style="font-size:12px;font-weight:600;color:#1D9E75;background:rgba(29,158,117,.1);border:none;border-radius:8px;padding:5px 10px;cursor:pointer;">${t('cal.add')}</button>
       </div>
       <div id="dds-body-body">${buildBodyContent(dateStr)}</div>
     </div>
@@ -4731,23 +4733,23 @@ function renderProgress(){
   const maxMVol=Math.max(...topMuscles.map(m=>m[1]),1);
   list.innerHTML=`
     <div class="metric-row">
-      <div class="metric-box"><div class="metric-val a">${totalSessions}</div><div class="metric-lbl">Sessions</div></div>
-      <div class="metric-box"><div class="metric-val">${totalSets}</div><div class="metric-lbl">Total sets</div></div>
-      <div class="metric-box"><div class="metric-val a" style="font-size:20px">${(totalVol/1000).toFixed(1)}k</div><div class="metric-lbl">Total vol (lb)</div></div>
-      <div class="metric-box"><div class="metric-val">${Object.keys(prs).length}</div><div class="metric-lbl">PRs set</div></div>
+      <div class="metric-box"><div class="metric-val a">${totalSessions}</div><div class="metric-lbl">${t('coach.sessions')}</div></div>
+      <div class="metric-box"><div class="metric-val">${totalSets}</div><div class="metric-lbl">${t('coach.totalSets')}</div></div>
+      <div class="metric-box"><div class="metric-val a" style="font-size:20px">${(totalVol/1000).toFixed(1)}k</div><div class="metric-lbl">${t('progress.totalVol')}</div></div>
+      <div class="metric-box"><div class="metric-val">${Object.keys(prs).length}</div><div class="metric-lbl">${t('progress.prsSet')}</div></div>
     </div>
     <div class="prog-tab-row">
-      <button class="prog-tab${progTab==='prs'?' on':''}" onclick="progTab='prs';renderProgress()">Strength PRs</button>
-      <button class="prog-tab${progTab==='vol'?' on':''}" onclick="progTab='vol';renderProgress()">Volume</button>
-      <button class="prog-tab${progTab==='cardio'?' on':''}" onclick="progTab='cardio';renderProgress()">Cardio</button>
-      <button class="prog-tab${progTab==='body'?' on':''}" onclick="progTab='body';renderProgress()">Body</button>
+      <button class="prog-tab${progTab==='prs'?' on':''}" onclick="progTab='prs';renderProgress()">${t('progress.tab.prs')}</button>
+      <button class="prog-tab${progTab==='vol'?' on':''}" onclick="progTab='vol';renderProgress()">${t('progress.tab.vol')}</button>
+      <button class="prog-tab${progTab==='cardio'?' on':''}" onclick="progTab='cardio';renderProgress()">${t('progress.tab.cardio')}</button>
+      <button class="prog-tab${progTab==='body'?' on':''}" onclick="progTab='body';renderProgress()">${t('progress.tab.body')}</button>
     </div>
     ${progTab==='prs'?renderPRs(prs):progTab==='vol'?renderMuscleVol(topMuscles,maxMVol):progTab==='cardio'?renderCardioProgress():renderBodyProgress()}`;
   if(progTab==='body')setTimeout(()=>renderPhotoCard(),0);
 }
 
 function renderPRs(prs){
-  if(!Object.keys(prs).length)return'<div class="empty">No PRs yet.<br>Log some weighted sets to track.</div>';
+  if(!Object.keys(prs).length)return'<div class="empty">'+t('progress.noPRs')+'</div>';
   const actionIcon={increase_weight:'🚀',consolidate:'🎯',progress_reps:'📈',deload:'⚠️',maintain:'→'};
   const rows=Object.entries(prs).sort((a,b)=>b[1]-a[1]).map(([name,w],ri)=>{
     const prog=analyzeProgression(name);
@@ -5605,11 +5607,11 @@ function showEquipmentSheet(){
   const plates=eq.plates||{};
   const bg=document.createElement('div');bg.className='sheet-bg';bg.id='equipment-sheet';
   bg.innerHTML=`<div class="sheet" style="max-height:90vh;overflow-y:auto;">
-    <div class="sheet-title">Equipment Inventory</div>
+    <div class="sheet-title">${t('eq.title')}</div>
     <div style="padding:0 16px 20px;">
 
-      <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:10px;">Dumbbells</div>
-      <div style="font-size:12px;color:var(--t3);margin-bottom:12px;line-height:1.5;">Select the weights you have. Suggestions cap at your heaviest pair.</div>
+      <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:10px;">${t('eq.dumbbells')}</div>
+      <div style="font-size:12px;color:var(--t3);margin-bottom:12px;line-height:1.5;">${t('eq.dumbbellsHint')}</div>
       <div id="db-chips" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px;">
         ${ALL_DB.map(w=>{
           const sel=(eq.dumbbells||[]).includes(w);
@@ -5617,10 +5619,10 @@ function showEquipmentSheet(){
         }).join('')}
       </div>
 
-      <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:6px;">Plates (Smith Machine / Barbell)</div>
-      <div style="font-size:12px;color:var(--t3);margin-bottom:4px;line-height:1.5;">Enter total plate count (e.g. 4 × 45lb = enter 4).</div>
+      <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:6px;">${t('eq.plates')}</div>
+      <div style="font-size:12px;color:var(--t3);margin-bottom:4px;line-height:1.5;">${t('eq.platesHint')}</div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-        <span style="font-size:12px;color:var(--t3);">Bar weight:</span>
+        <span style="font-size:12px;color:var(--t3);">${t('eq.barWeight')}:</span>
         <input type="number" id="eq-bar-weight" value="${eq.barWeight||15}" min="0" max="100" step="1"
           style="width:60px;padding:6px 8px;text-align:center;font-size:14px;font-weight:600;background:var(--s2);border:1px solid var(--b2);border-radius:9px;color:var(--acc);">
         <span style="font-size:12px;color:var(--t3);">lb</span>
@@ -5641,7 +5643,7 @@ function showEquipmentSheet(){
         }).join('')}
       </div>
 
-      <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:10px;">Machines &amp; Tools</div>
+      <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:10px;">${t('eq.machines')}</div>
       <div id="machine-chips" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;">
         ${EQ_MACHINES.map(m=>{
           const sel=(eq.machines||[]).includes(m.key);
@@ -5715,7 +5717,7 @@ function showGlobalRestSheet(){
   }).join('');
   bg.innerHTML=`<div class="sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-title">Global Rest Timers</div>
+    <div class="sheet-title">${t('rest.title')}</div>
     <div class="sheet-sub">Set rest times by muscle group. Per-exercise overrides still take priority. Leave blank to use defaults.</div>
     ${rows}
     <div style="margin-top:6px;padding:10px;background:rgba(232,255,71,.06);border:1px solid rgba(232,255,71,.15);border-radius:10px;font-size:12px;color:var(--t2);line-height:1.6;">
@@ -5895,7 +5897,7 @@ function editExSheet(dayId,name,idx){
   const bg=document.createElement('div');bg.className='sheet-bg';
   bg.innerHTML=`<div class="sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-title">Edit: ${name}</div>
+    <div class="sheet-title">${t('common.edit')}: ${name}</div>
     <div class="sheet-sub">${ex.muscle}</div>
     <div class="field">
       <label>Sets</label>
@@ -6226,13 +6228,13 @@ function showCheckInSheet(){
 
   bg.innerHTML='<div class="sheet">'
     +'<div class="sheet-handle"></div>'
-    +'<div class="sheet-title">Weekly Check-In</div>'
-    +'<div class="sheet-sub">Week of '+weekStart+' — How did this week feel?</div>'
+    +'<div class="sheet-title">'+t('ci.title')+'</div>'
+    +'<div class="sheet-sub">'+t('coach.weekOf')+' '+weekStart+' — '+t('ci.sub')+'</div>'
     +ratingHTML('sleep')+ratingHTML('energy')+ratingHTML('soreness')+ratingHTML('nutrition')
-    +'<div class="field" style="margin-top:4px;"><label>Notes (optional)</label>'
-    +'<input type="text" id="ci-note" placeholder="e.g. Felt tired Mon/Tue, great session Thu" value="'+(existing.note||'')+'"></div>'
-    +'<button class="btn btn-acc btn-full" onclick="submitCheckIn()" style="margin-bottom:8px;">Save Check-In</button>'
-    +'<button class="btn btn-ghost btn-full" onclick="closeSheets()">Cancel</button>'
+    +'<div class="field" style="margin-top:4px;"><label>'+t('body.notes')+' ('+(localStorage.getItem('gainz_lang')==='es'?'opcional':'optional')+')</label>'
+    +'<input type="text" id="ci-note" placeholder="" value="'+(existing.note||'')+'"></div>'
+    +'<button class="btn btn-acc btn-full" onclick="submitCheckIn()" style="margin-bottom:8px;">'+t('ci.submit')+'</button>'
+    +'<button class="btn btn-ghost btn-full" onclick="closeSheets()">'+t('common.cancel')+'</button>'
     +'</div>';
 
   window._ciRatings=ratings;
@@ -6259,13 +6261,13 @@ function computePlanAdjustment(ci){
   // Volume: soreness ≤ 2 → drop 1 set per exercise this week
   if(ci.soreness<=2){
     adj.volumeAdj=-1;
-    adj.reasons.push({icon:'📉',text:'Volume reduced — 1 set dropped per exercise',sub:'Soreness flagged high this week'});
+    adj.reasons.push({icon:'📉',text:t('coach.adj.volumeReduced'),sub:t('coach.adj.sorenessSub')});
   }
 
   // Intensity: energy ≤ 2 → 5% weight reduction (surfaced via computeLoadMultiplier)
   if(ci.energy<=2){
     adj.intensityAdj=-0.05;
-    adj.reasons.push({icon:'⚡',text:'Targets reduced 5% — low energy flagged',sub:'Weights scaled down to match your readiness'});
+    adj.reasons.push({icon:'⚡',text:t('coach.adj.intensityReduced'),sub:t('coach.adj.energySub')});
   }
 
   // Calorie: only if weight is rising faster than goal pace AND goal isn't muscle_gain/strength
@@ -6283,13 +6285,13 @@ function computePlanAdjustment(ci){
       const threshold=goal==='fat_loss'?0.5:1.0;
       if(weeklyGain>threshold){
         adj.calAdj=-100;
-        adj.reasons.push({icon:'🥗',text:'Calories adjusted −100 kcal',sub:`Weight trending +${weeklyGain.toFixed(1)} lb/wk — carbs trimmed slightly`});
+        adj.reasons.push({icon:'🥗',text:t('coach.adj.calReduced'),sub:t('coach.adj.weightTrend',{gain:weeklyGain.toFixed(1)})});
       }
     }
   }
 
   if(!adj.reasons.length){
-    adj.reasons.push({icon:'✓',text:'No adjustments needed',sub:'All signals look good — train as planned'});
+    adj.reasons.push({icon:'✓',text:t('coach.adj.noChanges'),sub:t('coach.adj.allGood')});
   }
 
   return adj;
@@ -6347,8 +6349,8 @@ function buildPlanAdjCard(){
     </div>`).join('');
   return`<div class="card" style="margin-bottom:14px;background:${bgCol};border-color:${borderCol};">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-      <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);">Plan Adjusted This Week</span>
-      <span style="font-size:10px;color:var(--t3);">${new Date(adj.appliedAt).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</span>
+      <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);">${t('coach.planAdj.title')}</span>
+      <span style="font-size:10px;color:var(--t3);">${new Date(adj.appliedAt).toLocaleDateString((localStorage.getItem('gainz_lang')==='es'?'es-ES':'en-US'),{weekday:'short',month:'short',day:'numeric'})}</span>
     </div>
     ${rows}
   </div>`;
@@ -6357,10 +6359,10 @@ function buildPlanAdjCard(){
 function submitCheckIn(){
   const r=window._ciRatings||{};
   if(!r.sleep||!r.energy||!r.soreness||!r.nutrition){
-    const t=document.createElement('div');
-    t.style.cssText='position:fixed;bottom:calc(100px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:#1a1a1a;border:1px solid rgba(255,71,71,.4);border-radius:12px;padding:10px 18px;font-size:13px;font-weight:600;color:var(--red);z-index:10001;pointer-events:none;animation:pwaSlideUp .25s ease;';
-    t.textContent='Please rate all four areas before saving.';
-    document.body.appendChild(t);setTimeout(()=>t.remove(),2500);
+    const el=document.createElement('div');
+    el.style.cssText='position:fixed;bottom:calc(100px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:#1a1a1a;border:1px solid rgba(255,71,71,.4);border-radius:12px;padding:10px 18px;font-size:13px;font-weight:600;color:var(--red);z-index:10001;pointer-events:none;animation:pwaSlideUp .25s ease;';
+    el.textContent=t('ci.rateAll');
+    document.body.appendChild(el);setTimeout(()=>el.remove(),2500);
     return;
   }
   const note=(document.getElementById('ci-note')?.value||'').trim();
@@ -6944,7 +6946,7 @@ function showWaterLogSheet(){
 
   bg.innerHTML=`<div class="sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-title">Hydration</div>
+    <div class="sheet-title">${t('hydro.title')}</div>
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;">
       <div style="position:relative;width:80px;height:80px;flex-shrink:0;">
         <svg width="80" height="80" viewBox="0 0 80 80" style="transform:rotate(-90deg)">
@@ -6954,9 +6956,9 @@ function showWaterLogSheet(){
         <div class="hydration-inner"><div class="hydration-oz">${total}</div><div class="hydration-lbl">/ ${goal} oz</div></div>
       </div>
       <div style="flex:1;">
-        <div style="font-size:22px;font-weight:700;color:#378ADD;font-family:Barlow Condensed,sans-serif;">${pct}% of goal</div>
-        <div style="font-size:12px;color:var(--t2);margin-top:2px;">Goal: ${goal} oz/day · Based on your weight</div>
-        <div style="font-size:12px;color:var(--t3);margin-top:2px;">${Math.max(goal-total,0)} oz remaining</div>
+        <div style="font-size:22px;font-weight:700;color:#378ADD;font-family:Barlow Condensed,sans-serif;">${pct}% ${t('hydro.ofGoal')}</div>
+        <div style="font-size:12px;color:var(--t2);margin-top:2px;">${t('hydro.goalLabel')}: ${goal} oz/${t('hydro.day')} · ${t('hydro.basedOnWeight')}</div>
+        <div style="font-size:12px;color:var(--t3);margin-top:2px;">${Math.max(goal-total,0)} oz ${t('cal.remaining')}</div>
       </div>
     </div>
     <div class="water-quick-btns" style="margin-bottom:14px;">
@@ -6966,11 +6968,11 @@ function showWaterLogSheet(){
       <button class="wq-btn" onclick="logWaterOz(20,'20oz bottle');closeSheets();">+ 20oz</button>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:14px;">
-      <input type="number" id="water-custom-oz" inputmode="decimal" placeholder="Custom oz" style="flex:1;padding:10px 12px;border-radius:10px;background:var(--s2);border:1px solid var(--b2);color:var(--t1);font-size:14px;font-family:DM Sans,sans-serif;">
-      <button onclick="(function(){const v=parseFloat(document.getElementById('water-custom-oz').value);if(v>0){logWaterOz(v,v+'oz custom');closeSheets();}})()" style="padding:10px 16px;border-radius:10px;background:#378ADD;color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:DM Sans,sans-serif;">Add</button>
+      <input type="number" id="water-custom-oz" inputmode="decimal" placeholder="${t('hydro.customOz')}" style="flex:1;padding:10px 12px;border-radius:10px;background:var(--s2);border:1px solid var(--b2);color:var(--t1);font-size:14px;font-family:DM Sans,sans-serif;">
+      <button onclick="(function(){const v=parseFloat(document.getElementById('water-custom-oz').value);if(v>0){logWaterOz(v,v+'oz custom');closeSheets();}})()" style="padding:10px 16px;border-radius:10px;background:#378ADD;color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:DM Sans,sans-serif;">${t('common.add')}</button>
     </div>
-    ${todayItems.length?`<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:6px;">Today's log</div>${itemRows}`:''}
-    <button class="btn btn-ghost btn-full" style="margin-top:12px;" onclick="closeSheets()">Close</button>
+    ${todayItems.length?`<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:6px;">${t('hydro.todaysLog')}</div>${itemRows}`:''}
+    <button class="btn btn-ghost btn-full" style="margin-top:12px;" onclick="closeSheets()">${t('common.close')}</button>
   </div>`;
   bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
   document.body.appendChild(bg);
@@ -8091,36 +8093,34 @@ function renderCoach(){
 
   const weeklySummaryHTML=
     '<div class="coach-section">'
-    +'<div class="coach-section-title">📅 Week of '+weekLabel+'</div>'
+    +'<div class="coach-section-title">📅 '+t('coach.weekOf')+' '+weekLabel+'</div>'
     +'<div class="summary-grid">'
-    +'<div class="sum-box"><div class="sum-val">'+ws.strengthSessions.length+'</div><div class="sum-lbl">Strength</div></div>'
-    +'<div class="sum-box"><div class="sum-val">'+ws.cardioSessions.length+'</div><div class="sum-lbl">Cardio</div></div>'
-    +'<div class="sum-box"><div class="sum-val">'+ws.totalSets+'</div><div class="sum-lbl">Sets</div></div>'
-    +'<div class="sum-box"><div class="sum-val">'+(ws.totalVol>0?(ws.totalVol/1000).toFixed(1)+'k':'—')+'</div><div class="sum-lbl">Vol (lb)</div></div>'
-    +'<div class="sum-box"><div class="sum-val">'+(ws.totalCardioMins>0?Math.round(ws.totalCardioMins):'—')+'</div><div class="sum-lbl">Cardio min</div></div>'
-    +'<div class="sum-box"><div class="sum-val" style="color:'+(ws.avgRpe?ws.avgRpe>=8.5?'var(--red)':ws.avgRpe>=7.5?'var(--acc)':'var(--grn)':'var(--t3)')+'">'+(ws.avgRpe||'—')+'</div><div class="sum-lbl">Avg RPE</div></div>'
+    +'<div class="sum-box"><div class="sum-val">'+ws.strengthSessions.length+'</div><div class="sum-lbl">'+t('train.strength')+'</div></div>'
+    +'<div class="sum-box"><div class="sum-val">'+ws.cardioSessions.length+'</div><div class="sum-lbl">'+t('train.cardio')+'</div></div>'
+    +'<div class="sum-box"><div class="sum-val">'+ws.totalSets+'</div><div class="sum-lbl">'+t('train.sets').replace(/^./, c=>c.toUpperCase())+'</div></div>'
+    +'<div class="sum-box"><div class="sum-val">'+(ws.totalVol>0?(ws.totalVol/1000).toFixed(1)+'k':'—')+'</div><div class="sum-lbl">'+t('coach.volLb')+'</div></div>'
+    +'<div class="sum-box"><div class="sum-val">'+(ws.totalCardioMins>0?Math.round(ws.totalCardioMins):'—')+'</div><div class="sum-lbl">'+t('coach.cardioMin')+'</div></div>'
+    +'<div class="sum-box"><div class="sum-val" style="color:'+(ws.avgRpe?ws.avgRpe>=8.5?'var(--red)':ws.avgRpe>=7.5?'var(--acc)':'var(--grn)':'var(--t3)')+'">'+(ws.avgRpe||'—')+'</div><div class="sum-lbl">'+t('coach.avgRPE')+'</div></div>'
     +'</div>'
-    // Overreaching alert
     +(ws.rpeOverreaching
       ?'<div style="display:flex;align-items:flex-start;gap:10px;background:rgba(255,71,71,.08);border:1px solid rgba(255,71,71,.25);border-radius:12px;padding:12px 14px;margin:12px 0 4px;">'
         +'<div style="font-size:20px;flex-shrink:0;">⚠️</div>'
-        +'<div><div style="font-size:13px;font-weight:600;color:var(--red);margin-bottom:3px;">Overreaching detected</div>'
-        +'<div style="font-size:12px;color:var(--t2);line-height:1.5;">Your avg RPE this week is <strong style="color:var(--red);">'+ws.avgRpe+'</strong> with '+ws.highRpeSets+' sets at RPE 9–10. Consider a deload or extra rest day before your next session.</div></div>'
+        +'<div><div style="font-size:13px;font-weight:600;color:var(--red);margin-bottom:3px;">'+t('coach.overreachTitle')+'</div>'
+        +'<div style="font-size:12px;color:var(--t2);line-height:1.5;">'+t('coach.overreachMsg',{rpe:ws.avgRpe, sets:ws.highRpeSets})+'</div></div>'
         +'</div>'
       :'')
-    // RPE spikes per exercise
     +(ws.rpeSpikes.length
-      ?'<div style="font-size:11px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin:12px 0 8px;">📈 RPE spikes vs last 2 weeks</div>'
+      ?'<div style="font-size:11px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin:12px 0 8px;">📈 '+t('coach.rpeSpikes')+'</div>'
         +ws.rpeSpikes.map(sp=>
           '<div class="highlight-row">'
           +'<div class="hi-dot" style="background:var(--red);"></div>'
-          +'<div><strong>'+sp.name+'</strong><br><span style="font-size:11px;color:var(--t2);">RPE '+sp.prevAvg+' → '+sp.thisAvg+' (+'+sp.delta+') — harder than usual, watch recovery</span></div>'
+          +'<div><strong>'+sp.name+'</strong><br><span style="font-size:11px;color:var(--t2);">RPE '+sp.prevAvg+' → '+sp.thisAvg+' (+'+sp.delta+') — '+t('coach.harderThanUsual')+'</span></div>'
           +'</div>'
         ).join('')
       :'')
-    +(ws.weekPRs.length?'<div style="font-size:11px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin:12px 0 8px;">🏆 PRs this week</div>'+prRows:'')
-    +(ws.readyToProgress.length?'<div style="font-size:11px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin:12px 0 8px;">🚀 Ready to progress</div>'+progressRows:'')
-    +(ws.weekSessions.length===0?'<div style="font-size:13px;color:var(--t3);text-align:center;padding:12px 0;">No sessions logged yet this week. Lets get moving! \u{1F4AA}</div>':'')
+    +(ws.weekPRs.length?'<div style="font-size:11px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin:12px 0 8px;">🏆 '+t('coach.prsThisWeek')+'</div>'+prRows:'')
+    +(ws.readyToProgress.length?'<div style="font-size:11px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin:12px 0 8px;">🚀 '+t('coach.readyToProgressTitle')+'</div>'+progressRows:'')
+    +(ws.weekSessions.length===0?'<div style="font-size:13px;color:var(--t3);text-align:center;padding:12px 0;">'+t('coach.noSessionsYet')+'</div>':'')
     +'</div>';
 
   // ── Muscle Group Volume ──
@@ -8164,12 +8164,12 @@ function renderCoach(){
     const underBand=sorted.filter(g=>{const s=mgSets[g];const t=MUSCLE_SET_TARGETS[g]||{min:10,max:20};return s<t.min;}).length;
     const insight=underBand>0
       ?`<div style="font-size:12px;color:var(--acc);background:rgba(232,255,71,.06);border-radius:8px;padding:8px 10px;margin-top:12px;">💡 ${underBand} group${underBand>1?'s':''} below the 10–20 set hypertrophy range this week.</div>`
-      :`<div style="font-size:12px;color:var(--grn);background:rgba(72,207,109,.06);border-radius:8px;padding:8px 10px;margin-top:12px;">🎯 All trained groups are in the hypertrophy range. Well balanced week!</div>`;
+      :`<div style="font-size:12px;color:var(--grn);background:rgba(72,207,109,.06);border-radius:8px;padding:8px 10px;margin-top:12px;">${t('coach.allBalanced')}</div>`;
     muscleVolHTML=
       '<div class="coach-section">'
       +'<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;">'
-      +'<div class="coach-section-title" style="margin-bottom:0;">💪 Muscle Group Volume</div>'
-      +'<div style="font-size:10px;color:var(--t3);font-weight:500;">Target: 10–20 sets/wk</div>'
+      +'<div class="coach-section-title" style="margin-bottom:0;">💪 '+t('coach.muscleVolume')+'</div>'
+      +'<div style="font-size:10px;color:var(--t3);font-weight:500;">'+t('coach.targetRange')+'</div>'
       +'</div>'
       +bars
       +insight
@@ -8192,15 +8192,15 @@ function renderCoach(){
   const bodyHTML=
     '<div class="coach-section" style="cursor:pointer;" onclick="progTab=\'body\';nav(\'progress\',document.querySelectorAll(\'.nb\')[3]);setTimeout(()=>renderPhotoCard(),0);">'
     +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
-    +'<div class="coach-section-title" style="margin-bottom:0;">⚖️ Body</div>'
+    +'<div class="coach-section-title" style="margin-bottom:0;">⚖️ '+t('coach.body')+'</div>'
     +'<div style="display:flex;align-items:center;gap:8px;">'
-    +'<button onclick="event.stopPropagation();showBodyLogSheet()" style="font-size:12px;font-weight:600;padding:6px 12px;border-radius:10px;background:var(--acc);color:#000;border:none;cursor:pointer;font-family:DM Sans,sans-serif;">+ Log</button>'
+    +'<button onclick="event.stopPropagation();showBodyLogSheet()" style="font-size:12px;font-weight:600;padding:6px 12px;border-radius:10px;background:var(--acc);color:#000;border:none;cursor:pointer;font-family:DM Sans,sans-serif;">+ '+t('coach.log')+'</button>'
     +'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>'
     +'</div></div>'
     +'<div style="margin-bottom:6px;">'+_bodyBridgeStats+'</div>'
     +(_lastBody
-      ?'<div style="font-size:11px;color:var(--t3);">Last logged: '+new Date(_lastBody.date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})+' · Tap for charts &amp; photos →</div>'
-      :'<div style="font-size:11px;color:var(--t3);">Tap to view body progress →</div>')
+      ?'<div style="font-size:11px;color:var(--t3);">'+t('coach.lastLogged')+': '+new Date(_lastBody.date+'T12:00:00').toLocaleDateString((localStorage.getItem('gainz_lang')==='es'?'es-ES':'en-US'),{weekday:'short',month:'short',day:'numeric'})+' · '+t('coach.tapCharts')+' →</div>'
+      :'<div style="font-size:11px;color:var(--t3);">'+t('coach.tapBody')+' →</div>')
     +'</div>';
 
   // ── Check-In ──
@@ -8209,12 +8209,12 @@ function renderCoach(){
   if(!thisCI){
     checkInHTML=
       '<div class="checkin-banner">'
-      +'<div class="checkin-banner-title">📋 Weekly Check-In</div>'
-      +'<div class="checkin-banner-sub">Rate your sleep, energy, soreness, and nutrition for the week — takes 30 seconds.</div>'
-      +'<button class="btn btn-acc" onclick="showCheckInSheet()" style="width:100%;font-size:14px;">Start Check-In</button>'
+      +'<div class="checkin-banner-title">📋 '+t('ci.title')+'</div>'
+      +'<div class="checkin-banner-sub">'+t('ci.bannerSub')+'</div>'
+      +'<button class="btn btn-acc" onclick="showCheckInSheet()" style="width:100%;font-size:14px;">'+t('coach.startCheckin')+'</button>'
       +'</div>';
   } else {
-    const ciDate=new Date(thisCI.date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    const ciDate=new Date(thisCI.date+'T12:00:00').toLocaleDateString((localStorage.getItem('gainz_lang')==='es'?'es-ES':'en-US'),{weekday:'short',month:'short',day:'numeric'});
     const scoreColor=(v)=>v>=4?'var(--grn)':v<=2?'var(--red)':'var(--acc)';
     const scoreBox=(field,val)=>{
       const meta=CI_META[field];
@@ -8227,8 +8227,8 @@ function renderCoach(){
     checkInHTML=
       '<div class="checkin-summary">'
       +'<div class="checkin-summary-header">'
-      +'<div class="checkin-summary-title">📋 This Week\'s Check-In</div>'
-      +'<button onclick="showCheckInSheet()" style="font-size:11px;padding:5px 10px;border-radius:20px;background:var(--s2);border:1px solid var(--b2);color:var(--t2);cursor:pointer;font-family:DM Sans,sans-serif;">Edit</button>'
+      +'<div class="checkin-summary-title">📋 '+t('ci.thisWeekTitle')+'</div>'
+      +'<button onclick="showCheckInSheet()" style="font-size:11px;padding:5px 10px;border-radius:20px;background:var(--s2);border:1px solid var(--b2);color:var(--t2);cursor:pointer;font-family:DM Sans,sans-serif;">'+t('common.edit')+'</button>'
       +'</div>'
       +'<div class="checkin-scores">'
       +scoreBox('sleep',thisCI.sleep)
@@ -8252,7 +8252,7 @@ function renderCoach(){
     ?activeStack.map(s=>{
       const done=takenToday.includes(s.id);
       const isWhey=s.id==='whey';
-      const wheyNote=isWhey&&!hadStrengthToday?'<span style="font-size:10px;color:var(--t3);margin-left:6px;">optional today</span>':'';
+      const wheyNote=isWhey&&!hadStrengthToday?'<span style="font-size:10px;color:var(--t3);margin-left:6px;">'+t('coach.optionalToday')+'</span>':'';
       return`<div class="supp-row" onclick="toggleSuppTaken('${s.id}')">
         <div class="supp-check${done?' done':''}"></div>
         <div class="supp-info">
@@ -8265,25 +8265,25 @@ function renderCoach(){
         </div>
       </div>`;
     }).join('')
-    :'<div style="font-size:13px;color:var(--t3);padding:6px 0 10px;">No supplements in your stack yet.</div>';
+    :'<div style="font-size:13px;color:var(--t3);padding:6px 0 10px;">'+t('coach.noSuppsYet')+'</div>';
 
   const allDone=suppCompletion.allTaken;
   const statusMsg=activeStack.length>0
     ?(allDone
-      ?'<span style="color:var(--grn);font-weight:600;font-size:12px;">✓ All taken</span>'
-      :`<span style="color:var(--t3);font-size:12px;">${suppCompletion.taken}/${suppCompletion.total} taken</span>`)
+      ?'<span style="color:var(--grn);font-weight:600;font-size:12px;">✓ '+t('coach.allTaken')+'</span>'
+      :`<span style="color:var(--t3);font-size:12px;">${suppCompletion.taken}/${suppCompletion.total} ${t('coach.taken')}</span>`)
     :'';
 
   const suppHTML=
     '<div class="coach-section">'
     +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">'
-    +'<div class="coach-section-title" style="margin-bottom:0;">💊 Supplements</div>'
+    +'<div class="coach-section-title" style="margin-bottom:0;">💊 '+t('coach.supplements')+'</div>'
     +statusMsg
     +'</div>'
     +stackRows
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;">'
-    +'<button onclick="showSuppRecsSheet()" style="padding:10px;border-radius:12px;background:rgba(232,255,71,.08);border:1px solid rgba(232,255,71,.2);color:var(--acc);font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;">Recommendations</button>'
-    +'<button onclick="showSuppBrowserSheet()" style="padding:10px;border-radius:12px;background:var(--s2);border:1px solid var(--b2);color:var(--t2);font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;">Browse all</button>'
+    +'<button onclick="showSuppRecsSheet()" style="padding:10px;border-radius:12px;background:rgba(232,255,71,.08);border:1px solid rgba(232,255,71,.2);color:var(--acc);font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;">'+t('coach.recommendations')+'</button>'
+    +'<button onclick="showSuppBrowserSheet()" style="padding:10px;border-radius:12px;background:var(--s2);border:1px solid var(--b2);color:var(--t2);font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;">'+t('coach.browseAll')+'</button>'
     +'</div>'
     +'</div>';
 
@@ -8593,41 +8593,40 @@ function showBodyLogSheet(){
     ?`<div class="field"><label>BMI <span style="font-size:10px;color:var(--t3);font-weight:400;">(auto)</span></label><input type="number" id="bm-bmi" inputmode="decimal" placeholder="auto" step="0.1" value="${lastBMI||''}" readonly style="background:var(--s3);color:var(--t3);cursor:default;"></div>`
     :`<div class="field"><label>BMI <span style="font-size:10px;color:var(--t3);font-weight:400;">(set height in profile)</span></label><input type="number" id="bm-bmi" inputmode="decimal" placeholder="e.g. 22.1" step="0.1" value="${last.bmi||''}"></div>`;
 
+  const optStr = localStorage.getItem('gainz_lang')==='es'?'opcional':'optional';
   bg.innerHTML='<div class="sheet"><div class="sheet-handle"></div>'
-    +'<div class="sheet-title">Log Body Metrics</div>'
-    +'<div class="sheet-sub">From your Renpho — leave blank to skip</div>'
+    +'<div class="sheet-title">'+t('body.title')+'</div>'
+    +'<div class="sheet-sub">'+t('body.sub')+'</div>'
 
-    // ── Scale metrics — Renpho order ──
-    +'<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin:0 0 8px;">Scale Metrics</div>'
+    +'<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin:0 0 8px;">'+t('body.scaleMetrics')+'</div>'
     +'<div class="metric-input-grid">'
-    +field('bm-weight','Weight (lb)','e.g. 158.2','0.1',last.weight)
-    +field('bm-bodyfat','Body Fat %','e.g. 11.2','0.1',last.bodyFat)
-    +field('bm-skel','Skeletal Muscle %','e.g. 57.4','0.1',last.skeletalMusclePct)
-    +field('bm-ffm','Fat-Free Mass (lb)','e.g. 140.6','0.1',last.fatFreeMass)
-    +field('bm-subcut','Subcutaneous Fat %','e.g. 9.7','0.1',last.subcutFat)
-    +field('bm-visceral','Visceral Fat','e.g. 5','1',last.visceralFat)
-    +field('bm-water','Body Water %','e.g. 64.1','0.1',last.bodyWater)
-    +field('bm-muscle','Muscle Mass (lb)','e.g. 133.6','0.1',last.muscleMass)
-    +field('bm-bone','Bone Mass (lb)','e.g. 7.0','0.1',last.boneMass)
-    +field('bm-protein','Protein %','e.g. 20.2','0.1',last.proteinPct)
-    +field('bm-bmr','BMR (kcal)','e.g. 1734','1',last.bmr)
-    +field('bm-metage','Metabolic Age','e.g. 25','1',last.metabolicAge)
+    +field('bm-weight',t('body.weight')+' (lb)','e.g. 158.2','0.1',last.weight)
+    +field('bm-bodyfat',t('body.bodyFat')+' %','e.g. 11.2','0.1',last.bodyFat)
+    +field('bm-skel',t('body.skeletalMuscle')+' %','e.g. 57.4','0.1',last.skeletalMusclePct)
+    +field('bm-ffm',t('body.fatFreeMass')+' (lb)','e.g. 140.6','0.1',last.fatFreeMass)
+    +field('bm-subcut',t('body.subcutFat')+' %','e.g. 9.7','0.1',last.subcutFat)
+    +field('bm-visceral',t('body.visceralFat'),'e.g. 5','1',last.visceralFat)
+    +field('bm-water',t('body.bodyWater')+' %','e.g. 64.1','0.1',last.bodyWater)
+    +field('bm-muscle',t('body.muscleMass')+' (lb)','e.g. 133.6','0.1',last.muscleMass)
+    +field('bm-bone',t('body.boneMass')+' (lb)','e.g. 7.0','0.1',last.boneMass)
+    +field('bm-protein',t('body.proteinPct'),'e.g. 20.2','0.1',last.proteinPct)
+    +field('bm-bmr',t('body.bmr')+' (kcal)','e.g. 1734','1',last.bmr)
+    +field('bm-metage',t('body.metabolicAge'),'e.g. 25','1',last.metabolicAge)
     +bmiField
     +'</div>'
 
-    // ── Measurements ──
-    +'<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin:8px 0 8px;">Measurements</div>'
+    +'<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin:8px 0 8px;">'+t('body.measurements')+'</div>'
     +'<div class="metric-input-grid">'
-    +field('bm-waist','Waist (in)','e.g. 32','0.5',last.waist)
-    +field('bm-hips','Hips (in)','e.g. 38','0.5',last.hips)
-    +field('bm-chest','Chest (in)','e.g. 42','0.5',last.chest)
-    +field('bm-arms','Arms (in)','e.g. 15','0.25',last.arms)
+    +field('bm-waist',t('body.waist')+' (in)','e.g. 32','0.5',last.waist)
+    +field('bm-hips',t('body.hips')+' (in)','e.g. 38','0.5',last.hips)
+    +field('bm-chest',t('body.chest')+' (in)','e.g. 42','0.5',last.chest)
+    +field('bm-arms',t('body.arms')+' (in)','e.g. 15','0.25',last.arms)
     +'</div>'
 
-    +'<div class="field" style="margin-top:4px;"><label>Notes (optional)</label><input type="text" id="bm-notes" placeholder="e.g. post-workout, morning weigh-in" value="'+(last.notes||'')+'"></div>'
-    +'<button class="btn btn-acc btn-full" onclick="logBodyMetrics()">Save Entry</button>'
-    +(bodyMetrics.length?'<div style="font-size:11px;color:var(--t3);margin-top:10px;text-align:center;">Previous: '+new Date(bodyMetrics[0].date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})+'</div>':'')
-    +'<button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="closeSheets()">Cancel</button></div>';
+    +'<div class="field" style="margin-top:4px;"><label>'+t('body.notes')+' ('+optStr+')</label><input type="text" id="bm-notes" placeholder="" value="'+(last.notes||'')+'"></div>'
+    +'<button class="btn btn-acc btn-full" onclick="logBodyMetrics()">'+t('body.saveEntry')+'</button>'
+    +(bodyMetrics.length?'<div style="font-size:11px;color:var(--t3);margin-top:10px;text-align:center;">'+t('body.previous')+': '+new Date(bodyMetrics[0].date+'T12:00:00').toLocaleDateString((localStorage.getItem('gainz_lang')==='es'?'es-ES':'en-US'),{weekday:'short',month:'short',day:'numeric'})+'</div>':'')
+    +'<button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="closeSheets()">'+t('common.cancel')+'</button></div>';
 
   bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
   document.body.appendChild(bg);
@@ -8731,8 +8730,541 @@ const GAINZ_KEYS = [
   'gainz_protein_goal','gainz_protein_log','gainz_food_goals','gainz_macro_profile',
   'gainz_checkins','gainz_voice','gainz_vibrate','gainz_water','gainz_pwa_dismissed','gainz_supps','gainz_custom_cardio',
   'gainz_equipment',
-  'gainz_api_key','gainz_usda_key','gainz_my_foods','gainz_theme'
+  'gainz_api_key','gainz_usda_key','gainz_my_foods','gainz_theme','gainz_lang'
 ];
+
+// ─── I18N ─────────────────────────────────────────────────────────────────────
+const STRINGS = {
+  // Nav (6 tabs)
+  'nav.home':       { en:'Home',       es:'Inicio' },
+  'nav.train':      { en:'Train',      es:'Entreno' },
+  'nav.nutrition':  { en:'Nutrition',  es:'Comida' },
+  'nav.progress':   { en:'Progress',   es:'Progreso' },
+  'nav.coach':      { en:'Coach',      es:'Coach' },
+  'nav.calendar':   { en:'Cal',        es:'Cal' },
+
+  // Home stats
+  'home.dayStreak':       { en:'Day streak',        es:'Racha diaria' },
+  'home.streakSub':       { en:'workout or food',   es:'entreno o comida' },
+  'home.dontBreakIt':     { en:"Don't break it",    es:'No la rompas' },
+  'home.streakReset':     { en:'Streak reset',      es:'Racha reiniciada' },
+  'home.lastWeighIn':     { en:'Last weigh-in',     es:'Último pesaje' },
+  'home.today':           { en:'Today',             es:'Hoy' },
+  'home.yesterday':       { en:'Yesterday',         es:'Ayer' },
+  'home.daysAgo':         { en:'d ago',             es:'d atrás' },
+
+  // Settings sheet
+  'settings.title':       { en:'Settings',                  es:'Ajustes' },
+  'settings.language':    { en:'Language',                  es:'Idioma' },
+  'settings.appearance':  { en:'Appearance',                es:'Apariencia' },
+  'settings.dark':        { en:'🌑 Dark',                    es:'🌑 Oscuro' },
+  'settings.light':       { en:'☀️ Light',                  es:'☀️ Claro' },
+  'settings.dataBackup':  { en:'Data & Backup',             es:'Datos y Respaldo' },
+  'settings.dataBackupSub': { en:'Clearing Safari cache will erase all your data. Export a backup regularly to keep your history safe.', es:'Borrar la caché de Safari eliminará tus datos. Exporta un respaldo regularmente para no perder tu historial.' },
+  'settings.exportBackup': { en:'⬇ Export Backup',          es:'⬇ Exportar Respaldo' },
+  'settings.importRestore': { en:'⬆ Import / Restore',      es:'⬆ Importar / Restaurar' },
+  'settings.claudeAi':    { en:'Claude AI',                 es:'Claude AI' },
+  'settings.claudeAiSub': { en:'Required for AI food search and smart coaching. Get a key at ', es:'Necesario para búsqueda de comida con IA y entrenamiento inteligente. Obtén una clave en ' },
+  'settings.claudeKeyHint': { en:'Stored locally on device. Never sent anywhere except Anthropic\'s API.', es:'Se guarda en tu dispositivo. Solo se envía a la API de Anthropic.' },
+  'settings.usdaTitle':   { en:'USDA Food Database',        es:'Base de Datos USDA' },
+  'settings.usdaSub':     { en:'Free key for faster food search (1,000 req/hr vs 30). Get one free at ', es:'Clave gratis para búsqueda más rápida (1.000 req/h vs 30). Consíguela gratis en ' },
+  'settings.usdaKeyHint': { en:'Stored locally on device. Never sent anywhere except USDA\'s API.', es:'Se guarda en tu dispositivo. Solo se envía a la API de USDA.' },
+  'settings.usdaKeyPh':   { en:'Paste USDA key here…',      es:'Pega tu clave USDA aquí…' },
+  'settings.about':       { en:'About',                     es:'Acerca de' },
+  'settings.aboutSub':    { en:'All data stored locally on device', es:'Todos los datos guardados en tu dispositivo' },
+  'settings.aboutAcct':   { en:'No account needed',         es:'No se necesita cuenta' },
+  'settings.close':       { en:'Close',                     es:'Cerrar' },
+  'settings.save':        { en:'Save',                      es:'Guardar' },
+
+  // Toasts
+  'toast.apiKeySaved':    { en:'API key saved ✓',           es:'Clave guardada ✓' },
+  'toast.usdaKeySaved':   { en:'USDA key saved ✓',          es:'Clave USDA guardada ✓' },
+  'toast.keyCleared':     { en:'Key cleared',               es:'Clave borrada' },
+  'toast.darkMode':       { en:'🌑 Dark mode',              es:'🌑 Modo oscuro' },
+  'toast.lightMode':      { en:'☀️ Light mode',             es:'☀️ Modo claro' },
+  'toast.langChanged':    { en:'Language updated ✓',        es:'Idioma actualizado ✓' },
+
+  // Common
+  'common.cancel':        { en:'Cancel',                    es:'Cancelar' },
+  'common.delete':        { en:'Delete',                    es:'Eliminar' },
+  'common.add':           { en:'Add',                       es:'Añadir' },
+  'common.save':          { en:'Save',                      es:'Guardar' },
+  'common.close':         { en:'Close',                     es:'Cerrar' },
+  'common.edit':          { en:'Edit',                      es:'Editar' },
+  'common.done':          { en:'Done',                      es:'Listo' },
+  'common.back':          { en:'Back',                      es:'Atrás' },
+
+  // ─── Progression engine messages ────────────────────────────────────────
+  'engine.firsttime':     { en:'First time doing this exercise — start light and focus on form',
+                            es:'Primera vez con este ejercicio — empieza ligero y enfócate en la forma' },
+  'engine.maxRepsUp':     { en:'Reps trending up +{n} — keep the weight and push for more',
+                            es:'Reps subiendo +{n} — mantén el peso y empuja por más' },
+  'engine.maxRepsHold':   { en:'Maintain current effort — focus on form',
+                            es:'Mantén el esfuerzo actual — enfócate en la forma' },
+  'engine.regress.msg':   { en:'Reps dropped from {prev} to {last} at {weight}lb — back off to {dropTo}lb and rebuild',
+                            es:'Reps bajaron de {prev} a {last} con {weight}lb — baja a {dropTo}lb y reconstruye' },
+  'engine.regress.detail':{ en:'Drop weight, hit {high}+ reps clean across all sets, then climb back',
+                            es:'Baja el peso, logra {high}+ reps limpios en todas las series, luego vuelve a subir' },
+  'engine.fatigue.msg':   { en:'RPE climbing over last 3 sessions — hold {weight}lb and prioritize recovery',
+                            es:'RPE subiendo en las últimas 3 sesiones — mantén {weight}lb y prioriza la recuperación' },
+  'engine.fatigue.detail':{ en:'Avg RPE: {a} → {b} → {c}',
+                            es:'RPE promedio: {a} → {b} → {c}' },
+  'engine.deload.msg':    { en:'{weeks} weeks of progression — take a deload at {weight}lb to recover and rebound',
+                            es:'{weeks} semanas de progresión — toma una descarga con {weight}lb para recuperar y rebotar' },
+  'engine.deload.detail': { en:'Drop one working set, focus on bar speed and clean reps',
+                            es:'Quita una serie, enfócate en velocidad de barra y reps limpias' },
+  'engine.consolidateRpe.msg':    { en:'Hit reps but RPE was {rpe} — hold the weight and build capacity first',
+                                    es:'Lograste las reps pero RPE fue {rpe} — mantén el peso y construye capacidad primero' },
+  'engine.consolidateRpe.detail': { en:'RPE {rpe} last session: match {weight}lb × {high} reps before adding load',
+                                    es:'RPE {rpe} última sesión: iguala {weight}lb × {high} reps antes de añadir carga' },
+  'engine.capped.msg':    { en:'Equipment maxed at {weight}lb — push reps higher ({target}+) for overload',
+                            es:'Equipo al máximo con {weight}lb — empuja más reps ({target}+) para sobrecarga' },
+  'engine.capped.detail': { en:"Add reps until you're 2+ above target, then drop set count slightly",
+                            es:'Añade reps hasta estar 2+ sobre el objetivo, luego baja una serie ligeramente' },
+  'engine.increase.msg':  { en:'Hit {reps}+ reps across all sets at {weight}lb for {streak} sessions — ready for {next}lb{rpeNote}',
+                            es:'Lograste {reps}+ reps en todas las series con {weight}lb por {streak} sesiones — listo para {next}lb{rpeNote}' },
+  'engine.increase.detail': { en:'Try {next}lb × {low} reps today',
+                              es:'Intenta {next}lb × {low} reps hoy' },
+  'engine.increase.rpeNote': { en:' (RPE {rpe} — felt easy, confident to progress)',
+                               es:' (RPE {rpe} — se sintió fácil, listo para progresar)' },
+  'engine.consolidate.msg':    { en:'Hit {reps}+ reps across all sets last time — match or beat it to lock it in',
+                                 es:'Lograste {reps}+ reps en todas las series — iguala o supera para consolidar' },
+  'engine.consolidate.detail': { en:'Target: {weight}lb × {high} reps',
+                                 es:'Objetivo: {weight}lb × {high} reps' },
+  'engine.deloadStuck.msg':    { en:'Stuck below target for {n} sessions — drop to {dropTo}lb to rebuild',
+                                 es:'Estancado bajo el objetivo por {n} sesiones — baja a {dropTo}lb para reconstruir' },
+  'engine.deloadStuck.detail': { en:'Focus on form, hit {high}+ reps, then climb back',
+                                 es:'Enfócate en la forma, logra {high}+ reps, luego vuelve a subir' },
+  'engine.progress.msg':    { en:'Within target range — push for {high}+ reps across all sets today',
+                              es:'Dentro del rango objetivo — empuja por {high}+ reps en todas las series hoy' },
+  'engine.progress.detail': { en:'Last: {weight}lb × {min}–{max} reps → Target: {high}',
+                              es:'Última: {weight}lb × {min}–{max} reps → Objetivo: {high}' },
+  'engine.maintain.msg':    { en:'Keep working at {weight}lb — focus on hitting {low}+ reps',
+                              es:'Sigue trabajando con {weight}lb — enfócate en lograr {low}+ reps' },
+
+  // Food confirm sheet
+  'food.confirm.title':    { en:'Confirm food',           es:'Confirmar comida' },
+  'food.servingSize':      { en:'Serving size',           es:'Tamaño de porción' },
+  'food.servings':         { en:'Servings',               es:'Porciones' },
+  'food.meal':             { en:'Meal',                   es:'Comida' },
+  'food.customAmount':     { en:'Or exact amount',        es:'O cantidad exacta' },
+  'food.amountInGrams':    { en:'Amount in grams',        es:'Cantidad en gramos' },
+  'food.amountInOunces':   { en:'Amount in ounces',       es:'Cantidad en onzas' },
+  'food.amountInMl':       { en:'Amount in ml',           es:'Cantidad en ml' },
+  'food.cal':              { en:'Cal',                    es:'Cal' },
+  'food.protein':          { en:'Protein',                es:'Proteína' },
+  'food.carbs':            { en:'Carbs',                  es:'Carbs' },
+  'food.fat':              { en:'Fat',                    es:'Grasa' },
+  'food.addToLog':         { en:'Add to log',             es:'Añadir al registro' },
+  'food.breakfast':        { en:'Breakfast',              es:'Desayuno' },
+  'food.lunch':            { en:'Lunch',                  es:'Almuerzo' },
+  'food.dinner':           { en:'Dinner',                 es:'Cena' },
+  'food.snack':            { en:'Snack',                  es:'Snack' },
+  'food.preWorkout':       { en:'Pre-workout',            es:'Pre-entreno' },
+  'food.postWorkout':      { en:'Post-workout',           es:'Post-entreno' },
+
+  // Workout finish screen
+  'finish.title':          { en:'Workout complete',       es:'Entreno completado' },
+  'finish.session':        { en:'Session',                es:'Sesión' },
+  'finish.complete':       { en:'Complete',               es:'Completa' },
+  'finish.minutes':        { en:'Minutes',                es:'Minutos' },
+  'finish.setsDone':       { en:'Sets done',              es:'Series hechas' },
+  'finish.exercises':      { en:'Exercises',              es:'Ejercicios' },
+  'finish.duration':       { en:'Duration',               es:'Duración' },
+  'finish.sets':           { en:'Sets',                   es:'Series' },
+  'finish.volume':         { en:'Volume',                 es:'Volumen' },
+  'finish.volCompleted':   { en:'Volume completed',       es:'Volumen completado' },
+  'finish.newPRs':         { en:'🏆 New PRs',             es:'🏆 Nuevos PRs' },
+  'finish.was':            { en:'was {prev}',             es:'antes {prev}' },
+  'finish.avgRPE':         { en:'Avg RPE',                es:'RPE promedio' },
+  'finish.rpeHigh':        { en:'High — consider load next session', es:'Alto — considera la carga la próxima sesión' },
+  'finish.rpeLow':         { en:'Well under — room to push', es:'Muy bajo — espacio para empujar' },
+  'finish.rpeMid':         { en:'Working range',          es:'Rango de trabajo' },
+  'finish.volFull':        { en:'Full session ✓',         es:'Sesión completa ✓' },
+  'finish.volSolid':       { en:'Solid effort',           es:'Buen esfuerzo' },
+  'finish.volPartial':     { en:'Partial session',        es:'Sesión parcial' },
+  'finish.vsLast':         { en:'vs last {day}',          es:'vs última {day}' },
+  'finish.lbTotal':        { en:'lb total',               es:'lb total' },
+  'finish.postWorkoutMeal':{ en:'💧 Post-Workout Meal',    es:'💧 Comida Post-Entreno' },
+  'finish.postWorkoutSub': { en:'Hit protein + carbs within 60 min to maximise recovery and muscle synthesis.',
+                             es:'Logra proteína + carbs en los próximos 60 min para maximizar recuperación y síntesis muscular.' },
+  'finish.logItNow':       { en:'Log it now',             es:'Registrar ahora' },
+  'finish.whatToEat':      { en:'What should I eat?',     es:'¿Qué debería comer?' },
+  'finish.backToHome':     { en:'Back to home',           es:'Volver al inicio' },
+  'finish.done':           { en:'Done',                   es:'Listo' },
+  'finish.share':          { en:'Share workout',          es:'Compartir entreno' },
+
+  // ─── ONBOARDING (9 steps) ─────────────────────────────────────────────────
+  'ob.continue':           { en:'Continue',                es:'Continuar' },
+  'ob.done.button':        { en:'Build my program 💪',     es:'Construir mi programa 💪' },
+  'ob.welcome.q':          { en:'Welcome to <em>Gainz</em>', es:'Bienvenido a <em>Gainz</em>' },
+  'ob.welcome.sub':        { en:"I'm your personal trainer. Before we build your program, I need to understand you. This takes about 2 minutes.",
+                             es:'Soy tu entrenador personal. Antes de construir tu programa, necesito entenderte. Toma unos 2 minutos.' },
+  'ob.goal.q':             { en:"What's your <em>main goal?</em>", es:'¿Cuál es tu <em>meta principal?</em>' },
+  'ob.goal.sub':           { en:'This shapes everything — rep ranges, rest times, program structure.',
+                             es:'Esto define todo — rangos de reps, descansos, estructura del programa.' },
+  'ob.goal.opt.hypertrophy.title': { en:'Build muscle & size', es:'Construir músculo' },
+  'ob.goal.opt.hypertrophy.sub':   { en:'Higher reps, shorter rest, progressive overload focus', es:'Más reps, menos descanso, enfoque en sobrecarga progresiva' },
+  'ob.goal.opt.strength.title':    { en:'Get stronger',        es:'Ser más fuerte' },
+  'ob.goal.opt.strength.sub':      { en:'Lower reps, heavier weight, compound movement focus', es:'Menos reps, más peso, enfoque en movimientos compuestos' },
+  'ob.goal.opt.fat_loss.title':    { en:'Lose fat & tone',     es:'Perder grasa y tonificar' },
+  'ob.goal.opt.fat_loss.sub':      { en:'Higher reps, supersets, cardio built in', es:'Más reps, superseries, cardio incluido' },
+  'ob.goal.opt.general.title':     { en:'General fitness',     es:'Fitness general' },
+  'ob.goal.opt.general.sub':       { en:'Balanced approach — strength, cardio, flexibility', es:'Enfoque balanceado — fuerza, cardio, flexibilidad' },
+  'ob.experience.q':       { en:'What is your <em>training experience?</em>', es:'¿Cuál es tu <em>experiencia de entreno?</em>' },
+  'ob.experience.sub':     { en:'Honest answer gives you the right starting weights and volume.', es:'Una respuesta honesta te da los pesos y volumen iniciales correctos.' },
+  'ob.experience.opt.beginner.title':     { en:'Beginner (0–1 yr)',          es:'Principiante (0–1 año)' },
+  'ob.experience.opt.beginner.sub':       { en:'Still learning movements, building base strength', es:'Aprendiendo movimientos, construyendo base de fuerza' },
+  'ob.experience.opt.intermediate.title': { en:'Intermediate (1–3 yrs)',     es:'Intermedio (1–3 años)' },
+  'ob.experience.opt.intermediate.sub':   { en:'Consistent training, understand most movements', es:'Entrenas constante, entiendes la mayoría de movimientos' },
+  'ob.experience.opt.advanced.title':     { en:'Advanced (3+ yrs)',          es:'Avanzado (3+ años)' },
+  'ob.experience.opt.advanced.sub':       { en:'Strong foundation, looking to break plateaus', es:'Base sólida, buscando romper mesetas' },
+  'ob.days.q':             { en:'How many days per week <em>can you train?</em>', es:'¿Cuántos días por semana <em>puedes entrenar?</em>' },
+  'ob.days.sub':           { en:'Be realistic — consistency beats frequency.', es:'Sé realista — la constancia gana a la frecuencia.' },
+  'ob.days.opt.3.title':   { en:'3 days',  es:'3 días' },
+  'ob.days.opt.3.sub':     { en:'Full body or Push / Pull / Legs', es:'Cuerpo completo o Push / Pull / Legs' },
+  'ob.days.opt.4.title':   { en:'4 days',  es:'4 días' },
+  'ob.days.opt.4.sub':     { en:'Upper / Lower split or PPL + arms', es:'Upper / Lower o PPL + brazos' },
+  'ob.days.opt.5.title':   { en:'5 days',  es:'5 días' },
+  'ob.days.opt.5.sub':     { en:'PPL + extra focus day', es:'PPL + día de enfoque extra' },
+  'ob.days.opt.6.title':   { en:'6 days',  es:'6 días' },
+  'ob.days.opt.6.sub':     { en:'Full PPL twice per week', es:'PPL completo dos veces por semana' },
+  'ob.equipment.q':        { en:'What equipment do you have <em>access to?</em>', es:'¿A qué equipo <em>tienes acceso?</em>' },
+  'ob.equipment.sub':      { en:'This determines which exercises go in your program.', es:'Esto determina qué ejercicios van en tu programa.' },
+  'ob.equipment.opt.full_gym.title':   { en:'Full gym',           es:'Gimnasio completo' },
+  'ob.equipment.opt.full_gym.sub':     { en:'Barbells, Smith machine, cables, machines — everything', es:'Barras, Smith, cables, máquinas — todo' },
+  'ob.equipment.opt.dumbbells.title':  { en:'Dumbbells + cables', es:'Mancuernas + cables' },
+  'ob.equipment.opt.dumbbells.sub':    { en:'No Smith machine, but full cable/DB setup', es:'Sin máquina Smith, pero setup completo de cables/mancuernas' },
+  'ob.equipment.opt.home_basic.title': { en:'Home gym (basic)',   es:'Gimnasio en casa (básico)' },
+  'ob.equipment.opt.home_basic.sub':   { en:'Dumbbells, resistance bands, pull-up bar', es:'Mancuernas, bandas, barra de dominadas' },
+  'ob.focus.q':            { en:'Any <em>focus areas?</em>',      es:'¿Áreas de <em>enfoque?</em>' },
+  'ob.focus.sub':          { en:'Select all that apply — your program will prioritize these.', es:'Selecciona las que apliquen — tu programa las priorizará.' },
+  'ob.focus.opt.chest.label':     { en:'Chest',     es:'Pecho' },
+  'ob.focus.opt.back.label':      { en:'Back',      es:'Espalda' },
+  'ob.focus.opt.legs.label':      { en:'Legs',      es:'Piernas' },
+  'ob.focus.opt.glutes.label':    { en:'Glutes',    es:'Glúteos' },
+  'ob.focus.opt.arms.label':      { en:'Arms',      es:'Brazos' },
+  'ob.focus.opt.shoulders.label': { en:'Shoulders', es:'Hombros' },
+  'ob.focus.opt.core.label':      { en:'Core',      es:'Core' },
+  'ob.focus.opt.cardio.label':    { en:'Cardio',    es:'Cardio' },
+  'ob.cardio_style.q':     { en:'How do you prefer <em>cardio?</em>', es:'¿Cómo prefieres el <em>cardio?</em>' },
+  'ob.cardio_style.sub':   { en:'We will include this in your weekly plan.', es:'Lo incluiremos en tu plan semanal.' },
+  'ob.cardio_style.opt.none.title':  { en:'Skip cardio for now',     es:'Saltar cardio por ahora' },
+  'ob.cardio_style.opt.none.sub':    { en:'Focused on strength gains only', es:'Enfocado solo en ganancias de fuerza' },
+  'ob.cardio_style.opt.hiit.title':  { en:'HIIT — short & intense',  es:'HIIT — corto e intenso' },
+  'ob.cardio_style.opt.hiit.sub':    { en:'20–30 min, high effort, 2–3x per week', es:'20–30 min, alto esfuerzo, 2–3x por semana' },
+  'ob.cardio_style.opt.zone2.title': { en:'Zone 2 — steady state',   es:'Zona 2 — ritmo estable' },
+  'ob.cardio_style.opt.zone2.sub':   { en:'30–60 min run or bike, low intensity', es:'30–60 min corriendo o bici, baja intensidad' },
+  'ob.cardio_style.opt.both.title':  { en:'Mix of both',             es:'Mezcla de ambos' },
+  'ob.cardio_style.opt.both.sub':    { en:'HIIT some days, steady state others', es:'HIIT algunos días, estable otros' },
+  'ob.weight_unit.q':      { en:'Do you track in <em>lbs or kg?</em>', es:'¿Mides en <em>lbs o kg?</em>' },
+  'ob.weight_unit.sub':    { en:'This sets your starting weight suggestions.', es:'Esto define las sugerencias iniciales de peso.' },
+  'ob.weight_unit.opt.lbs.title':  { en:'Pounds (lbs)',   es:'Libras (lbs)' },
+  'ob.weight_unit.opt.lbs.sub':    { en:'US standard',    es:'Estándar EE.UU.' },
+  'ob.weight_unit.opt.kg.title':   { en:'Kilograms (kg)', es:'Kilogramos (kg)' },
+  'ob.weight_unit.opt.kg.sub':     { en:'Metric',         es:'Métrico' },
+  'ob.protein_goal_q.q':   { en:'What is your <em>bodyweight?</em>', es:'¿Cuál es tu <em>peso corporal?</em>' },
+  'ob.protein_goal_q.sub': { en:'Used to calculate your daily protein target. 0.7–1g per lb is the gold standard for muscle building.', es:'Se usa para calcular tu objetivo diario de proteína. 0.7–1g por lb es el estándar oro para construir músculo.' },
+  'ob.protein_goal_q.placeholder': { en:'e.g. 175', es:'p.ej. 175' },
+  'ob.protein_goal_q.unit':        { en:'lbs',      es:'lbs' },
+  'ob.done.q':             { en:'Your program is <em>ready.</em>', es:'Tu programa está <em>listo.</em>' },
+  'ob.done.sub':           { en:"Based on your answers I've built a custom program with the right exercises, rep ranges, and rest times for your goals. Weights start empty — log your first session and the app learns from there.", es:'Según tus respuestas he construido un programa personalizado con los ejercicios, rangos de reps y descansos correctos para tus metas. Los pesos empiezan vacíos — registra tu primera sesión y la app aprende desde ahí.' },
+
+  // ─── MACRO QUESTIONNAIRE (10 steps) ───────────────────────────────────────
+  'mq.continue':            { en:'Continue',              es:'Continuar' },
+  'mq.skip':                { en:'Skip',                  es:'Saltar' },
+  'mq.skipSection':         { en:'Skip this section',     es:'Saltar esta sección' },
+  'mq.calculate':           { en:'See My Targets',        es:'Ver Mis Objetivos' },
+  'mq.why':                 { en:'Why this matters',      es:'Por qué importa' },
+  'mq.biometrics.section':  { en:'1 — The Basics',        es:'1 — Lo Básico' },
+  'mq.biometrics.q':        { en:'Age, sex, <em>height & weight</em>', es:'Edad, sexo, <em>altura y peso</em>' },
+  'mq.biometrics.why':      { en:"These four numbers anchor your metabolism. If they're wrong, your calorie target is wrong and everything downstream breaks.", es:'Estos cuatro números anclan tu metabolismo. Si están mal, tu objetivo calórico está mal y todo lo demás se rompe.' },
+  'mq.bodyfat.section':     { en:'2 — Body Composition',  es:'2 — Composición Corporal' },
+  'mq.bodyfat.q':           { en:'Estimated <em>body fat %</em>', es:'<em>% de grasa corporal</em> estimado' },
+  'mq.bodyfat.why':         { en:'Lean mass is metabolically active. High body fat means your TDEE is lower than your scale weight suggests.', es:'La masa magra es metabólicamente activa. Alto % de grasa significa que tu TDEE es menor de lo que sugiere tu peso.' },
+  'mq.goal.section':        { en:'3 — Goal Clarity',      es:'3 — Claridad de Meta' },
+  'mq.goal.q':              { en:'What exactly <em>do you want?</em>', es:'¿Qué quieres <em>exactamente?</em>' },
+  'mq.goal.why':            { en:'"Lose weight" is useless. A 300 kcal deficit vs 800 kcal deficit leads to completely different macros.', es:'"Perder peso" no sirve. Un déficit de 300 kcal vs 800 kcal lleva a macros completamente distintos.' },
+  'mq.goal.opt.fat_loss.title':    { en:'Lose fat',     es:'Perder grasa' },
+  'mq.goal.opt.fat_loss.sub':      { en:'Priority is dropping body fat while preserving muscle', es:'Prioridad: bajar grasa corporal preservando músculo' },
+  'mq.goal.opt.muscle.title':      { en:'Build muscle', es:'Construir músculo' },
+  'mq.goal.opt.muscle.sub':        { en:'Caloric surplus, progressive overload focus', es:'Superávit calórico, enfoque en sobrecarga progresiva' },
+  'mq.goal.opt.recomp.title':      { en:'Recomp',       es:'Recomposición' },
+  'mq.goal.opt.recomp.sub':        { en:'Lose fat and gain muscle simultaneously — slow but possible', es:'Perder grasa y ganar músculo al mismo tiempo — lento pero posible' },
+  'mq.goal.opt.performance.title': { en:'Performance',  es:'Rendimiento' },
+  'mq.goal.opt.performance.sub':   { en:'Fuel athletic performance — endurance, strength, sport', es:'Combustible para el rendimiento atlético — resistencia, fuerza, deporte' },
+  'mq.goal.opt.maintenance.title': { en:'Maintain',     es:'Mantener' },
+  'mq.goal.opt.maintenance.sub':   { en:'Keep current weight and body composition', es:'Mantener peso y composición corporal actuales' },
+  'mq.aggression.section':  { en:'3 — Goal Clarity',     es:'3 — Claridad de Meta' },
+  'mq.aggression.q':        { en:'How <em>aggressive?</em>', es:'¿Qué tan <em>agresivo?</em>' },
+  'mq.aggression.why':      { en:'"I want abs in 8 weeks" ≠ "I want sustainable fat loss." Aggression determines your deficit or surplus size.', es:'"Quiero abs en 8 semanas" ≠ "Quiero pérdida de grasa sostenible." La agresividad determina el tamaño del déficit o superávit.' },
+  'mq.aggression.opt.gentle.title':     { en:'Gentle',     es:'Suave' },
+  'mq.aggression.opt.gentle.sub':       { en:'Slow & sustainable — minimal hunger, muscle preservation priority', es:'Lento y sostenible — hambre mínima, prioridad preservar músculo' },
+  'mq.aggression.opt.moderate.title':   { en:'Moderate',   es:'Moderado' },
+  'mq.aggression.opt.moderate.sub':     { en:'Standard approach — good progress without excessive sacrifice', es:'Enfoque estándar — buen progreso sin sacrificio excesivo' },
+  'mq.aggression.opt.aggressive.title': { en:'Aggressive', es:'Agresivo' },
+  'mq.aggression.opt.aggressive.sub':   { en:'Faster results — higher hunger risk, requires strict adherence', es:'Resultados más rápidos — más hambre, requiere adherencia estricta' },
+  'mq.activity.section':    { en:'4 — Activity Level',    es:'4 — Nivel de Actividad' },
+  'mq.activity.q':          { en:'Job type & <em>daily steps</em>', es:'Tipo de trabajo y <em>pasos diarios</em>' },
+  'mq.activity.why':        { en:'"Moderately active" is one of the biggest lies in fitness. This is the single biggest variable in your TDEE.', es:'"Moderadamente activo" es una de las mayores mentiras en fitness. Es la variable más grande en tu TDEE.' },
+  'mq.training.section':    { en:'5 — Training',          es:'5 — Entrenamiento' },
+  'mq.training.q':          { en:'How do you <em>train?</em>', es:'¿Cómo <em>entrenas?</em>' },
+  'mq.training.why':        { en:"Macros support what you're asking your body to do. Lifting shifts protein up. Endurance shifts carbs up.", es:'Los macros apoyan lo que le pides a tu cuerpo. Levantar pesas sube la proteína. Resistencia sube los carbs.' },
+  'mq.constraints.section': { en:'6 — Dietary Constraints', es:'6 — Restricciones Dietéticas' },
+  'mq.constraints.q':       { en:'Any <em>dietary constraints?</em>', es:'¿Alguna <em>restricción dietética?</em>' },
+  'mq.constraints.why':     { en:"Perfect macros you can't follow = useless. This shapes what a realistic plan looks like for you.", es:'Macros perfectos que no puedes seguir = inútiles. Esto da forma a un plan realista para ti.' },
+  'mq.constraints.opt.vegetarian.label': { en:'Vegetarian',   es:'Vegetariano' },
+  'mq.constraints.opt.vegan.label':      { en:'Vegan',        es:'Vegano' },
+  'mq.constraints.opt.gluten.label':     { en:'Gluten-free',  es:'Sin gluten' },
+  'mq.constraints.opt.dairy.label':      { en:'Dairy-free',   es:'Sin lácteos' },
+  'mq.constraints.opt.halal.label':      { en:'Halal',        es:'Halal' },
+  'mq.constraints.opt.kosher.label':     { en:'Kosher',       es:'Kosher' },
+  'mq.constraints.opt.none.label':       { en:'None',         es:'Ninguna' },
+  'mq.adherence.section':   { en:'7 — Adherence Risk',    es:'7 — Riesgo de Adherencia' },
+  'mq.adherence.q':         { en:'Your biggest <em>struggle?</em>', es:'¿Tu mayor <em>lucha?</em>' },
+  'mq.adherence.why':       { en:'Macros should be engineered around your failure points, not ideal scenarios. This affects how we set targets.', es:'Los macros deben diseñarse alrededor de tus puntos débiles, no de escenarios ideales. Esto afecta cómo fijamos los objetivos.' },
+  'mq.adherence.opt.hunger.label':    { en:'Hunger',           es:'Hambre' },
+  'mq.adherence.opt.cravings.label':  { en:'Cravings',         es:'Antojos' },
+  'mq.adherence.opt.social.label':    { en:'Social eating',    es:'Comer en social' },
+  'mq.adherence.opt.latenight.label': { en:'Late-night eating', es:'Comer de noche' },
+  'mq.adherence.opt.travel.label':    { en:'Travel / chaos',   es:'Viajes / caos' },
+  'mq.adherence.opt.weekends.label':  { en:'Weekends',         es:'Fines de semana' },
+  'mq.adherence.opt.none.label':      { en:'None really',      es:'Ninguna realmente' },
+  'mq.history.section':     { en:'8 — Biofeedback & History', es:'8 — Biofeedback e Historial' },
+  'mq.history.q':           { en:"What's worked <em>before?</em>", es:'¿Qué te ha <em>funcionado antes?</em>' },
+  'mq.history.why':         { en:'Two people with identical stats can need different macro setups based on their history and response.', es:'Dos personas con stats idénticos pueden necesitar macros distintos según su historial y respuesta.' },
+  'mq.precision.section':   { en:'10 — Precision Level',  es:'10 — Nivel de Precisión' },
+  'mq.precision.q':         { en:'How <em>precisely</em> will you track?', es:'¿Con qué <em>precisión</em> vas a registrar?' },
+  'mq.precision.why':       { en:"No point giving you 178g protein / 63g fat / 212g carbs if you're eyeballing. Sets how specific your targets are.", es:'No tiene sentido darte 178g proteína / 63g grasa / 212g carbs si lo estás estimando a ojo. Define qué tan específicos son tus objetivos.' },
+  'mq.precision.opt.exact.title': { en:'Weigh everything',      es:'Pesar todo' },
+  'mq.precision.opt.exact.sub':   { en:"Scale, MyFitnessPal-level precision — you're serious", es:'Báscula, precisión MyFitnessPal — vas en serio' },
+  'mq.precision.opt.daily.title': { en:'Track daily totals',    es:'Registrar totales diarios' },
+  'mq.precision.opt.daily.sub':   { en:"Log meals, don't weigh — good middle ground", es:'Registra comidas sin pesar — buen punto medio' },
+  'mq.precision.opt.rough.title': { en:'Rough guidelines only', es:'Solo guías generales' },
+  'mq.precision.opt.rough.sub':   { en:'Ballpark macros, no daily tracking', es:'Macros aproximados, sin registro diario' },
+
+  // Macro Q biometrics specialized renderer
+  'mq.bio.age':       { en:'Age',     es:'Edad' },
+  'mq.bio.sex':       { en:'Sex',     es:'Sexo' },
+  'mq.bio.select':    { en:'Select',  es:'Selecciona' },
+  'mq.bio.male':      { en:'Male',    es:'Hombre' },
+  'mq.bio.female':    { en:'Female',  es:'Mujer' },
+  'mq.bio.weight':    { en:'Weight',  es:'Peso' },
+  'mq.bio.height':    { en:'Height',  es:'Altura' },
+
+  // ─── TRAIN TAB ────────────────────────────────────────────────────────────
+  'train.tab.program':     { en:'Program',          es:'Programa' },
+  'train.tab.edit':        { en:'Edit',             es:'Editar' },
+  'train.tab.videos':      { en:'Videos',           es:'Videos' },
+  'train.tab.log':         { en:'Session Log',      es:'Historial' },
+  'train.strength':        { en:'Strength',         es:'Fuerza' },
+  'train.cardio':          { en:'Cardio',           es:'Cardio' },
+  'train.strengthWork':    { en:'Strength Work',    es:'Trabajo de Fuerza' },
+  'train.cardioWork':      { en:'Cardio',           es:'Cardio' },
+  'train.todaysTargets':   { en:"Today's Targets",  es:'Objetivos de Hoy' },
+  'train.exercises':       { en:'exercises',        es:'ejercicios' },
+  'train.sets':            { en:'sets',             es:'series' },
+  'train.day':             { en:'Day',              es:'Día' },
+  'train.preWorkout':      { en:'🍌 Pre-workout',    es:'🍌 Pre-entreno' },
+  'train.moreExercises':   { en:'+ {n} more',       es:'+ {n} más' },
+  'train.equipmentCap':    { en:'⚠ Equipment limit on some exercises — update in Edit', es:'⚠ Límite de equipo en algunos ejercicios — actualiza en Editar' },
+  'train.cap':             { en:'⚠ cap',            es:'⚠ tope' },
+  'train.timeMin':         { en:'Time (min)',       es:'Tiempo (min)' },
+  'train.distance':        { en:'Distance',         es:'Distancia' },
+  'train.lastSession':     { en:'Last',             es:'Última' },
+  'train.noSessionsYet':   { en:'No sessions yet',  es:'Sin sesiones aún' },
+
+  // ─── CALENDAR DAY DETAIL SHEET ────────────────────────────────────────────
+  'cal.workout':           { en:'💪 Workout',        es:'💪 Entreno' },
+  'cal.nutrition':         { en:'🥗 Nutrition',      es:'🥗 Comida' },
+  'cal.bodyMetrics':       { en:'⚖️ Body Metrics',   es:'⚖️ Métricas Corporales' },
+  'cal.add':               { en:'+ Add',            es:'+ Añadir' },
+  'cal.noWorkout':         { en:'No workout logged this day.', es:'Sin entreno registrado este día.' },
+  'cal.noFood':            { en:'No food logged this day.',    es:'Sin comida registrada este día.' },
+  'cal.noBody':            { en:'No body metrics logged this day.', es:'Sin métricas corporales este día.' },
+  'cal.over':              { en:'over',             es:'sobre' },
+  'cal.remaining':         { en:'remaining',        es:'restante' },
+  'cal.items':             { en:'Items',            es:'Items' },
+
+  // ─── COACH TAB ────────────────────────────────────────────────────────────
+  'coach.thisWeek':        { en:'This Week',                  es:'Esta Semana' },
+  'coach.sessions':        { en:'Sessions',                   es:'Sesiones' },
+  'coach.totalVolume':     { en:'Total volume',               es:'Volumen total' },
+  'coach.totalSets':       { en:'Total sets',                 es:'Series totales' },
+  'coach.cardioMins':      { en:'Cardio minutes',             es:'Minutos de cardio' },
+  'coach.weekPRs':         { en:'PRs hit',                    es:'PRs logrados' },
+  'coach.avgProtein':      { en:'Avg protein',                es:'Proteína prom.' },
+  'coach.avgRPE':          { en:'Avg RPE',                    es:'RPE promedio' },
+  'coach.readyToProgress': { en:'Exercises ready to progress',es:'Ejercicios listos para progresar' },
+  'coach.planAdj.title':   { en:'This Week\'s Adjustment',    es:'Ajuste de Esta Semana' },
+  'coach.weeklyCheckin':   { en:'Weekly Check-In',            es:'Check-In Semanal' },
+  'coach.muscleVolume':    { en:'Muscle Volume',              es:'Volumen Muscular' },
+  'coach.supplements':     { en:'Supplements',                es:'Suplementos' },
+  'coach.rpeCorrelation':  { en:'RPE × Recovery',             es:'RPE × Recuperación' },
+  'coach.startCheckin':    { en:'Start check-in',             es:'Iniciar check-in' },
+  'coach.setsTarget':      { en:'sets · target',              es:'series · objetivo' },
+  'coach.undervolume':     { en:'Undervolume — add sets',     es:'Bajo volumen — añade series' },
+  'coach.inRange':         { en:'In range',                   es:'En rango' },
+  'coach.overvolume':      { en:'Overvolume — back off',      es:'Exceso — reduce series' },
+  'coach.weekOf':          { en:'Week of',                    es:'Semana del' },
+  'coach.volLb':           { en:'Vol (lb)',                   es:'Vol (lb)' },
+  'coach.cardioMin':       { en:'Cardio min',                 es:'Min cardio' },
+  'coach.overreachTitle':  { en:'Overreaching detected',      es:'Sobreentreno detectado' },
+  'coach.overreachMsg':    { en:'Your avg RPE this week is <strong style="color:var(--red);">{rpe}</strong> with {sets} sets at RPE 9–10. Consider a deload or extra rest day before your next session.', es:'Tu RPE promedio esta semana es <strong style="color:var(--red);">{rpe}</strong> con {sets} series en RPE 9–10. Considera una descarga o día extra de descanso antes de tu próxima sesión.' },
+  'coach.rpeSpikes':       { en:'RPE spikes vs last 2 weeks', es:'Picos de RPE vs últimas 2 semanas' },
+  'coach.harderThanUsual': { en:'harder than usual, watch recovery', es:'más duro de lo normal, vigila la recuperación' },
+  'coach.prsThisWeek':     { en:'PRs this week',              es:'PRs esta semana' },
+  'coach.readyToProgressTitle': { en:'Ready to progress',     es:'Listos para progresar' },
+  'coach.noSessionsYet':   { en:"No sessions logged yet this week. Let's get moving! 💪", es:'Aún no hay sesiones esta semana. ¡A moverse! 💪' },
+
+  // ─── BODY METRICS / HYDRATION / CHECK-IN SHEETS ──────────────────────────
+  'body.title':            { en:'Log Body Metrics',           es:'Registrar Métricas' },
+  'body.weight':           { en:'Weight',                     es:'Peso' },
+  'body.bmi':              { en:'BMI',                        es:'IMC' },
+  'body.bodyFat':          { en:'Body Fat',                   es:'Grasa Corporal' },
+  'body.skeletalMuscle':   { en:'Skeletal Muscle',            es:'Músculo Esquelético' },
+  'body.fatFreeMass':      { en:'Fat-Free Mass',              es:'Masa Magra' },
+  'body.muscleMass':       { en:'Muscle Mass',                es:'Masa Muscular' },
+  'body.boneMass':         { en:'Bone Mass',                  es:'Masa Ósea' },
+  'body.bodyWater':        { en:'Body Water',                 es:'Agua Corporal' },
+  'body.visceralFat':      { en:'Visceral Fat',               es:'Grasa Visceral' },
+  'body.subcutFat':        { en:'Subcutaneous Fat',           es:'Grasa Subcutánea' },
+  'body.proteinPct':       { en:'Protein %',                  es:'Proteína %' },
+  'body.bmr':              { en:'BMR',                        es:'TMB' },
+  'body.metabolicAge':     { en:'Metabolic Age',              es:'Edad Metabólica' },
+  'body.waist':            { en:'Waist',                      es:'Cintura' },
+  'body.hips':             { en:'Hips',                       es:'Cadera' },
+  'body.chest':            { en:'Chest',                      es:'Pecho' },
+  'body.arms':             { en:'Arms',                       es:'Brazos' },
+  'body.notes':            { en:'Notes',                      es:'Notas' },
+  'body.saveMetrics':      { en:'Save metrics',               es:'Guardar métricas' },
+  'body.sub':              { en:'From your Renpho — leave blank to skip', es:'Desde tu Renpho — déjalo en blanco para saltar' },
+  'body.scaleMetrics':     { en:'Scale Metrics',              es:'Métricas de Báscula' },
+  'body.measurements':     { en:'Measurements',               es:'Medidas' },
+  'body.saveEntry':        { en:'Save Entry',                 es:'Guardar Entrada' },
+  'body.previous':         { en:'Previous',                   es:'Anterior' },
+
+  'hydro.title':           { en:'Hydration',                  es:'Hidratación' },
+  'hydro.goalLabel':       { en:'Daily goal',                 es:'Meta diaria' },
+  'hydro.glasses':         { en:'glasses',                    es:'vasos' },
+  'hydro.addGlass':        { en:'+ Glass (8 oz)',             es:'+ Vaso (8 oz)' },
+  'hydro.reset':           { en:'Reset today',                es:'Reiniciar hoy' },
+  'hydro.youAre':          { en:'You are',                    es:'Estás' },
+  'hydro.under':           { en:'under hydrated',             es:'deshidratado' },
+  'hydro.onTrack':         { en:'on track',                   es:'en buen camino' },
+  'hydro.crushing':        { en:'crushing it 💧',              es:'arrasando 💧' },
+  'hydro.ofGoal':          { en:'of goal',                    es:'de la meta' },
+  'hydro.day':             { en:'day',                        es:'día' },
+  'hydro.basedOnWeight':   { en:'Based on your weight',       es:'Según tu peso' },
+  'hydro.customOz':        { en:'Custom oz',                  es:'Onzas personalizadas' },
+  'hydro.todaysLog':       { en:"Today's log",                es:'Registro de hoy' },
+
+  'ci.title':              { en:'Weekly Check-In',            es:'Check-In Semanal' },
+  'ci.sub':                { en:'Quick honest reflection so the app can adjust your plan.', es:'Reflexión honesta y rápida para que la app ajuste tu plan.' },
+  'ci.soreness':           { en:'Muscle soreness this week',  es:'Dolor muscular esta semana' },
+  'ci.energy':             { en:'Energy levels',              es:'Niveles de energía' },
+  'ci.sleep':              { en:'Sleep quality',              es:'Calidad de sueño' },
+  'ci.stress':             { en:'Stress / mood',              es:'Estrés / ánimo' },
+  'ci.submit':             { en:'Submit check-in',            es:'Enviar check-in' },
+  'ci.low':                { en:'Low',                        es:'Bajo' },
+  'ci.high':               { en:'High',                       es:'Alto' },
+  'ci.rateAll':            { en:'Please rate all four areas before saving.', es:'Por favor califica las cuatro áreas antes de guardar.' },
+
+  'coach.adj.volumeReduced':    { en:'Volume reduced — 1 set dropped per exercise', es:'Volumen reducido — 1 serie menos por ejercicio' },
+  'coach.adj.sorenessSub':      { en:'Soreness flagged high this week',          es:'Dolor muscular alto esta semana' },
+  'coach.adj.intensityReduced': { en:'Targets reduced 5% — low energy flagged',   es:'Objetivos reducidos 5% — energía baja' },
+  'coach.adj.energySub':        { en:'Weights scaled down to match your readiness', es:'Pesos ajustados según tu nivel de preparación' },
+  'coach.adj.calReduced':       { en:'Calories adjusted −100 kcal',               es:'Calorías ajustadas −100 kcal' },
+  'coach.adj.weightTrend':      { en:'Weight trending +{gain} lb/wk — carbs trimmed slightly', es:'Peso subiendo +{gain} lb/sem — carbs recortados ligeramente' },
+  'coach.adj.noChanges':        { en:'No adjustments needed',                     es:'Sin ajustes necesarios' },
+  'coach.adj.allGood':          { en:'All signals look good — train as planned',  es:'Todas las señales bien — entrena como está planeado' },
+  'coach.allBalanced':          { en:'🎯 All trained groups are in the hypertrophy range. Well balanced week!', es:'🎯 Todos los grupos trabajados están en el rango de hipertrofia. ¡Semana balanceada!' },
+  'coach.targetRange':          { en:'Target: 10–20 sets/wk',         es:'Objetivo: 10–20 series/sem' },
+  'coach.body':                 { en:'Body',                          es:'Cuerpo' },
+  'coach.log':                  { en:'Log',                           es:'Registrar' },
+  'coach.lastLogged':           { en:'Last logged',                   es:'Último registro' },
+  'coach.tapCharts':            { en:'Tap for charts & photos',       es:'Toca para gráficas y fotos' },
+  'coach.tapBody':              { en:'Tap to view body progress',     es:'Toca para ver progreso corporal' },
+  'ci.bannerSub':               { en:'Rate your sleep, energy, soreness, and nutrition for the week — takes 30 seconds.', es:'Califica tu sueño, energía, dolor muscular y nutrición de la semana — toma 30 segundos.' },
+  'ci.thisWeekTitle':           { en:"This Week's Check-In",          es:'Check-In de Esta Semana' },
+  'coach.optionalToday':        { en:'optional today',                es:'opcional hoy' },
+  'coach.noSuppsYet':           { en:'No supplements in your stack yet.', es:'Aún no hay suplementos en tu stack.' },
+  'coach.allTaken':             { en:'All taken',                     es:'Todos tomados' },
+  'coach.taken':                { en:'taken',                         es:'tomados' },
+  'coach.recommendations':      { en:'Recommendations',               es:'Recomendaciones' },
+  'coach.browseAll':            { en:'Browse all',                    es:'Ver todos' },
+
+  // ─── PROGRESS TAB ────────────────────────────────────────────────────────
+  'progress.tab.prs':      { en:'Strength PRs',  es:'PRs de Fuerza' },
+  'progress.tab.vol':      { en:'Volume',         es:'Volumen' },
+  'progress.tab.cardio':   { en:'Cardio',         es:'Cardio' },
+  'progress.tab.body':     { en:'Body',           es:'Cuerpo' },
+  'progress.totalVol':     { en:'Total vol (lb)', es:'Vol total (lb)' },
+  'progress.prsSet':       { en:'PRs set',        es:'PRs logrados' },
+  'progress.noPRs':        { en:'No PRs yet.<br>Log some weighted sets to track.', es:'Aún no hay PRs.<br>Registra algunas series con peso para empezar.' },
+
+  // ─── EQUIPMENT / REST / EDIT SHEETS ──────────────────────────────────────
+  'eq.title':              { en:'Equipment Inventory',         es:'Inventario de Equipo' },
+  'eq.dumbbells':          { en:'Dumbbells',                   es:'Mancuernas' },
+  'eq.dumbbellsHint':      { en:'Select the weights you have. Suggestions cap at your heaviest pair.',
+                             es:'Selecciona los pesos que tienes. Las sugerencias se topan en tu par más pesado.' },
+  'eq.plates':             { en:'Plates (Smith Machine / Barbell)', es:'Discos (Smith / Barra)' },
+  'eq.platesHint':         { en:'Enter total plate count (e.g. 4 × 45lb = enter 4).',
+                             es:'Ingresa el total de discos (p.ej. 4 × 45lb = pon 4).' },
+  'eq.barWeight':          { en:'Bar weight',                  es:'Peso de barra' },
+  'eq.machines':           { en:'Machines & Tools',            es:'Máquinas y Herramientas' },
+  'rest.title':            { en:'Global Rest Timers',          es:'Temporizadores Globales' },
+};
+
+function t(key, paramsOrFallback){
+  const lang = localStorage.getItem('gainz_lang') || 'en';
+  const entry = STRINGS[key];
+  const isParams = paramsOrFallback && typeof paramsOrFallback === 'object';
+  const fb = (!isParams && typeof paramsOrFallback === 'string') ? paramsOrFallback : null;
+  let str = entry ? (entry[lang] || entry.en || key) : (fb != null ? fb : key);
+  if(isParams){
+    Object.entries(paramsOrFallback).forEach(([k,v]) => {
+      str = str.replace(new RegExp('\\{'+k+'\\}', 'g'), v);
+    });
+  }
+  return str;
+}
+
+function applyNavTranslations(){
+  // Map onclick target → key (handles all 6 repeated nav bars at once)
+  const map = {
+    'home': 'nav.home', 'history': 'nav.train', 'food': 'nav.nutrition',
+    'progress': 'nav.progress', 'coach': 'nav.coach', 'calendar': 'nav.calendar',
+  };
+  document.querySelectorAll('.nb').forEach(btn => {
+    const onclick = btn.getAttribute('onclick') || '';
+    const m = onclick.match(/nav\('([^']+)'/);
+    if(!m) return;
+    const key = map[m[1]];
+    if(!key) return;
+    const span = btn.querySelector('span');
+    if(span) span.textContent = t(key);
+  });
+}
+
+function setLang(lang){
+  localStorage.setItem('gainz_lang', lang);
+  document.documentElement.lang = (lang === 'es') ? 'es' : 'en';
+  applyNavTranslations();
+  // Re-render any currently visible tab to refresh dynamic strings
+  if(typeof renderHome === 'function')     renderHome();
+  if(typeof renderFood === 'function' && eid('s-food')?.classList.contains('on'))     renderFood();
+  if(typeof renderTrain === 'function' && eid('s-history')?.classList.contains('on')) renderTrain();
+  if(typeof renderProgress === 'function' && eid('s-progress')?.classList.contains('on')) renderProgress();
+  if(typeof renderCoach === 'function' && eid('s-coach')?.classList.contains('on')) renderCoach();
+  if(typeof renderCalendar === 'function' && eid('s-calendar')?.classList.contains('on')) renderCalendar();
+  // If Settings is open, re-render it so labels update live
+  if(document.querySelector('.sheet-bg .sheet-title')?.textContent.match(/Settings|Ajustes/)){
+    document.querySelectorAll('.sheet-bg').forEach(el=>el.remove());
+    if(typeof showSettingsSheet === 'function') showSettingsSheet();
+  }
+  showToast(t('toast.langChanged'));
+}
 
 function applyTheme(theme){
   document.documentElement.dataset.theme = (theme === 'light') ? 'light' : 'dark';
@@ -8746,62 +9278,74 @@ function setTheme(theme){
   const isLight = theme === 'light';
   if(d){ d.style.background = isLight ? 'var(--s2)' : 'var(--acc)'; d.style.color = isLight ? 'var(--t2)' : '#000'; d.style.border = isLight ? '1px solid var(--b2)' : '1px solid transparent'; }
   if(l){ l.style.background = isLight ? 'var(--acc)' : 'var(--s2)'; l.style.color = isLight ? '#000' : 'var(--t2)'; l.style.border = isLight ? '1px solid transparent' : '1px solid var(--b2)'; }
-  showToast(isLight ? '☀️ Light mode' : '🌑 Dark mode');
+  showToast(isLight ? t('toast.lightMode') : t('toast.darkMode'));
 }
 
 function showSettingsSheet(){
   const bg=document.createElement('div');bg.className='sheet-bg';
   const curTheme = localStorage.getItem('gainz_theme') || 'dark';
   const isDark = curTheme !== 'light';
+  const curLang = localStorage.getItem('gainz_lang') || 'en';
+  const isEn = curLang !== 'es';
   const pillBase = 'flex:1;padding:9px 0;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;transition:background .2s;';
+  const sectionLbl = 'font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:10px;';
+  const apiKeyToast = "'"+t('toast.apiKeySaved')+"'";
+  const usdaKeyToast = "'"+t('toast.usdaKeySaved')+"'";
+  const clearedToast = "'"+t('toast.keyCleared')+"'";
   bg.innerHTML=`<div class="sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-title">Settings</div>
+    <div class="sheet-title">${t('settings.title')}</div>
 
-    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:10px;">Appearance</div>
+    <div style="${sectionLbl}">${t('settings.language')}</div>
     <div style="display:flex;gap:8px;margin-bottom:24px;background:var(--s2);border-radius:12px;padding:4px;">
-      <button id="theme-pill-dark" onclick="setTheme('dark')" style="${pillBase}background:${isDark?'var(--acc)':'transparent'};color:${isDark?'#000':'var(--t2)'};border:${isDark?'1px solid transparent':'1px solid transparent'};">🌑 Dark</button>
-      <button id="theme-pill-light" onclick="setTheme('light')" style="${pillBase}background:${!isDark?'var(--acc)':'transparent'};color:${!isDark?'#000':'var(--t2)'};border:${!isDark?'1px solid transparent':'1px solid transparent'};">☀️ Light</button>
+      <button id="lang-pill-en" onclick="setLang('en')" style="${pillBase}background:${isEn?'var(--acc)':'transparent'};color:${isEn?'#000':'var(--t2)'};border:1px solid transparent;">🇺🇸 English</button>
+      <button id="lang-pill-es" onclick="setLang('es')" style="${pillBase}background:${!isEn?'var(--acc)':'transparent'};color:${!isEn?'#000':'var(--t2)'};border:1px solid transparent;">🇪🇸 Español</button>
     </div>
 
-    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:10px;">Data &amp; Backup</div>
-    <div style="font-size:13px;color:var(--t2);margin-bottom:14px;line-height:1.5;">Clearing Safari cache will erase all your data. Export a backup regularly to keep your history safe.</div>
-    <button class="btn btn-acc btn-full" style="margin-bottom:10px;" onclick="exportGainzData()">⬇ Export Backup</button>
-    <button class="btn btn-ghost btn-full" style="margin-bottom:24px;" onclick="closeSheets();showImportSheet()">⬆ Import / Restore</button>
+    <div style="${sectionLbl}">${t('settings.appearance')}</div>
+    <div style="display:flex;gap:8px;margin-bottom:24px;background:var(--s2);border-radius:12px;padding:4px;">
+      <button id="theme-pill-dark" onclick="setTheme('dark')" style="${pillBase}background:${isDark?'var(--acc)':'transparent'};color:${isDark?'#000':'var(--t2)'};border:1px solid transparent;">${t('settings.dark')}</button>
+      <button id="theme-pill-light" onclick="setTheme('light')" style="${pillBase}background:${!isDark?'var(--acc)':'transparent'};color:${!isDark?'#000':'var(--t2)'};border:1px solid transparent;">${t('settings.light')}</button>
+    </div>
 
-    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:10px;">Claude AI</div>
-    <div style="font-size:13px;color:var(--t2);margin-bottom:10px;line-height:1.5;">Required for AI food search and smart coaching. Get a key at <span style="color:var(--acc);">console.anthropic.com</span></div>
+    <div style="${sectionLbl}">${t('settings.dataBackup')}</div>
+    <div style="font-size:13px;color:var(--t2);margin-bottom:14px;line-height:1.5;">${t('settings.dataBackupSub')}</div>
+    <button class="btn btn-acc btn-full" style="margin-bottom:10px;" onclick="exportGainzData()">${t('settings.exportBackup')}</button>
+    <button class="btn btn-ghost btn-full" style="margin-bottom:24px;" onclick="closeSheets();showImportSheet()">${t('settings.importRestore')}</button>
+
+    <div style="${sectionLbl}">${t('settings.claudeAi')}</div>
+    <div style="font-size:13px;color:var(--t2);margin-bottom:10px;line-height:1.5;">${t('settings.claudeAiSub')}<span style="color:var(--acc);">console.anthropic.com</span></div>
     <div style="display:flex;gap:8px;margin-bottom:6px;">
       <input type="password" id="settings-api-key" placeholder="sk-ant-…"
         value="${localStorage.getItem('gainz_api_key')||''}"
         style="flex:1;font-size:13px;letter-spacing:.05em;"
         autocomplete="off" autocorrect="off" spellcheck="false">
-      <button class="btn btn-acc btn-sm" onclick="(()=>{const v=document.getElementById('settings-api-key')?.value?.trim();if(v){localStorage.setItem('gainz_api_key',v);showToast('API key saved ✓');}else{localStorage.removeItem('gainz_api_key');showToast('Key cleared');}})()">Save</button>
+      <button class="btn btn-acc btn-sm" onclick="(()=>{const v=document.getElementById('settings-api-key')?.value?.trim();if(v){localStorage.setItem('gainz_api_key',v);showToast(${apiKeyToast});}else{localStorage.removeItem('gainz_api_key');showToast(${clearedToast});}})()">${t('settings.save')}</button>
     </div>
-    <div style="font-size:11px;color:var(--t3);margin-bottom:24px;">Stored locally on device. Never sent anywhere except Anthropic's API.</div>
+    <div style="font-size:11px;color:var(--t3);margin-bottom:24px;">${t('settings.claudeKeyHint')}</div>
 
-    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:10px;">USDA Food Database</div>
-    <div style="font-size:13px;color:var(--t2);margin-bottom:10px;line-height:1.5;">Free key for faster food search (1,000 req/hr vs 30). Get one free at <span style="color:#47b4ff;">fdc.nal.usda.gov/api-key-signup</span></div>
+    <div style="${sectionLbl}">${t('settings.usdaTitle')}</div>
+    <div style="font-size:13px;color:var(--t2);margin-bottom:10px;line-height:1.5;">${t('settings.usdaSub')}<span style="color:#47b4ff;">fdc.nal.usda.gov/api-key-signup</span></div>
     <div style="display:flex;gap:8px;margin-bottom:6px;">
-      <input type="password" id="settings-usda-key" placeholder="Paste USDA key here…"
+      <input type="password" id="settings-usda-key" placeholder="${t('settings.usdaKeyPh')}"
         value="${localStorage.getItem('gainz_usda_key')||''}"
         style="flex:1;font-size:13px;letter-spacing:.05em;"
         autocomplete="off" autocorrect="off" spellcheck="false">
-      <button class="btn btn-acc btn-sm" onclick="(()=>{const v=document.getElementById('settings-usda-key')?.value?.trim();if(v){localStorage.setItem('gainz_usda_key',v);showToast('USDA key saved ✓');}else{localStorage.removeItem('gainz_usda_key');showToast('Key cleared');}})()">Save</button>
+      <button class="btn btn-acc btn-sm" onclick="(()=>{const v=document.getElementById('settings-usda-key')?.value?.trim();if(v){localStorage.setItem('gainz_usda_key',v);showToast(${usdaKeyToast});}else{localStorage.removeItem('gainz_usda_key');showToast(${clearedToast});}})()">${t('settings.save')}</button>
     </div>
-    <div style="font-size:11px;color:var(--t3);margin-bottom:24px;">Stored locally on device. Never sent anywhere except USDA's API.</div>
+    <div style="font-size:11px;color:var(--t3);margin-bottom:24px;">${t('settings.usdaKeyHint')}</div>
 
-    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:10px;">About</div>
+    <div style="${sectionLbl}">${t('settings.about')}</div>
     <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--b1);">
       <span style="font-size:14px;font-weight:600;">GAINZ</span>
       <span style="font-size:12px;color:var(--t3);">v1.0</span>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;">
-      <span style="font-size:13px;color:var(--t2);">All data stored locally on device</span>
-      <span style="font-size:11px;color:var(--t3);">No account needed</span>
+      <span style="font-size:13px;color:var(--t2);">${t('settings.aboutSub')}</span>
+      <span style="font-size:11px;color:var(--t3);">${t('settings.aboutAcct')}</span>
     </div>
 
-    <button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="closeSheets()">Close</button>
+    <button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="closeSheets()">${t('settings.close')}</button>
   </div>`;
   bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
   document.body.appendChild(bg);
@@ -9151,8 +9695,32 @@ function obToggle(key, value) {
   });
 }
 
+// Translate a step object in place — looks up keys based on step.id, falls back
+// to the English values already in the step. Used for both onboarding and macro Q.
+function _tStep(step, prefix){
+  const base = prefix + '.' + step.id;
+  const out = {...step};
+  if(step.q   != null) out.q   = t(base + '.q',   step.q);
+  if(step.sub != null) out.sub = t(base + '.sub', step.sub);
+  if(step.why != null) out.why = t(base + '.why', step.why);
+  if(step.section     != null) out.section     = t(base + '.section',     step.section);
+  if(step.placeholder != null) out.placeholder = t(base + '.placeholder', step.placeholder);
+  if(step.unit        != null) out.unit        = t(base + '.unit',        step.unit);
+  if(Array.isArray(step.options)){
+    out.options = step.options.map(opt => {
+      const optBase = base + '.opt.' + opt.value;
+      const o = {...opt};
+      if(opt.title != null) o.title = t(optBase + '.title', opt.title);
+      if(opt.sub   != null) o.sub   = t(optBase + '.sub',   opt.sub);
+      if(opt.label != null) o.label = t(optBase + '.label', opt.label);
+      return o;
+    });
+  }
+  return out;
+}
+
 function renderObStep() {
-  const step = OB_STEPS[obStep];
+  const step = _tStep(OB_STEPS[obStep], 'ob');
   const pct = Math.round((obStep / (OB_STEPS.length - 1)) * 100);
   document.getElementById('ob-bar').style.width = pct + '%';
 
@@ -9160,7 +9728,7 @@ function renderObStep() {
   const nextBtn = document.getElementById('ob-next');
   if (backBtn) backBtn.style.display = obStep > 0 ? 'block' : 'none';
   if (nextBtn) {
-    nextBtn.textContent = step.id === 'done' ? 'Build my program 💪' : 'Continue';
+    nextBtn.textContent = step.id === 'done' ? t('ob.done.button') : t('ob.continue');
     nextBtn.style.display = (step.type === 'single' && step.id !== 'welcome' && step.id !== 'done' && !step.inputType) ? 'none' : '';
   }
 
@@ -10106,7 +10674,7 @@ function mqToggleChip(key, value) {
 }
 
 function renderMqStep() {
-  const step = MQ_STEPS[mqStep];
+  const step = _tStep(MQ_STEPS[mqStep], 'mq');
   const pct = Math.round(((mqStep) / MQ_STEPS.length) * 100);
   document.getElementById('mq-bar').style.width = pct + '%';
   document.getElementById('mq-step-label').textContent = (mqStep + 1) + ' / ' + MQ_STEPS.length;
@@ -10116,8 +10684,8 @@ function renderMqStep() {
   const footer = document.querySelector('.mq-footer');
   const isLast = mqStep === MQ_STEPS.length - 1;
   footer.innerHTML = '<button class="mq-next" id="mq-next-btn" onclick="mqNext()">'
-    + (isLast ? 'See My Targets' : 'Continue') + '</button>'
-    + (step.skippable ? '<button class="mq-skip" id="mq-skip-btn" onclick="mqSkip()">Skip this section</button>' : '');
+    + (isLast ? t('mq.calculate') : t('mq.continue')) + '</button>'
+    + (step.skippable ? '<button class="mq-skip" id="mq-skip-btn" onclick="mqSkip()">' + t('mq.skipSection') + '</button>' : '');
 
   let html = '<div class="mq-section-tag">' + step.section + '</div>'
     + '<div class="mq-q">' + step.q + '</div>'
@@ -10158,16 +10726,16 @@ function renderMqStep() {
                   : (mqAnswers.height_cm || '');
 
     html += '<div class="mq-fields two">'
-      + '<div class="mq-field"><label>Age</label><input type="number" id="mq-age" inputmode="numeric" placeholder="e.g. 28" min="10" max="100" value="' + (mqAnswers.age||'') + '"></div>'
-      + '<div class="mq-field"><label>Sex</label><select id="mq-sex">'
-      + '<option value="" disabled ' + (!mqAnswers.sex?'selected':'') + '>Select</option>'
-      + '<option value="male" '   + (mqAnswers.sex==='male'   ?'selected':'') + '>Male</option>'
-      + '<option value="female" ' + (mqAnswers.sex==='female' ?'selected':'') + '>Female</option>'
+      + '<div class="mq-field"><label>'+t('mq.bio.age')+'</label><input type="number" id="mq-age" inputmode="numeric" placeholder="e.g. 28" min="10" max="100" value="' + (mqAnswers.age||'') + '"></div>'
+      + '<div class="mq-field"><label>'+t('mq.bio.sex')+'</label><select id="mq-sex">'
+      + '<option value="" disabled ' + (!mqAnswers.sex?'selected':'') + '>'+t('mq.bio.select')+'</option>'
+      + '<option value="male" '   + (mqAnswers.sex==='male'   ?'selected':'') + '>'+t('mq.bio.male')+'</option>'
+      + '<option value="female" ' + (mqAnswers.sex==='female' ?'selected':'') + '>'+t('mq.bio.female')+'</option>'
       + '</select></div>'
       + '</div>'
       // Weight row with unit toggle
       + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">'
-      + '<div class="mq-field" style="flex:1;margin-bottom:0;"><label>Weight</label><input type="number" id="mq-weight" inputmode="decimal" placeholder="' + (wUnit==='lbs'?'e.g. 175':'e.g. 79') + '" value="' + (mqAnswers.weight||'') + '"></div>'
+      + '<div class="mq-field" style="flex:1;margin-bottom:0;"><label>'+t('mq.bio.weight')+'</label><input type="number" id="mq-weight" inputmode="decimal" placeholder="' + (wUnit==='lbs'?'e.g. 175':'e.g. 79') + '" value="' + (mqAnswers.weight||'') + '"></div>'
       + '<div style="display:flex;border:1px solid var(--b2);border-radius:10px;overflow:hidden;margin-top:18px;">'
       + '<button onclick="mqSnapshotBiometrics();mqAnswers.weight_unit=\'lbs\';renderMqStep()" style="padding:10px 12px;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:DM Sans,sans-serif;background:' + (wUnit==='lbs'?'var(--acc)':'var(--s2)') + ';color:' + (wUnit==='lbs'?'#000':'var(--t2)') + ';">lbs</button>'
       + '<button onclick="mqSnapshotBiometrics();mqAnswers.weight_unit=\'kg\';renderMqStep()" style="padding:10px 12px;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:DM Sans,sans-serif;background:' + (wUnit==='kg'?'var(--acc)':'var(--s2)') + ';color:' + (wUnit==='kg'?'#000':'var(--t2)') + ';">kg</button>'
@@ -10176,12 +10744,12 @@ function renderMqStep() {
       + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">'
       + '<div style="flex:1;">'
       + (hUnit === 'imperial'
-        ? '<label style="display:block;font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">Height</label>'
+        ? '<label style="display:block;font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">'+t('mq.bio.height')+'</label>'
           + '<div style="display:flex;gap:6px;">'
           + '<div class="mq-field" style="flex:1;margin-bottom:0;"><input type="number" id="mq-ht-ft" inputmode="numeric" placeholder="ft" min="3" max="8" value="' + existFt + '"><div style="font-size:10px;color:var(--t3);text-align:center;margin-top:2px;">ft</div></div>'
           + '<div class="mq-field" style="flex:1;margin-bottom:0;"><input type="number" id="mq-ht-in" inputmode="numeric" placeholder="in" min="0" max="11" value="' + existIn + '"><div style="font-size:10px;color:var(--t3);text-align:center;margin-top:2px;">in</div></div>'
           + '</div>'
-        : '<label style="display:block;font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">Height</label>'
+        : '<label style="display:block;font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">'+t('mq.bio.height')+'</label>'
           + '<div class="mq-field" style="margin-bottom:0;"><input type="number" id="mq-ht-cm" inputmode="numeric" placeholder="e.g. 178" min="100" max="250" value="' + existCm + '"><div style="font-size:10px;color:var(--t3);margin-top:2px;">cm</div></div>'
       )
       + '</div>'
@@ -11219,10 +11787,10 @@ function switchServingUnit(g, unit, chipEl) {
   // Update label
   const lbl = document.getElementById('fc-serving-label');
   if(lbl) {
-    lbl.textContent = unit === '1g'  ? 'Amount in grams'
-                    : unit === '1oz' ? 'Amount in ounces'
-                    : unit === '1ml' ? 'Amount in ml'
-                    : 'Amount (' + unit + ')';
+    lbl.textContent = unit === '1g'  ? t('food.amountInGrams')
+                    : unit === '1oz' ? t('food.amountInOunces')
+                    : unit === '1ml' ? t('food.amountInMl')
+                    : (t('food.amountInGrams').replace(/in grams|en gramos/i, '(' + unit + ')'));
   }
   // Update chip active styles
   document.querySelectorAll('.fc-unit-chip').forEach(c => {
@@ -11308,12 +11876,12 @@ function showAddFoodConfirmSheet(food) {
     + '</div>'
     + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;">'
     +   '<div class="metric-box" style="padding:10px;text-align:center;"><div class="metric-val a" id="fc-cal" style="font-size:22px;">' + food.cal + '</div><div class="metric-lbl">kcal</div></div>'
-    +   '<div class="metric-box" style="padding:10px;text-align:center;"><div class="metric-val" id="fc-p" style="font-size:22px;color:#47b4ff;">' + food.g + 'g</div><div class="metric-lbl">protein</div></div>'
-    +   '<div class="metric-box" style="padding:10px;text-align:center;"><div class="metric-val" id="fc-c" style="font-size:22px;color:#ffb347;">' + food.carbs + 'g</div><div class="metric-lbl">carbs</div></div>'
-    +   '<div class="metric-box" style="padding:10px;text-align:center;"><div class="metric-val" id="fc-f" style="font-size:22px;color:#ff9147;">' + food.fat + 'g</div><div class="metric-lbl">fat</div></div>'
+    +   '<div class="metric-box" style="padding:10px;text-align:center;"><div class="metric-val" id="fc-p" style="font-size:22px;color:#47b4ff;">' + food.g + 'g</div><div class="metric-lbl">' + t('food.protein').toLowerCase() + '</div></div>'
+    +   '<div class="metric-box" style="padding:10px;text-align:center;"><div class="metric-val" id="fc-c" style="font-size:22px;color:#ffb347;">' + food.carbs + 'g</div><div class="metric-lbl">' + t('food.carbs').toLowerCase() + '</div></div>'
+    +   '<div class="metric-box" style="padding:10px;text-align:center;"><div class="metric-val" id="fc-f" style="font-size:22px;color:#ff9147;">' + food.fat + 'g</div><div class="metric-lbl">' + t('food.fat').toLowerCase() + '</div></div>'
     + '</div>'
     + '<div class="field">'
-    +   '<label id="fc-serving-label">' + (_hasNat ? 'Amount (' + _activeServingUnit + ')' : 'Amount in grams') + '</label>'
+    +   '<label id="fc-serving-label">' + (_hasNat ? ('Amount (' + _activeServingUnit + ')') : t('food.amountInGrams')) + '</label>'
     +   '<div style="display:flex;align-items:center;gap:10px;">'
     +     '<button onclick="adjServings(-0.5)" style="width:40px;height:40px;border-radius:50%;background:var(--s2);border:1px solid var(--b2);color:var(--t1);font-size:20px;cursor:pointer;flex-shrink:0;">−</button>'
     +     '<input type="number" id="fc-servings" value="' + (_hasNat ? 1 : (food._origServing||100)) + '" min="1" step="' + (_chipStep >= 1 ? _chipStep : 1) + '" inputmode="decimal" style="flex:1;text-align:center;font-size:22px;font-weight:700;" oninput="updateFoodServingDisplay(this.value)">'
@@ -11344,7 +11912,7 @@ function showAddFoodConfirmSheet(food) {
     + '</div>'
     // Custom amount — big number input, small unit pills
     + '<div style="margin-top:10px;padding:10px 12px;background:var(--s2);border:1px solid var(--b1);border-radius:12px;">'
-    +   '<div style="font-size:10px;color:var(--t3);margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;">Or exact amount</div>'
+    +   '<div style="font-size:10px;color:var(--t3);margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;">' + t('food.customAmount') + '</div>'
     +   '<div style="display:flex;align-items:center;gap:10px;">'
     +     '<input type="number" id="fc-custom-amount" placeholder="–" min="1" step="any" inputmode="decimal"'
     +       ' style="flex:1;text-align:center;font-size:36px;font-weight:800;font-family:Barlow Condensed,sans-serif;background:var(--s1);border:1px solid var(--b2);border-radius:10px;padding:6px 0;color:var(--t1);"'
@@ -11360,11 +11928,18 @@ function showAddFoodConfirmSheet(food) {
     +   '</div>'
     + '</div>'
     + '<div class="field" style="margin-bottom:6px;margin-top:12px;">'
-    +   '<label>Meal</label>'
-    +   '<select id="fc-meal"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option><option>Pre-workout</option><option>Post-workout</option></select>'
+    +   '<label>' + t('food.meal') + '</label>'
+    +   '<select id="fc-meal">'
+    +     '<option value="Breakfast">' + t('food.breakfast') + '</option>'
+    +     '<option value="Lunch">'     + t('food.lunch')     + '</option>'
+    +     '<option value="Dinner">'    + t('food.dinner')    + '</option>'
+    +     '<option value="Snack">'     + t('food.snack')     + '</option>'
+    +     '<option value="Pre-workout">'  + t('food.preWorkout')  + '</option>'
+    +     '<option value="Post-workout">' + t('food.postWorkout') + '</option>'
+    +   '</select>'
     + '</div>'
-    + '<button class="btn btn-acc btn-full" style="margin-top:10px;" onclick="confirmAddFood()">Add to log</button>'
-    + '<button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="closeSheets()">Cancel</button>'
+    + '<button class="btn btn-acc btn-full" style="margin-top:10px;" onclick="confirmAddFood()">' + t('food.addToLog') + '</button>'
+    + '<button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="closeSheets()">' + t('common.cancel') + '</button>'
     + '</div>';
   bg.addEventListener('click', e => { if(e.target===bg) bg.remove(); });
   document.body.appendChild(bg);
@@ -12225,8 +12800,20 @@ function shiftFoodDate(dir) {
 }
 
 
-// ── Auto-inject close (×) button into every sheet that opens ─────────────────
+// ── Auto-inject close (×) button + auto-translate common buttons in sheets ──
 (function(){
+  // English button text → translation key. Translated in-place when a sheet opens.
+  const COMMON_BTN_MAP = {
+    'Cancel':  'common.cancel',
+    'Save':    'common.save',
+    'Close':   'common.close',
+    'Delete':  'common.delete',
+    'Edit':    'common.edit',
+    'Done':    'common.done',
+    'Back':    'common.back',
+    'Add':     'common.add',
+  };
+
   function injectCloseBtn(sheetBg) {
     const sheet = sheetBg.querySelector('.sheet');
     if(!sheet || sheet.querySelector('.sheet-x')) return; // already has one
@@ -12237,12 +12824,29 @@ function shiftFoodDate(dir) {
     btn.addEventListener('click', () => sheetBg.remove());
     sheet.appendChild(btn);
   }
+
+  function translateCommonButtons(sheetBg) {
+    if(typeof t !== 'function') return;
+    // Only translate when language is non-default to avoid touching English UI
+    if((localStorage.getItem('gainz_lang') || 'en') === 'en') return;
+    sheetBg.querySelectorAll('button').forEach(btn => {
+      const txt = (btn.textContent || '').trim();
+      const key = COMMON_BTN_MAP[txt];
+      if(key) btn.textContent = t(key);
+    });
+  }
+
+  function processSheet(sheetBg){
+    injectCloseBtn(sheetBg);
+    translateCommonButtons(sheetBg);
+  }
+
   const obs = new MutationObserver(mutations => {
     mutations.forEach(m => {
       m.addedNodes.forEach(node => {
         if(node.nodeType !== 1) return;
-        if(node.classList && node.classList.contains('sheet-bg')) injectCloseBtn(node);
-        else node.querySelectorAll && node.querySelectorAll('.sheet-bg').forEach(injectCloseBtn);
+        if(node.classList && node.classList.contains('sheet-bg')) processSheet(node);
+        else node.querySelectorAll && node.querySelectorAll('.sheet-bg').forEach(processSheet);
       });
     });
   });
@@ -12251,6 +12855,10 @@ function shiftFoodDate(dir) {
 
 // Apply saved theme before first paint
 applyTheme(localStorage.getItem('gainz_theme') || 'dark');
+
+// Apply saved language to nav labels before first paint
+document.documentElement.lang = (localStorage.getItem('gainz_lang') === 'es') ? 'es' : 'en';
+applyNavTranslations();
 
 // ── One-time migration: seed My Foods from full log history ──────────────────
 (function _migrateHistoryToMyFoods(){
