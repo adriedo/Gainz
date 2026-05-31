@@ -759,7 +759,7 @@ input[type="date"]{color-scheme:inherit;color:var(--t1);background:var(--s2);}
       <button class="btn btn-ghost" style="flex-shrink:0;padding:12px 14px;" onclick="confirmEnd()" title="End or discard workout">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
       </button>
-      <button class="btn btn-acc" style="flex:1;" onclick="finishWorkout()">Finish &amp; Save</button>
+      <button class="btn btn-acc" id="wk-finish-btn" style="flex:1;" onclick="finishWorkout()">Finish &amp; Save</button>
       <button class="btn btn-danger" style="flex-shrink:0;padding:12px 14px;" onclick="confirmDiscard()" title="Discard workout">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
       </button>
@@ -2279,37 +2279,31 @@ function buildOnTrackCard(){
   // ── COACHING LINE ──────────────────────────────────────────────────────────
   function coachLine(){
     if(overallStatus==='green'){
-      if(strengthStatus==='green'&&adherenceStatus==='green'&&nutritionStatus==='green')
-        return'Strength up, showing up, eating right — keep pushing.';
-      if(strengthStatus==='green')return'Strength is moving. Stay consistent and this compounds fast.';
-      return'All signals green — you\'re doing the work.';
+      if(strengthStatus==='green'&&adherenceStatus==='green'&&nutritionStatus==='green') return t('ot.green.all');
+      if(strengthStatus==='green') return t('ot.green.strength');
+      return t('ot.green.default');
     }
     if(overallStatus==='red'){
       if(adherenceStatus==='red'){
         const missed=plannedSessions-uniqueSessionDays;
-        return`${missed} missed sessions in 4 weeks — consistency is the bottleneck right now.`;
+        return t('ot.red.adherence',{missed});
       }
-      if(nutritionStatus==='red')
-        return`Protein hit on only ${nutritionGoodDays} of ${nutritionTrackedDays} tracked days — that's limiting your results.`;
-      if(strengthStatus==='red')
-        return'Strength trending down on multiple lifts — consider a deload or check recovery.';
-      return'Multiple signals need attention — pick one and fix it this week.';
+      if(nutritionStatus==='red') return t('ot.red.nutrition',{good:nutritionGoodDays,tracked:nutritionTrackedDays});
+      if(strengthStatus==='red')  return t('ot.red.strength');
+      return t('ot.red.default');
     }
     // Amber
-    if(adherenceStatus==='amber')
-      return`${Math.round(adherencePct*100)}% session rate — close to target. One more session a week changes this.`;
-    if(nutritionStatus==='amber')
-      return`Protein on target ${nutritionGoodDays} of ${nutritionTrackedDays} days — a little more consistency here unlocks more gains.`;
-    if(strengthStatus==='amber')
-      return'Strength holding steady — keep progressive overload and it\'ll move.';
-    return'Making progress — a few things to tighten up.';
+    if(adherenceStatus==='amber') return t('ot.amber.adherence',{pct:Math.round(adherencePct*100)});
+    if(nutritionStatus==='amber') return t('ot.amber.nutrition',{good:nutritionGoodDays,tracked:nutritionTrackedDays});
+    if(strengthStatus==='amber')  return t('ot.amber.strength');
+    return t('ot.amber.default');
   }
 
   // ── RENDER ─────────────────────────────────────────────────────────────────
   const statusMeta={
-    green:{dot:'#4ade80',label:'On Track',bg:'rgba(74,222,128,.08)',border:'rgba(74,222,128,.2)'},
-    amber:{dot:'#E8FF47',label:'Check In',bg:'rgba(232,255,71,.06)',border:'rgba(232,255,71,.18)'},
-    red:  {dot:'#ff6b6b',label:'Off Track',bg:'rgba(255,107,107,.08)',border:'rgba(255,107,107,.2)'},
+    green:{dot:'#4ade80',label:t('ot.status.green'),bg:'rgba(74,222,128,.08)',border:'rgba(74,222,128,.2)'},
+    amber:{dot:'#E8FF47',label:t('ot.status.amber'),bg:'rgba(232,255,71,.06)',border:'rgba(232,255,71,.18)'},
+    red:  {dot:'#ff6b6b',label:t('ot.status.red'),  bg:'rgba(255,107,107,.08)',border:'rgba(255,107,107,.2)'},
   };
   const sm=statusMeta[overallStatus];
 
@@ -2327,20 +2321,20 @@ function buildOnTrackCard(){
   }
 
   const strengthDetail=strengthStatus==='none'?'':
-    strengthStatus==='green'?`${strengthUp} lift${strengthUp!==1?'s':''} up`:
-    strengthStatus==='red'?`${strengthDown} lift${strengthDown!==1?'s':''} declining`:
-    'Holding steady';
+    strengthStatus==='green'?t('ot.detail.liftsUp',{n:strengthUp}):
+    strengthStatus==='red'?t('ot.detail.liftsDown',{n:strengthDown}):
+    t('ot.detail.holdingSteady');
 
   const adherenceDetail=adherenceStatus==='none'?'':
-    `${uniqueSessionDays}/${plannedSessions} sessions`;
+    t('ot.detail.sessionsCount',{n:uniqueSessionDays,total:plannedSessions});
 
   const nutritionDetail=nutritionStatus==='none'?'':
-    `${nutritionGoodDays}/${nutritionTrackedDays} days on target`;
+    t('ot.detail.daysOnTarget',{n:nutritionGoodDays,total:nutritionTrackedDays});
 
   const detailRows=[
-    dimRow('Strength',strengthStatus,strengthDetail),
-    dimRow('Adherence',adherenceStatus,adherenceDetail),
-    dimRow('Nutrition',nutritionStatus,nutritionDetail),
+    dimRow(t('ot.label.strength'),strengthStatus,strengthDetail),
+    dimRow(t('ot.label.adherence'),adherenceStatus,adherenceDetail),
+    dimRow(t('ot.label.nutrition'),nutritionStatus,nutritionDetail),
   ].filter(Boolean).join('');
 
   return`<div class="card" style="margin-bottom:16px;background:${sm.bg};border-color:${sm.border};">
@@ -2492,24 +2486,22 @@ function buildProgressionDirectivesCard(){
   }).filter(Boolean);
 
   if(!directives.length){
-    // Has a next day but no history on any exercise yet
     return`<div class="card" style="margin-bottom:16px;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);">Up Next</span>
+        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);">${t('dir.upNext')}</span>
         <span style="font-size:11px;font-weight:700;color:var(--acc);">${nextDay.name}</span>
       </div>
-      <div style="font-size:13px;color:var(--t2);">Log your first session to unlock progression directives.</div>
+      <div style="font-size:13px;color:var(--t2);">${t('dir.firstSession')}</div>
     </div>`;
   }
 
-  // Modifier banner (deload or check-in adjustment)
   let modifierBanner='';
   if(deload){
     modifierBanner=`<div style="display:flex;align-items:center;gap:6px;padding:8px 10px;background:rgba(255,71,71,.08);border:1px solid rgba(255,71,71,.2);border-radius:8px;margin-bottom:12px;">
       <span style="font-size:14px;">⚠️</span>
       <div>
-        <div style="font-size:11px;font-weight:700;color:#ff9999;text-transform:uppercase;letter-spacing:.06em;">Deload Week</div>
-        <div style="font-size:11px;color:var(--t2);">Accumulated fatigue detected — weights reduced 20%</div>
+        <div style="font-size:11px;font-weight:700;color:#ff9999;text-transform:uppercase;letter-spacing:.06em;">${t('dir.deloadWeek')}</div>
+        <div style="font-size:11px;color:var(--t2);">${t('dir.deloadSub')}</div>
       </div>
     </div>`;
   } else if(reasons.length&&adjusted){
@@ -2520,7 +2512,7 @@ function buildProgressionDirectivesCard(){
       <span style="font-size:14px;">${icon}</span>
       <div>
         <div style="font-size:11px;font-weight:700;color:${col};text-transform:uppercase;letter-spacing:.06em;">${reasons[0]}</div>
-        <div style="font-size:11px;color:var(--t2);">${isBoost?'Targets reflect readiness — push today':'Targets adjusted down — focus on movement quality'}</div>
+        <div style="font-size:11px;color:var(--t2);">${isBoost?t('dir.boostSub'):t('dir.dropSub')}</div>
       </div>
     </div>`;
   }
@@ -2536,11 +2528,11 @@ function buildProgressionDirectivesCard(){
   }
   function badgeLabel(type,sg,baseW,adjW){
     if(type==='increase')return`↑ +${adjW-(sg.analysis?.last?.maxWeight??baseW)||'?'}lb`;
-    if(type==='deload')return`↓ ${Math.round((1-multiplier)*100)}% off`;
-    if(type==='consolidate')return'→ Hold';
-    if(type==='progress')return'→ Push reps';
-    if(type==='capped')return'⚠ at limit';
-    return'→ Maintain';
+    if(type==='deload')return`↓ ${Math.round((1-multiplier)*100)}% ${t('dir.badge.off')}`;
+    if(type==='consolidate')return'→ '+t('dir.badge.hold');
+    if(type==='progress')return'→ '+t('dir.badge.pushReps');
+    if(type==='capped')return'⚠ '+t('dir.badge.atLimit');
+    return'→ '+t('dir.badge.maintain');
   }
 
   const rows=directives.map(d=>{
@@ -2549,7 +2541,7 @@ function buildProgressionDirectivesCard(){
     const bs=badgeStyle(d.actionType);
     // Truncate long names
     const shortName=d.name.length>22?d.name.replace(/Smith Machine /g,'SM ').replace(/Cable /g,'').replace(/Dumbbell /g,'DB '):d.name;
-    const cappedNote=d.actionType==='capped'?`<div style="font-size:10px;color:var(--org);margin-top:2px;">Equipment ceiling — update in Train → Edit</div>`:'';
+    const cappedNote=d.actionType==='capped'?`<div style="font-size:10px;color:var(--org);margin-top:2px;">${t('dir.equipmentCeiling')}</div>`:'';
     return`<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--b1);">
       <div style="flex:1;min-width:0;">
         <div style="font-size:13px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${shortName}</div>
@@ -2561,19 +2553,19 @@ function buildProgressionDirectivesCard(){
   }).join('');
 
   const doneStyle=alreadyDoneToday?'opacity:.55;':'';
-  const doneLabel=alreadyDoneToday?'<span style="font-size:10px;color:var(--grn);font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-left:6px;">✓ Done today</span>':'';
+  const doneLabel=alreadyDoneToday?'<span style="font-size:10px;color:var(--grn);font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-left:6px;">✓ '+t('dir.doneToday')+'</span>':'';
 
   return`<div class="card" style="margin-bottom:16px;${doneStyle}" onclick="nav('history',null);setTrainTab('program');" role="button" tabindex="0">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
       <div style="display:flex;align-items:center;gap:8px;">
-        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);">Today's Directives</span>
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);">${t('dir.title')}</span>
         ${doneLabel}
       </div>
       <span style="font-size:12px;font-weight:700;color:var(--acc);letter-spacing:.03em;">${nextDay.name}</span>
     </div>
     ${modifierBanner}
     <div>${rows}</div>
-    <div style="margin-top:10px;text-align:right;font-size:11px;color:var(--t3);">Tap to open ${nextDay.name} →</div>
+    <div style="margin-top:10px;text-align:right;font-size:11px;color:var(--t3);">${t('dir.tapToOpen',{name:nextDay.name})} →</div>
   </div>`;
 }
 
@@ -2780,7 +2772,7 @@ Format: [train line]|||[eat line]|||[recover line]`;
 }
 
 function buildStreakRecoveryCard(lastStreak){
-  const lang=localStorage.getItem('_lang')||'en';
+  const lang=localStorage.getItem('gainz_lang')||'en';
   let msg;
   if(lastStreak>=14){
     msg=lang==='es'
@@ -2800,14 +2792,14 @@ function buildStreakRecoveryCard(lastStreak){
       <div style="font-size:28px;line-height:1;flex-shrink:0;">🔥</div>
       <div style="flex:1;min-width:0;">
         <div style="font-size:14px;color:var(--t2);line-height:1.5;">${msg}</div>
-        <button onclick="showTodayPlanSheet()" style="margin-top:10px;padding:8px 16px;background:var(--acc);border:none;border-radius:8px;font-size:13px;font-weight:700;color:#000;cursor:pointer;touch-action:manipulation;font-family:'Barlow Condensed',sans-serif;letter-spacing:.04em;text-transform:uppercase;">Get back on track →</button>
+        <button onclick="showTodayPlanSheet()" style="margin-top:10px;padding:8px 16px;background:var(--acc);border:none;border-radius:8px;font-size:13px;font-weight:700;color:#000;cursor:pointer;touch-action:manipulation;font-family:'Barlow Condensed',sans-serif;letter-spacing:.04em;text-transform:uppercase;">${t('home.getBackOnTrack')} →</button>
       </div>
     </div>
   </div>`;
 }
 
 function buildStreakGraceCard(){
-  const lang=localStorage.getItem('_lang')||'en';
+  const lang=localStorage.getItem('gainz_lang')||'en';
   const msg=lang==='es'
     ?'Ayer no entrenaste. Tu racha sigue viva porque un día no define lo que construiste. Hoy es el entrenamiento que importa.'
     :"You missed yesterday. Your streak is still running — one gap in the data doesn't redefine the pattern. You train consistently. That's who you are.";
@@ -2847,33 +2839,30 @@ function renderHome(){
     const _nextDay=getNextProgramDay();
     let _ctaHtml;
     if(_trainedToday){
-      // State 1: post-workout — close the loop to nutrition
       const _lastS=_strengthSessions[0];
-      const _doneDayName=(_lastS&&program.find(d=>d.id===_lastS.dayId)?.name)||'Workout';
+      const _doneDayName=(_lastS&&program.find(d=>d.id===_lastS.dayId)?.name)||t('cta.workout');
       _ctaHtml=`<div style="background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.18);border-radius:12px;padding:14px 16px;margin-bottom:16px;">
         <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          <span style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#4ade80;">${_doneDayName} done</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#4ade80;">${_doneDayName} ${t('cta.done')}</span>
         </div>
-        <div style="font-size:13px;color:var(--t2);margin-bottom:11px;line-height:1.4;">Lock in your gains — log your post-workout meal.</div>
-        <button onclick="nav('food',null)" style="width:100%;padding:11px;background:#4ade80;border-radius:10px;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;color:#000;text-transform:uppercase;letter-spacing:.04em;touch-action:manipulation;">Log post-workout meal →</button>
+        <div style="font-size:13px;color:var(--t2);margin-bottom:11px;line-height:1.4;">${t('cta.lockInGains')}</div>
+        <button onclick="nav('food',null)" style="width:100%;padding:11px;background:#4ade80;border-radius:10px;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;color:#000;text-transform:uppercase;letter-spacing:.04em;touch-action:manipulation;">${t('cta.logPostMeal')} →</button>
       </div>`;
     } else if(_nextDay){
-      // State 2: workout due — direct launch
       _ctaHtml=`<div style="margin-bottom:16px;">
         <button onclick="launchWk('${_nextDay.id}')" style="width:100%;padding:16px 18px;background:var(--acc);border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;touch-action:manipulation;">
           <div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:rgba(0,0,0,.5);margin-bottom:2px;">Today</div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:#000;">Start ${_nextDay.name}</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:rgba(0,0,0,.5);margin-bottom:2px;">${t('home.today')}</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:#000;">${t('cta.start')} ${_nextDay.name}</div>
           </div>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" style="opacity:.55;flex-shrink:0;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </button>
-        <button onclick="showTodayPlanSheet()" style="width:100%;padding:9px;background:transparent;border:none;cursor:pointer;font-size:12px;color:var(--t3);margin-top:4px;touch-action:manipulation;text-align:center;">Full plan →</button>
+        <button onclick="showTodayPlanSheet()" style="width:100%;padding:9px;background:transparent;border:none;cursor:pointer;font-size:12px;color:var(--t3);margin-top:4px;touch-action:manipulation;text-align:center;">${t('cta.fullPlan')} →</button>
       </div>`;
     } else {
-      // State 3: no program set up
       _ctaHtml=`<button onclick="showTodayPlanSheet()" style="width:100%;padding:15px;background:var(--acc);border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;touch-action:manipulation;">
-        <span style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;color:#000;text-transform:uppercase;letter-spacing:.04em;">What should I do today?</span>
+        <span style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;color:#000;text-transform:uppercase;letter-spacing:.04em;">${t('cta.whatToday')}</span>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" style="opacity:.6;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </button>`;
     }
@@ -2997,7 +2986,7 @@ function renderWk(){
     let banner='';
     const sg=tgt.analysis?.suggestion;
     const lastRpe=tgt.analysis?.lastRpe;
-    const rpeNote=lastRpe!==null&&lastRpe!==undefined?`<span style="font-size:10px;margin-left:6px;padding:2px 6px;border-radius:4px;font-weight:700;font-family:Barlow Condensed,sans-serif;${lastRpe>=9?'background:rgba(255,71,71,.15);color:var(--red)':lastRpe>=8?'background:rgba(232,255,71,.12);color:var(--acc)':'background:rgba(71,255,138,.12);color:var(--grn)'}">Last RPE ${lastRpe.toFixed(1)}</span>`:'';
+    const rpeNote=lastRpe!==null&&lastRpe!==undefined?`<span style="font-size:10px;margin-left:6px;padding:2px 6px;border-radius:4px;font-weight:700;font-family:Barlow Condensed,sans-serif;${lastRpe>=9?'background:rgba(255,71,71,.15);color:var(--red)':lastRpe>=8?'background:rgba(232,255,71,.12);color:var(--acc)':'background:rgba(71,255,138,.12);color:var(--grn)'}">${t('wk.lastRpe')} ${lastRpe.toFixed(1)}</span>`:'';
     if(sg){
       if(sg.type==='increase'){
         banner=`<div class="target-banner up" style="flex-direction:column;align-items:flex-start;gap:4px;">
@@ -3025,34 +3014,35 @@ function renderWk(){
     } else if(sg&&sg.type==='firsttime'){
       banner=`<div class="target-banner same"><span>🌱</span> ${sg.msg}</div>`;
     } else if(prev.length){
-      banner=`<div class="target-banner same"><span>🎯</span> Target: ${tgt.weight}lb × ${isMaxReps?'Max reps':tgt.reps+' reps'}${rpeNote?` ${rpeNote}`:''}</div>`;
+      banner=`<div class="target-banner same"><span>🎯</span> ${t('wk.target')}: ${tgt.weight}lb × ${isMaxReps?t('wk.maxReps'):tgt.reps+' '+t('wk.reps')}${rpeNote?` ${rpeNote}`:''}</div>`;
     }
+    const _restSrc = custRest[n]!==undefined?t('wk.restSrc.perEx'):globalRestSettings.byMuscle[getMuscleGroupKey((findExBase(n)||{}).muscle)]!==undefined?t('wk.restSrc.muscle'):globalRestSettings.overall!==null?t('wk.restSrc.global'):t('wk.restSrc.default');
     return`<div class="ex-card${isOpen?' active-ex':''} fu" id="exc_${idx}" style="animation-delay:${idx*.04}s">
       <div class="ex-head" onclick="toggleEx('${n}')">
-        <div style="flex:1;min-width:0"><div class="ex-name">${n}</div><div class="ex-info">${ex.sets}×${ex.reps} · ${restSec}s rest · ${ex.muscle||''}</div></div>
-        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">${allDone?'<span class="ex-done-badge">✓ Done</span>':''}<span class="chevron${isOpen?' open':''}">▼</span></div>
+        <div style="flex:1;min-width:0"><div class="ex-name">${n}</div><div class="ex-info">${ex.sets}×${ex.reps} · ${restSec}s ${t('wk.rest')} · ${ex.muscle||''}</div></div>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">${allDone?'<span class="ex-done-badge">✓ '+t('wk.done')+'</span>':''}<span class="chevron${isOpen?' open':''}">▼</span></div>
       </div>
       <div class="ex-body${isOpen?' open':''}">
         <div class="muscle-diagram">${getIllo(n)}</div>
         ${banner}
-        <div class="set-head"><div></div><div class="sh-lbl">Previous</div><div class="sh-lbl">Target</div><div class="sh-lbl">Actual</div><div></div></div>
+        <div class="set-head"><div></div><div class="sh-lbl">${t('wk.previous')}</div><div class="sh-lbl">${t('wk.targetShort')}</div><div class="sh-lbl">${t('wk.actual')}</div><div></div></div>
         ${sets.map((s,i)=>{
           const p=prev[i]||{};const hasP=p.weight||p.reps;
           const rpeCls=s.rpe?s.rpe<=7?'rpe-low':s.rpe<=8?'rpe-mid':'rpe-high':'';
           return`<div class="set-row${s.done?' set-done':''}">
             <div class="set-n">${i+1}${s.done&&s.rpe?`<div class="rpe-badge ${rpeCls}" style="margin-top:3px;">R${s.rpe}</div>`:''}</div>
-            <div class="set-prev">${hasP?`<div class="set-prev-w">${p.weight||'—'}<span style="font-size:9px;color:var(--t3)">lb</span></div><div class="set-prev-r">${p.reps||'—'} reps</div>`:`<div class="set-prev-r" style="font-size:11px">—</div>`}</div>
+            <div class="set-prev">${hasP?`<div class="set-prev-w">${p.weight||'—'}<span style="font-size:9px;color:var(--t3)">lb</span></div><div class="set-prev-r">${p.reps||'—'} ${t('wk.reps')}</div>`:`<div class="set-prev-r" style="font-size:11px">—</div>`}</div>
             <div class="set-tgt">
               ${ex.inputType==='time'
-                ?`<div class="set-tgt-w" style="font-size:11px;color:var(--blu);">${ex.reps}</div><div class="set-tgt-r">target</div>`
-                :`<div class="set-tgt-w">${tgt.weight||'—'}<span style="font-size:9px">lb</span></div><div class="set-tgt-r">${isMaxReps?'Max':tgt.reps||'—'} reps</div>`
+                ?`<div class="set-tgt-w" style="font-size:11px;color:var(--blu);">${ex.reps}</div><div class="set-tgt-r">${t('wk.targetLbl')}</div>`
+                :`<div class="set-tgt-w">${tgt.weight||'—'}<span style="font-size:9px">lb</span></div><div class="set-tgt-r">${isMaxReps?t('wk.max'):tgt.reps||'—'} ${t('wk.reps')}</div>`
               }
             </div>
             <div class="set-actual">
-              ${ex.inputType!=='time'?`<input class="si-w" type="number" inputmode="decimal" placeholder="lbs" value="${s.weight}" id="w_${key}_${i}" onchange="updSet('${n}',${i},'weight',this.value)">`:'<div style="font-size:9px;color:var(--t3);text-align:center;padding:4px 0;">bodyweight</div>'}
+              ${ex.inputType!=='time'?`<input class="si-w" type="number" inputmode="decimal" placeholder="lbs" value="${s.weight}" id="w_${key}_${i}" onchange="updSet('${n}',${i},'weight',this.value)">`:'<div style="font-size:9px;color:var(--t3);text-align:center;padding:4px 0;">'+t('wk.bodyweight')+'</div>'}
               ${ex.inputType==='time'
-                ?`<input class="si-r" type="number" inputmode="numeric" placeholder="sec" value="${s.reps}" id="r_${key}_${i}" onchange="updSet('${n}',${i},'reps',this.value)" style="color:var(--blu);">`
-                :`<input class="si-r" type="number" inputmode="numeric" placeholder="${isMaxReps?'reps':'reps'}" value="${s.reps}" id="r_${key}_${i}" onchange="updSet('${n}',${i},'reps',this.value)">`
+                ?`<input class="si-r" type="number" inputmode="numeric" placeholder="${t('wk.sec')}" value="${s.reps}" id="r_${key}_${i}" onchange="updSet('${n}',${i},'reps',this.value)" style="color:var(--blu);">`
+                :`<input class="si-r" type="number" inputmode="numeric" placeholder="${t('wk.reps')}" value="${s.reps}" id="r_${key}_${i}" onchange="updSet('${n}',${i},'reps',this.value)">`
               }
             </div>
             <button class="chk${s.done?' done':''}" onclick="doneSet('${n}',${i})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></button>
@@ -3060,12 +3050,12 @@ function renderWk(){
         }).join('')}
         <div class="rest-ctrl">
           <div>
-            <span class="rc-lbl">Rest timer</span>
-            <div style="font-size:10px;color:var(--t3);margin-top:2px;">${custRest[n]!==undefined?'per-exercise':globalRestSettings.byMuscle[getMuscleGroupKey((findExBase(n)||{}).muscle)]!==undefined?'muscle group':globalRestSettings.overall!==null?'global overall':'default'}</div>
+            <span class="rc-lbl">${t('wk.restTimer')}</span>
+            <div style="font-size:10px;color:var(--t3);margin-top:2px;">${_restSrc}</div>
           </div>
           <div class="rc-adj"><button class="rc-btn" onclick="adjRest('${n}',-15)">−</button><div class="rc-val" id="rv_${key}">${restSec}s</div><button class="rc-btn" onclick="adjRest('${n}',15)">+</button></div>
         </div>
-        <button class="form-tips-btn" onclick="showCues('${n}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>Form tips &amp; cues</button>
+        <button class="form-tips-btn" onclick="showCues('${n}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>${t('wk.formTips')}</button>
       </div></div>`;
   }).join('');
   updateProg();
@@ -5777,65 +5767,65 @@ function renderEdit(){
   // Build summary of active global rests
   const hasGlobal=globalRestSettings.overall!==null||Object.keys(globalRestSettings.byMuscle||{}).length>0;
   const globalSummary=hasGlobal?[
-    globalRestSettings.overall?`All: ${globalRestSettings.overall}s`:'',
+    globalRestSettings.overall?`${t('edit.all')}: ${globalRestSettings.overall}s`:'',
     ...Object.entries(globalRestSettings.byMuscle||{}).map(([k,v])=>`${k}: ${v}s`)
-  ].filter(Boolean).join(' · '):'No global overrides set';
+  ].filter(Boolean).join(' · '):t('edit.noGlobalRests');
 
   list.innerHTML=`
-    ${onTrainTab?`<button class="btn btn-acc btn-full" style="margin-bottom:14px;" onclick="showNewDaySheet()">+ New day</button>`:''}
+    ${onTrainTab?`<button class="btn btn-acc btn-full" style="margin-bottom:14px;" onclick="showNewDaySheet()">+ ${t('edit.newDay')}</button>`:''}
     ${(()=>{
       const eq=loadEquipment();
       const dbs=eq.dumbbells||[];
-      const dbSummary=dbs.length?dbs.map(w=>w+'lb').join(', '):'Not set';
+      const dbSummary=dbs.length?dbs.map(w=>w+'lb').join(', '):t('edit.notSet');
       const plateEntries=Object.entries(eq.plates||{}).filter(([,c])=>c>0).sort((a,b)=>parseFloat(b[0])-parseFloat(a[0]));
-      const plateSummary=plateEntries.length?plateEntries.map(([w,c])=>`${c}×${w}lb`).join(', '):'Not set';
+      const plateSummary=plateEntries.length?plateEntries.map(([w,c])=>`${c}×${w}lb`).join(', '):t('edit.notSet');
       const achievable=getAchievableBarWeights(eq.barWeight||15,eq.plates||{});
       const maxBar=achievable.length?achievable[achievable.length-1]:0;
       return`<div style="background:var(--s1);border:1px solid var(--b1);border-radius:14px;margin-bottom:14px;padding:14px 16px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;text-transform:uppercase;">Equipment</div>
-          <button class="mini-btn" onclick="showEquipmentSheet()">Edit</button>
+          <div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;text-transform:uppercase;">${t('edit.equipment')}</div>
+          <button class="mini-btn" onclick="showEquipmentSheet()">${t('common.edit')}</button>
         </div>
-        <div style="font-size:11px;color:var(--t3);margin-bottom:2px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;">Dumbbells</div>
+        <div style="font-size:11px;color:var(--t3);margin-bottom:2px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;">${t('eq.dumbbells')}</div>
         <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:8px;">${dbSummary}</div>
-        <div style="font-size:11px;color:var(--t3);margin-bottom:2px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;">Plates · Bar ${eq.barWeight||15}lb · Max ${maxBar}lb loaded</div>
+        <div style="font-size:11px;color:var(--t3);margin-bottom:2px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;">${t('edit.plates')} · ${t('eq.barWeight')} ${eq.barWeight||15}lb · ${t('edit.maxLoaded',{w:maxBar})}</div>
         <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:8px;">${plateSummary}</div>
-        ${(()=>{const mKeys=eq.machines||[];const mLabels=mKeys.map(k=>(EQ_MACHINES.find(m=>m.key===k)||{label:k}).label);if(!mLabels.length)return'';return`<div style="font-size:11px;color:var(--t3);margin-bottom:2px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;">Machines &amp; Tools</div><div style="font-size:12px;color:var(--t2);line-height:1.6;">${mLabels.join(', ')}</div>`;})()}
+        ${(()=>{const mKeys=eq.machines||[];const mLabels=mKeys.map(k=>(EQ_MACHINES.find(m=>m.key===k)||{label:k}).label);if(!mLabels.length)return'';return`<div style="font-size:11px;color:var(--t3);margin-bottom:2px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;">${t('eq.machines')}</div><div style="font-size:12px;color:var(--t2);line-height:1.6;">${mLabels.join(', ')}</div>`;})()}
       </div>`;
     })()}
     <div style="background:var(--s1);border:1px solid var(--b1);border-radius:14px;margin-bottom:14px;padding:14px 16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-        <div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;text-transform:uppercase;">Global Rest Timers</div>
-        <button class="mini-btn" onclick="showGlobalRestSheet()">Edit</button>
+        <div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;text-transform:uppercase;">${t('rest.title')}</div>
+        <button class="mini-btn" onclick="showGlobalRestSheet()">${t('common.edit')}</button>
       </div>
       <div style="font-size:12px;color:var(--t3);line-height:1.6;">${globalSummary}</div>
     </div>`+
   program.map(d=>`
     <div class="edit-day-card" id="edc_${d.id}">
       <div class="edit-day-head" onclick="toggleEditDay('${d.id}')">
-        <div><div class="edit-day-name bc" style="color:${typeColor(d.type)}">${d.day} — ${d.name}</div><div style="font-size:12px;color:var(--t2);margin-top:2px">${d.exercises.length} exercises</div></div>
-        <div style="display:flex;align-items:center;gap:8px"><button class="mini-btn del" onclick="delDay('${d.id}',event)">Delete day</button><span class="chevron${editExpandId===d.id?' open':''}">▼</span></div>
+        <div><div class="edit-day-name bc" style="color:${typeColor(d.type)}">${d.day} — ${d.name}</div><div style="font-size:12px;color:var(--t2);margin-top:2px">${d.exercises.length} ${t('train.exercises')}</div></div>
+        <div style="display:flex;align-items:center;gap:8px"><button class="mini-btn del" onclick="delDay('${d.id}',event)">${t('edit.deleteDay')}</button><span class="chevron${editExpandId===d.id?' open':''}">▼</span></div>
       </div>
       <div class="edit-day-body${editExpandId===d.id?' open':''}" id="edb_${d.id}">
         <div id="drag-list-${d.id}">
           ${d.exercises.map((n,i)=>{
             const ex=findEx(n);
             const hasCustomRest=custRest[n]!==undefined;
-            const restDisplay=hasCustomRest?`${custRest[n]}s (custom)`:'default';
+            const restDisplay=hasCustomRest?`${custRest[n]}s (${t('edit.custom')})`:t('edit.default');
             return`<div class="ex-edit-row" id="exrow_${d.id}_${i}" draggable="true"
               ondragstart="onDragStart(event,'${d.id}',${i})" ondragover="onDragOver(event,'${d.id}',${i})"
               ondrop="onDrop(event,'${d.id}',${i})" ondragend="onDragEnd(event)">
-              <div class="drag-handle" title="Drag to reorder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="9" y1="6" x2="15" y2="6"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="18" x2="15" y2="18"/></svg></div>
-              <div style="flex:1;min-width:0"><div class="ex-edit-name">${n}</div><div class="ex-edit-meta">${ex.sets}×${ex.reps} · ${ex.muscle} · rest: ${restDisplay}</div></div>
+              <div class="drag-handle" title="${t('edit.dragReorder')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="9" y1="6" x2="15" y2="6"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="18" x2="15" y2="18"/></svg></div>
+              <div style="flex:1;min-width:0"><div class="ex-edit-name">${n}</div><div class="ex-edit-meta">${ex.sets}×${ex.reps} · ${ex.muscle} · ${t('wk.rest')}: ${restDisplay}</div></div>
               <div class="ex-edit-actions">
-                <button class="mini-btn ex-edit-btn" data-action="edit" data-day="${d.id}" data-ex="${i}">Edit</button>
+                <button class="mini-btn ex-edit-btn" data-action="edit" data-day="${d.id}" data-ex="${i}">${t('common.edit')}</button>
                 <button class="mini-btn del ex-edit-btn" data-action="remove" data-day="${d.id}" data-ex="${i}">✕</button>
                 <button class="mini-btn del ex-edit-btn" data-action="delcustom" data-day="${d.id}" data-ex="${i}" style="display:none;">🗑</button>
               </div>
             </div>`;
           }).join('')}
         </div>
-        <button class="btn btn-ghost btn-full btn-sm" style="margin-top:10px" onclick="showAddExSheet('${d.id}')">+ Add exercise</button>
+        <button class="btn btn-ghost btn-full btn-sm" style="margin-top:10px" onclick="showAddExSheet('${d.id}')">+ ${t('edit.addExercise')}</button>
       </div>
     </div>`).join('');
   setupTouchDrag();
@@ -6009,52 +5999,53 @@ function saveExEdit(name){
 function showAddExSheet(dayId){
   addExToDay=dayId;activeMg='chest';
   const bg=document.createElement('div');bg.className='sheet-bg';bg.id='add-ex-sheet';
-  bg.innerHTML=`<div class="sheet"><div class="sheet-handle"></div><div class="sheet-title">Add Exercise</div><div class="sheet-sub">Pick a muscle group then select exercise</div>
-    <div class="mg-tabs" id="mg-tabs">${['chest','shoulders','back','arms','legs','core','cardio'].map(g=>`<button class="mg-tab${g===activeMg?' on':''}" onclick="setMg('${g}')">${g.charAt(0).toUpperCase()+g.slice(1)}</button>`).join('')}</div>
+  const mgLabels={chest:t('mg.chest'),shoulders:t('mg.shoulders'),back:t('mg.back'),arms:t('mg.arms'),legs:t('mg.legs'),core:t('mg.core'),cardio:t('train.cardio')};
+  bg.innerHTML=`<div class="sheet"><div class="sheet-handle"></div><div class="sheet-title">${t('edit.addExercise')}</div><div class="sheet-sub">${t('edit.pickMuscle')}</div>
+    <div class="mg-tabs" id="mg-tabs">${['chest','shoulders','back','arms','legs','core','cardio'].map(g=>`<button class="mg-tab${g===activeMg?' on':''}" onclick="setMg('${g}')">${mgLabels[g]}</button>`).join('')}</div>
     <div id="ex-pick-list"></div>
     <div style="margin-top:8px;padding-top:12px;border-top:1px solid var(--b1);">
-      <div class="sheet-sub" style="margin-bottom:10px;">Or add a custom exercise:</div>
-      <div class="field"><label>Exercise name</label><input type="text" id="custom-ex-name" placeholder="e.g. Tricep Dips"></div>
+      <div class="sheet-sub" style="margin-bottom:10px;">${t('edit.orCustom')}</div>
+      <div class="field"><label>${t('edit.exerciseName')}</label><input type="text" id="custom-ex-name" placeholder="${t('edit.exNamePlaceholder')}"></div>
       <div class="field">
-        <label>Muscle group (for rest timer grouping)</label>
+        <label>${t('edit.muscleGroup')}</label>
         <select id="custom-ex-muscle">
-          <option value="Chest">Chest</option>
-          <option value="Upper Chest">Upper Chest</option>
-          <option value="Shoulders">Shoulders</option>
-          <option value="Side Delts">Side Delts</option>
-          <option value="Rear Delts">Rear Delts</option>
-          <option value="Triceps" selected>Triceps</option>
-          <option value="Biceps">Biceps</option>
-          <option value="Lats">Lats</option>
-          <option value="Mid Back">Mid Back</option>
-          <option value="Quads/Glutes">Quads / Glutes</option>
-          <option value="Hamstrings">Hamstrings</option>
-          <option value="Glutes">Glutes</option>
-          <option value="Calves">Calves</option>
-          <option value="Abs">Abs</option>
-          <option value="Core">Core</option>
-          <option value="Cardio">Cardio</option>
-          <option value="Custom">Other / Custom</option>
+          <option value="Chest">${t('mg.chest')}</option>
+          <option value="Upper Chest">${t('mg.upperChest')}</option>
+          <option value="Shoulders">${t('mg.shoulders')}</option>
+          <option value="Side Delts">${t('mg.sideDelts')}</option>
+          <option value="Rear Delts">${t('mg.rearDelts')}</option>
+          <option value="Triceps" selected>${t('mg.triceps')}</option>
+          <option value="Biceps">${t('mg.biceps')}</option>
+          <option value="Lats">${t('mg.lats')}</option>
+          <option value="Mid Back">${t('mg.midBack')}</option>
+          <option value="Quads/Glutes">${t('mg.quadsGlutes')}</option>
+          <option value="Hamstrings">${t('mg.hamstrings')}</option>
+          <option value="Glutes">${t('mg.glutes')}</option>
+          <option value="Calves">${t('mg.calves')}</option>
+          <option value="Abs">${t('mg.abs')}</option>
+          <option value="Core">${t('mg.core')}</option>
+          <option value="Cardio">${t('train.cardio')}</option>
+          <option value="Custom">${t('mg.other')}</option>
         </select>
       </div>
       <div class="field">
-        <label>Default sets</label>
+        <label>${t('edit.defaultSets')}</label>
         <input type="number" id="custom-ex-sets" value="3" min="1" max="10">
       </div>
       <div class="field">
-        <label>Input type</label>
+        <label>${t('edit.inputType')}</label>
         <select id="custom-ex-inputtype">
-          <option value="reps">Reps</option>
-          <option value="time">Time (seconds)</option>
+          <option value="reps">${t('edit.repsType')}</option>
+          <option value="time">${t('edit.timeType')}</option>
         </select>
       </div>
       <div class="field">
-        <label id="custom-ex-reps-label">Default reps / target</label>
-        <input type="text" id="custom-ex-reps" value="10–12" placeholder="e.g. 10–12, Max, or 45 sec">
+        <label id="custom-ex-reps-label">${t('edit.defaultReps')}</label>
+        <input type="text" id="custom-ex-reps" value="10–12" placeholder="${t('edit.repsPlaceholder')}">
       </div>
-      <button class="btn btn-acc btn-full btn-sm" onclick="addCustomEx()">Add custom exercise</button>
+      <button class="btn btn-acc btn-full btn-sm" onclick="addCustomEx()">${t('edit.addCustom')}</button>
     </div>
-    <button class="btn btn-ghost btn-full" style="margin-top:10px" onclick="closeSheets()">Close</button>
+    <button class="btn btn-ghost btn-full" style="margin-top:10px" onclick="closeSheets()">${t('common.close')}</button>
   </div>`;
   bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
   document.body.appendChild(bg);
@@ -6143,12 +6134,12 @@ function deleteCustomExercise(name){
 
 function showNewDaySheet(){
   const bg=document.createElement('div');bg.className='sheet-bg';
-  bg.innerHTML=`<div class="sheet"><div class="sheet-handle"></div><div class="sheet-title">New Workout Day</div><div class="sheet-sub">Create a custom training day</div>
-    <div class="field"><label>Day name (e.g. "Upper Body A")</label><input type="text" id="nd-name" placeholder="Day name..."></div>
-    <div class="field"><label>Focus / subtitle</label><input type="text" id="nd-focus" placeholder="e.g. Chest / Shoulders / Triceps"></div>
-    <div class="field"><label>Type (sets color)</label><select id="nd-type"><option value="push">Push (red)</option><option value="pull">Pull (green)</option><option value="legs">Legs (purple)</option><option value="cardio">Cardio (blue)</option><option value="full">Full/Other (orange)</option></select></div>
-    <button class="btn btn-acc btn-full" onclick="createDay()">Create day</button>
-    <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="closeSheets()">Cancel</button>
+  bg.innerHTML=`<div class="sheet"><div class="sheet-handle"></div><div class="sheet-title">${t('edit.newDayTitle')}</div><div class="sheet-sub">${t('edit.newDaySub')}</div>
+    <div class="field"><label>${t('edit.dayName')}</label><input type="text" id="nd-name" placeholder="${t('edit.dayNamePh')}"></div>
+    <div class="field"><label>${t('edit.focusSub')}</label><input type="text" id="nd-focus" placeholder="${t('edit.focusPh')}"></div>
+    <div class="field"><label>${t('edit.typeColor')}</label><select id="nd-type"><option value="push">${t('edit.type.push')}</option><option value="pull">${t('edit.type.pull')}</option><option value="legs">${t('edit.type.legs')}</option><option value="cardio">${t('edit.type.cardio')}</option><option value="full">${t('edit.type.full')}</option></select></div>
+    <button class="btn btn-acc btn-full" onclick="createDay()">${t('edit.createDay')}</button>
+    <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="closeSheets()">${t('common.cancel')}</button>
   </div>`;
   bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
   document.body.appendChild(bg);
@@ -8862,6 +8853,28 @@ const STRINGS = {
   'food.snack':            { en:'Snack',                  es:'Snack' },
   'food.preWorkout':       { en:'Pre-workout',            es:'Pre-entreno' },
   'food.postWorkout':      { en:'Post-workout',           es:'Post-entreno' },
+  'food.planned':          { en:'Planned',                 es:'Planeado' },
+  'food.goalLbl':          { en:'Goal',                    es:'Meta' },
+  'food.eaten':            { en:'Eaten',                   es:'Comido' },
+  'food.left':             { en:'Left',                    es:'Restan' },
+  'food.over':             { en:'Over',                    es:'Excedido' },
+  'food.search':           { en:'Search',                  es:'Buscar' },
+  'food.manual':           { en:'Manual',                  es:'Manual' },
+  'food.custom':           { en:'CUSTOM',                  es:'PERSONALIZADO' },
+  'food.goal.fatLoss':     { en:'Fat Loss',                es:'Pérdida de Grasa' },
+  'food.goal.muscle':      { en:'Build Muscle',            es:'Construir Músculo' },
+  'food.goal.strength':    { en:'Get Stronger',            es:'Más Fuerza' },
+  'food.goal.maint':       { en:'Maintenance',             es:'Mantenimiento' },
+  'food.meal.s':           { en:'meal',                    es:'comida' },
+  'food.meal.p':           { en:'meals',                   es:'comidas' },
+  'food.pace.hit':         { en:'Protein goal hit!',       es:'¡Meta de proteína alcanzada!' },
+  'food.pace.miss':        { en:'{g}g short — protein will be a miss today', es:'{g}g por debajo — la proteína no se logrará hoy' },
+  'food.pace.missHint':    { en:'High-protein snack can still recover 30–40g', es:'Un snack alto en proteína aún puede recuperar 30–40g' },
+  'food.pace.onPace':      { en:'On pace — {g}g remaining', es:'En ritmo — {g}g restantes' },
+  'food.pace.across':      { en:'across {n} {meal}',       es:'en {n} {meal}' },
+  'food.pace.perMealHint': { en:'per meal to hit your goal', es:'por comida para alcanzar tu meta' },
+  'food.pace.behind':      { en:'{g}g short — behind pace', es:'{g}g por debajo — atrás del ritmo' },
+  'food.pace.targetPerMeal':{ en:'Target ~{g}g per remaining meal', es:'Objetivo ~{g}g por comida restante' },
 
   // Workout finish screen
   'finish.title':          { en:'Workout complete',       es:'Entreno completado' },
@@ -9214,6 +9227,152 @@ const STRINGS = {
   'eq.barWeight':          { en:'Bar weight',                  es:'Peso de barra' },
   'eq.machines':           { en:'Machines & Tools',            es:'Máquinas y Herramientas' },
   'rest.title':            { en:'Global Rest Timers',          es:'Temporizadores Globales' },
+
+  // ─── ACTIVE WORKOUT SCREEN ───────────────────────────────────────────────
+  'wk.finishSave':         { en:'Finish &amp; Save',     es:'Terminar y Guardar' },
+  'wk.lastRpe':            { en:'Last RPE',              es:'Último RPE' },
+  'wk.target':             { en:'Target',                es:'Objetivo' },
+  'wk.targetShort':        { en:'Target',                es:'Meta' },
+  'wk.targetLbl':          { en:'target',                es:'objetivo' },
+  'wk.maxReps':            { en:'Max reps',              es:'Reps máx' },
+  'wk.max':                { en:'Max',                   es:'Máx' },
+  'wk.reps':               { en:'reps',                  es:'reps' },
+  'wk.sec':                { en:'sec',                   es:'seg' },
+  'wk.rest':               { en:'rest',                  es:'descanso' },
+  'wk.done':               { en:'Done',                  es:'Listo' },
+  'wk.previous':           { en:'Previous',              es:'Anterior' },
+  'wk.actual':             { en:'Actual',                es:'Actual' },
+  'wk.bodyweight':         { en:'bodyweight',            es:'peso corporal' },
+  'wk.restTimer':          { en:'Rest timer',            es:'Temporizador' },
+  'wk.restSrc.perEx':      { en:'per-exercise',          es:'por ejercicio' },
+  'wk.restSrc.muscle':     { en:'muscle group',          es:'grupo muscular' },
+  'wk.restSrc.global':     { en:'global overall',        es:'global' },
+  'wk.restSrc.default':    { en:'default',               es:'predeterminado' },
+  'wk.formTips':           { en:'Form tips & cues',      es:'Tips de forma' },
+
+  // ─── EDIT SEGMENT (Train tab) ────────────────────────────────────────────
+  'edit.all':              { en:'All',                   es:'Todos' },
+  'edit.noGlobalRests':    { en:'No global overrides set', es:'Sin sobrescrituras globales' },
+  'edit.newDay':           { en:'New day',               es:'Nuevo día' },
+  'edit.notSet':           { en:'Not set',               es:'Sin configurar' },
+  'edit.equipment':        { en:'Equipment',             es:'Equipo' },
+  'edit.plates':           { en:'Plates',                es:'Discos' },
+  'edit.maxLoaded':        { en:'Max {w}lb loaded',      es:'Máx {w}lb cargado' },
+  'edit.deleteDay':        { en:'Delete day',            es:'Borrar día' },
+  'edit.custom':           { en:'custom',                es:'personalizado' },
+  'edit.default':          { en:'default',               es:'predeterminado' },
+  'edit.dragReorder':      { en:'Drag to reorder',       es:'Arrastra para reordenar' },
+  'edit.addExercise':      { en:'Add exercise',          es:'Añadir ejercicio' },
+  'edit.pickMuscle':       { en:'Pick a muscle group then select exercise', es:'Elige un grupo muscular y luego un ejercicio' },
+  'edit.orCustom':         { en:'Or add a custom exercise:', es:'O añade un ejercicio personalizado:' },
+  'edit.exerciseName':     { en:'Exercise name',         es:'Nombre del ejercicio' },
+  'edit.exNamePlaceholder':{ en:'e.g. Tricep Dips',      es:'p.ej. Fondos de Tríceps' },
+  'edit.muscleGroup':      { en:'Muscle group (for rest timer grouping)', es:'Grupo muscular (para agrupar temporizadores)' },
+  'edit.defaultSets':      { en:'Default sets',          es:'Series por defecto' },
+  'edit.inputType':        { en:'Input type',            es:'Tipo de entrada' },
+  'edit.repsType':         { en:'Reps',                  es:'Reps' },
+  'edit.timeType':         { en:'Time (seconds)',        es:'Tiempo (segundos)' },
+  'edit.defaultReps':      { en:'Default reps / target', es:'Reps por defecto / objetivo' },
+  'edit.repsPlaceholder':  { en:'e.g. 10–12, Max, or 45 sec', es:'p.ej. 10–12, Máx, o 45 seg' },
+  'edit.addCustom':        { en:'Add custom exercise',   es:'Añadir ejercicio personalizado' },
+  'edit.newDayTitle':      { en:'New Workout Day',       es:'Nuevo Día de Entreno' },
+  'edit.newDaySub':        { en:'Create a custom training day', es:'Crea un día de entreno personalizado' },
+  'edit.dayName':          { en:'Day name (e.g. "Upper Body A")', es:'Nombre del día (p.ej. "Tren Superior A")' },
+  'edit.dayNamePh':        { en:'Day name...',           es:'Nombre del día...' },
+  'edit.focusSub':         { en:'Focus / subtitle',      es:'Enfoque / subtítulo' },
+  'edit.focusPh':          { en:'e.g. Chest / Shoulders / Triceps', es:'p.ej. Pecho / Hombros / Tríceps' },
+  'edit.typeColor':        { en:'Type (sets color)',     es:'Tipo (color)' },
+  'edit.type.push':        { en:'Push (red)',            es:'Empuje (rojo)' },
+  'edit.type.pull':        { en:'Pull (green)',          es:'Tirón (verde)' },
+  'edit.type.legs':        { en:'Legs (purple)',         es:'Piernas (morado)' },
+  'edit.type.cardio':      { en:'Cardio (blue)',         es:'Cardio (azul)' },
+  'edit.type.full':        { en:'Full/Other (orange)',   es:'Completo/Otro (naranja)' },
+  'edit.createDay':        { en:'Create day',            es:'Crear día' },
+
+  // Muscle groups (used across Add Exercise sheet)
+  'mg.chest':              { en:'Chest',                 es:'Pecho' },
+  'mg.upperChest':         { en:'Upper Chest',           es:'Pecho Superior' },
+  'mg.shoulders':          { en:'Shoulders',             es:'Hombros' },
+  'mg.sideDelts':          { en:'Side Delts',            es:'Deltoides Lateral' },
+  'mg.rearDelts':          { en:'Rear Delts',            es:'Deltoides Posterior' },
+  'mg.back':               { en:'Back',                  es:'Espalda' },
+  'mg.lats':               { en:'Lats',                  es:'Dorsales' },
+  'mg.midBack':            { en:'Mid Back',              es:'Espalda Media' },
+  'mg.arms':               { en:'Arms',                  es:'Brazos' },
+  'mg.biceps':             { en:'Biceps',                es:'Bíceps' },
+  'mg.triceps':            { en:'Triceps',               es:'Tríceps' },
+  'mg.legs':               { en:'Legs',                  es:'Piernas' },
+  'mg.quadsGlutes':        { en:'Quads / Glutes',        es:'Cuádriceps / Glúteos' },
+  'mg.hamstrings':         { en:'Hamstrings',            es:'Isquiotibiales' },
+  'mg.glutes':             { en:'Glutes',                es:'Glúteos' },
+  'mg.calves':             { en:'Calves',                es:'Pantorrillas' },
+  'mg.core':               { en:'Core',                  es:'Core' },
+  'mg.abs':                { en:'Abs',                   es:'Abdominales' },
+  'mg.other':              { en:'Other / Custom',        es:'Otro / Personalizado' },
+
+  // ─── HOME: ON-TRACK CARD ─────────────────────────────────────────────────
+  'ot.status.green':       { en:'On Track',       es:'En Camino' },
+  'ot.status.amber':       { en:'Check In',       es:'Revisa' },
+  'ot.status.red':         { en:'Off Track',      es:'Fuera de Rumbo' },
+  'ot.label.strength':     { en:'Strength',       es:'Fuerza' },
+  'ot.label.adherence':    { en:'Adherence',      es:'Adherencia' },
+  'ot.label.nutrition':    { en:'Nutrition',      es:'Nutrición' },
+  'ot.detail.liftsUp':     { en:'{n} lift(s) up',          es:'{n} levantamiento(s) subiendo' },
+  'ot.detail.liftsDown':   { en:'{n} lift(s) declining',   es:'{n} levantamiento(s) bajando' },
+  'ot.detail.holdingSteady':{ en:'Holding steady',         es:'Manteniéndose' },
+  'ot.detail.sessionsCount':{ en:'{n}/{total} sessions',   es:'{n}/{total} sesiones' },
+  'ot.detail.daysOnTarget':{ en:'{n}/{total} days on target', es:'{n}/{total} días en objetivo' },
+  'ot.green.all':          { en:'Strength up, showing up, eating right — keep pushing.',
+                             es:'Fuerza subiendo, asistencia firme, comiendo bien — sigue empujando.' },
+  'ot.green.strength':     { en:'Strength is moving. Stay consistent and this compounds fast.',
+                             es:'La fuerza está subiendo. Mantén la constancia y esto se acumula rápido.' },
+  'ot.green.default':      { en:"All signals green — you're doing the work.",
+                             es:'Todas las señales verdes — estás haciendo el trabajo.' },
+  'ot.red.adherence':      { en:'{missed} missed sessions in 4 weeks — consistency is the bottleneck right now.',
+                             es:'{missed} sesiones perdidas en 4 semanas — la constancia es el cuello de botella.' },
+  'ot.red.nutrition':      { en:"Protein hit on only {good} of {tracked} tracked days — that's limiting your results.",
+                             es:'Proteína alcanzada solo {good} de {tracked} días — eso limita tus resultados.' },
+  'ot.red.strength':       { en:'Strength trending down on multiple lifts — consider a deload or check recovery.',
+                             es:'Fuerza bajando en varios levantamientos — considera descarga o revisa la recuperación.' },
+  'ot.red.default':        { en:'Multiple signals need attention — pick one and fix it this week.',
+                             es:'Varias señales necesitan atención — elige una y arréglala esta semana.' },
+  'ot.amber.adherence':    { en:'{pct}% session rate — close to target. One more session a week changes this.',
+                             es:'{pct}% de adherencia — cerca del objetivo. Una sesión más por semana lo cambia.' },
+  'ot.amber.nutrition':    { en:'Protein on target {good} of {tracked} days — a little more consistency here unlocks more gains.',
+                             es:'Proteína en objetivo {good} de {tracked} días — un poco más de constancia desbloquea más ganancias.' },
+  'ot.amber.strength':     { en:"Strength holding steady — keep progressive overload and it'll move.",
+                             es:'Fuerza estable — mantén la sobrecarga progresiva y se moverá.' },
+  'ot.amber.default':      { en:'Making progress — a few things to tighten up.',
+                             es:'Haciendo progreso — algunas cosas por afinar.' },
+
+  // Home recovery button
+  'home.getBackOnTrack':   { en:'Get back on track',     es:'Vuelve al camino' },
+
+  // Directives card
+  'dir.title':             { en:"Today's Directives",    es:'Directivas de Hoy' },
+  'dir.upNext':            { en:'Up Next',               es:'A Continuación' },
+  'dir.firstSession':      { en:'Log your first session to unlock progression directives.', es:'Registra tu primera sesión para desbloquear las directivas de progresión.' },
+  'dir.deloadWeek':        { en:'Deload Week',           es:'Semana de Descarga' },
+  'dir.deloadSub':         { en:'Accumulated fatigue detected — weights reduced 20%', es:'Fatiga acumulada detectada — pesos reducidos 20%' },
+  'dir.boostSub':          { en:'Targets reflect readiness — push today', es:'Los objetivos reflejan tu disposición — empuja hoy' },
+  'dir.dropSub':           { en:'Targets adjusted down — focus on movement quality', es:'Objetivos ajustados a la baja — enfócate en la calidad del movimiento' },
+  'dir.doneToday':         { en:'Done today',            es:'Hecho hoy' },
+  'dir.tapToOpen':         { en:'Tap to open {name}',    es:'Toca para abrir {name}' },
+  'dir.equipmentCeiling':  { en:'Equipment ceiling — update in Train → Edit', es:'Tope de equipo — actualiza en Entreno → Editar' },
+  'dir.badge.hold':        { en:'Hold',                  es:'Mantén' },
+  'dir.badge.pushReps':    { en:'Push reps',             es:'Empuja reps' },
+  'dir.badge.atLimit':     { en:'at limit',              es:'al límite' },
+  'dir.badge.maintain':    { en:'Maintain',              es:'Mantén' },
+  'dir.badge.off':         { en:'off',                   es:'menos' },
+
+  // Today CTA
+  'cta.workout':           { en:'Workout',               es:'Entreno' },
+  'cta.done':              { en:'done',                  es:'completado' },
+  'cta.lockInGains':       { en:'Lock in your gains — log your post-workout meal.', es:'Asegura tus ganancias — registra tu comida post-entreno.' },
+  'cta.logPostMeal':       { en:'Log post-workout meal', es:'Registrar comida post-entreno' },
+  'cta.start':             { en:'Start',                 es:'Iniciar' },
+  'cta.fullPlan':          { en:'Full plan',             es:'Plan completo' },
+  'cta.whatToday':         { en:'What should I do today?', es:'¿Qué debería hacer hoy?' },
 };
 
 function t(key, paramsOrFallback){
@@ -9245,6 +9404,9 @@ function applyNavTranslations(){
     const span = btn.querySelector('span');
     if(span) span.textContent = t(key);
   });
+  // Workout footer Finish button (static HTML)
+  const wkBtn = document.getElementById('wk-finish-btn');
+  if(wkBtn) wkBtn.innerHTML = t('wk.finishSave');
 }
 
 function setLang(lang){
@@ -12503,46 +12665,50 @@ function renderFood() {
   const _maxFuture = new Date(); _maxFuture.setDate(_maxFuture.getDate() + 14);
   const atFutureCap = _fvd >= _maxFuture;
   const isFuture = _fvd > new Date();
-  const displayDate = isToday ? 'Today'
+  const _locale = (localStorage.getItem('gainz_lang')==='es'?'es-ES':'en-US');
+  const displayDate = isToday ? t('home.today')
     : isFuture
-      ? _fvd.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'}) + ' · Planned'
-      : _fvd.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+      ? _fvd.toLocaleDateString(_locale,{weekday:'long',month:'short',day:'numeric'}) + ' · ' + t('food.planned')
+      : _fvd.toLocaleDateString(_locale,{weekday:'long',month:'short',day:'numeric'});
   if(dl) dl.textContent = displayDate;
 
   const items = getTodayFoodItems(foodViewDate);
-  const t = getDayTotals(foodViewDate);
+  const totals = getDayTotals(foodViewDate);
   const g = foodGoals;
 
   // Calorie progress bar
-  const calPct = Math.min(t.calories / Math.max(g.calories, 1), 1);
-  const calLeft = Math.max(g.calories - t.calories, 0);
-  const calOver = t.calories > g.calories;
+  const calPct = Math.min(totals.calories / Math.max(g.calories, 1), 1);
+  const calLeft = Math.max(g.calories - totals.calories, 0);
+  const calOver = totals.calories > g.calories;
 
   // Protein-hero macro section with contextual pacing signal
   function buildMacroSection() {
-    const pPct = Math.min(t.protein / Math.max(g.protein,1), 1) * 100;
-    const pOver = t.protein > g.protein;
-    const pLeft = Math.max(g.protein - t.protein, 0);
-    const cPct = Math.min(t.carbs / Math.max(g.carbs,1), 1) * 100;
-    const fPct = Math.min(t.fat / Math.max(g.fat,1), 1) * 100;
-    const cOver = t.carbs > g.carbs;
-    const fOver = t.fat > g.fat;
+    const pPct = Math.min(totals.protein / Math.max(g.protein,1), 1) * 100;
+    const pOver = totals.protein > g.protein;
+    const pLeft = Math.max(g.protein - totals.protein, 0);
+    const cPct = Math.min(totals.carbs / Math.max(g.carbs,1), 1) * 100;
+    const fPct = Math.min(totals.fat / Math.max(g.fat,1), 1) * 100;
+    const cOver = totals.carbs > g.carbs;
+    const fOver = totals.fat > g.fat;
 
     let paceHtml = '';
     if(isToday) {
       if(pOver || pLeft <= 5) {
-        paceHtml = '<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:9px;margin-top:8px;background:rgba(71,255,138,.08);border:1px solid rgba(71,255,138,.2);color:#47ff8a;font-size:12px;font-weight:600;">&#10003; Protein goal hit!</div>';
+        paceHtml = '<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:9px;margin-top:8px;background:rgba(71,255,138,.08);border:1px solid rgba(71,255,138,.2);color:#47ff8a;font-size:12px;font-weight:600;">&#10003; '+t('food.pace.hit')+'</div>';
       } else {
         const hr = new Date().getHours();
         const mealsLeft = hr < 9 ? 4 : hr < 12 ? 3 : hr < 16 ? 2 : hr < 20 ? 1 : 0;
         const expected = g.protein * Math.min(hr / 21, 1);
         const perMeal = mealsLeft > 0 ? Math.round(pLeft / mealsLeft) : 0;
         if(mealsLeft === 0 && pLeft > 20) {
-          paceHtml = '<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 10px;border-radius:9px;margin-top:8px;background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.2);color:#ff6b6b;font-size:12px;font-weight:600;"><span style="flex-shrink:0;">!</span><span>' + Math.round(pLeft) + 'g short — protein will be a miss today<span style="display:block;font-size:10px;font-weight:400;opacity:.75;margin-top:1px;">High-protein snack can still recover 30–40g</span></span></div>';
-        } else if(t.protein >= expected * 0.85) {
-          paceHtml = '<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 10px;border-radius:9px;margin-top:8px;background:rgba(71,255,138,.08);border:1px solid rgba(71,255,138,.2);color:#47ff8a;font-size:12px;font-weight:600;"><span style="flex-shrink:0;">&#10003;</span><span>On pace — ' + Math.round(pLeft) + 'g remaining' + (mealsLeft>0?' across '+mealsLeft+' meal'+(mealsLeft===1?'':'s'):'') + '<span style="display:block;font-size:10px;font-weight:400;opacity:.75;margin-top:1px;">' + (mealsLeft>0?'~'+perMeal+'g per meal to hit your goal':'') + '</span></span></div>';
+          paceHtml = '<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 10px;border-radius:9px;margin-top:8px;background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.2);color:#ff6b6b;font-size:12px;font-weight:600;"><span style="flex-shrink:0;">!</span><span>'+t('food.pace.miss',{g:Math.round(pLeft)})+'<span style="display:block;font-size:10px;font-weight:400;opacity:.75;margin-top:1px;">'+t('food.pace.missHint')+'</span></span></div>';
+        } else if(totals.protein >= expected * 0.85) {
+          const mealsStr = mealsLeft>0 ? ' '+t('food.pace.across',{n:mealsLeft, meal:mealsLeft===1?t('food.meal.s'):t('food.meal.p')}) : '';
+          const perMealStr = mealsLeft>0 ? '~'+perMeal+'g '+t('food.pace.perMealHint') : '';
+          paceHtml = '<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 10px;border-radius:9px;margin-top:8px;background:rgba(71,255,138,.08);border:1px solid rgba(71,255,138,.2);color:#47ff8a;font-size:12px;font-weight:600;"><span style="flex-shrink:0;">&#10003;</span><span>'+t('food.pace.onPace',{g:Math.round(pLeft)})+mealsStr+'<span style="display:block;font-size:10px;font-weight:400;opacity:.75;margin-top:1px;">'+perMealStr+'</span></span></div>';
         } else {
-          paceHtml = '<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 10px;border-radius:9px;margin-top:8px;background:rgba(255,179,71,.08);border:1px solid rgba(255,179,71,.2);color:#ffb347;font-size:12px;font-weight:600;"><span style="flex-shrink:0;">&#9888;</span><span>' + Math.round(pLeft) + 'g short — behind pace' + (mealsLeft>0?'<span style="display:block;font-size:10px;font-weight:400;opacity:.75;margin-top:1px;">Target ~'+perMeal+'g per remaining meal</span>':'') + '</span></div>';
+          const subHint = mealsLeft>0 ? '<span style="display:block;font-size:10px;font-weight:400;opacity:.75;margin-top:1px;">'+t('food.pace.targetPerMeal',{g:perMeal})+'</span>' : '';
+          paceHtml = '<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 10px;border-radius:9px;margin-top:8px;background:rgba(255,179,71,.08);border:1px solid rgba(255,179,71,.2);color:#ffb347;font-size:12px;font-weight:600;"><span style="flex-shrink:0;">&#9888;</span><span>'+t('food.pace.behind',{g:Math.round(pLeft)})+subHint+'</span></div>';
         }
       }
     }
@@ -12553,8 +12719,8 @@ function renderFood() {
 
     return '<div style="background:var(--s2);border:1px solid rgba(71,180,255,.18);border-radius:12px;padding:10px 12px;margin-bottom:8px;">'
       + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;">'
-      + '<div style="display:flex;align-items:center;">' + addBtn('protein') + '<span style="font-size:13px;font-weight:700;color:#47b4ff;">Protein</span></div>'
-      + '<span style="font-family:Barlow Condensed,sans-serif;font-size:20px;font-weight:700;color:' + (pOver?'var(--red)':'#47b4ff') + ';">' + Math.round(t.protein) + 'g<span style="font-family:DM Sans,sans-serif;font-size:12px;font-weight:400;color:var(--t3);"> / ' + g.protein + 'g</span></span>'
+      + '<div style="display:flex;align-items:center;">' + addBtn('protein') + '<span style="font-size:13px;font-weight:700;color:#47b4ff;">'+t('food.protein')+'</span></div>'
+      + '<span style="font-family:Barlow Condensed,sans-serif;font-size:20px;font-weight:700;color:' + (pOver?'var(--red)':'#47b4ff') + ';">' + Math.round(totals.protein) + 'g<span style="font-family:DM Sans,sans-serif;font-size:12px;font-weight:400;color:var(--t3);"> / ' + g.protein + 'g</span></span>'
       + '</div>'
       + '<div style="height:8px;background:rgba(71,180,255,.12);border-radius:4px;overflow:hidden;">'
       + '<div style="height:100%;width:' + pPct.toFixed(1) + '%;background:' + (pOver?'var(--red)':'#47b4ff') + ';border-radius:4px;transition:width .4s;"></div>'
@@ -12564,16 +12730,16 @@ function renderFood() {
       + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">'
       + '<div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:8px 10px;">'
       + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">'
-      + '<div style="display:flex;align-items:center;">' + addBtn('carbs') + '<span style="font-size:11px;font-weight:600;color:var(--t2);">Carbs</span></div>'
-      + '<span style="font-size:12px;font-weight:700;color:' + (cOver?'var(--red)':'var(--t1)') + ';">' + Math.round(t.carbs) + '<span style="font-size:10px;color:var(--t3);font-weight:400;">g / ' + g.carbs + '</span></span>'
+      + '<div style="display:flex;align-items:center;">' + addBtn('carbs') + '<span style="font-size:11px;font-weight:600;color:var(--t2);">'+t('food.carbs')+'</span></div>'
+      + '<span style="font-size:12px;font-weight:700;color:' + (cOver?'var(--red)':'var(--t1)') + ';">' + Math.round(totals.carbs) + '<span style="font-size:10px;color:var(--t3);font-weight:400;">g / ' + g.carbs + '</span></span>'
       + '</div>'
       + '<div style="height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;">'
       + '<div style="height:100%;width:' + cPct.toFixed(1) + '%;background:' + (cOver?'var(--red)':'#ffb347') + ';border-radius:2px;transition:width .4s;"></div>'
       + '</div></div>'
       + '<div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:8px 10px;">'
       + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">'
-      + '<div style="display:flex;align-items:center;">' + addBtn('fat') + '<span style="font-size:11px;font-weight:600;color:var(--t2);">Fat</span></div>'
-      + '<span style="font-size:12px;font-weight:700;color:' + (fOver?'var(--red)':'var(--t1)') + ';">' + Math.round(t.fat) + '<span style="font-size:10px;color:var(--t3);font-weight:400;">g / ' + g.fat + '</span></span>'
+      + '<div style="display:flex;align-items:center;">' + addBtn('fat') + '<span style="font-size:11px;font-weight:600;color:var(--t2);">'+t('food.fat')+'</span></div>'
+      + '<span style="font-size:12px;font-weight:700;color:' + (fOver?'var(--red)':'var(--t1)') + ';">' + Math.round(totals.fat) + '<span style="font-size:10px;color:var(--t3);font-weight:400;">g / ' + g.fat + '</span></span>'
       + '</div>'
       + '<div style="height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;">'
       + '<div style="height:100%;width:' + fPct.toFixed(1) + '%;background:' + (fOver?'var(--red)':'#ff9147') + ';border-radius:2px;transition:width .4s;"></div>'
@@ -12581,12 +12747,11 @@ function renderFood() {
       + '</div>';
   }
 
-  // Summary card — goal-aware: show source tag, remaining prominently
-  const goalLabelMap = {fat_loss:'Fat Loss',hypertrophy:'Build Muscle',strength:'Get Stronger',general:'Maintenance'};
-  const goalLabel = goalLabelMap[(_profile&&_profile.goal)||'general']||'Maintenance';
+  const goalLabelMap = {fat_loss:t('food.goal.fatLoss'),hypertrophy:t('food.goal.muscle'),strength:t('food.goal.strength'),general:t('food.goal.maint')};
+  const goalLabel = goalLabelMap[(_profile&&_profile.goal)||'general']||t('food.goal.maint');
   const sourceTag = _tdeeGoals
     ? (_goalsOverridden
-        ? '<span style="font-size:10px;background:var(--s3);color:var(--t3);padding:2px 7px;border-radius:10px;font-weight:600;">CUSTOM</span>'
+        ? '<span style="font-size:10px;background:var(--s3);color:var(--t3);padding:2px 7px;border-radius:10px;font-weight:600;">'+t('food.custom')+'</span>'
         : '<span style="font-size:10px;background:var(--acc);color:#000;padding:2px 7px;border-radius:10px;font-weight:700;">' + goalLabel.toUpperCase() + '</span>')
     : '';
 
@@ -12603,19 +12768,19 @@ function renderFood() {
     // Calorie triple — Goal  −  Eaten  =  Remaining
     + '<div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:0;margin-bottom:12px;">'
     + '<div style="text-align:center;">'
-    +   '<div style="font-size:11px;color:var(--t2);margin-bottom:2px;">Goal</div>'
+    +   '<div style="font-size:11px;color:var(--t2);margin-bottom:2px;">'+t('food.goalLbl')+'</div>'
     +   '<div style="font-family:Barlow Condensed,sans-serif;font-size:28px;font-weight:800;">' + g.calories + '</div>'
     +   '<div style="font-size:9px;color:var(--t3);">kcal</div>'
     + '</div>'
     + '<div style="text-align:center;padding:0 10px;">'
-    +   '<div style="font-size:11px;color:var(--t2);margin-bottom:2px;">Eaten</div>'
-    +   '<div style="font-family:Barlow Condensed,sans-serif;font-size:28px;font-weight:800;color:var(--t2);">' + Math.round(t.calories) + '</div>'
+    +   '<div style="font-size:11px;color:var(--t2);margin-bottom:2px;">'+t('food.eaten')+'</div>'
+    +   '<div style="font-family:Barlow Condensed,sans-serif;font-size:28px;font-weight:800;color:var(--t2);">' + Math.round(totals.calories) + '</div>'
     +   '<div style="font-size:9px;color:var(--t3);">kcal</div>'
     + '</div>'
     + '<div style="text-align:center;">'
-    +   '<div style="font-size:11px;color:var(--t2);margin-bottom:2px;">' + (calOver ? 'Over' : 'Left') + '</div>'
-    +   '<div style="font-family:Barlow Condensed,sans-serif;font-size:28px;font-weight:800;color:' + (calOver ? 'var(--red)' : 'var(--acc)') + ';">' + (calOver ? Math.round(t.calories - g.calories) : Math.round(calLeft)) + '</div>'
-    +   '<div style="font-size:9px;color:' + (calOver ? 'var(--red)' : 'var(--t3)') + ';">' + (calOver ? 'over' : 'kcal') + '</div>'
+    +   '<div style="font-size:11px;color:var(--t2);margin-bottom:2px;">' + (calOver ? t('food.over') : t('food.left')) + '</div>'
+    +   '<div style="font-family:Barlow Condensed,sans-serif;font-size:28px;font-weight:800;color:' + (calOver ? 'var(--red)' : 'var(--acc)') + ';">' + (calOver ? Math.round(totals.calories - g.calories) : Math.round(calLeft)) + '</div>'
+    +   '<div style="font-size:9px;color:' + (calOver ? 'var(--red)' : 'var(--t3)') + ';">' + (calOver ? t('food.over').toLowerCase() : 'kcal') + '</div>'
     + '</div>'
     + '</div>'
     // Calorie progress bar
@@ -12630,11 +12795,11 @@ function renderFood() {
   const actions = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">'
     + '<button onclick="showFoodSearchSheet()" style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:14px 8px;background:var(--s1);border:1px solid var(--b2);border-radius:14px;cursor:pointer;touch-action:manipulation;">'
     +   '<span style="font-size:26px;">🔍</span>'
-    +   '<span style="font-size:12px;font-weight:600;color:var(--t2);margin-top:2px;">Search</span>'
+    +   '<span style="font-size:12px;font-weight:600;color:var(--t2);margin-top:2px;">'+t('food.search')+'</span>'
     + '</button>'
     + '<button onclick="showManualFoodSheet()" style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:14px 8px;background:var(--s1);border:1px solid var(--b2);border-radius:14px;cursor:pointer;touch-action:manipulation;">'
     +   '<span style="font-size:26px;">✏️</span>'
-    +   '<span style="font-size:12px;font-weight:600;color:var(--t2);margin-top:2px;">Manual</span>'
+    +   '<span style="font-size:12px;font-weight:600;color:var(--t2);margin-top:2px;">'+t('food.manual')+'</span>'
     + '</button>'
     + '</div>';
 
