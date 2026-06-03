@@ -11253,6 +11253,24 @@ function toggleMyFoodFromSheet() {
   if(btn) { const saved = isMyFood(f); btn.textContent = saved ? '♥' : '♡'; btn.style.color = saved ? '#ff4d6d' : 'var(--t3)'; }
 }
 
+// Ensure per100 is actual per-100g data before opening the confirm sheet.
+// Foods saved without a valid per100 (or with per100 mistakenly set equal to
+// the per-serving cal) produce the wrong scaling in updateFoodServingDisplay.
+// Detection: per100.cal ≈ f.cal AND serving ≠ 100g means per100 was stored as
+// per-serving — recompute it from cal / serving.
+function _fixMyFoodPer100(f) {
+  const s = f.serving || 100;
+  if (!f.per100 || f.per100.cal == null ||
+      (Math.abs(s - 100) > 0.5 && Math.abs((f.per100.cal || 0) - (f.cal || 0)) < 1)) {
+    f.per100 = {
+      cal:     Math.round((f.cal     || 0) * 100 / s),
+      protein: Math.round((f.g       || 0) * 100 / s * 10) / 10,
+      carbs:   Math.round((f.carbs   || 0) * 100 / s * 10) / 10,
+      fat:     Math.round((f.fat     || 0) * 100 / s * 10) / 10,
+    };
+  }
+}
+
 // ─── RECENT FOODS ─────────────────────────────────────────────────────────────
 function getRecentFoods() {
   const seen = new Set();
@@ -12121,7 +12139,8 @@ function showAddFoodConfirmSheet(food) {
   _confirmFoodData  = food;
   _customUnit       = 'g';  // reset custom unit pill to g each time
   const _origServingG = food.serving || 100; // save before overwrite
-  food._origServing   = _origServingG;
+  food._origServing     = _origServingG;
+  food._origServingUnit = food.servingUnit;  // save before overwrite
   // Default chip: natural unit first → its gram value; else 1g chip
   const _hasNat = _isNaturalUnit(food.servingUnit || '');
   _activeServingG    = _hasNat ? _origServingG : 1;
@@ -12284,11 +12303,18 @@ function confirmAddFood() {
     fat:   Math.round((p.fat||f.fat||0)*factor*10)/10,
   });
   // Auto-save to My Foods on every confirm so it's always available to search
+  const _saveServing = f._origServing || f.serving || 100;
   saveMyFood({
     name: f.name, brand: f.brand||'', source: f.source||'search',
-    serving: f.serving, servingUnit: f.servingUnit,
+    serving: _saveServing,
+    servingUnit: f._origServingUnit || f.servingUnit,
     cal: f.cal, g: f.g, carbs: f.carbs, fat: f.fat,
-    per100: p.cal != null ? p : {cal: f.cal, protein: f.g, carbs: f.carbs, fat: f.fat},
+    per100: p.cal != null ? p : {
+      cal:     Math.round((f.cal   ||0) * 100 / _saveServing),
+      protein: Math.round((f.g     ||0) * 100 / _saveServing * 10) / 10,
+      carbs:   Math.round((f.carbs ||0) * 100 / _saveServing * 10) / 10,
+      fat:     Math.round((f.fat   ||0) * 100 / _saveServing * 10) / 10,
+    },
   });
   closeSheets();
   renderFood();
@@ -12434,10 +12460,10 @@ function submitManualFood() {
     _manualWeight: hasWeight ? weight : 0,   // remembered for pre-fill
     serving:     hasWeight ? weight : 1,
     servingUnit: hasWeight ? (weight + 'g') : '1 serving',
-    cal:   hasWeight ? Math.round(cal   * factor100) : cal,
-    g:     hasWeight ? Math.round(g     * factor100 * 10) / 10 : g,
-    carbs: hasWeight ? Math.round(carbs * factor100 * 10) / 10 : carbs,
-    fat:   hasWeight ? Math.round(fat   * factor100 * 10) / 10 : fat,
+    cal,   // always per-serving (what the user entered for this serving)
+    g,
+    carbs,
+    fat,
     per100: {
       cal:     Math.round(cal   * factor100),
       protein: Math.round(g     * factor100 * 10) / 10,
@@ -12499,7 +12525,7 @@ function _showRecentInSearchResults(el) {
     row.addEventListener('click', () => {
       const f = window._mySearchFoods[parseInt(row.dataset.mfi)];
       if(!f) return;
-      f.per100 = f.per100 || {cal: f.cal, protein: f.g, carbs: f.carbs, fat: f.fat};
+      _fixMyFoodPer100(f);
       closeSheets(); showAddFoodConfirmSheet(f);
     });
   });
@@ -12507,7 +12533,7 @@ function _showRecentInSearchResults(el) {
     row.addEventListener('click', () => {
       const f = window._recentSearchFoods[parseInt(row.dataset.rsi)];
       if(!f) return;
-      f.per100 = f.per100 || {cal: f.cal, protein: f.g, carbs: f.carbs, fat: f.fat};
+      _fixMyFoodPer100(f);
       closeSheets(); showAddFoodConfirmSheet(f);
     });
   });
@@ -12667,14 +12693,16 @@ function renderSearchResults(foods, q, resultsEl, isPartial) {
   resultsEl.querySelectorAll('.food-search-result[data-fi]').forEach(el => {
     el.addEventListener('click', () => {
       const f = window._searchFoods[parseInt(el.dataset.fi)];
-      if(f) { closeSheets(); showAddFoodConfirmSheet(f); }
+      if(!f) return;
+      _fixMyFoodPer100(f);
+      closeSheets(); showAddFoodConfirmSheet(f);
     });
   });
   resultsEl.querySelectorAll('.food-search-result[data-mfi]').forEach(el => {
     el.addEventListener('click', () => {
       const f = (window._mySearchFoods||[])[parseInt(el.dataset.mfi)];
       if(!f) return;
-      f.per100 = f.per100 || {cal: f.cal, protein: f.g, carbs: f.carbs, fat: f.fat};
+      _fixMyFoodPer100(f);
       closeSheets(); showAddFoodConfirmSheet(f);
     });
   });
