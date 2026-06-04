@@ -11271,6 +11271,107 @@ function _fixMyFoodPer100(f) {
   }
 }
 
+// ─── MY FOODS MANAGER ─────────────────────────────────────────────────────────
+
+function showMyFoodsManagerSheet() {
+  document.getElementById('my-foods-manager-sheet')?.remove();
+  const foods = getMyFoods();
+  const listHTML = foods.length
+    ? foods.map(f => {
+        const key = _myFoodKey(f).replace(/'/g, "\\'");
+        return '<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--b1);">'
+          + '<div style="flex:1;min-width:0;">'
+          +   '<div style="font-size:14px;font-weight:500;">' + f.name + (f.brand ? ' <span style="color:var(--t3);font-size:11px;">· ' + f.brand + '</span>' : '') + '</div>'
+          +   '<div style="font-size:11px;color:var(--t2);margin-top:2px;">' + (f.servingUnit||f.serving+'g') + ' · ' + f.cal + ' kcal · ' + f.g + 'g P</div>'
+          + '</div>'
+          + '<button onclick="deleteMyFoodEntry(\'' + key + '\')" style="background:none;border:none;color:var(--t3);font-size:18px;cursor:pointer;padding:4px 8px;flex-shrink:0;line-height:1;">✕</button>'
+          + '</div>';
+      }).join('')
+    : '<div style="text-align:center;padding:28px 0;color:var(--t3);font-size:13px;line-height:1.6;">No foods saved yet.<br>Add the foods you eat regularly for quick access.</div>';
+
+  const bg = document.createElement('div'); bg.className='sheet-bg'; bg.id='my-foods-manager-sheet';
+  bg.innerHTML = '<div class="sheet">'
+    + '<div class="sheet-handle"></div>'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">'
+    +   '<div style="font-size:18px;font-weight:700;letter-spacing:.03em;">MY FOODS</div>'
+    +   (foods.length ? '<button onclick="confirmClearAllMyFoods(this)" style="font-size:11px;color:var(--t3);background:none;border:none;cursor:pointer;padding:4px;">Clear all</button>' : '')
+    + '</div>'
+    + '<div id="mfm-list">' + listHTML + '</div>'
+    + '<button class="btn btn-acc btn-full" style="margin-top:16px;" onclick="showAddMyFoodSheet()">+ Add Food</button>'
+    + '<button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="document.getElementById(\'my-foods-manager-sheet\')?.remove()">Done</button>'
+    + '</div>';
+  bg.addEventListener('click', e => { if(e.target===bg) bg.remove(); });
+  document.body.appendChild(bg);
+}
+
+function deleteMyFoodEntry(key) {
+  const foods = getMyFoods().filter(f => _myFoodKey(f) !== key);
+  localStorage.setItem('gainz_my_foods', JSON.stringify(foods));
+  showMyFoodsManagerSheet();
+}
+
+function confirmClearAllMyFoods(btn) {
+  showInlineConfirm(btn, 'Delete all saved foods?', () => {
+    localStorage.setItem('gainz_my_foods', '[]');
+    showMyFoodsManagerSheet();
+  });
+}
+
+function showAddMyFoodSheet() {
+  document.getElementById('add-my-food-sheet')?.remove();
+  const bg = document.createElement('div'); bg.className='sheet-bg'; bg.id='add-my-food-sheet';
+  bg.innerHTML = '<div class="sheet">'
+    + '<div class="sheet-handle"></div>'
+    + '<div style="font-size:18px;font-weight:700;letter-spacing:.03em;margin-bottom:16px;">ADD FOOD</div>'
+    + '<div class="field"><label>Food name *</label>'
+    +   '<input type="text" id="amf-name" placeholder="e.g. Skyr, Heritage Flakes, Oats" autocorrect="off" autocapitalize="words" spellcheck="false">'
+    + '</div>'
+    + '<div class="field"><label>Serving size (g)</label>'
+    +   '<input type="number" id="amf-serving" placeholder="100" inputmode="decimal" min="1">'
+    + '</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+    +   '<div class="field"><label>Calories (kcal) *</label><input type="number" id="amf-cal" placeholder="0" inputmode="decimal" min="0"></div>'
+    +   '<div class="field"><label>Protein (g)</label><input type="number" id="amf-protein" placeholder="0" inputmode="decimal" min="0" step="0.1"></div>'
+    +   '<div class="field"><label>Carbs (g)</label><input type="number" id="amf-carbs" placeholder="0" inputmode="decimal" min="0" step="0.1"></div>'
+    +   '<div class="field"><label>Fat (g)</label><input type="number" id="amf-fat" placeholder="0" inputmode="decimal" min="0" step="0.1"></div>'
+    + '</div>'
+    + '<div id="amf-err" style="color:#ff6b6b;font-size:12px;display:none;margin-bottom:6px;">Please enter a name and calories.</div>'
+    + '<button class="btn btn-acc btn-full" style="margin-top:10px;" onclick="saveNewMyFood()">Save to My Foods</button>'
+    + '<button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="document.getElementById(\'add-my-food-sheet\')?.remove()">Cancel</button>'
+    + '</div>';
+  bg.addEventListener('click', e => { if(e.target===bg) bg.remove(); });
+  document.body.appendChild(bg);
+  setTimeout(() => document.getElementById('amf-name')?.focus(), 120);
+}
+
+function saveNewMyFood() {
+  const name     = (document.getElementById('amf-name')?.value || '').trim();
+  const servingG = parseFloat(document.getElementById('amf-serving')?.value) || 100;
+  const cal      = parseInt(document.getElementById('amf-cal')?.value)       || 0;
+  const protein  = parseFloat(document.getElementById('amf-protein')?.value) || 0;
+  const carbs    = parseFloat(document.getElementById('amf-carbs')?.value)   || 0;
+  const fat      = parseFloat(document.getElementById('amf-fat')?.value)     || 0;
+  const errEl    = document.getElementById('amf-err');
+  if(!name || !cal) {
+    if(errEl) { errEl.style.display='block'; setTimeout(()=>errEl.style.display='none', 2500); }
+    return;
+  }
+  const f100 = 100 / servingG;
+  saveMyFood({
+    name, brand: '', source: 'custom',
+    serving: servingG, servingUnit: servingG + 'g',
+    cal, g: protein, carbs, fat,
+    per100: {
+      cal:     Math.round(cal     * f100),
+      protein: Math.round(protein * f100 * 10) / 10,
+      carbs:   Math.round(carbs   * f100 * 10) / 10,
+      fat:     Math.round(fat     * f100 * 10) / 10,
+    },
+  });
+  document.getElementById('add-my-food-sheet')?.remove();
+  showMyFoodsManagerSheet();
+}
+
 // ─── RECENT FOODS ─────────────────────────────────────────────────────────────
 function getRecentFoods() {
   const seen = new Set();
@@ -12302,20 +12403,6 @@ function confirmAddFood() {
     carbs: Math.round((p.carbs||f.carbs||0)*factor*10)/10,
     fat:   Math.round((p.fat||f.fat||0)*factor*10)/10,
   });
-  // Auto-save to My Foods on every confirm so it's always available to search
-  const _saveServing = f._origServing || f.serving || 100;
-  saveMyFood({
-    name: f.name, brand: f.brand||'', source: f.source||'search',
-    serving: _saveServing,
-    servingUnit: f._origServingUnit || f.servingUnit,
-    cal: f.cal, g: f.g, carbs: f.carbs, fat: f.fat,
-    per100: p.cal != null ? p : {
-      cal:     Math.round((f.cal   ||0) * 100 / _saveServing),
-      protein: Math.round((f.g     ||0) * 100 / _saveServing * 10) / 10,
-      carbs:   Math.round((f.carbs ||0) * 100 / _saveServing * 10) / 10,
-      fat:     Math.round((f.fat   ||0) * 100 / _saveServing * 10) / 10,
-    },
-  });
   closeSheets();
   renderFood();
 }
@@ -12452,25 +12539,6 @@ function submitManualFood() {
     meal: document.getElementById('mf-meal')?.value || 'Other',
     cal, g, carbs, fat,
   });
-  // Auto-save to My Foods — store per-100g if weight was given so macros scale next time
-  const hasWeight = weight > 0;
-  const factor100 = hasWeight ? (100 / weight) : 1;
-  saveMyFood({
-    name, brand: '', source: 'manual',
-    _manualWeight: hasWeight ? weight : 0,   // remembered for pre-fill
-    serving:     hasWeight ? weight : 1,
-    servingUnit: hasWeight ? (weight + 'g') : '1 serving',
-    cal,   // always per-serving (what the user entered for this serving)
-    g,
-    carbs,
-    fat,
-    per100: {
-      cal:     Math.round(cal   * factor100),
-      protein: Math.round(g     * factor100 * 10) / 10,
-      carbs:   Math.round(carbs * factor100 * 10) / 10,
-      fat:     Math.round(fat   * factor100 * 10) / 10,
-    },
-  });
   closeSheets(); renderFood();
 }
 
@@ -12502,19 +12570,25 @@ function _showRecentInSearchResults(el) {
   const myFoods = getMyFoods().slice(0, 6);
   const recent  = getRecentFoods().slice(0, 5);
 
-  if(!myFoods.length && !recent.length) {
-    el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--t3);">Type a food, brand, or product name</div>';
-    return;
-  }
-
   let html = '';
   if(myFoods.length) {
-    html += _sectionHdr('My Foods');
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;margin-top:10px;">'
+      + '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);">My Foods</div>'
+      + '<button onclick="showMyFoodsManagerSheet()" style="font-size:11px;font-weight:600;color:var(--acc);background:none;border:none;cursor:pointer;padding:0 2px;">Manage ›</button>'
+      + '</div>';
     html += myFoods.map((f, i) => _buildQuickFoodRow(f, 'mfi', i)).join('');
+  } else {
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0 8px;">'
+      + '<div style="font-size:13px;color:var(--t3);">Save foods you eat regularly</div>'
+      + '<button onclick="showMyFoodsManagerSheet()" style="font-size:12px;font-weight:700;color:var(--acc);background:none;border:none;cursor:pointer;padding:0 2px;white-space:nowrap;">+ My Foods ›</button>'
+      + '</div>';
   }
   if(recent.length) {
     html += _sectionHdr('Recently logged');
     html += recent.map((f, i) => _buildQuickFoodRow(f, 'rsi', i)).join('');
+  }
+  if(!myFoods.length && !recent.length) {
+    html += '<div style="padding:16px 0;text-align:center;color:var(--t3);">Type a food, brand, or product name</div>';
   }
   el.innerHTML = html;
 
@@ -12656,7 +12730,10 @@ function renderSearchResults(foods, q, resultsEl, isPartial) {
   ).slice(0, 3);
   window._mySearchFoods = myMatches;
   const myFoodsSection = myMatches.length
-    ? _sectionHdr('My Foods')
+    ? '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;margin-top:10px;">'
+      + '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);">My Foods</div>'
+      + '<button onclick="showMyFoodsManagerSheet()" style="font-size:11px;font-weight:600;color:var(--acc);background:none;border:none;cursor:pointer;padding:0 2px;">Manage ›</button>'
+      + '</div>'
       + myMatches.map((f, i) => _buildQuickFoodRow(f, 'mfi', i)).join('')
     : '';
 
